@@ -1,0 +1,67 @@
+W11Z1S0W21X0Y0 0.004629630
+W11Z1S1W21X0Y0 0.009259259
+W11Z1S0W21X1Y0 0.023148148
+W11Z1S1W21X1Y0 0.046296296
+W11Z1S0W21X0Y1 0.009259259
+W11Z1S1W21X0Y1 0.018518519
+W11Z1S0W21X1Y1 0.046296296
+W11Z1S1W21X1Y1 0.092592593
+
+
+W11Z1S0W21X0Y0 0.004629630
+W11Z1S1W21X0Y0 0.009259259
+W11Z1S0W21X1Y0 0.023148148
+W11Z1S1W21X1Y0 0.046296296
+W11Z1S0W21X0Y1 0.009259259
+W11Z1S1W21X0Y1 0.018518519
+W11Z1S0W21X1Y1 0.046296296
+W11Z1S1W21X1Y1 0.092592593
+
+
+
+model <- fusion
+n = 100
+using = "parameters"
+w = NULL
+P = NULL 
+A = NULL
+  
+  # Check that parameters sum to 1 in each param_set
+  if(!is.null(parameters)) parameters <- gbiqq:::check_params(parameters,
+                                                              gbiqq:::get_param_set_names(model), warning = TRUE, model = model)
+  
+  if(!is.null(using)) if(using == "parameters" & is.null(parameters)) {
+    if(is.null(model$parameters)) stop(
+      "Using is set to 'parameters' (perhaps by default) but parameters not provided.
+		Please provide parameters or set `using` to `priors` or `posteriors`")}
+  
+  if(using == "priors" & is.null(model$priors)) {
+    model <- set_priors(model); message("Priors missing; flat priors assumed")}
+  
+  # Generate event probabilities w if missing
+  if(is.null(w)){
+    if(is.null(P)) 	P <- get_parameter_matrix(model)
+    if(is.null(A)) 	A <- get_ambiguities_matrix(model)
+    w <- draw_event_prob(model, P, A, parameters = parameters, using = using)}
+  
+  # Data drawn here
+  data_events <- draw_data_events(model, n = n, parameters = parameters, using = using, w = w)
+  
+  # Reshape
+  d <- expand_data(data_events, model)
+
+  filter(d, W1 = 1, Z = 1, W2 = 0)
+  
+
+
+
+
+event_prob
+W11Z1S0W21X0Y0 0.004629630
+W11Z1S1W21X0Y0 0.009259259
+W11Z1S0W21X1Y0 0.023148148
+W11Z1S1W21X1Y0 0.046296296
+W11Z1S0W21X0Y1 0.009259259
+W11Z1S1W21X0Y1 0.018518519
+W11Z1S0W21X1Y1 0.046296296
+W11Z1S1W21X1Y1 0.092592593

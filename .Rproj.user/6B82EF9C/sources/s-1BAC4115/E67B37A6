@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1572645951082.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "E67B37A6",
+    "lastKnownWriteTime" : 1572736523,
+    "last_content_update" : 1572736523868,
+    "path" : "C:/Dropbox/github/integrated_inferences/17-appendix.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "1019,0",
+        "ignored_words" : "rds,unmodelled,Mansky,modelled,counterfactual,compliers,frontdoor,ignorability,collider,covariate,Collider\n",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 29,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

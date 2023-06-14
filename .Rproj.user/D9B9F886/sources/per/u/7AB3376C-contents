@@ -1,0 +1,3 @@
+install.packages("igraph")
+library(igraph)
+el <- read.csv("class_el.csv", header = TRUE)

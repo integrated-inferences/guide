@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1578057435666.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3973446036",
+    "id" : "AF0164E4",
+    "lastKnownWriteTime" : 1578147815,
+    "last_content_update" : 1578912662547,
+    "path" : "C:/Dropbox/github/causalmodels/3_models.Rmd",
+    "project_path" : "3_models.Rmd",
+    "properties" : {
+        "cursorPosition" : "84,40",
+        "scrollLine" : "91"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 11,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

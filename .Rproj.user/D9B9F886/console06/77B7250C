@@ -1,0 +1,31 @@
+]0;~/Dropbox/ProcessTracing/6 Book/ii[?1034hARTS-POLI-AJacobs:ii alanjacobs$ [KARTS-POLI-AJacobs:ii alanjacobs$ install.packages("remotes")
+bash: syntax error near unexpected token `"remotes"'
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ remotes::install_github("macartan/biqq")
+bash: syntax error near unexpected token `"macartan/biqq"'
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ 
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ install.packages("remotes")
+bash: syntax error near unexpected token `"remotes"'
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ remotes::install_github("macartan/biqq")
+bash: syntax error near unexpected token `"macartan/biqq"'
+install.packages("remotes")
+bash: syntax error near unexpected token `"remotes"'
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ 
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ remotes::install_github("macartan/gbiqq") [K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kinstall.packages("remotes")
+bash: syntax error near unexpected token `"remotes"'
+remotes::install_github("macartan/gbiqq") 
+bash: syntax error near unexpected token `"macartan/gbiqq"'
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ remotes::install_github("macartan/gbiqq") 
+bash: syntax error near unexpected token `"macartan/gbiqq"'
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ [KARTS-POLI-AJacobs:ii alanjacobs$ install.packages('tinytex')
+bash: syntax error near unexpected token `'tinytex''
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ tinytex::install_tinytex()
+> 
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ install.packages('tinytex')
+bash: syntax error near unexpected token `'tinytex''
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ tinytex::install_tinytex()[K=[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kinstall.packages('tinytex')
+bash: syntax error near unexpected token `'tinytex''
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ tinytex::install_tinytex()
+> 
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ [KARTS-POLI-AJacobs:ii alanjacobs$ tinytex::install_tinytex()
+> 
+]0;~/Dropbox/ProcessTracing/6 Book/iiARTS-POLI-AJacobs:ii alanjacobs$ 

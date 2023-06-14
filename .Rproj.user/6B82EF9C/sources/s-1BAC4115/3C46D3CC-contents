@@ -1,0 +1,16 @@
+---
+title: "roundtable"
+author: "Macartan"
+date: "10/10/2019"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## What has worked well
+
+* Bottom up versus top down
+* 

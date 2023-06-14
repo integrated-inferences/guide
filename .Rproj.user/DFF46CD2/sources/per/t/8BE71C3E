@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537830752192.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3425604164",
+    "id" : "8BE71C3E",
+    "lastKnownWriteTime" : 1502978453,
+    "last_content_update" : 1543501676311,
+    "path" : "~/Dropbox/ProcessTracing/6 Book/ii/11-mixed-application.Rmd",
+    "project_path" : "11-mixed-application.Rmd",
+    "properties" : {
+        "cursorPosition" : "27,53",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

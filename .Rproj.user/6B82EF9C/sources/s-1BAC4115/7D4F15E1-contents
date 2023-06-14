@@ -1,0 +1,81 @@
+## Van Evera's tests
+
+### Doubly decisive
+
+make_model("X -> Y <- K") %>%
+  
+  set_restrictions(labels = list(Y = "0001"), keep = TRUE) %>%
+  
+  query_model(query = "Y[X=1] > Y[X=0]", 
+              given = c(TRUE, "K==0", "K==1"),
+              using = "parameters")
+
+
+## Smoking gun
+
+make_model("X -> Y <- K") %>%
+  
+  set_restrictions(labels = list(Y = c("0001", "0011")), keep = TRUE) %>%
+  
+  query_model(query = "Y[X=1] > Y[X=0]", 
+              given = c(TRUE, "K==0", "K==1"),
+              using = "parameters")
+
+# Hoop
+
+make_model("X -> Y <- K") %>%
+  
+  set_restrictions(labels = list(Y = c("0001", "0101")), keep = TRUE) %>%
+  
+  query_model(query = "Y[X=1] > Y[X=0]", 
+              given = c(TRUE, "K==0", "K==1"),
+              using = "parameters")
+
+# Straw in the wind
+
+make_model("X -> Y <- K") %>%
+  
+  set_restrictions(labels = list(Y = c("0001", "0101", "0011")), keep = TRUE) %>%
+  
+  query_model(query = "Y[X=1] > Y[X=0]", 
+              given = c(TRUE, "K==0", "K==1"),
+              using = "parameters")
+
+
+
+van_evera_data <- function(y_types, k_prob  = .5)
+  
+  make_model("X -> Y <- K") %>%
+  
+  set_restrictions(labels = list(Y = y_types), keep = TRUE) %>%
+  
+  set_parameters(param_type = "define", node = "K", alphas = c(1 - k_prob, k_prob)) %>%
+  
+  make_data(n = 1000)
+
+
+van_evera_inference <- function(data)
+  
+  make_model("X -> Y <- K") %>%
+  
+  update_model(data = data, fit = fit) %>%  
+  
+  query_model(query = "Y[X=1] > Y[X=0]", 
+              given = c(TRUE, "K==0", "K==1"),
+              using = "posteriors")
+
+
+doubly_decisive <- van_evera_data("0001", k_prob  = .5) %>% van_evera_inference
+
+hoop            <- van_evera_data(c("0001", "0101"), k_prob = .9) %>% van_evera_inference
+
+smoking_gun     <- van_evera_data(c("0001", "0011"), k_prob = .1) %>% van_evera_inference
+
+straw_in_wind   <- van_evera_data(c("0001", "0101", "0011"), k_prob = .5) %>% van_evera_inference
+
+
+doubly_decisive %>% kable(label= "Doubly decisive test")
+hoop %>%  kable(label= "Hoop test")
+smoking_gun %>% kable(label= "Smoking gun test")
+straw_in_wind %>% kable(label= "Straw in the wind test")
+

@@ -1,0 +1,19 @@
+
+library(DeclareDesign)
+library(dplyr)
+library(gbiqq)
+
+population <- declare_population(N = 1000, u = runif(N))
+
+add_to_wallet <- declare_step(handler = function(data) {
+  attr(data, "wallet") <- runif(1)
+  data
+})
+
+estimand <-  declare_estimand(Q = 1)
+
+sampling <- declare_sampling(n = 10)
+
+assign <- declare_assignment(handler = function(data) {mutate(data, Z = complete_ra(nrow(data), prob = attr(data, "wallet")))} ) 
+
+population + add_to_wallet + estimand + sampling + assign

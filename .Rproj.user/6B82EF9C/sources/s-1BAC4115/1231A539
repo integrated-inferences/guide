@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1575579171217.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "1231A539",
+    "lastKnownWriteTime" : 1575624081,
+    "last_content_update" : 1575624081995,
+    "path" : "C:/Dropbox/github/causalmodels/_output.yml",
+    "project_path" : "_output.yml",
+    "properties" : {
+        "cursorPosition" : "6,60",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 36,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "yaml"
+}

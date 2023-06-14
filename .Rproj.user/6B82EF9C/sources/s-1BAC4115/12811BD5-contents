@@ -1,0 +1,163 @@
+# Evaluating models {#evaluation}
+
+***
+
+Model based inference takes the model seriously. But deep down we know that all of these models are wrong, in myriad ways. We examine strategies for figuring out whether a model is likely doing more harm than good.
+
+***
+
+
+```{r, include = FALSE}
+source("_packages_used.R")
+if(do_diagnosis) if(!exists("fit"))  fit <- fitted_model()
+library("bayesplot")
+library("ggplot2")
+library("rstanarm")
+```
+
+
+Throughout this book we have maintained the conceit that you believe your model. But it is also obvious that even the most non-parametric-seeming models depend on substantive assumptions and that these may be wrong. 
+
+## Inferences when you don;t buy your priors
+
+You need to provide priors in order to get Bayesian updating off the ground. But seeing your priors reported as hard cold numbers may make them feel like forced confessions. What if you just don't believe them?
+
+Even in this case there are still two strategies for inference.
+
+First you might take a bounding approach. MANSKI stuff.
+
+Second, you might engage in qualitative inference. There is a literature on probabilistic causal models that assesses the scope for inferences when researchers provide ranges of plausible values for parameters (perhaps intervals, perhaps only signs, positive negative, zero), rather than specifying a probability distribution. For a comprehensive treatment of qualitative algebras, see @parsons2001qualitative. Under this kind of approach  a researcher might willing to say that they think some probability $p$ is not plausibly  greater than .5,  but unwilling to make a statement about their beliefs about where in the $0$ to $0.5$ range it lies. Such incomplete statements can be enough to rule our classes of conclusion.
+
+
+
+## Tools for evaluating models
+
+### Check conditional independencies
+
+Claims of conditional independence - Show for whether there's a direct effect of X on Y
+
+```{r}
+reference_model <- make_model("X -> M -> Y <- X") %>%
+  set_parameters(c(.5, .5, .1, .1, .7, .1, rep(.05, 8), .25, rep(.05, 7)))
+analyst_model   <- make_model("X -> M -> Y")
+
+data <- simulate_data(reference_model, using = "parameters", n = 1000)
+# summary(lm(Y~X*M, data = data))
+```
+
+### Check confounding assumptions
+
+approach 2 -- say actual confound is q~=0; but model  assumes q = 0. Draw data from priors, draw data; given data type (001, 100 etc) plot (a) the posterior distribution under no confounding nad (b) the distribution of estimands that gave rise to the data.  
+
+
+(Verma and Pearl, 1990) identify conditions under which we can check some independence assumptions.
+
+Say we have model
+
+```{r}
+model <- make_model("X -> M1 -> M2 -> Y ") %>% set_confound(list(M1 = "Y[M2=1]>Y[M2=0]"))
+```
+
+Can we check that there is no direct path from $X$ to $Y$?
+
+ Pearl (1995) gives conditions for assessing for discrete data whether $Z$ has a  direct effect on $Y$. (Involves inequalities)
+ 
+Evans (Graphical methods for inequality constraints in marginalized DAGs) generalizes the instrumental inequality.
+ 
+ 
+### Check prior dependence
+
+
+- A graph showing how some conclusions changes as we relax one of the restrictions.
+
+How much do our conclusions depend on qual restrictions?
+
+- How do conclusions differ if we drop all restrictions
+
+### Check fit
+
+Approaches using simulated data from the posterior predictive distribution  are described in @gabry2019visualization
+
+The graphs below compare (using tools in the `bayesplot`) package, show how typical the data we observe is for the model that correctly assumes a direct effect and the model that incorrectly excludes it. 
+
+
+```{r, echo = FALSE}
+sims = 1000
+
+if(do_diagnosis){
+  write_rds(gbiqq(reference_model, data, stan_model = fit), "saved/ref_update.rds") 
+  write_rds(gbiqq(analyst_model, data, stan_model = fit), "saved/ana_update.rds") 
+  ana_update <- gbiqq(analyst_model, data, stan_model = fit)}
+
+  ref_update <-   read_rds("saved/ref_update.rds") 
+  ana_update <-   read_rds("saved/ana_update.rds") 
+```
+
+
+How does the researcher's model do?
+
+```{r, fig.cap= "Posterior distribution of test statistics under researcher's model"}
+# Updated researcher model
+w_ana <- draw_event_prob(ana_update, using = "posteriors")
+# Distribution of Y outcomes from analyst's model
+replicates_ana <- 
+  t(replicate(sims, simulate_data(ana_update, n = nrow(data), w = w_ana)$Y))
+ppc_stat(data$Y, replicates_ana)
+
+```
+
+How would we evaluate the less constrained (true) model?
+
+```{r, echo = FALSE, fig.cap = "Distribution of $Y$ under the (data updated) true model"}
+# Updated alternative model
+w_ref <- draw_event_prob(ref_update, using = "posteriors")
+replicates_ref <- 
+  t(replicate(sims, simulate_data(ref_update, n = nrow(data), w = w_ref)$Y))
+ppc_stat(data$Y, replicates_ref)
+```
+
+<!-- - Generate equivalent of an R^2. Using posterior, make predictions for all the cases, say, on Y. How much lower is the error from that prediction than from the  -->
+
+Compare out of sample fit between model with posteriors and priors. 
+
+Reality checks -- posterior fits. Predict data from the posterior. Look at whether the data you see are similar to the data you actually have. 
+
+### Assess likelihoods under different models
+
+Bayesian information criterion (BIC)^[$BIC = \ln(n)k - 2\ln(\hat{L})$ where $\hat{L}$ is the maximized likelhood, $k$ is the number of parameters, and $n$ the number of data points.]
+BIC involves a penalty for more parameters
+
+
+Compare likelihoods of the data under different models
+Check look package for rstan
+
+
+## Evaluating the Democracy-Inequality model
+
+
+### Prior check
+In a second iteration of the analysis, we show what happens if we loosen the monotonicity restriction on $I$'s effect on $M$. Here we  consider negative effects of $I$ on $M$ *unlikely*, rather than impossible, and we consider null and positive effects somewhat likely. We refer to these priors as "quantitative priors" in the sense that they place a numerical value on beliefs rather than a logical restriction. Here, we set our prior on $\theta^M$ as: $p(\theta^M=\theta^M_{10})=0.1$, $p(\theta^M=\theta^M_{00})=0.25$, $p(\theta^M=\theta^M_{11})=0.25$, and $p(\theta^M=\theta^M_{01})=0.4$. We show the results for the inferences given different findings in tables \ref{tab:HK8cases1quant} and \ref{tab:HK8cases2quant}. The mapping into expected posterior variance associated with each strategy is shown by the numbers in parentheses in  Table \ref{CaseLearn}.
+
+```{r, echo = FALSE, eval = FALSE}
+I0D12 <- some_results(i=0, d=1, example = example_a2)
+I0D12 <- round(I0D12, 3)
+kable(cases_table(I0D12,  cases = cases1), caption = "\\label{tab:HK8cases1quant} Four cases with low inequality and  democratization. Question of interest: Was low inequality a cause of democracy? Table shows posterior beliefs for different data for 4 cases given information on $M$ or $P$. Data from Haggard and Kaufman (2012). Analyses here use priors assuming quantitative restrictions.")
+I1D12 <- some_results(i=1, d=1, example = example_b2)
+I1D12 <- round(I1D12, 3)
+kable(cases_table(I1D12, cases = cases2), caption = "\\label{tab:HK8cases2} Four cases with high inequality and  democratization. Question of interest: Was high inequality a cause of democratization? Table shows posterior beliefs for different data for 4 cases given information on $M$ or $P$. Data from Haggard and Kaufman (2012). Analyses here use priors assuming quantitative restrictions.")
+
+```
+
+
+The results differ in various modest ways. However, the biggest difference we observe is in the degree to which the mobilization clue matters when we are looking for negative effects of inequality. As discussed, if we assumed monotonic positive effects of inequality on mobilization and monotonic positive effects of mobilization on inequality, then the mediator clue is uninformative about the indirect pathway since that pathway can only generate a positive effect. However, if we allow for the possibility of a negative effect of inequality on mobilization, we now make $M$ informative as a mediator even when the effect of inequality that we are interested in is negative: it is now possible that inequality has a negative effect on democratization via a negative effect on mobilization, followed by a positive effect of mobilization on democratization. So now, observing whether mobilization occurred adds information about whether a negative effect could have occurred via the mobilization pathway. 
+
+Moreover, it is possible for the two effects of observing $M$ on our beliefs to work in opposite ways. What we learn from observing $M$ about the $I \rightarrow M \rightarrow D$ pathway may push in a different direction from what we learn from observing $M$ about the direct $I \rightarrow D$ pathway. We see this dynamic at work in a case with low inequality and democratization. Where we are only learning about $M$ as a moderator of $I$'s direct effect (monotonicity assumption in place), observing $M=0$ shifts our beliefs in favor of $I$'s negative effect. But where we are learning about $M$ as both mediator and moderator, observing $M=0$ shifts our beliefs *against* $I$'s negative effect. The reason for this latter result is straightforward: if $I=0$ and we then see $M=0$, then we have just learned that inequality's possible indirect negative effect, running via the mobilization pathway, has *not* in fact occurred; and this has a considerable downward effect on our beliefs in an overall negative effect of inequality. This learning outweighs the small positive impact of observing $M=0$ on our confidence that $I$ had a direct negative effect on $D$.
+
+We see these differences most clearly in the cases of Albania (as compared to Mexico) and Nicaragua (as compared to Taiwan). Under priors fully constrained to monotonic causal effects, we saw that the mediator clue, $M$, made only a small difference to our inferences. However, if we allow for a negative effect of $I$ on $M$, even while believing it to be unlikely, observing mobilization in Albania and Nicaragua makes us substantially more confident that inequality mattered, and differentiates our conclusions about these cases more sharply from our conclusions about Mexico and Taiwan, respectively. 
+
+
+### Monotonic restrictions
+
+Compare fit between model with and without monotonic restrictions
+
+

@@ -1,0 +1,230 @@
+
+---
+title: "Causal Inference from Causal Models"
+author: "Macartan Humphreys and Alan Jacobs"
+header-includes:
+  - \usepackage{multirow}
+  - \usepackage{graphicx}
+  - \newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
+  - \usepackage{bbold, mathabx}
+bibliography: bib.bib
+output: 
+  beamer_presentation:
+    slide_level: 2
+    incremental: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include = FALSE}
+source("../6 Book/ii/hj_dag.R")
+```
+
+# Motivation
+
+## "Causal inference"
+
+* The term has become synonymous with randomization, or *design-based* inference
+
+    * Randomization by the researcher: standard experiments
+
+    * Randomization by nature: pure natural experiments
+
+    * "As if" randomization, e.g.:
+
+        * Regression-discontinuity designs
+    
+        * Instrumental-variable approaches
+
+* Massive growth in last 15 years in design-based approaches in political science and economics
+
+## Assumption-free inference
+
+* Randomization allows for "assumption-free" causal inference
+
+    * $$ATE = \frac{1}{N} \sum_{i=1}^{N} (Y(1)_i - Y(0)_i)$$
+    
+    * Liberated from **models**
+    
+* Broad, deep skepticism about models
+
+    * Gerber, Green, and Kaplan (2014): "...observational findings are accorded zero weight...." if biases unknown
+    
+
+## When design isn't enough
+
+* To be clear: we think developments in design-based inference are enormously important
+
+    * If you can randomize to get at your estimand, go for it
+    
+* But the "causal inference revolution" has serious limits
+
+
+## Limits of randomized designs
+
+* **Feasibility**: Randomization impossible or unavailable for large set of research and policy questions
+
+
+<!-- ## Limits of randomized designs -->
+
+<!-- * Does randomization even tell us what we want to know? -->
+
+<!-- Consider the following potential outcomes table: -->
+<!-- \begin{table} \centering -->
+
+<!-- 	\begin{tabular}{c|c|c} -->
+<!-- 		In treatment?	&Y(0)	&Y(1)  \\ \hline -->
+<!-- 		Yes	&	& 2	\\ -->
+<!-- 		No	& 3	&	\\ -->
+<!-- 		No	& 1	&	\\ -->
+<!-- 		Yes	&	& 3	\\ -->
+<!-- 		Yes	&	& 3	\\ -->
+<!-- 		No	& 2	&	 -->
+<!-- 	\end{tabular}  -->
+<!-- \end{table} -->
+
+<!-- \color{red}\textbf{Questions for us: } Fill in the blanks. -->
+<!-- \begin{itemize} -->
+<!-- 	\item Assuming a constant treatment effect of $+1$  -->
+<!--  	\item Assuming an \textit{average} treatment effect of $1$ -->
+<!-- \end{itemize} -->
+<!-- \color{red} How useful is the ATE? -->
+
+
+## Limits of randomized designs
+
+* **Feasibility**: Randomization impossible or unavailable for large set of research and policy questions
+    
+* **Estimand**: Randomization gives us an ATE but can't tell us:
+    
+    * Distribution of effects
+    
+        * E.g., What proportion of individuals does the treatment *hurt*?
+        
+    * *How* effects occurred -- mechanisms
+        
+    * Whether effects will travel
+    
+    * *Case*-level effects: it's all population-level
+    
+    
+
+ 
+## If we can't randomize, we need models
+
+Simple example:
+
+* Assume no randomization
+
+* We want to know if $X$ causes $Y$
+    
+* We use $X,Y$ correlation as evidence
+    
+    * But this evidence depends on a *model of the world* 
+        * A model that excludes $X \leftarrow Z \rightarrow Y$
+    
+* Or we control for $Z$
+    
+    * But this depends on a different model of the world 
+        * A model that excludes $X \rightarrow Z \rightarrow Y$
+
+* So beliefs about the world always play a central role in non-randomized inference
+
+## And if you don't use a model, you never learn about a model
+
+Only by bringing a model to bear on an empirical problem can we learn about:
+
+* Scope conditions
+
+* Causal pathways/mechanisms
+
+* Case-level causes (e.g., causal explanation)
+
+
+## An ambiguity at the heart of process tracing
+
+* We have this general intuition about process tracing
+
+    * I have a theory that $X \rightarrow K \rightarrow Y$
+    
+* So I go into a case with $X=1, Y=1$ and I see if $K=1$
+    
+* If $K$ is present, I take this as evidence that $X \rightarrow Y$ in this case
+
+* But what warrants this conclusion?
+
+    * Maybe $K=1$ for some completely reason having nothing to do with $X$
+    
+    * Maybe $K$ has no effect on $Y$
+    
+    * Why isn't this just another correlation?
+    
+* We need a deeper and more systematic engagement with models to draw out the logic of process tracing
+
+
+## An ambiguity at the heart of process tracing
+
+To put the point another way:
+
+* I want to know if Democracy $\rightarrow$ Growth
+
+* So I go into a case with Democracy and Growth, and I look for, and find, the protection of Property Rights
+
+* Is this evidence that Democracy caused Growth?
+
+* Maybe it is evidence *against* this effect
+
+    * Maybe Democracy can only affect Growth through Property Rights by having a *negative* effect on Property Rights (which has a positive effect on Growth)
+    * Then this clue is evidence that Democracy did NOT cause Growth
+    
+* What stops us from drawing the latter inference?
+
+
+<!-- ## Motivation 3: Mixing methods -->
+
+<!-- * Multi-method research is all the rage -->
+
+<!-- * But how to systematically combine cross-case and within-case information? -->
+
+<!-- * Maybe we only use one method in service of another (Seawright 2016)? -->
+
+<!--     * Using process tracing to test assumptions underlying a regression -->
+
+<!--     * Let regression give us the inference -->
+
+<!-- * But this leaves information on the table -->
+
+<!--     * e.g., what can the within-case data tell us about causal effects? -->
+
+<!-- * How can we fully *integrate* forms of information to generate a single set of inferences? -->
+
+
+## Key claims
+
+* Whether implicitly or explicitly, all causal inference (at least, absent randomization) rests heavily on background knowledge about the world
+
+* By making our beliefs about the world *explicit* and reasoning systematically from them, we can do much better than if we keep our models implicit
+
+## Key claims
+
+* Using causal models can allow us to
+
+    * Draw inferences from evidence in ways logically consistent with our prior beliefs/information
+
+    * Show, and allow others to see, precisely how our inferences hinge on our model
+
+    * Make research design choices in a way systematically informed by what we already know
+
+    * Readily integrate quantitative and qualitative evidence into a single set of findings
+
+    * $\Rightarrow$ implications for large-n, small-n, and mixed-method research
+    
+    
+    
+
+
+
+

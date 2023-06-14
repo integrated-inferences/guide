@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1543501571132.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "7588687",
+    "id" : "962E92D7",
+    "lastKnownWriteTime" : 1502807241,
+    "last_content_update" : 1502807241,
+    "path" : "~/Dropbox/ProcessTracing/6 Book/ii/Notes and other/stan_biqq_PIMD.stan",
+    "project_path" : "Notes and other/stan_biqq_PIMD.stan",
+    "properties" : {
+        "cursorPosition" : "34,226",
+        "scrollLine" : "28"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "stan"
+}

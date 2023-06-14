@@ -1,0 +1,641 @@
+# (PART) The Package {-} 
+
+```{r part2, include = FALSE}
+source("_packages_used.R")
+library(DeclareDesign)
+do_diagnosis <- FALSE
+
+# if(!exists("fit")) fit <- gbiqq::fitted_model()
+# write_rds(fit, "saved/fit.rds")
+fit <- read_rds("saved/fit.rds")
+```
+
+# Installation {#package}
+
+You can install the package from Rstudio via:
+
+```{r, eval = FALSE}
+install.packages("remotes")
+remotes::install_github("macartan/gbiqq")
+```
+
+The package has some dependencies, the most important of which is `rstan`. Make sure you have `rstan` installed and working properly before doing anything else. Note that at installation `gbiqq` compiles and stores a `stan` model so if you have problems with `stan` you won't be ablt to install `gbiqq`. 
+
+* See the [rstan getting started guide](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) for general installation procedures
+* Check that rstan is working by running one of the simple `stan` examples (see for example `?stan`)
+* For windows users you might have to configure according to (these instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-from-source-on-Windows#configuration)
+* if all is working you should be able to run a simple model of the form:
+
+```{r, eval = FALSE}
+make_model("X->Y") %>% update_model
+```
+
+
+# Defining models
+
+## Getting going
+
+Model definition involves:
+
+* Defining a [causal structure](#structure) (required)
+* Indicating causal type [restrictions](#restrictions) (optional)
+* Indicating possible unobserved [confounding](#confounding) (optional)
+* Providing [priors](#priors) and [parameters](#parameters)  (required, but defaults are provided)
+
+We discuss these in turn. 
+
+## Causal structure {#structure}
+
+A simple model is defined in one step using a `dagitty` syntax in which the structure of the model is provided as a statement.
+
+For instance:
+
+```{r}
+model <- make_model("X -> M -> Y <- X")
+```
+
+The statement (in quotes) provides the names of nodes. An arrow ("`->`" or "`<-`") connecting nodes indicates that one node is a potential cause of another  (that is, whether a given node is a "parent" or "child" of another; see section \@ref(parents)). 
+
+Formally a statement like this is interpreted as:
+
+1. Functional equations:
+  * $Y = f(M, X, \theta^Y)$
+  * $M = f(X, \theta^M)$
+  * $X = \theta^X$
+  
+2. Distributions on shocks:
+  * $\Pr(\theta^i = \theta^i_k) = \lambda^i_k$
+
+3. Independence assumptions:   
+* $\theta_i \perp\!\!\! \perp \theta_j, i\neq j$
+
+where function $f$ maps from the set of possible values of the parents of $i$ to values of node $i$ given $\theta^i$. Units with the same value on $\theta^i$ react in the same way to the parents of $i$. Indeed in this discrete world we think of $\theta^i$ as fully dictating the  functional form of $f$, indicating what outcome is observed on $i$ for any value of $i$'s parents.  
+
+In addition, it is also possible to indicate "unobserved confounding", that is, the presence of an unobserved variable that might influence observed variables. In this case condition 3 above is relaxed. We describe how this is done in greater detail in section \@ref(confounding).
+
+For instance:
+
+```{r}
+model <- make_model("X -> Y <- W -> X; X <-> Y")
+```
+
+Note that different segments of the graph can be included in the same statement, separated by semicolons. There are many ways to write the same model. Here is the same model written once using a three part statement and once as a chain (with the same node appearing possibly more than once).
+
+
+```{r, eval  FALSE}
+model <- make_model("W -> X; W -> Y; X -> Y")
+model <- make_model("X -> Y <- W -> X")
+```
+
+Once defined, a model can be graphed (we use the `dagitty` package for this):
+
+```{r, fig.cap="A plotted model. Curved double headed arrows indicate unobserved confounding"}
+model <- make_model("X -> Y <- W -> X; X <-> Y")
+plot(model)
+```
+
+This is useful to check that you have written the structure down correctly. 
+
+When a model is defined, a set of objects are generated. These are the key quantities that are used for all inference. We discuss each in turn. (See the notation guide---section \@ref(notation)---for definitions and code pointers).
+
+
+### Nodal types
+
+Two units have the same *nodal type* at node $Y$, $\theta^Y$, if their outcome at $Y$ responds in the same ways to parents of $Y$. 
+
+A node with $k$ parents has $2^{2^k}$ nodal types. The reason is that with $k$ parents, there are $2^k$ possible values of the parents and so  $2^{2^k}$ ways to respond to these possible parental values. As a convention we say that a node with no parents has two nodal types (0 or 1).
+
+When a model is created the full set of "nodal types" is identified. These are stored in the model. The subscripts become very long and hard to parse for  more complex models so the model object also includes a guide to interpreting nodal type values. You can see them like this.
+
+```{r, comment = ""}
+make_model("X -> Y")$nodal_types
+```
+
+
+Note that we use $\theta^j$ to indicate nodal types because for qualitative analysis the nodal types are often the parameters of interest.
+
+### Causal types
+
+Causal types are collections of nodal types. Two units are of the same *causal type* if they have the same nodal type at every node. For example in a $X \rightarrow M \rightarrow Y$ model, $\theta = (\theta^X_0, \theta^M_{01}, \theta^Y_{10})$ is a type that has $X=0$, $M$ responds positively to $X$, and $Y$ responds positively to $M$.
+
+When a model is created, the full set of causal types is identified. These are stored in the model object:
+
+```{r, comment = ""}
+make_model("A -> B")$causal_types
+```
+
+A model with $n_j$ nodal types at node $j$ has $\prod_jn_j$ causal types. Thus the set of causal types can be large. In the model $(X\rightarrow M \rightarrow Y \leftarrow X)$ there are $2\times 4\times 16 = 128$ causal types.
+
+Knowledge of a causal type tells you what values a unit would take, on all nodes, absent an intervention. For example for a model $X \rightarrow  M \rightarrow  Y$ a type $\theta = (\theta^X_0, \theta^M_{01}, \theta^Y_{10})$ would imply data $(X=0, M=0, Y=1)$. (The converse of this, of course, is the key to updating: observation of data $(X=0, M=0, Y=1)$ result in more weight placed on $\theta^X_0$, $\theta^M_{01}$, and $\theta^Y_{10})$.)
+
+### Parameters dataframe
+
+When a model is created, `gbiqq` attaches a "parameters dataframe" which keeps track of model parameters, which belong together in a family, and how they relate to causal types. This becomes especially important for more complex models with confounding that might involve more complicated mappings between parameters and nodal types. In the case with no confounding the nodal types *are* the parameters; in cases with confounding you generally have more parameters than nodal types.
+
+For instance:
+
+```{r, comment = ""}
+make_model("X->Y")$parameters_df %>%
+  kable()
+```
+
+Each row in the dataframe corresponds to a single parameter.
+
+The columns of the parameters data frame are understood as follows:
+
+* `param_names` gives the name of the parameter, in shorthand. For instance the parameter $\lambda^X_0 = \Pr(\theta^X = \theta^X_0)$ has `par_name`  `X.0`. See section \@ref(notation) for a summary of notation. 
+* `param_value` gives the (possibly default) parameter values. These are probabilities.  
+* `param_set` indicates which parameters group together to form a simplex. The parameters in a set have parameter values that sum to 1. In this example $\lambda^X_0 + \lambda^X_1 = 1$.
+* `node`  indicates the node associated with the parameter. For parameter `\lambda^X_0` this is $X$.
+* `nodal_type` indicates the nodal types associated with the parameter. 
+* `gen`  indicates the place in the partial causal ordering (generation) of the  node associated with the parameter
+* `priors` gives (possibly default) Dirichlet priors arguments for parameters in a set. Values of 1 (.5) for all parameters in a set implies uniform (Jeffrey's) priors over this set. 
+
+Below we will see examples where the parameter dataframe helps keep track of parameters that are created when confounding is added to a model. 
+
+### Parameter matrix
+
+The parameters dataframe keeps track of parameter values and priors for parameters but it does not provide a mapping between parameters and the probability of causal types.
+
+The parameter matrix  ($P$  matrix) is added to the model to provide this mapping. The $P$ matrix has a row for each parameter and a column for each causal type. For instance:
+
+```{r, comment = ""}
+make_model("X->Y") %>% get_parameter_matrix %>%
+  kable
+```
+
+The probability of a causal type is given by the product of the parameters values for parameters whose row in the $P$ matrix contains a 1.  
+
+Below we will see examples where the $P$ matrix helps keep track of parameters that are created when confounding is added to a model. 
+
+## Setting restrictions {#restrictions}
+
+When a model is defined, the complete set of possible causal relations are identified. This set can be very large. 
+
+Sometimes for theoretical or practical reasons it is useful to constrain the set of types. In `gbiqq` this is done at the level of nodal types, with restrictions on causal types following from restrictions on nodal types.
+
+For instance to impose an assumption that $Y$ is not decreasing in $X$ we generate a restricted model as follows:
+
+```{r}
+model <- make_model("X->Y") %>% set_restrictions("Y[X=1] < Y[X=0]")
+```
+
+or:
+
+
+```{r}
+model <- make_model("X->Y") %>% set_restrictions(decreasing("X", "Y"))
+```
+
+
+Viewing the resulting parameter matrix we see that both the set of parameters and the set of causal types are now restricted:
+
+```{r, comment = ""}
+get_parameter_matrix(model)
+```
+
+Here and in general, setting restrictions typically involves using causal syntax;  see Section \@ref(syntax) for a guide the syntax used by `gbiqq`.
+
+Note:
+
+* Restrictions have to operate on nodal types: restrictions on *levels* of endogenous nodes aren't allowed. This, for example, will fail: 
+`make_model("X->Y") %>% set_restrictions(statement =  "(Y == 1)")`. The reason is that it requests a correlated restriction on nodal types for `X` and `Y` which involves undeclared confounding. 
+* Restrictions implicitly assume fixed values for *all* parents of a node. For instance: `make_model("A -> B <- C") %>% set_restrictions("(B[C=1]==1)")` is interpreted as shorthand for the restriction  `"B[C = 1, A = 0]==1 | B[C = 1, A = 1]==1"`.
+* To place restrictions on multiple nodes at the same time, provide these as a vector of restrictions. This is not permitted: `set_restrictions("Y[X=1]==1 & X==1")`, since it requests correlated restrictions. This however is allowed: `set_restrictions(c("Y[X=1]==1", "X==1"))`.  
+* Use the `keep` argument to indicate whether nodal types should be dropped (default) or retained.
+* Restrictions can be set using nodal type labels. `make_model("S -> C -> Y <- R <- X; X -> C -> R") %>%
+set_restrictions(labels = list(C = "C1000", R = "R0001", Y = "Y0001"), keep = TRUE)`
+* Wild cards can be used in nodal type labels: `make_model("X->Y") %>%
+set_restrictions(labels = list(Y = "Y?0"))`
+
+## Allowing confounding {#confounding}
+
+(Unobserved) confounding between two nodes arises when the nodal types for the nodes are not independently distributed. 
+
+In the $X \rightarrow Y$ graph, for instance, there are 2 nodal types for $X$ and 4 for $Y$. There are thus 8 joint nodal types (or causal types):
+
+|   |    | $\theta^X$         |                    |           |
+|:-:|:--:|:------------------:|:-------------------|-----------|
+|   |  | 0                    | 1                  | Sum       |
+|$\theta^Y$ | 00 | $\Pr(\theta^X_0, \theta^Y_{00})$ | $\Pr(\theta^X_1, \theta^Y_{00})$ | $\Pr(\theta^Y_{00})$|
+|   | 10 | $\Pr(\theta^X_0, \theta^Y_{10})$ | $\Pr(\theta^X_1, \theta^Y_{10})$ | $\Pr(\theta^Y_{10})$|
+|   | 01 | $\Pr(\theta^X_0, \theta^Y_{01})$ | $\Pr(\theta^X_1, \theta^Y_{01})$ | $\Pr(\theta^Y_{01})$|
+|   | 11 | $\Pr(\theta^X_0, \theta^Y_{11})$ | $\Pr(\theta^X_1, \theta^Y_{11})$ | $\Pr(\theta^Y_{11})$|
+|   |Sum | $\Pr(\theta^X_0)$  | $\Pr(\theta^X_1)$  | 1         |
+
+This table has 8 interior elements and so an unconstrained joint distribution would have 7 degrees of freedom. A no confounding assumption means that $\Pr(\theta^X | \theta^Y) = \Pr(\theta^X)$, or $\Pr(\theta^X, \theta^Y) = \Pr(\theta^X)\Pr(\theta^Y)$. In this case we just put a distribution on the marginals and there would be 3 degrees of freedom for $Y$ and 1 for $X$, totaling $4$ rather than 7.
+
+`set_confounds` lets you relax this assumption by increasing the number of parameters characterizing the joint distribution. Using the fact that $\Pr(A,B) = \Pr(A)\Pr(B|A)$ new parameters are introduced to capture $\Pr(B|A=a)$ rather than simply $\Pr(B)$.
+
+The simplest way to allow for confounding is by adding a bidirected edge, such as via: `set_confound(model, list("X <-> Y"))`. In this case the descendant node has a distribution conditional on the value of the ancestor node. To wit:
+
+```{r, comment  = ""}
+confounded <- make_model("X->Y") %>% 
+  set_confound("X <-> Y")
+
+confounded$parameters_df %>% kable
+
+```
+
+We see here that there are now two parameter families for parameters associated with the node $Y$. Each family captures the conditional distribution of $Y$'s nodal types, given $X$. For instance the parameter `Y-1.Y01` can be interpreted as $\Pr(\theta^Y = \theta^Y _{01} | X=1)$.
+
+To see exactly how the parameters map to causal types we can view the parameter matrix:
+
+```{r, comment = ""}
+get_parameter_matrix(confounded) %>% kable
+```
+
+Importantly, the $P$ matrix works as before, despite confounding. We can assess the probability of causal types by multiplying the probabilities of the constituent parameters.
+
+Note:
+
+* Ordering of conditioning can also be controlled however via `set_confound(model, list(X = "Y"))` in which case X is given a distribution conditional on nodal types of Y.
+
+* More specific confounding statements are also possible using causal syntax. 
+  * A statement of the form `list(X = "Y[X=1]==1")` can be interpreted as: "Allow X to have a distinct conditional distribution when $Y$ has types that involve $Y(do(X=1))=1$." In this case, nodal types for $Y$ would continue to have 3 degrees of freedom. But there would be parameters assigning the probability of $X$ when $\theta^Y = \theta^Y_{01}$ or $\theta^Y = \theta^Y_{11}$ and other parameters for residual cases. Thus 6 degrees of freedom in all.
+  * Similarly a statement of the form `list(Y = "X==1")` can be interpreted as: "Allow Y to have a distinct conditional distribution when X=1." In this case there would be two distributions over nodal types for Y, producing 2*3 = 6 degrees of freedom. Nodal types for X would continue to have 1 degree of freedom. Thus 7 degrees of freedom in all, corresponding to a fully unconstrained joint distribution.
+* Unlike nodal restrictions, a confounding relation can involve multiple nodal types simultaneously. For instance `make_model("X -> M -> Y") %>% set_confound(list(X = "Y[X=1] > Y[X=0]"))` allows for a parameter that renders $X$ more or less likely depending on whether $X$ has a positive effect on $Y$ whether it runs through a positive or a negative effect on $M$.
+* The parameters needed to capture confounding relations depend on the direction of causal arrows. For example compare:
+  * `make_model("A -> W <- B ; A <-> W; B <-> W")$parameters_df %>% dim`   In this case we can decompose shocks on $A, B, W$ via: $\Pr(\theta^A, \theta^B,  \theta^W) = \Pr(\theta^W | \theta^A, \theta^A)\Pr(\theta^A)\Pr(\theta^B)$, and we have 68 parameters. 
+  * `make_model("A <- W -> B ; A <-> W; B <-> W")$parameters_df %>% dim` In this case we have $\Pr(\theta^A, \theta^B,  \theta^W) = \Pr(\theta^A | \theta^W)\Pr(\theta^B|\theta^W)\Pr(\theta^W)$ and just has just 18 parameters.
+
+When confounding is added to a model, a dataframe, `confounds_df` is created and added to the model, recording which variables involve confounding. This is then used for plotting:
+
+```{r}
+make_model("A <- X -> B; A <-> X; B <-> X") %>% plot
+```
+
+Sometimes the `confounds_df` can highlight nonobvious confounding relations:
+
+```{r, comment = ""}
+model <- make_model("X -> M -> Y") %>%
+  set_confound(list(X = "Y[X=1] > Y[X=0]"))
+model$confounds_df
+```
+
+In this example, the confounding statement implies confounding between $X$ and $M$ even though $M$ is not included explicitly in the confound statement (the reason is that $X$ can have a positive effect on $Y$ by having a positive effect on $M$ and this in turn having a positive effect on $Y$ *or* by having a negative effect on  $M$ and this in turn having a negative effect on $Y$).
+
+## Setting Priors {#priors}
+
+Priors on model parameters can be added to the parameters dataframe. The priors are interpreted as alpha arguments for a Dirichlet distribution. They can be seen using `get_priors`.
+
+```{r, comment = ""}
+
+make_model("X->Y") %>% get_priors
+
+```
+
+Here the priors have not been specified and so they default to 1, which corresponds to uniform priors.
+
+Alternatively you could set jeffreys priors like this:
+
+```{r, comment = ""}
+
+make_model("X->Y") %>% set_priors(distribution = "jeffreys") %>% get_priors
+
+```
+
+### Custom priors
+
+Custom priors are most simply specified by being added as a vector of numbers using `set_priors`. For instance:
+
+```{r, comment = ""}
+
+make_model("X->Y") %>% set_priors(1:6) %>% get_priors
+
+```
+
+The priors here should be interpreted as indicating:
+
+ * $\alpha_X = (1,2)$, which implies a distribution over $(\lambda^X_0, \lambda^X_1)$ centered on $(1/3, 2/3)$. 
+ * $\alpha_Y = (3,4,5,6)$, which implies a distribution over $(\lambda^Y_{00}, \lambda^Y_{10}, \lambda^Y_{01} \lambda^Y_{11})$ centered on $(3/18, 4/18, 5/18, 6/18)$. 
+
+For larger models it can be hard to provide priors as a vector of numbers and so `set_priors` can allow for more targeted modifications of the parameter vector. For instance:
+
+```{r, comment = ""}
+make_model("X->Y") %>%
+  set_priors(statement = "Y[X=1] > Y[X=0]", alphas = 3) %>%
+  get_priors
+```
+
+See `?set_priors` and `?make_priors` for many examples.
+
+### Prior warnings
+
+"Flat" priors over parameters in a parameter family put equal weight on each nodal type, but this in turn can translate into strong assumptions on causal quantities of interest. 
+
+For instance in an $X \rightarrow Y$ model model in which negative effects are ruled out, the average causal effect implied by "flat" priors is $1/3$. This can be seen by querying the model:
+
+```{r}
+
+make_model("X -> Y") %>%
+  set_restrictions(decreasing("X", "Y")) %>%
+  query_model("Y[X=1] - Y[X=0]", n_draws = 10000) %>%
+  kable
+
+```
+
+More subtly the *structure* of a model, coupled with flat priors, has substantive importance for priors on causal quantities. For instance with flat priors, priors on the probability that $X$ has a positive effect on $Y$ in the model $X \rightarrow Y$ is centered on $1/4$. But priors on the probability that $X$ has a positive effect on $Y$ in the model $X \rightarrow M \rightarrow Y$ is centered on $1/8$. 
+
+Again, you can use `query_model` to figure out what flat  (or other) priors over parameters imply for priors over causal quantities:
+
+```{r}
+
+make_model("X -> Y") %>%
+  query_model("Y[X=1] > Y[X=0]", n_draws = 10000) %>%
+  kable
+
+make_model("X -> M -> Y") %>%
+  query_model("Y[X=1] > Y[X=0]", n_draws = 10000) %>%
+  kable
+
+```
+
+
+Caution regarding priors is particularly important when models are not identified, as is the case for many of the models considered here. In such cases, for some quantities, the marginal posterior distribution can be the same as the marginal prior distribution [@poirier1998revising].
+
+The key point here is to make sure you do not fall into a trap of thinking that "uninformative" priors make no commitments regarding the values of causal quantities of interest. They do, and the implications of flat priors for causal quantities can depend on the structure of the model. Moreover for some inferences from causal models the priors can matter a lot even if you have a lot of data. In such cases it can be helpful to know what priors on parameters imply for priors on causal quantities of interest  (by using `query_model`) and to assess how much conclusions depend on priors (by comparing results across models that vary in their priors).
+
+
+## Setting Parameters {#parameters}
+
+By default, models have a vector of parameter values included in the `parameters_df` dataframe. These are useful for generating data, or for situations, such as process tracing, when one wants to make inferences about causal types ($\theta$), given case level data, under the assumption that the model is known. 
+
+Setting parameters can be done using the same syntax as `set_priors`. The key difference is that parameters are normalized to sum to 1 within each parameter set. If a given value is altered the entire set is then renormalized.
+
+This can sometimes be confusing. In the example below for example, the parameter value on `Y.Y01` is .4 even though `alphas = .5` was requested. In fact .4 arises from a normalization of vector (.25, .25, .5, .25). If in doubt, check parameter values.
+
+```{r, comment = ""}
+make_model("X->Y") %>%
+  set_parameters(statement = "Y[X=1] > Y[X=0]", alphas = .5) %>%
+  get_parameters
+```
+
+See `? set_parameters` for some handy ways to set parameters either manually (`define`) or using `prior_mean`, `prior_draw`, `posterior_mean`, `posterior_draw`.
+
+# Updating models with `stan`
+
+When we generate a model we often impose a lot of assumptions on nature of causal relations. This includes "structure" regarding what relates to what but also the nature of those relations---how strong the effect of a given variable is and how it interacts with others, for example. The latter features are captured by parameters whose values, fortunately, can be data based. 
+
+The approach used by the `gbiqq` package to updating parameter values given observed data uses `stan` and involves the following elements:
+
+* Dirichlet priors over parameters, $\lambda$ (which, in cases without confounding, correspond to nodal types)
+* A mapping from parameters to event probabilities, $w$
+* A likelihood function that assumes events are distributed according to a multinomial distribution given event probabilities. 
+
+We provide further details below. 
+
+## Data for `stan` 
+
+We use a generic `stan` model that works for all binary causal models. Rather than writing a new `stan` model for each causal model we send `stan` details of each particular causal model as data inputs. 
+
+In particular we provide a set of matrices that `stan` tailor itself to  particular models: the parameter matrix ($P$ ) tells `stan` how many parameters there are, and how they map into causal types; an ambiguity matrix $A$ tells stan how causal types map into data types; and an event matrix $E$ relates data types into patterns of observed data (in cases where there are incomplete observations). 
+
+The internal function `prep_gbiqq_data` prepares data for `stan`. You generally don't need to use this manually, but we show here a sample of what it produces as input for `stan`.
+
+We provide  `prep_gbiqq_data` with data in compact form (listing "data events").
+
+```{r ch2compact, comment = ""}
+model <- make_model("X->Y")
+
+data  <- data.frame(X = c(0, 1, 1, NA), Y = c(0, 1, 0, 1)) 
+
+compact_data <-  collapse_data(data, model) 
+
+kable(compact_data)
+```
+
+Note that NAs are interpreted as data not having been sought. So in this case the interpretation is that there are two data strategies: data on $Y$ and $X$ was  sought in three cases; data on  $Y$ only was sought in just one case. 
+
+`prep_gbiqq_data` then returns a list of objects that `stan` expects to receive. These include indicators to figure out where a parameter set starts (`l_starts`, `l_ends`) and ends and where a data strategy starts and ends (`strategy_starts`, `strategy_ends`), as well as the matrices described above.
+
+```{r ch2prep, comment = ""}
+
+gbiqq::prep_gbiqq_data(model, compact_data)
+
+```
+
+
+## `stan` code
+
+Below we show the  `stan` code. This starts off with a block saying what input data is to be expected. Then there is a characterization of parameters and the transformed parameters. Then the likelihoods and priors are provided. `stan` takes it from there and generates a posterior distribution.
+
+```{r, echo = FALSE, comment = ""}
+
+cat(get_stancode(fit))
+
+```
+
+
+The `stan` model works as follows (technical!):
+
+* We are interested in "sets" of parameters. For example in the $X \rightarrow Y$ model we have two parameter sets (`param_sets`). The first is $\lambda^X \in \{\lambda^X_0, \lambda^X_1\}$ whose elements give the probability that $X$ is 0 or 1. These two probabilities sum to one. The second parameter set  is $\lambda^Y \in \{\lambda^Y_{00}, \lambda^Y_{10}, \lambda^Y_{01} \lambda^Y_{11}\}$. These are also probabilities and their values sum to one. Note in all that we have 6 parameters but just 1 + 3 = 4 degrees of freedom. 
+* We would like to express priors over these parameters using multiple Dirichlet distributions (two in this case). In practice because we are dealing with multiple simplices of varying length, it is easier to express priors over gamma distributions with a unit scale parameter and shape parameter corresponding to the Dirichlet priors, $\alpha$. We make use of the fact that $\lambda^X_0 \sim Gamma(\alpha^X_0,1)$ and $\lambda^X_1 \sim Gamma(\alpha^X_1,1)$ then $\frac{1}{\lambda^X_0 +\lambda^X_1}(\lambda^X_0, \lambda^X_1) \sim Dirichlet(\alpha^X_0, \alpha^X_1)$. For a discussion of implementation of this approach in `stan` see https://discourse.mc-stan.org/t/ragged-array-of-simplexes/1382.
+* For any candidate parameter vector $\lambda$ we calculate the probability of *causal* types (`prob_of_types`) by taking, for each type $i$, the product of the probabilities of all parameters ($\lambda_j$) that appear in column $i$ of the parameter matrix $P$. Thus the probability of a $(X_0,Y_{00})$ case is just $\lambda^X_0 \times \lambda^Y_{00}$. The implementations in `stan` uses `prob_of_types_[i]` $= \prod_j \left(P_{j,i} \lambda_j + (1-P_{j,i})\right)$: this multiplies the probability of all parameters involved in the causal type (and substitutes 1s for parameters that are not). (`P` and `not_P` (1-$P$) are provided as data to `stan`).
+
+* The probability of data types, `w`, is given by summing up the probabilities of all  causal types that produce a given data type. For example, the probability of a $X=0,Y=0$ case, $w_{00}$ is   $\lambda^X_0\times \lambda^Y_{00} + \lambda^X_0\times \lambda^Y_{01}$. The ambiguity matrix $A$ is provided to `stan` to indicate which probabilities need to be summed.
+* In the case of incomplete data we first identify the set of "data strategies", where a collection of a data strategy might be of the form "gather data on $X$ and $M$, but not $Y$,  for $n_1$ cases and gather data on $X$ and $Y$, but not $M$, for $n_2$ cases. The probability of an observed event, within a data strategy, is given by summing the probabilities of the types that could give rise to the incomplete data. For example $X$ is observed, but $Y$ is not, then the probability of $X=0, Y = \text{NA}$ is $w_{00} +w_{01}$. The matrix $E$ is passed to `stan` to figure out which event probabilities need to be combined for events with missing data.
+* The probability of a dataset is then given by a multinomial distribution with these event probabilities (or, in the case of incomplete data, the product of multinomials, one for each data strategy). Justification for this approach relies on the likelihood principle and is discussed in Chapter 6.   
+
+
+## Implementation
+
+To update a gbiqq model with data use:
+
+```{r, eval = FALSE}
+update_model(model, data)
+```
+
+where the data argument is a dataset containing some or all of the nodes in the model.
+
+Other `stan` arguments can be passed to `update_data`, in particular:
+
+* use `fit` to give `stan` a fitted `gbiqq` model which speeds things up 
+* `iter` sets the number of iterations and ultimately the number of draws in the posterior
+* `chains` sets the number of chains; doing multiple chains in parallel speeds things up
+* lots of other options via `?rstan::stan`
+
+If you have multiple cores you can do parallel processing by including this line before running `gbiqq`:
+
+```{r, eval = FALSE}
+options(mc.cores = parallel::detectCores())`
+```
+
+
+The `stan` output from a simple model looks like this:
+
+```{r, echo = FALSE, comment = ""}
+fit
+```
+
+
+Note the parameters include the gamma parameters plus transformed parameters, $\lambda$, which are our parameters of interest and which `gbiqq` then interprets as possible row probabilities for the $P$ matrix. 
+
+## Extensions
+
+### Arbitrary parameters
+
+Although the package provides helpers to generate mappings from parameters to causal types via nodal types, it is possible to dispense with the nodal types altogether and provide a direct mapping from parameters to causal types. 
+
+For this you need to manually provide a `P` matrix and a corresponding `parameters_df`. As an example here is a model with complete confounding and parameters that correspond to causal types directly. 
+
+```{r, eval = FALSE}
+model <- make_model("X->Y")
+
+model$P <- diag(8)
+colnames(model$P) <- rownames(model$causal_types)
+
+model$parameters_df <- data.frame(
+  param_names = paste0("x",1:8), 
+  param_set = 1, 
+  priors = 1, 
+  parameters = 1/8)
+
+# Update fully confounded model on strongly correlated data
+
+data <- make_data(make_model("X->Y"), n = 100, parameters = c(.5, .5, .1,.1,.7,.1))
+
+fully_confounded <- update_model(model, data, fit = fit)
+
+```
+
+### Non binary data
+
+In principle the `stan` model could be extended to handle non binary data. Though a limitation of the current package there is no structural reason why nodes should be constrained to be dichotomous. The set of nodal and causal types however expands even more rapidly in the case of non binary data. .
+
+
+# Querying models
+
+Models can be queried using the `query_distribution` and `query_model` functions. The difference between these functions is that `query_distribution` examines a single query and returns a full distribution of draws from the distribution of the estimand (prior or posterior); `query_model` takes a collection of queries and returns a dataframe with summary statistics on the queries. 
+
+The simplest queries ask about causal estimands given particular parameter values and case level data. Here is one surprising result of this form:
+
+## Case level queries
+
+The `query_model` function takes causal queries and conditions (`given`) and specifies the parameters to be used. The result is a dataframe which can be displayed as a table.
+
+For a case level query we can make the query *given* a particular parameter vector, as below: 
+
+```{r}
+make_model("X-> M -> Y <- X") %>% 
+  
+  set_restrictions(c(decreasing("X", "M"), 
+                     decreasing("M", "Y"), 
+                     decreasing("X", "Y"))) %>%
+  
+  query_model(queries = "Y[X=1]> Y[X=0]",
+              given = c("X==1 & Y==1", 
+                        "X==1 & Y==1 & M==1", 
+                        "X==1 & Y==1 & M==0"),
+              using = c("parameters")) %>%
+  
+  kable(
+    caption = "In a monotonic model with flat priors, knowledge
+    that $M=1$ *reduces* confidence that $X=1$ caused $Y=1$")
+
+```
+
+This example shows how inferences change given additional data on $M$ in a monotonic $X \rightarrow M \rightarrow  Y \leftarrow  X$ model. Surprisingly observing $M=1$ *reduces* beliefs that $X$ caused $Y$, the reason being that perhaps $M$ and not $X$ was responsible for $Y=1$.
+
+## Posterior queries
+
+Queries can also draw directly from the posterior distribution provided by `stan`. In this next example we illustrate the joint distribution of the posterior over causal effects, drawing directly from the posterior dataframe generated by `update_model`:
+
+```{r, warning = FALSE, eval = FALSE}
+data  <- fabricate(N = 100, X = complete_ra(N), Y = X)
+
+model <- make_model("X->Y") %>% 
+  set_confound(list(X = "Y[X=1]>Y[X=0]")) %>%
+  update_model(data, iter  = 4000)
+
+model$posterior_distribution %>% 
+  data.frame() %>%
+  ggplot(aes(X_1.1 - X_1.0, Y.01 - Y.10)) + 
+  geom_point()
+
+```
+
+
+```{r, warning = FALSE, echo = FALSE}
+
+if(do_diagnosis){
+data  <- fabricate(N = 100, X = complete_ra(N), Y = X)
+
+model <- make_model("X->Y") %>% 
+  set_confound(list(X = "Y[X=1]>Y[X=0]")) %>%
+  update_model(data, iter  = 4000)
+
+write_rds(model, "saved/app_2_illus.rds")
+}
+
+model <- read_rds("saved/app_2_illus.rds")
+
+model$posterior_distribution %>% 
+  data.frame() %>%
+  ggplot(aes(X_1.1 - X_0.1, Y.01 - Y.10)) + 
+  geom_point()
+
+```
+
+We see that beliefs about the size of the overall effect are related to beliefs that $X$ is assigned differently when there is a positive effect.
+
+## Query distribution
+
+`query_distribution` works similarly except that the query is over an estimand. For instance:
+
+```{r}
+make_model("X -> Y") %>% 
+  query_distribution(increasing("X", "Y"), using = "priors") %>%
+ hist(main = "Prior on Y increasing in X")  
+```
+
+## Token and general causation
+
+Note that in all these cases we use the same technology to make case level and population inferences. Indeed the case level query is just a conditional population query. As an illustration of this imagine we have a model of the form $X \rightarrow M \rightarrow Y$ and are interested in whether $X$ caused $Y$ in a case in which $M=1$. We answer the question by asking "what would be the probability that $X$ caused $Y$ in a case in which $X=M=Y=1$?" (line 3 below). This speculative answer is the same answer as we would get were we to ask the same question having updated our model with knowledge that in a particular case, indeed, $X=M=Y=1$. See below: 
+
+
+```{r, eval = FALSE}
+
+model <- make_model("X->M->Y") %>% 
+  set_restrictions(c(decreasing("X", "M"), decreasing("M", "Y"))) %>%
+  update_model(data = data.frame(X = 1, M = 1, Y = 1), iter = 8000)
+
+query_model(
+            model, 
+            query = "Y[X=1]> Y[X=0]",
+            given = c("X==1 & Y==1", "X==1 & Y==1 & M==1"),
+            using = c("priors", "posteriors"),
+            expand_grid = TRUE)
+
+
+```
+
+
+```{r, echo = FALSE}
+
+if(do_diagnosis){
+model <- make_model("X->M->Y") %>% 
+  set_restrictions(c(decreasing("X", "M"), decreasing("M", "Y"))) %>%
+  update_model(data = data.frame(X = 1, M = 1, Y = 1), iter = 12000, chains = 8)
+
+query <- query_model(
+            model, 
+            query = "Y[X=1]> Y[X=0]",
+            given = c("X==1 & Y==1", "X==1 & Y==1 & M==1"),
+            using = c("priors", "posteriors"),
+            expand_grid = TRUE)
+
+write_rds(query, "saved/app_ch2_demonsx.rds")
+}
+
+query <- read_rds("saved/app_ch2_demonsx.rds")
+
+kable(query, caption = "Posteriors equal priors for a query that conditions on data used to form the posterior ")
+
+```
+
+We see the conditional inference is the same using the prior and the posterior distributions. 
+
+## Complex queries
+
+The Billy Suzy bottle breaking example illustrates complex queries. See Section \@ref(Billy). 

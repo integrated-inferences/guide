@@ -1,0 +1,58 @@
+--- 
+title: "Causal Models: Guide to gbiqq"
+author: "Macartan Humphreys and Alan Jacobs"
+date: "Draft!: `r Sys.Date()`"
+documentclass: book
+fontsize: 12pt
+bibliography: [bib.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: rstudio/causalmodels
+description: "Model based strategies for integrating qualitative and quantitative inferences."
+site: bookdown::bookdown_site
+header-includes:
+ - \usepackage{amsmath}
+ - \usepackage{mathspec}
+ - \usepackage{color}
+ - \usepackage{amssymb} 
+ - \usepackage{amsfonts} 
+ - \usepackage{dsfont}
+---
+
+```{r setup, include=FALSE}
+
+options(
+  htmltools.dir.version = FALSE, formatR.indent = 2,
+  width = 55, digits = 4, warnPartialMatchAttr = FALSE, warnPartialMatchDollar = FALSE
+
+)
+```
+
+# Preface {-}
+
+```{r, include=FALSE}
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+
+```
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("_packages_used.R")
+```
+
+**Map**
+
+This guide is supplementary material for our book-in-progress *Integrated Inferences*.
+
+* The [first part](#cm)  of the guide provides a brief motivation of causal models.
+* The [second part](#package) describes how the package works and how to use it. 
+* The [third part](#applications)  uses the package for defining and learning from a set of canonical causal models. 
+* The short [last part](#notation) has a notation guide.
+
+
+**Credits**
+
+The approach used in gbiqq is a generalization of the biqq models described in "Mixing Methods: A Bayesian Approach" (Humphreys and Jacobs, 2015, https://doi.org/10.1017/S0003055415000453). The conceptual extension makes use of work on probabilistic causal models described in Pearl's Causality (Pearl, 2009, https://doi.org/10.1017/CBO9780511803161). The approach to generating a generic stan function that can take data from arbitrary models was developed in key contributions by Jasper Cooper (http://jasper-cooper.com/) and Georgiy Syunyaev (http://gsyunyaev.com/). Lily Medina (https://lilymedina.github.io/) did magical work pulling it all together and developing approaches to characterizing confounding and defining estimands. Clara Bicalho helped figure out a nice syntax for causal statements. Julio Solis did wonders to simplify the specification of priors.

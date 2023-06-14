@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1575618403341.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3821845839",
+    "id" : "1014EDDE",
+    "lastKnownWriteTime" : 1581491990,
+    "last_content_update" : 1581491990809,
+    "path" : "C:/Dropbox/github/causalmodels/2_package.Rmd",
+    "project_path" : "2_package.Rmd",
+    "properties" : {
+        "cursorPosition" : "36,0",
+        "ignored_words" : "dataframe,stan,simplices,https,mc,simplexes,dataset,rds,Rstudio,gbiqq,finnicky,rstan,pre,Jeffreys\n",
+        "scrollLine" : "25"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 40,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

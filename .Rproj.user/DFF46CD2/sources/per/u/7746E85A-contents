@@ -1,0 +1,89 @@
+stanbiqq <- "
+data {
+  int<lower=0> XYK[8];        // summary data, providing number of XYK
+int<lower=0> XY[4];         // summary data, providing number of XY
+
+vector[4] alpha_prior;             // initial hyperparameters for the Dirichlet distribution; provided as data
+vector[4] pi_alpha;                // initial hyperparameters for the beta distributions for pi_a, pi_b  etc
+vector[4] pi_beta ;                // initial hyperparameters for the beta distributions for pi_a, pi_b  etc
+vector[4] q0_alpha ;               // initial hyperparameters for the beta distributions for pi_a, pi_b  etc
+vector[4] q0_beta ;                // initial hyperparameters for the beta distributions for pi_a, pi_b  etc
+vector[4] q1_alpha ;               // initial hyperparameters for the beta distributions for pi_a, pi_b  etc
+vector[4] q1_beta ;                // initial hyperparameters for the beta distributions for pi_a, pi_b  etc
+
+}
+
+parameters {
+simplex[4]  abcd;                          // Parameters of interest: share of causal types in population
+real<lower=0,upper=1> pi_a;               //
+real<lower=0,upper=1> pi_b;               //
+real<lower=0,upper=1> pi_c;               //
+real<lower=0,upper=1> pi_d;               //
+
+real<lower=0,upper=1> q_a0;               //
+real<lower=0,upper=1> q_b0;               //
+real<lower=0,upper=1> q_c0;               //
+real<lower=0,upper=1> q_d0;               //
+
+real<lower=0,upper=1> q_a1;               //
+real<lower=0,upper=1> q_b1;               //
+real<lower=0,upper=1> q_c1;               //
+real<lower=0,upper=1> q_d1;               //
+
+
+}
+
+transformed parameters {
+// Parameters determine the multinomial event probabilities
+// assume here that kappa is fixed; note; may need to generalize to case where
+// kappa is uncertain and or case in which clues are sought in a fixed share
+
+simplex[4] w_XY;
+simplex[8] w_XYK;
+
+w_XY[1] =  (1-pi_b)*abcd[2]          + (1-pi_c)*abcd[3]          ;    //00- from b and c types - clue not sought
+w_XY[2] =  (1-pi_a)*abcd[1]          + (1-pi_d)*abcd[4]          ;    //01- from a and d types - clue not sought
+w_XY[3] =  pi_a*abcd[1]              + pi_c*abcd[3]              ;    //10- from a and c types - clue not sought
+w_XY[4] =  pi_b*abcd[2]              + pi_d*abcd[4]              ;    //11- from b and d types - clue not sought
+
+
+w_XYK[1] =  (1-pi_b)*(1-q_b0)*abcd[2] + (1-pi_c)*(1-q_c0)*abcd[3] ;    //000 from b and c types
+w_XYK[2] =  (1-pi_b)*q_b0*abcd[2]     + (1-pi_c)*q_c0*abcd[3]     ;    //00K from b and c types -
+
+w_XYK[3] =  (1-pi_a)*(1-q_a0)*abcd[1] + (1-pi_d)*(1-q_d0)*abcd[4] ;    //010 from a and d types
+w_XYK[4] =  (1-pi_a)*q_a0*abcd[1]     + (1-pi_d)*q_d0*abcd[4]     ;    //01K from a and d types
+
+w_XYK[5] =  pi_a*(1-q_a1)*abcd[1]     + pi_c*(1-q_c1)*abcd[3]     ;    //100 from a and c types
+w_XYK[6] =  pi_a*q_a1*abcd[1]         + pi_c*q_c1*abcd[3]         ;    //10K from a and c types
+
+w_XYK[7] =  pi_b*(1-q_b1)*abcd[2]     + pi_d*(1-q_d1)*abcd[4]     ;    //110 from b and d types
+w_XYK[8] =  pi_b*q_b1*abcd[2]         + pi_d*q_d1*abcd[4]         ;    //11K from b and d types
+}
+
+
+model {
+abcd ~ dirichlet(alpha_prior);               // Priors for causal types
+pi_a ~ beta(pi_alpha[1], pi_beta[1]);       // Priors for ps
+pi_b ~ beta(pi_alpha[2], pi_beta[2]);
+pi_c ~ beta(pi_alpha[3], pi_beta[3]);
+pi_d ~ beta(pi_alpha[4], pi_beta[4]);
+
+q_a0 ~ beta(q0_alpha[1], q0_beta[1]);   // Priors for qs
+q_a1 ~ beta(q1_alpha[1], q1_beta[1]);
+
+q_b0 ~ beta(q0_alpha[2], q0_beta[2]);
+q_b1 ~ beta(q1_alpha[2], q1_beta[2]);
+
+q_c0 ~ beta(q0_alpha[3], q0_beta[3]);
+q_c1 ~ beta(q1_alpha[3], q1_beta[3]);
+
+q_d0 ~ beta(q0_alpha[4], q0_beta[4]);
+q_d1 ~ beta(q1_alpha[4], q1_beta[4]);
+
+XY ~  multinomial(w_XY);                    // Likelihood Part 1: (XY and w have 4 elements)
+XYK ~ multinomial(w_XYK);                  // Likelihood Part 2: (XYK and w each have  8 elements)
+} 
+
+
+
+"

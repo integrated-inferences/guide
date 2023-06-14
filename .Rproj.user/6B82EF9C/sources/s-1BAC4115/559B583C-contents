@@ -1,0 +1,186 @@
+# Introduction  {#intro}
+
+***
+
+We describe the book's general approach, and explain how it differs from current approaches in the social sciences. We preview our argument for the utility of causal models as a framework for choosing research strategies and drawing causal inferences from evidence.
+
+***
+
+
+```{r, include = FALSE}
+source("_packages_used.R")
+```
+
+<!-- CHANGE FROM PHILOSOPHER TO SOMETHING ELSE; SKEPTIC? -->
+
+The engineer pressed the button, but the light didn't turn on. 
+
+"Maybe the bulb is blown," she thought. 
+
+She replaced the bulb, pressed the button and, sure enough, the light turned on.
+
+"What just happened?" asked her philosopher friend.
+
+"The light wouldn't turn on because the bulb was busted, but I replaced the bulb and fixed the problem." 
+
+"Such hubris!" remarked her friend.  "If I understand you, you are saying that pressing the button *would have* caused a change in the light *if the bulb had not been busted*."
+
+"That's right."
+
+"But hold on a second. That's a causal claim about counterfactual events in counterfactual conditions that you couldn't have observed. I don't know where to begin. For one thing, you seem to be inferring from the fact that the light did not go on when you pressed the button the first time that pressing the button the first time had no effect at all. What a remarkable conclusion. Did it never occur to you that the light might have about to turn on anyway---and that your pressing that button at just that moment is what *stopped* the light going on?"
+
+"What's more," the philosopher went on, "you seem also to be saying that pressing the button the second time *did* have an effect because you saw the light go on that second time. That's rather incredible. That light could be controlled by a different circuit that was timed to turn it on at just the moment that you pressed the button the second time. Did you think about that possibility?"
+   
+"On top of those two unsubstantiated causal claims," the philosopher continued, "you are *also* saying, I think, that the difference between what you *believe* to be a non-cause on the first pressing and a cause on the second pressing is itself due to the bulb. But, of course, countless other things could have changed! Maybe there was a power outage for a few minutes." 
+
+"That hardly ever happens."
+
+"Well, maybe the light only comes on the second time the button is pressed." 
+
+"It's not that kind of button."
+
+"So you say. But even if that's true, there are still so many other possible factors that could have mattered here---including things that neither of us can even imagine!"
+
+The philosopher paused to ponder her friend's chutzpah.
+
+"Come to think of it," the philosopher went on, "how do you even know the bulb was busted?"
+
+"Because the light worked when I replaced the bulb."
+
+"But that means," the philosopher responded, "that your measurement of the state of the bulb depends on your causal inference about the effects of the button. And we know where that leads. Really, my friend, you are lost."
+
+"So do you want me to put the old bulb back in?"
+
+
+## The Case for Causal Models
+
+In the conversation between the philosopher and the engineer, the philosopher disputes what seems a simple inference. Some of her arguments suggest a skepticism bordering on paranoia and seem easily dismissed. Others seem closer to hitting a mark: perhaps there was nothing wrong with the bulb and the button was just the kind that has to be pressed twice. For an objection like this, we have to rely on the engineer's knowledge of how the button works. 
+
+While the philosopher's skepticism guards against false inferences, it is also potentially paralyzing. 
+
+Social scientists have been shifting between the poles staked out by the philosopher and the engineer for many years. The engineers bring background knowledge to bear on a question and deploy models of broad processes to make inferences about particular cases. The philosophers bring a skeptical lense and ask for justifications that depend as little as possible on imported knowledge.
+
+This book is written for would-be engineers. It is a book about how we can mobilize our background knowledge about how the world works to learn more about the world. It is, more specifically, a study in how we can use causal models of the world to design and implement empirical strategies of causal inferences. But we will try to imagine throughout that the engineers have philosophers looking over their shoulders and will try to figure out ways to equip the engineers with plausible answers to the the philosophers' worries. 
+
+By causal models, we mean systems of statements reflecting background knowledge of and uncertainty about possible causal linkages in a domain of interest. There are three closely related motivations for our move to examine the important role that models can play in empirical social inquiry. One is an interest in integrating qualitative knowledge with quantitative approaches, and a view---possibly a controversial one---that process tracing is a model-dependent endeavor.  A second is concern over the limits of design-based inference. A third and related motive is an interest in better connecting empirical strategies to theory. 
+
+
+### The limits to design-based inference 
+
+The engineer in our story tackles the problem of causal inference using models: theories of how the world works, generated from past experiences and applied to the situation at hand. The philosopher maintains a critical position, resisting models and the importation of beliefs not supported by evidence in the case at hand. 
+
+The engineer's approach recalls the dominant orientation among social scientists until rather recently. At the turn of the current century, multivariate regression had become a nearly indispensable tool of quantitative social science, with a large family of statistical models serving as political scientists' and economists' analytic workhorses for the estimation of causal effects.  
+
+Over the last two decades, however, the philosophers have raised a set of compelling concerns about the assumption-laden nature of standard regression analysis, while also clarifying how valid inferences can be made with limited resort to models in certain research situations. The result has been a growth in the use of design-based inference techniques that, in principle, allow for model-free estimation of causal effects (see @dunning2012natural, @GerGreKap04, @druckman2011experimentation, @palfrey2009laboratory among others). These include lab, survey, and field experiments and natural-experimental methods exploiting either true or "as-if" randomization by nature. With the turn to experimental and natural-experimental methods has come a broader conceptual shift, with a growing reliance on the "potential outcomes" framework as a model for thinking about causation (see @Rubin1974, @splawa1990application among others) and a reduced reliance on models of data-generating processes.
+
+The ability to estimate average effects and to calculate $p$-values and standard errors without resort to models is an extraordinary development. In Fisher's terms, with these tools, randomization processes provide a "reasoned basis for inference," placing empirical claims on a powerful footing.
+
+While acknowledging the strengths of these approaches, we also take seriously two points of concern. 
+
+The first concern---raised by many in recent years (e.g., @thelen2015comparative)---is about design-based inference's scope of application. While experimentation and natural experiments represent powerful tools, the range of research situations in which model-free inference is possible is inevitably limited. For a wide range of causal conditions of interest to social scientists and to society, controlled experimentation is impossible, and true or "as-if" randomization is absent. Moreover, limiting our focus to those questions for, or situations in which, exogeneity can be established "by design" would represent a dramatic narrowing of social science's ken. It would be a recipe for, at best, learning more and more about less and less. To be clear, this is not an argument against experimentation or design based inference; yet it is an argument for why social science needs a broader set of tools.
+
+The second concern is more subtle. The great advantage of design-based inference is that it liberates researchers from the need to rely on models to make claims about causal effects. The risk is that, in operating model-free, researchers end up learning about effect sizes but not about models. But models are what we want to learn about. Our goal as social scientists is to have a useful model for how the world works, not simply a collection of claims about the effects different causes have had in different times and places. It is through models that we derive an understanding of how things might work in contexts and for processes and variables that we have not yet studied. Thus, our interest in models is intrinsic, not instrumental. By taking models, as it were, out of the equation, we dramatically limit the potential for learning about the world. 
+
+### Qualitative and mixed-method inference
+
+Recent years have seen the elucidation of the inferential logic behind "process tracing" procedures used in qualitative political science and other disciplines. In our read, the logic provided in these accounts depends on a particular form of model-based inference.^[As we describe in @humphreys2015mixing, the term "qualitative research" means many different things to different scholars, and there are multiple approaches to mixing qualitative and quantitative methods. There we distinguish between approaches that suggest that qualitative and quantitative approaches address distinct, if complementary, questions; those that suggest that they involve distinct measurement strategies; and those that suggest that they employ distinct inferential logics. The approach that we employ in @humphreys2015mixing connects most with the third family of approaches. Most closely related, in political science, is work in  @GlynnQuinn2011, in which researchers use knowledge about the empirical joint distribution of the treatment variable, the outcome variable, and a post-treatment variable, alongside assumptions about how causal processes operate, to tighten estimated bounds on causal effects. In the present book, however, we move toward a position in which fundamental differences between qualitative and quantitative inference tend to dissolve, with all inference drawing on what might be considered a "qualitative" logic in which the researcher's task is to confront a pattern of evidence with a theoretical logic.] 
+
+While process tracing as a method has been around for more than three decades (e.g., @george1985case), its logic has been most fully laid out by qualitative methodologists over the last 15 years (e.g., @bennett2014process, @george2005case, @brady2010rethinking, @Hall2003aligning, @mahoney2010after). Whereas @king1994designing sought to derive qualitative principles of causal inference within a correlational framework, qualitative methodologists writing in the wake of "KKV" have emphasized and clarified process-tracing's "within-case" inferential logic: in process tracing, explanatory hypotheses are tested based on observations of what happened within a case, rather than on covariation between causes and effects across cases. The process tracing literature has also advanced increasingly elaborate conceptualizations of the different kinds of probative value that within-case evidence can yield. 
+
+For instance, qualitative methodologists have explicated the logic of different test types ("hoop", "smoking gun", etc.) involving varying degree of specificity and sensitivity (@collier2011understanding, @Mahony:Logic:2012).  A smoking-gun test is a test that seeks information that is only plausibly present if a hypothesis is true (thus, generating strong evidence for the hypothesis if passed), a hoop test seeks data that should certainly be present if a proposition is true (thus generating strong evidence against the hypothesis if failed), and a doubly decisive test is both smoking-gun and hoop (for an expanded typology, see also @rohlfing2013comparative). Other scholars have expressed the leverage provided by process-tracing evidence in Bayesian terms, moving from a set of discrete test types to a more continuous notion of probative value (@fairfield2017explicit, @BennettAppendix, @humphreys2015mixing).^[In @humphreys2015mixing, we use a fully Bayesian structure to generalize Van Evera's four test types in two ways: first, by allowing the probative values of clues to be continuous; and, second, by allowing for researcher uncertainty (and, in turn, updating) over these values. In the Bayesian formulation, use of process-tracing information is not formally used to conduct tests that are either "passed" or "failed", but rather to update beliefs about different propositions.]
+
+<!-- ^[Note that these statements are statements about likelihood functions and do not require a specifically Bayesian mode of inference.] -->
+
+Yet, conceptualizing the different ways in which probative value might operate leaves a fundamental question unanswered: what gives within-case evidence its probative value with respect to causal relations? We believe that, fundamentally, the answer lies in researcher beliefs that lies outside of the analysis in question. We enter a research situation with a model of how the world works, and we use this model to make inferences given observed patterns in the data---while at the same time updating those models based on the data. A key aim of this book is to demonstrate how models can --- and, in our view, must --- play in drawing case-level causal inferences.
+
+As we will also argue, along with clarifying the logic of qualitative inference, causal models can also enable the systematic integration of qualitative and quantitative forms of evidence. Social scientists are increasingly pursuing mixed-method research designs. It is becoming increasingly common for scholars to pursue research strategies that combine quantitative with qualitative forms of evidence. A typical mixed-methods study includes the estimation of causal effects using data from many cases as well as a detailed examination of the processes taking place in a few. Prominent examples include Lieberman's study of racial and regional dynamics in tax policy (@lieberman2003race); Swank's analysis of globalization and the welfare state (@swank2002global); and Stokes' study of neoliberal reform in Latin America (@stokes2001mandates). Major recent methodological texts provide intellectual justification of this trend toward mixing, characterizing  small-$n$  and large-$n$ analysis as drawing on a single logic of inference and/or as serving complementary functions (King, Keohane, and Verba, 1994; Brady and Collier, 2004). The American Political Science Association now has an organized section devoted in part to the promotion of multi-method investigations, and the emphasis on multiple strategies of inference research is now embedded in guidelines from many research funding agencies (Creswell and Garrett, 2008). 
+
+However, while scholars frequently point to the benefits of mixing correlational and process-based inquiry (e.g., @collier2010sources, p.~181), and have sometimes mapped out broad strategies of multi-method research design (@Lieberman2005nested, @SeawrightGerring2008), they have rarely provided specific guidance on how the integration of inferential leverage should unfold. In particular, the literature does has not supplied specific principles for aggregating findings---whether mutually reinforcing or contradictory---across different modes of analysis.A small number of exceptions stand out. In the approach suggested by @gordon2004quantitative, for instance, available expert (possibly imperfect) knowledge regarding the operative causal mechanisms for a small number of cases can be used to anchor the statistical estimation procedure in a large-N study. @WesternJackman1994 propose a Bayesian approach in which qualitative information shapes subjective priors which in turn affect inferences from quantitative data. Relatedly,  in @GlynnQuinn2011, researchers use knowledge about the empirical joint distribution of the treatment variable, the outcome variable, and a post-treatment variable, alongside assumptions about how causal processes operate, to tighten estimated bounds on causal effects. @seawrightbook presents an informal framework in which case studies are used to test the assumptions underlying statistical inferences, such as the assumption of no-confounding or the stable-unit treatment value assumption (SUTVA). 
+
+Yet we still lack a comprehensive framework that allows us to enter qualitative and quantitative form of information into an integrated analysis for the purposes of answering the wide range of causal questions that are of interests to social scientists, including questions about case-level explanations and causal effects, average causal effects, and causal pathways. As we aim to demonstrate in this book, grounding inference in causal models provides a very natural way of combining information of the $X,Y$ variety with information about the causal processes connecting $X$ and $Y$. The approach can be readily addressed to both the  case-oriented questions that tend to be of interest to qualitative scholars and the population-oriented questions that tend to motivate quantitative inquiry. As will become clear, in fact, when we structure our inquiry in terms of causal models, the conceptual distinction between qualitative and quantitative inference becomes hard to sustain. Notably, this is not for the reason that "KKV"'s framework suggests, i.e., that all causal inference is fundamentally about correlating causes and effects. To the contrary, it is that in a causal-model-based inference, what matters for the informativeness of a piece of evidence is how that evidence is connected to our query, given how we think the world works. While the apparatus that we present is formal, the approach---in asking how pieces of evidence drawn from different parts of a process map on to a base of theoretical knowledge---is arguably most closely connected to process tracing in its core logic.
+
+<!-- We see each of these three developments as being of great importance to the development of empirical social science. Collectively, they have generated far greater clarity and sophistication about, and diversified social scientists approaches to, the empirical assessment of causation. At the same time, we see each of these developments as, to date, limited in important ways.  -->
+
+
+
+### Connecting theory and empirics
+
+Theory and empirics have had a surprisingly uncomfortable relationship in political science. In a major recent intervention, for instance, @clarke2012model draw attention to and critique political scientists' extremely widespread reliance on the "hypothetico-deductive" (H-D) framework, in which a theory or model is elaborated, empirical predictions derived, and data sought to test these predictions and the model from which they derive.Clarke and Primo draw on decades of scholarship in the philosophy of science pointing to deep problems with the HD framework, including with the idea that the truth of a model logically derived from first principles can be *tested* against evidence. 
+
+This book is also motivated by a concern with the relationship between theory and evidence in social inquiry. In particular, we are struck by the frequent lack of a clear link between theory, on the one hand, and empirical strategy and inference, on the other. We see this ambiguity as relatively common in both qualitative and quantitative work. We can perhaps illustrate it best, however, by reference to qualitative work, where the centrality of theory to inference has been most emphasized. In process tracing, theory is what justifies inferences. In their classic text on case study approaches, @george2005case describe process tracing as the search for evidence of "the causal process that a theory hypothesizes or implies" (6). Similarly, @Hall2003aligning conceptualizes the approach as testing for the causal-process-related observable implications of a theory, @mahoney2010after indicates that the events for which process tracers go looking are those posited by theory (128), and @gerring2006case describes theory as a source of predictions that the case-study analyst tests (116). Theory, in these accounts, is supposed to help us figure out where to look for discriminating evidence. 
+
+What we do not yet have, however, is a systematic account of how researchers can derive within-case empirical predictions from theory and how exactly doing so provides leverage on a causal question. From what elements of a theory can scholars derive informative within-case observations? Given a set of possible things to be observed in a case, how can theory help us distinguish more from less informative observations? Of the many possible observations suggested by a theory, how can we determine which would add probative value to the evidence already at hand? How do the evidentiary requisites for drawing a causal inference, given a theory, depend on the particular causal question of interest---on whether, for instance, we are interested in identifying the cause of an outcome, estimating an average causal effect, or identifying the pathway through which an effect is generated? In short, how exactly can we ground causal inferences from within-case evidence in background knowledge about how the world works?
+
+Most quantitative work in political science features a similarly weak integration between theory and research design. The modal inferential approach in quantitative work, both observational and experimental, involves looking for correlations between causes and outcomes, with minimal regard for intervening or surrounding causal relationships.^[One exception is structural equation modeling, which bears a close affinity to the approach that we present in this book, but has gained minimal traction in political science.] 
+
+In this book, we seek to show how scholars can make much fuller and more explicit use of theoretical knowledge in designing their research projects and analyzing their observations. Like Clarke and Primo, we treat models not as maps of sort: maps, based on prior theoretical knowledge, about causal relations in a domain of interest. Also as in Clarke and Primo's approach, we do not write down a model in order to test its veracity. Rather, we show how we can systematically use causal models with particular characteristics to guide our empirical strategies and inform our inferences. Grounding our empirical strategy in a model allows us, in turn, to learn about the model itself as we encounter the data.  
+
+
+## Key contributions
+
+This book draws on methods developed in the study of Bayesian networks, a field pioneered by scholars in computer science, statistics, and philosophy. Bayesian networks, a form of causal model, have had limited traction to date in political science. Yet the literature on Bayesian networks and their graphical counterparts, directed acyclic graphs (DAGs), is a body of work that addresses very directly the kinds of problems that qualitative and quantitative scholars routinely grapple with.^[For application to quantitative analysis strategies in  political science, @glynn2007non give a clear introduction to how these methods  can be used to motivate strategies for conditioning and adjusting for causal inference; @garcia2015graphical demonstrate how these methods can be used to assess claims of external validity. With a focus on qualitative methods, @Waldner2015completeness uses causal diagrams to lay out a ''completeness standard'' for good process tracing. @weller2014finding employ  graphs to conceptualize the different possible pathways between causal and outcome variables among which qualitative researchers may want to distinguish. Generally, in discussions of qualitative methodology, graphs are used to capture core features of theoretical accounts, but  are not developed specifically to ensure a representation of the kind of independence relations implied by structural causal models (notably what is called in the literature the "Markov condition"). Moreover, efforts to tie these causal graphs to probative observations, as in @Waldner2015completeness, are generally limited to identifying steps in a causal chain that the researcher should seek to observe.] 
+
+Drawing on this work, we show in the chapters that follow how a theory can be formalized as a causal model represented by a causal graph and a set of structural equations. Engaging in this modest degree of formalization, we seek to demonstrate, yields enormous benefits. It allows us, for a wide range of causal questions, to identify a.) a set of variables (or nodes) in the model, including unobservable factors, that represent the causal query and b.) a set of observable variables that are potentially informative about the nodes in the query. 
+
+For students engaging in process tracing, the payoffs of this approach are that it provides:
+
+
+- A grounding for probative value for data of any arbitrary kind, from different parts of any causal network. Including giving guidance on where there can be probative value
+
+- A way of aggregating inferences from observations drawn from all different parts of the causal network.
+
+- An approach for assessing a wide variety of estimands: e.g., how does inference differ for causal effects compared to mechanisms?
+
+- Consistency of probative value, priors, and therefore inferences with how you think the world works. 
+
+- Transparency, allowing for evaluation
+
+- Design: diagnosis of different evidentiary and case-selection strategies, conditional on how you think the world works and the question you want to answer. 
+
+
+For mixed method inference:
+
+- Systematic integration — using both qual and quant to both help answer any given query. in fact, no fundamental difference between quant and qual data — which may discomfit some readers, who see qual research as fundamentally distinct, but offers big advantages, including:
+
+- Transparency: how exactly the qual and the quant enter into the analysis.
+
+- A way to justify the background assumptions you've used
+
+- Learning in both directions: from cases to populations, from populations to cases
+
+- Which provides a model for cumulation. Models get updated and become priors for new analyses.
+
+- Design: diagnosis of wide vs deep, as well as evidentiary and case-selection strategies
+
+
+<!-- * make systematic use of theory to figure out what kinds of evidence have probative value for our causal queries and, in turn, to design maximally informative empirical strategies; -->
+
+<!-- * draw inferences from the evidence in a manner disciplined by our theoretical knowledge of how the world works; -->
+
+<!-- * integrate in this analysis information conventionally considered "qualitative" (e.g., evidence about causal mechanisms) with information conventionally considered "quantitative" (e.g., evidence about causal and outcome variables); and -->
+
+<!-- * learn about the models that we bring to the table, which allows for the cumulation of knowledge through the updating of the theoretical knowledge base on which future inferences can draw. -->
+
+As we will show, using causal models has substantial implications for common methodological advice and practice. To touch on just a few of these: Our elaboration and application of model-based process tracing shows that, given plausible causal models, process tracing's common focus on intervening causal chains may be much less productive than other empirical strategies, such as examining moderating conditions. Our examination of model-based case-selection indicates that for many common purposes there is nothing particularly especially informative about "on the regression line" cases or those in which the outcome occurred, and that case selection should often be driven by factors that have to date received little attention, such as the population distribution of cases and the probative value of the available evidence. And an analysis of clue-selection as a decision problem shows that the probative value of a piece evidence cannot be assessed in isolation, but hinges critically on what we have already observed.  
+
+**MORE TO COME HERE ELABORATING IMPLICATIONS, COMPARING TO ADVICE AND PRACTICE IN LITERATURE**
+
+We emphasize that the basic analytical apparatus that we employ in this book is not new, and the book's aim is not to generate fundamentally novel approaches to study causality in the world. Rather, we see the book's goals as being of three kinds. First, the book aims to import insight: to introduce political scientists to an approach that has received little attention in the discipline but that can be useful for addressing the sorts of causal causal questions with which political scientists are commonly preoccupied. As a model-based approach, it is a framework especially well suited to a field of inquiry in which exogeneity frequently cannot be assumed by design---that is, in which we often have no choice but to be engineers. Second, the book draws connections between the Bayesian networks approach and key concerns and challenges with which methodologists in our discipline routinely grapple. Working with causal models and DAGs most naturally connects to concerns about confounding and identification that have been central to much quantitative methodological development. Yet we also show how causal models can address issues central to process tracing, such as how to select cases for examination, how to think about the probative value of causal process observations, and how to structure our search for evidence, given finite resources. Third, the book provides a set of usable tools for implementing the approach. We provide intuition and software that researchers can use to make research design choices and draw inferences from the data.
+
+
+## The Road Ahead
+
+The book is divided into four main parts. 
+
+The first part is about the basics. We start off by  describing the kinds of causal estimands of interest. The main goal here is to introduce the key ideas in the study of Bayesian nets and to argue for a focus of interest away from  average treatment effects as go-to estimands of interest and towards a focus on causal nets, or causal structures, as the key quantity of interest. The next chapter introduces key Bayesian ideas; what  Bayes' rule is and how to use it. The third chapter connects the study of Bayesian networks to theoretical claims. The key argument here is that nets should be thought of as theories which are themselves supportable by lower level networks (theories). Lower level theories are useful insofar as they provide leverage to learn about processes on higher level networks.
+
+The second part applies these ideas to process tracing. Rather than conceptualizing process tracing as has been done in recent work as seeking process level data that is known to be informative about a causal claim, the approach suggested here is one in which the probative value of a clue is derived from its position in a causal network connecting variables of interest. Chapter 5 lays out the key logic of inference from clues and provides general criteria for assessing when it is and is not possible. Chapter 6 provides specific tools for assessing which collections of clues are most informative for a given estimand of interest and outlines a strategy for assessing which clues to gather when in a research process. Chapter 7 applies these tools to the problem of assessing the effects of economic inequality on democratization.
+
+The third part moves to mixed data problems --- situations in which a researcher contains "quantitative" ($X,Y$) data on a set of cases and is considering gathering within case ("qualitative") data on some of these. In chapter 8 we argue that this situation is formally no different to the single case process tracing problem since a collection of cases can always be conceptualized as a single case with vector valued variables. The computational complexity is however greater in these cases and so in this chapter we describe a set of models that may be useful for addressing these problems. In this framework the problem of case selection is equivalent to the kind of problem of clue selection discussed in Chapter 6. For a canonical multicase model however we use simulation approaches to provide guidance for how cases should be selected. The broad conclusion here is that researchers should go where the probative value lies, and all else equal, should select cases approximately proportional to the size of $XY$ strata---whether or not these are "on the regression line." We conclude this part by revisiting the problem of inequality and democracy introduced in Chapter 7.
+
+The fourth part steps back and puts the model-based approach into question. We have been advocating an embrace of models to aid inference. But the dangers of doing this are demonstrably large. The key problem is that with model-based inference, the inferences are only as good as the model. In the end, while we are supporting the efforts of engineers, we know that the philosopher is right. This final part  provides four responses to this (serious) concern. The first is that the dependence on models can sound more extreme than it is. Seemingly fixed parameters of models can themselves become quantities of interest in lower-level models, and there can be learning about these when higher-level models are studied. Thus models are both put to use and objects of interest. The second is that different types of conditional statements are possible; in particular as shown in work qualitative graphs.  The third response points to the sort of arguments that can be made to support models, most importantly the importation of knowledge from one study to another. The last argument, presented in the last substantive chapter, highlights the tools to *evaluate* models, using tools that are increasingly standard in Bayesian analysis. 
+
+Here we go.
+
+
+

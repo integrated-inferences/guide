@@ -1,0 +1,1071 @@
+# (PART) Appendices {-}
+
+# Analysis of canonical models with `gbiqq`  {#examplesappendix}
+
+
+```{r, include = FALSE}
+source("_packages_used.R")
+# do_diagnosis <- TRUE
+if(do_diagnosis & !exists("fit")) fit <- gbiqq::fitted_model()
+```
+
+***
+
+We walk through  a set of canonical models and show how to define and analyze them using `gbiqq`.
+
+***
+
+## A simple model and the ladder of causation
+
+We first introduce a  simple $X$ causes $Y$ model with no confounding and use this to illustrate the "ladder of causation."
+
+The model is written:
+
+```{r ap-XYnoconf}
+model <- make_model("X -> Y")
+plot_dag(model)
+```
+
+<!-- The model implies a "parameter matrix" that maps from parameters to causal types. Inspecting the parameter matrix,  confirms that there are no constraints here on possible nodal types  and no unobserved confounding: -->
+
+
+```{r, eval= FALSE, echo = FALSE, include = FALSE}
+get_parameter_matrix(model)
+```
+
+```{r, echo = FALSE, include = FALSE}
+kable(get_parameter_matrix(model), caption = "Parameter matrix for X causes Y model without confounding")
+```
+
+
+We will  assume a "true" distribution over parameters. Let's assume that the true effect of 0.5, but that this is not known to researchers. The .5 effect comes from the difference between the share of units with a positive effect (.6) and those with a negative effect (.1). (We say share but we may as well think in terms of the probability that a given unit is of one or other type.)
+
+```{r}
+model <- set_parameters(model, node = "Y", alphas = c(.2, .1, .6, .1))
+
+kable(t(get_parameters(model)))
+```
+
+We can now simulate data using the  model: 
+
+```{r}
+
+data <- simulate_data(model, n = 1000)
+
+```
+
+With a model and data in hand we can now update the model. 
+
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+updated <- gbiqq(model, data)
+```
+
+
+From the updated model we can draw posterior inferences over estimands of interest.
+
+We will imagine three estimands, corresponding to Pearl's "ladder of causation." 
+
+* At the first level we are interested in the distribution of some node, perhaps given the value of another node.  This question is answerable from observational data. 
+
+* At the second  level we are interested in treatment effects: how changing one node changes another. This question is answerable from experimental data. 
+
+* At the third level we are interested in counterfactual statements: how would things have been different if some features of the world were different from what they are? Answering this question requires a causal model.
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(gbiqq(model, data, refresh = 0, stan_model = fit), "saved/appendix_XY_model_1.rds")
+  }
+updated <- read_rds("saved/appendix_XY_model_1.rds")
+```
+
+Here are the results:
+
+```{r}
+
+results <- gbiqq::query_model(
+ updated,
+ queries = list("Y | X=1" = "Y", 
+                ATE = "Y[X=1] - Y[X=0]", 
+                PC  = "Y[X=1] > Y[X=0]"),
+ subsets = c(TRUE, TRUE, "X==1 & Y==1"),
+ using = "posteriors")
+```
+
+```{r, echo = FALSE}
+kable(cbind( "Query (rung)" = c("Association", "Intervention", "Imagining"), results), digits = 2)
+```
+
+We see from the posterior variance on PC that we have the greatest difficulty with  the third rung. In particular the PC is not identified (the  distribution does not tighten even with very large N).  For more intuition we graph the posteriors:
+
+
+```{r, echo = FALSE} 
+if(do_diagnosis){
+ATE_dist <- query_distribution(
+                   model = updated, 
+                   using = "posteriors",
+                   query = "Y[X=1] - Y[X=0]"
+                   )
+PC_dist <- query_distribution(
+                   model = updated, 
+                   using = "posteriors",
+                   query = "Y[X=1] > Y[X=0]",
+                   subset = "X==1 & Y==1"
+                   )
+write_rds(ATE_dist, "saved/appendix_ATE_dist.rds")
+write_rds(PC_dist, "saved/appendix_PC_dist.rds")
+}
+ATE_dist <- read_rds("saved/appendix_ATE_dist.rds")
+PC_dist  <- read_rds("saved/appendix_PC_dist.rds")
+
+par(mfrow = c(1,2))
+hist(ATE_dist, xlim = c(-1,1), main = "Posterior on ATE")  
+hist(PC_dist, xlim = c(0,1), main = "Posterior on PC")  
+```
+
+
+We find that they do not converge but they do place positive mass in the right range. Within this range, the shape of the posterior depends on the priors only. 
+
+
+## $X$ causes $Y$, with unmodelled confounding
+
+An $X$ causes $Y$ model with confounding can be written:
+
+```{r}
+model <- make_model("X -> Y; X <-> Y") 
+plot_dag(model)
+```
+
+
+If we look at the parameter matrix implied by this model we see that it   has more parameters than nodal types, reflecting the joint assignment probabilities of $\theta_X$ and $\theta_Y$. Here we have parameters for $\Pr(\theta_X=x)$ and $\Pr(\theta_Y |\theta_X=x)$, which allow us to represent $\Pr(\theta_X, \theta_Y)$ via  $\Pr(\theta_X=x)\Pr(\theta_Y |\theta_X=x)$.
+
+```{r, eval= FALSE, echo = FALSE}
+get_parameter_matrix(model)
+```
+
+
+```{r, echo = FALSE}
+kable(get_parameter_matrix(model), caption = "Parameter matrix for X causes Y model with arbitrary confounding")
+```
+
+With the possibility of any type of confounding, the best we can do is place "Manski bounds" on the average causal effect. 
+
+To see this, let's plot a histogram of our posterior on average causal effects, given lots of data. We will assume here that in truth there is no confounding, but that that is not known to researchers.
+
+```{r}
+data5000 <- simulate_data(
+    model, n = 5000, 
+    parameters = c(.25, .0, .5, .25, .5, .5, .25, 0, .5, .25))
+
+data100 <- data5000[sample(5000, 100), ]
+
+```
+
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(gbiqq(model, data5000, refresh = 0, stan_model = fit), "saved/appendix_XY_model_5000.rds")
+    write_rds(gbiqq(model, data100, refresh = 0, stan_model = fit), "saved/appendix_XY_model_100.rds")
+
+  }
+updated_5000 <- read_rds("saved/appendix_XY_model_5000.rds")
+updated_100  <- read_rds("saved/appendix_XY_model_100.rds")
+```
+
+```{r, echo = FALSE, fig.cap= "Modest gains from additional data when ATE is not identified"}
+prior_ate      <- query_distribution(updated_5000, "c(Y[X=1] - Y[X=0])", using = "priors")
+post_ate_5000  <- query_distribution(updated_5000, "c(Y[X=1] - Y[X=0])", using = "posteriors")
+post_ate_100   <- query_distribution(updated_100, "c(Y[X=1] - Y[X=0])", using = "posteriors")
+par(mfrow= c(1,3))
+    hist(prior_ate, xlim = c(-1,1), main = "Prior", xlab = "ATE")
+    hist(post_ate_100, xlim = c(-1,1), main = "Posterior, n = 100", xlab = "ATE")
+    hist(post_ate_5000, xlim = c(-1,1), main = "Posterior, n = 5000", xlab = "ATE")
+
+```
+
+The key thing here is that the posterior on the ATE has shifted, as it should, but it is not tight, even with large data. In fact the distribution of the posterior covers one unit of the range between -1 and 1.
+
+
+## An $X$ causes $Y$, with confounding modeled
+
+Say now we have a theory that the relationship between $X$ and $Y$ is confounded by possibly unobserved variable $C$. Although $C$ is unobserved we can still include it in the model and observe the confounding it generates by estimating the model on data generated by the model but assuming that we cannot observe $C$.
+
+```{r, message = FALSE}
+model <- make_model("C -> X -> Y <- C") %>%
+         set_restrictions(c(
+           "(Y[X=1] < Y[X=0]) | (Y[C=1] < Y[C=0])",  
+           "(X[C=1] < X[C=0])")) %>%
+         set_parameters(type = "prior_mean")  
+```
+
+The ATE estimand in this case is given by:
+
+```{r, echo = FALSE}
+result <- gbiqq::query_model(
+    model, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    using = "parameters")
+
+kable(result)
+```
+
+In the first column below we run a  regression using data generated from this model but with $C$ unobserved. The second column shows what we would estimate if were able to observe $C$.
+
+```{r, echo = FALSE, results='asis'}
+data <- simulate_data(model, n = 10000)
+
+stargazer::stargazer(lm(Y~X, data = data), lm(Y~X + C, data = data), header = FALSE, type = 'html')
+```
+
+Our posteriors over the effect of $X$ on $Y$ and the effect of the unobserved confounder ($C$) on $Y$ have a joint distributed with negative covariance. 
+
+To illustrate we will use the same data but assume priors from  model where we do not restrict the relationship between $C$ and $Y$  and show the joint distribution of our posteriors.
+
+```{r}
+model <- make_model("C -> X -> Y <- C")  %>%
+         set_restrictions("(X[C=1] < X[C=0])") 
+```
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  data_sparse <- mutate(data, C = NA)
+
+  write_rds(gbiqq::gbiqq(model, data, stan_model = fit, refresh = 0), "saved/appendix_modelled_confound.rds")
+
+  write_rds(gbiqq::gbiqq(model, data_sparse, stan_model = fit, refresh = 0), "saved/appendix_modelled_confound_sparse.rds")
+  
+ate <- query_distribution(updated, "c(Y[X=1] - Y[X=0])", using = "posteriors")
+write_rds(ate, "saved/appendix_modelled_confound_ate.rds")
+
+updated <- read_rds("saved/appendix_modelled_confound.rds")
+
+confound <- query_distribution(updated, "c(Y[C=1] - Y[C=0])", using = "posteriors")
+write_rds(confound, "saved/appendix_modelled_confound_confound.rds")
+}
+
+updated <- read_rds("saved/appendix_modelled_confound.rds")
+```
+
+```{r}
+ate      <- read_rds("saved/appendix_modelled_confound_ate.rds")
+confound <- read_rds("saved/appendix_modelled_confound_confound.rds")
+
+plot(ate, confound)
+abline(lm(confound~ate), col = "red")
+```
+
+
+## Illustration of the backdoor criterion
+
+We can use the same model to illustrate the backdoor criterion. We want to show that estimates of the treatment effect are identified if we have data on $C$ but not otherwise. 
+
+```{r, eval = FALSE}
+
+model <- make_model("C -> X -> Y <- C")  %>%
+         set_parameters(type = "prior_mean")  %>%
+         set_restrictions("(Y[C=1]<Y[C=0])")
+
+# Four types of data
+
+N <- 10000
+
+df_close_large <- simulate_data(model, n = N)
+df_open_large  <- mutate(data_1_large, C = NA)
+df_close_small <- data_1_large[sample(N, 200), ]
+df_open_small  <- data_2_large[sample(N, 200), ]
+
+```
+
+```{r, message = FALSE, echo = FALSE}
+if(do_diagnosis){
+
+  model <- make_model("C -> X -> Y <- C")  %>%
+         set_parameters(type = "prior_mean")  %>%
+         set_restrictions("(Y[C=1]<Y[C=0])")
+
+# parameters <- model$parameters
+# parameters[c("Y.Y1000", "Y.Y1100",  "Y.Y1001",  "Y.Y1101")] <- .125
+# model <- set_parameters(model, parameters)
+
+query_model(model, "Y[X=1] > Y[X=0]", using = "parameters")
+
+data_1_large <- simulate_data(model, n = 10000)
+data_2_large <- mutate(data_1_large, C = NA)
+data_1_small <- data_1_large[sample(1:10000, 200), ]
+data_2_small <- data_2_large[sample(1:10000, 200), ]
+
+updated1 <- gbiqq(model, data_1_large, stan_model = fit)
+updated2 <- gbiqq(model, data_2_large, stan_model = fit)
+updated3 <- gbiqq(model, data_1_small, stan_model = fit)
+updated4 <- gbiqq(model, data_2_small, stan_model = fit)
+
+dist1 <- query_distribution(updated1, query = "Y[X=1] - Y[X=0]", using = "posteriors")
+dist2 <- query_distribution(updated2, query = "Y[X=1] - Y[X=0]", using = "posteriors")
+dist3 <- query_distribution(updated3, query = "Y[X=1] - Y[X=0]", using = "posteriors")
+dist4 <- query_distribution(updated4, query = "Y[X=1] - Y[X=0]", using = "posteriors")
+
+write_rds(list(dist1 = dist1, dist2 = dist2, dist3=dist3, dist4=dist4), "saved/appendix_backdoor.rds")
+
+}
+
+back <- read_rds("saved/appendix_backdoor.rds")
+
+v <- query_model(model, "Y[X=1] - Y[X=0]", using = "parameters")$mean
+
+par(mfrow = c(2,2))
+hist(back$dist4, xlim = c(-1, 1)*.4, main = "Small n, backdoor open", xlab = "ATE")
+abline(v = v, col = "red")
+hist(back$dist3, xlim = c(-1, 1)*.4, main = "Small n, backdoor blocked", xlab = "ATE")
+abline(v = v, col = "red")
+hist(back$dist2, xlim = c(-1, 1)*.4, main = "Large n, backdoor open", xlab = "ATE")
+abline(v = v, col = "red")
+hist(back$dist1, xlim = c(-1, 1)*.4, main = "Large n, backdoor blocked", xlab = "ATE")
+abline(v = v, col = "red")
+
+
+```
+
+
+We see that with small $n$ (200 units), closing the backdoor (by including data on $C$) produces a tighter distribution on the ATE. With large $N$ (10,000 units) the distribution around the estimand collapses when the backdoor is closed but not when it is open.
+
+## Simple mediation model
+
+We define a simple mediation model and illustrate learning about  whether $X=1$ caused $Y=1$ from observations of $M$.
+
+```{r}
+model <- make_model("X -> M -> Y") %>%
+         set_confound(confound = list(X = "M[X=1]==1")) %>%
+         set_parameters(node = "X",  alphas = c(.2, .8, .8, .2)) %>% 
+         set_parameters(node = "M", alphas = c(.2, 0, .8, 0)) %>%
+         set_parameters(node = "Y", alphas = c(.2, 0, .8, 0))
+
+#FLAG check code on confound alphas setting
+# confound = "M[X=1]=1",
+```
+
+
+```{r}
+plot_dag(model)
+```
+
+Data and estimation:
+
+```{r}
+data <- simulate_data(model, n = 1000, using = "parameters")
+```
+
+```{r, message = FALSE, eval = FALSE}
+updated <- gbiqq(model, data)
+```
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(gbiqq(model, data, refresh = 0, stan_model = fit), "saved/appendix_XMY_simple.rds")
+  }
+updated <- read_rds("saved/appendix_XMY_simple.rds")
+```
+
+```{r}
+result <- gbiqq::query_model(
+    updated, 
+    queries = list(COE = "c(Y[X=1] > Y[X=0])"), 
+    subsets = c("X==1 & Y==1", "X==1 & Y==1 & M==0", "X==1 & Y==1 & M==1"),
+    using = "posteriors")
+
+```
+
+```{r, echo = FALSE}
+kable(result)
+```
+
+Note that observation of $M=0$ results in a 0 probability for the posterior that $X$ caused $Y$, while observation of $M=1$ has only a modest positive effect. The mediator thus provides a hoop test for the proposition that $X$ caused $Y$.
+
+## Simple moderator model
+
+We define a simple  model with a moderator and illustrate how updating about COE is possible using the value of  a mediator as a clue.
+
+
+```{r}
+model <- make_model("X -> Y; Z -> Y") 
+plot_dag(model)
+
+```
+
+
+```{r}
+data <- simulate_data(
+    model, n = 1000, 
+    parameters = c(.5, .5, .5, .5, 
+                   .02, .02, .02, .02, .02, .02, .02, .02,
+                   .02, .70, .02, .02, .02, .02, .02, .02))
+```
+
+```{r, message = FALSE, eval  = FALSE}
+posterior <- gbiqq(model, data)
+```
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(gbiqq(model, data, stan_model = fit), "saved/appendix_mod_simple.rds")
+  }
+updated <- read_rds("saved/appendix_mod_simple.rds")
+```
+
+
+```{r}
+result <- gbiqq::query_model(
+    updated, 
+    queries = list(COE = "Y[X=1] > Y[X=0]"), 
+    subsets = list("X==1 & Y==1", "X==1 & Y==1 & Z==0", "X==1 & Y==1 & Z==1"),
+    using = "posteriors")
+
+```
+
+```{r, echo = FALSE}
+kable(result)
+```
+
+As an exercise, define a model where, learning about a model with moderators allows you to tighten bounds on COE even without observing the value of the mediator.
+
+## Billy and Suzy's moderator and mediation model
+
+We can describe a simple version of the Billy and Suzy stone throwing game as a model with moderation and mediation in three nodes.
+
+```{r}
+
+
+model <- make_model("Suzy -> Billy -> Smash <- Suzy") %>%
+         set_restrictions(c(
+           
+           # If Suzy throws the bottle breaks
+           "(Smash[Suzy=1]==0)",
+
+           # The bottle won't break by itself
+           "(Smash[Billy=0, Suzy = 0]==1)",
+           
+           # Suzy's throw doesn't *encourage* Billy to throw
+           "Billy[Suzy=1]>Billy[Suzy=0]"))
+plot_dag(model)
+```
+
+Here "Suzy" means Suzy throws, "Billy": means Billy throws---which he might not do if Suzy throws---and "Smash" means the bottle gets smashed.
+The version here is a somewhat less deterministic version of the classic account. Suzy is still an ace shot but now she may or may not throw and Billy may or may not respond positively  to Suzy and if he does respond he may or may not be successful. With all these possibilities we have twelve unit causal types instead of 1.
+
+We have two estimands of interest: counterfactual causation and actual causation. Conditional on Suzy throwing and the bottle breaking, would the bottle not have broken had Suzy not thrown her stone. That's counterfactual causation. The actual causation asks the same question but *conditioning* on the fact that Billy did or did not thrown *his* stone---which we know could itself be due to Suzy throwing her stone. If so then we might think of an "active path" from Suzy's throw to the smashing, even though had she not thrown the bottle would have smashed anyhow.
+
+Our results:
+
+```{r}
+actual_cause <- query_model(model, using = "priors",
+  queries = c(
+    Counterfactual = "Smash[Suzy = 1] > Smash[Suzy = 0]",
+    Actual = "Smash[Suzy = 1, Billy = Billy[Suzy = 1] ] > 
+              Smash[Suzy = 0, Billy = Billy[Suzy = 1]]"),
+  subsets = c("Suzy==1 & Smash==1", "Suzy==1 & Smash==1 & Billy==0", "Suzy==1 & Smash==1 & Billy==1"),
+  expand_grid = TRUE
+  )
+```
+
+```{r, echo = FALSE}
+kable(actual_cause)
+```
+
+Our inferences, *without even observing* Billy's throw distinguish between Suzy being a counterfactual cause and an actual cause. We think it likely that Suzy's throw was an actual cause of the outcome though we are less sure that it was a counterfactual causes. Observing Billy's throw strengthens our inferences. If Billy didn't throw then we are sure Suzy's throw was the actual cause, though we are still in doubt about whether her throw was a counterfactual cause.  
+
+Note that if we observed Suzy *not* throwing  then we would learn *more* about whether she would be a counterfactual cause since we would have learned more about whether Billy reacts to her and also about whether Billy is a good shot.
+
+
+```{r, echo = FALSE}
+actual_cause_2 <- query_model(
+  model, 
+  using = "priors",
+  queries = c(
+    Counterfactual = "Smash[Suzy = 1] > Smash[Suzy = 0]",
+    Actual = "Smash[Suzy = 1, Billy = Billy[Suzy = 1] ] > 
+              Smash[Suzy = 0, Billy = Billy[Suzy = 1]]"),
+    subsets = c("Suzy==0 & Billy==0", "Suzy==0 & Billy==1",  "Suzy==0 & Billy==1 & Smash==1"),
+    expand_grid = TRUE
+    )
+kable(actual_cause_2)
+```
+
+## An IV model
+
+We define a simple mediation model and illustrate learning about whether $X=1$ caused $Y=1$ from observations of $M$.
+
+```{r}
+model <- make_model("X -> M -> Y")  %>%
+         set_confound(confound = list(M = "Y[M=1]==1")) 
+
+plot_dag(model)
+```
+
+
+```{r, echo = FALSE}
+pars <- c( .1, .2, .6, .1,
+           .5, .5,
+           .1, .1, .7, .1, 
+           .1, .1, .7, .1)
+
+data <- simulate_data(model, n = 1000, parameters = pars)
+```
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  updated <- gbiqq(model, data, stan_model = fit)
+  write_rds(updated, "saved/appendix_IV_simple.rds")
+  }
+updated <- read_rds("saved/appendix_IV_simple.rds")
+```
+
+
+```{r, echo = TRUE}
+result <- gbiqq::query_model(
+    updated, 
+    queries = list(ATE = "c(Y[M=1] - Y[M=0])"), 
+    subsets = list(TRUE, "M[X=1] > M[X=0]",  "M==0",  "M==1"),
+    using = "posteriors")
+
+```
+
+```{r, echo = FALSE}
+kable(result)
+```
+
+We calculate the average causal effect for all and for the compliers and conditional on values of $M$.
+
+## An illustration of identification through the frontdoor
+
+Consider the following model:
+
+```{r}
+
+frontdoor <- make_model("X -> M -> Y") %>%
+  
+  set_confound(list(X = "Y[M=1]>Y[M=0]", 
+                    X = "Y[M=1]<Y[M=0]"))
+
+plot_dag(frontdoor)
+
+```
+
+FLAG (fix confound arrows)
+
+Below we plot posterior distributions given observations on 2000 units, with and without data on $M$:
+
+```{r, echo = FALSE}
+
+if(do_diagnosis) {
+  data <- simulate_data(frontdoor, n = 2000)
+  
+  updated_1 <- gbiqq(frontdoor, mutate(data, M = NA), stan_model = fit)
+  
+  updated_2 <- gbiqq(frontdoor, data, stan_model = fit)
+  
+  Q1 <- query_distribution(updated_1, using = "posteriors", query = "Y[X=1] - Y[X=0]")
+  Q2 <- query_distribution(updated_2, using = "posteriors", query = "Y[X=1] - Y[X=0]")
+
+  write_rds(list(Q1=Q1, Q2=Q2), "saved/appendix_frontdoor.rds")
+}
+
+frontdoor <- read_rds("saved/appendix_frontdoor.rds")
+par(mfrow = c(1,2))
+hist(frontdoor$Q1, xlim = c(-.3, .3), main= "Inferences given X,Y, data only", xlab = "ATE")
+hist(frontdoor$Q2, xlim = c(-.3, .3), main = "Inferences given X,Y, and M data", xlab = "ATE")
+```
+
+## A model with a violation of sequential ignorability
+
+## Learning from a collider
+
+Pearl describes a  model similar to the following as a case for which controlling for covariate $W$ induces bias in the estimation of the effect of $X$ on $Y$, which could otherwise be estimated without bias.
+
+```{r}
+model <- make_model("X -> Y <- S; S -> W") %>%
+         set_confound(list(X = "W[S=1]>W[S=0]")) %>%
+         set_parameters(parameters = c(.1, .9, 
+                          .5, .5, 
+                          .9, .1, 
+                          .1,.1,.7,.1,
+                          .2, 0,0,0, 0,0,0,0, .6,0,0,0, 0,0,0,.2)) 
+
+plot_dag(model)
+
+data <- simulate_data(model, n =  20000)
+data$S <- NA
+
+```
+
+The true effect of $X$ on $Y$ is .3 but the PC is quite different for units with $W=0$ and $W=1$:
+
+```{r, echo = FALSE, message = FALSE}
+
+kable(
+  gbiqq::query_model(model, queries = list(`Y(1)-Y(0)` = "Y[X=1] - Y[X=0]"), 
+              using = "parameters",
+              subsets = list(
+                TRUE, 
+                "X==1 & Y==1",
+                "X==1 & Y==1 & W==0",
+                "X==1 & Y==1 & W==1")))
+```
+
+These are the quantities we seek to recover.  The ATE can be gotten fairly precisely in a simple regression. But controlling for $W$ introduces bias both for the unconditional and the conditional effects of $X$:
+
+```{r, echo = FALSE, warning = FALSE, results='asis'}
+M1 <- lm(Y~X, data = data)
+M2 <- lm(Y~X+W, data = data)
+M3 <- lm(Y~X*W, data = data)
+
+stargazer::stargazer(M1, M2, M3, type = "html", header = FALSE)
+  
+```
+
+How does the Bayesian model do, with and without data on $W$?
+
+```{r, echo = FALSE}
+data_no_W <- data
+data_no_W$W <- NA
+```
+
+Inferences that do not use $W$ get ATE  right on average, but PC is not identified and statements about PC conditional on $W$ are not possible:
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+  updated_no_W <- gbiqq(model, data_no_W, refresh = 0, stan_model = fit)
+  write_rds(updated_no_W, "saved/appendix_collider1.rds")
+  updated_W <- gbiqq(model, data, refresh = 0, iter = 6000, stan_model = fit)
+  write_rds(updated_W, "saved/appendix_collider2.rds")
+  }
+updated_no_W <- read_rds("saved/appendix_collider1.rds")
+updated_W <- read_rds("saved/appendix_collider2.rds")
+
+```
+
+Without $W$:
+
+```{r, echo = FALSE}
+kable(
+  gbiqq::query_model(updated_no_W, queries = list(`Y(1)-Y(0)` = "Y[X=1] - Y[X=0]"), 
+              using = "posteriors",
+              subsets = list(
+                TRUE, 
+                "X==1 & Y==1",
+                "X==1 & Y==1 & W==0",
+                "X==1 & Y==1 & W==1")), caption = "Collider excluded from model")
+
+```
+
+We see  including the collider does not induce error in estimation of the ATE, even though it does in a regression framework. It provides an ability to make different PC case level claims given W, but these are nevertheless far off in this example because we still do not have identification. 
+
+With $W$:
+
+```{r, echo = FALSE}
+kable(
+  gbiqq::query_model(updated_W, queries = list(`Y(1)-Y(0)` = "Y[X=1] - Y[X=0]"), 
+              using = "posteriors",
+              subsets = list(
+                TRUE, 
+                "X==1 & Y==1",
+                "X==1 & Y==1 & W==0",
+                "X==1 & Y==1 & W==1")), caption = "Collider included in model")
+
+```
+
+## Inferring a cause from symptoms
+
+Sometimes we want to know whether a particular condition was present that could have caused an observed outcome. This is the stuff of medical diagnosis: on observing symptoms, is the sickness due to $A$ or to $B$? 
+
+We imagine cases in which we do not get to observe the putative cause directly and we want to infer both whether the putative cause was present and whether it caused the outcome. This requires stating a query on both an effect and the level of an unobserved node. 
+
+An illustration:
+
+
+```{r}
+model <- make_model("A -> S -> Y <- B") %>%
+  set_restrictions(c("(S[A=1]< S[A=0])", 
+                   "(Y[S=1]<Y[S=0])",
+                   "(Y[S = 0, B = 0]== 1)"))
+
+query_model(model, 
+       queries = list(A="(Y[A=1] > Y[A =0]) & A==1", B="(Y[B=1] > Y[B =0]) & B==1"),
+       subsets = list("Y==1",  "Y==1 & S==1"), using = "priors", 
+       expand_grid = TRUE) %>% kable
+
+```
+
+In this example there are two possible causes of interest, $A$ and $B$. With flat priors the $B$ path starts as more probable. Observation of symptom $S$, which is a consequence of $A$,  however raises the chances that the outcome is due to $A$ and lowers the chances that it is due to $B$. 
+
+
+## A model mixing observational and experimental data
+
+We imagine that node $R$ indicates whether a unit was assigned to be randomly assigned to treatment assignment ($X=Z$ if $R=1$) or took on its observational value ($X=O$ if $R=0$). We assume the exclusion restriction that entering the experimental sample is not related to $Y$ other than through assignment of $X$. 
+
+```{r}
+model <- make_model("R -> X; O ->X; Z -> X; X -> Y") %>%
+         set_restrictions("(X[R=1, Z=0]!=0) | 
+                           (X[R=1, Z=1]!=1) | 
+                           (X[R=0, O=0]!=0) | 
+                           (X[R=0, O=1]!=1)") %>%
+         set_priors(distribution = "uniform") %>%
+         set_confound(list(O = "(Y[X=1] > Y[X=0])", 
+                           O = "(Y[X=1] < Y[X=0])", 
+                           O = "(Y[X=1] == 1) & (Y[X=0] == 1)"))
+
+plot_dag(model)
+```
+
+```{r, echo = FALSE, include = FALSE}
+P <- get_parameter_matrix(model)
+kable(P[,1:4])
+```
+
+
+The parameter matrix has just one type for $X$ since $X$ really operates here as a kind of switch, inheriting the value of $Z$ or $O$ depending on $R$. Parameters allow for complete confounding between $O$ and $Y$ by $Z$ and $Y$ are unconfounded.
+
+We imagine parameter values in which there is a true .2 effect of $X$ on $Y$ and in which observational assignment is more likely if $X$ causes $Y$ of if $Y=1$ regardless.
+
+```{r}
+
+model <- set_parameters(model, confound = list(
+           O = "(Y[X=1] == 0) & (Y[X=0] == 0)",
+           O = "(Y[X=1] > Y[X=0])", 
+           O = "(Y[X=1] < Y[X=0])", 
+           O = "(Y[X=1] == 1) & (Y[X=0] == 1)"),
+           alpha = list(c(.8,.2), c(.2,.8), c(.8,.2), c(.2,.8))) %>%
+         set_parameters(node = "Y", alpha = c(.2, .2, .4, .2))
+
+```
+
+
+
+The estimands:
+
+```{r, echo = FALSE}
+result <- gbiqq::query_model(
+    model, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    subsets = list(TRUE, "R==0", "R==1"),
+    using = "parameters")
+kable(result)
+```
+
+
+The priors:
+
+```{r, echo = FALSE}
+result <- gbiqq::query_model(
+    model, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    subsets = list(TRUE, "R==0", "R==1"),
+    using = "priors")
+kable(result)
+```
+
+Data:
+
+
+```{r}
+data <- simulate_data(model, n = 600)
+
+# Uncomment if data on $O$ is not available for cases assigned to $R=1$.
+# data$O[data$R == 1] <- NA   
+```
+
+
+The true effect is .2 but naive analysis on the observational data would yield a strongly upwardly biased estimate.
+
+The gbiqq estimates are:
+
+```{r, eval = FALSE}
+posterior <- gbiqq(model, data)
+```
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(gbiqq(model, data, stan_model = fit), "saved/appendix_exp_obs.rds")
+  }
+updated <- read_rds("saved/appendix_exp_obs.rds")
+```
+
+```{r, echo = FALSE}
+result <- gbiqq::query_model(
+    updated, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    subsets = list(TRUE, "R==0", "R==1"),
+    using = "posteriors")
+kable(result)
+```
+
+
+Did observational data improve the estimates from the experimental data?
+
+
+```{r, eval = FALSE}
+posterior <- gbiqq(model, data[data$R==1,])
+```
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(gbiqq(model, data[data$R==1,], stan_model = fit), "saved/appendix_exp_obs_2.rds")
+  }
+updated_no_O <- read_rds("saved/appendix_exp_obs_2.rds")
+```
+
+```{r, echo = FALSE}
+result <- gbiqq::query_model(
+    updated_no_O, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    subsets = list(TRUE, "R==0", "R==1"),
+    using = "posteriors")
+kable(result)
+```
+
+
+A key quantity of interest from this model is the average effect of treatment conditional on being in treatment in the observational group. We have:
+
+```{r, echo = FALSE}
+result2 <- gbiqq::query_model(
+    updated, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    subsets = list("R==1 & X==0", "R==1 & X==1", "R==0 & X==0", "R==0 & X==1"),
+    using = "posteriors")
+
+kable(result2)
+```
+
+## Simple sample selection bias
+
+Say we are interested in assessing the share of Republicans in a population but Republicans are (possible) systematically likely to be absent from our sample. What inferences can we make given our sample?
+
+We will assume that we know when we have missing data though of course we do not know the value of the missing data. 
+
+To tackle the problem we will include sample selection into our model:
+
+```{r}
+
+model <- make_model("R -> S") %>%
+  set_parameters(node = c("R", "S"), alphas = list(c(2,1), c(1, 0, 1, 1)))
+
+data <- simulate_data(model, n = 1000) %>%
+        mutate(R = ifelse(S==0, NA, R ))
+
+```
+
+From this data and model, the priors and posteriors for population and sample quantities are:
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+  write_rds(gbiqq(model, data, refresh = 0, stan_model = fit), "saved/appendix_simple_selection1.rds")
+  }
+
+updated <- read_rds("saved/appendix_simple_selection1.rds")
+
+results <- query_model(updated, queries = "R==1", subsets = c(TRUE, "S==1"), using = c("parameters", "priors", "posteriors"), expand_grid = TRUE)
+
+kable(results)
+```
+
+For the population average effect we tighted our posteriors relative to the priors, though credibility intervals remain wide, even with large data, reflecting our uncertainty about the nature of selection.  Our posteriors on the sample mean are accurate and tight.
+
+Importantly we would not do so well if our data did not indicate that we had missingness.
+
+
+```{r, echo = FALSE}
+data <- simulate_data(model, n = 10000) %>%
+        filter(S==1)
+
+if(do_diagnosis){
+  write_rds(gbiqq(model, data, refresh = 0, stan_model = fit), "saved/appendix_simple_selection2.rds")
+  }
+
+updated <- read_rds("saved/appendix_simple_selection2.rds")
+
+results <- query_model(updated, queries = "R==1", subsets = c(TRUE, "S==1"), using = c("parameters", "posteriors"), expand_grid = TRUE)
+
+kable(results)
+
+```
+
+We naively conclude that all cases are sampled and that population effects are the same as sample effects. The problem here arises because the causal model does not encompass the data gathering process. 
+
+
+## Sample selection bias
+
+As an example consider the below  from @bareinboim2016causal (their Figure 4C). The key feature is that data is only seen for units with $S=1$.
+
+In this model the relationship between $X$ and $Y$ is confounded. Controlling for either $Z$ or for $W1$ *and* $W2$ can address this confounding, but only controlling for $Z$ can capture sample selection. The reason is that $Z$ is independent of $S$ and so variation in $Z$ is not affected by selection on $S$.  
+
+```{r, eval = FALSE}
+selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S")
+```
+
+```{r, echo = FALSE}
+selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S")
+plot_dag(selection)
+```
+
+To keep the parameter and type space small we also impose a set of restrictions: $S$ is non decreasing in $W_1$, $X$ is not decreasing in either $W1$ or $W2$, $Y$ is not decreasing $Z$ or $X$ and $X$ affects $Y$ only if $Z=1$. $W_2=1$ if and only if both $W_1=1$ and $Z=1$. These all reduce the problem to one with 18 nodal types and 288 causal types. 
+
+Worth noting that in this model although selection is related to patterns of confounding, it is not related to causal effects: the effect of $X$ on $Y$ is not different from units that are or are not selected. 
+
+Given these priors we will assume a true (unknown) dgp with no effect of $X$ on $Y$, in which $W_1$ arises with a $1/3$ probability but has a strong positive effect on selection into the sample when it does arise.  
+
+```{r, echo = FALSE} 
+
+if(do_diagnosis) {
+  
+  {if(!exists("fit")) fit <- fitted_model()}
+  
+selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S") %>%
+    set_restrictions(c(
+                     "(S[W1=1] < S[W1=0])",
+                     "(X[W2=1] < X[W2=0])", 
+                     "(X[W1=1] < X[W1=0])", 
+                     "(Y[Z=1]  < Y[Z=0])",
+                     "(Y[X=1]  < Y[X=0])")) %>%
+    set_restrictions(labels = list(W2 = c("W20001", "W21111")), keep = TRUE) %>% 
+    set_parameters(statement = "(S[W1=1] > S[W1=0])", 
+                   node = "S", alphas = .1) %>%
+    set_parameters(node = "W2", alphas = c(1,1)) %>%
+    set_parameters(statement = "(Y[X=1] != Y[X=0])", 
+                   node = "Y", alphas = 0) %>%
+    set_parameters(label = "X0001", alphas = 5 )
+
+selection$parameters_df
+df  <- simulate_data(selection, n = 30000, using = "parameters")
+df0 <- dplyr::filter(df, S==1)
+df1 <- dplyr::mutate(df0, Z = NA, W1 = NA, W2 = NA)
+df2 <- dplyr::mutate(df0, Z = NA)
+df3 <- dplyr::mutate(df0, W1 = NA, W2 = NA)
+
+
+# mean(df$W1)
+# mean(df0$W1)
+# summary(lm(S~W1, data = df))
+# summary(lm(X~Z, data = df0))
+# summary(lm(Y~Z, data = df0))
+# summary(lm(Y~X, data = df0))
+# summary(lm(W1~Z, data = filter(df, W2 ==1)))
+# summary(lm(W1~Z, data = filter(df, W2 ==0)))
+# summary(lm(X~Z, data = filter(df, S ==1)))
+# summary(lm(X~Z, data = filter(df, S ==0)))
+# summary(lm(Y~X + W2, data = filter(df, S ==1)))
+# summary(lm(Y~X + W2, data = filter(df, S ==0)))
+# summary(lm(Y~X, data = df0))
+
+# summary(lm(W2~W1, data = df0))
+# summary(lm(Y~W1, data = df0))
+# summary(lm(Y~W1 + W2, data = dplyr::filter(df0, X ==1)))
+# summary(lm(Y~W1 + W2, data = dplyr::filter(df0, X ==0)))
+
+# summary(lm(X~Z, data = dplyr::filter(df0, W1==1, W2==1))) # But not conditional on W1, W2
+# summary(lm(S~X, data = df))
+# summary(lm(S~W1, data = df))
+# summary(lm(X~W1, data = df0))
+# summary(lm(Y~X,  data = df0))
+# summary(lm(Y~X*Z_norm,  data = mutate(df0, Z_norm = Z- mean(Z))))
+# summary(lm(Y~X*W1_norm + X*W2_norm,  data = mutate(df0, W1_norm = W1- mean(W1), W2_norm = W2- mean(W2))))
+
+sapply(0:1, function(w1) {sapply(0:1, function(w2)  with(dplyr::filter(df0, W1 == w1, W2==w2), mean(Y[X==1]) - mean(Y[X==0])))})
+
+
+  
+# summary(lm(Y~X*W2_norm ,  data = mutate(df0, W1_norm = W1- mean(W1), W2_norm = W2- mean(W2))))
+
+
+M1 <- gbiqq(selection, df1, stan_model = fit)
+M2 <- gbiqq(selection, df2, stan_model = fit)
+M3 <- gbiqq(selection, df3, stan_model = fit)
+
+OUT0 <- query_model(selection, 
+                    using = c("parameters", "priors"), 
+                    queries = "Y[X=1] - Y[X=0]")
+OUT <- lapply(list(M1, M2, M3), function(M) 
+  query_model(M, using = "posteriors", queries = "Y[X=1] - Y[X=0]"))
+
+check <- query_model(M2, using = "posteriors", queries = 
+              c(
+                "Y[X=1, W1=1, W2= 1] - Y[X=0, W1=1, W2= 1]",
+                "Y[X=1, W1=0, W2= 1] - Y[X=0, W1=0, W2= 1]",
+                "Y[X=1, W1=1, W2= 0] - Y[X=0, W1=1, W2= 0]",
+                "Y[X=1, W1=0, W2= 0] - Y[X=0, W1=0, W2= 0]",
+                "Y[X=1, Z= 1] - Y[X=0, W1=0, Z= 1]",
+                "Y[X=1, Z= 0] - Y[X=0, W1=0, Z= 0]"))
+check
+
+                
+write_rds(list(M1=M1, M2=M2, M3=M3, OUT0=OUT0, OUT=OUT, df0=df0, df1=df1, df2=df2, df3=df3, selection), "saved/17_selection_list.rds")
+}
+
+
+selection_list <- read_rds("saved/17_selection_list.rds")
+
+
+
+```
+
+The estimand values given the true parameters and priors for this model are as shown below. 
+
+```{r, echo = FALSE}
+
+kable(selection_list$OUT0, caption = "Estimand values")
+```
+
+This confirms a zero true effect, though priors are dispersed centered on a positive effect.
+
+We can see the inference challenge from observational data using regression analysis with and without conditioning on $Z$ and $W_1, W_2$.
+
+```{r, echo = FALSE, message = FALSE, results='asis'}
+
+lm1 <- lm(Y~X,  data = selection_list$df0)
+
+lm2 <- lm(Y~X*W1_norm + X*W2_norm, data = mutate(selection_list$df0, W1_norm = W1 - mean(W1),            W2_norm = W2 - mean(W2)))
+lm3 <- lm(Y~X*Z_norm, data = mutate(selection_list$df0, Z_norm = Z - mean(Z)))
+stargazer(lm1, lm2, lm3, type = 'html', header = FALSE, keep = "X")
+```
+
+Naive analysis is far off; but even after conditioning on $W_1, W_2$ we still wrongly infer a positive effect. 
+
+Bayesian inferences given different data strategies are shown below:
+
+```{r, echo = FALSE}
+kable(
+  cbind(
+  data = c("X,Y", "X,Y, W1, W2", "X, Y, Z"),
+  bind_rows(selection_list$OUT)[, c("mean", "sd")]
+  # [c(1,3,5),]
+  ))
+
+
+```
+
+We see the best performance is achieved for the model with data on $Z$---in this case the mean posterior estimate is closest to the truth--0--and the standard deviation is lowest also.
+
+## Transportation of findings across contexts
+
+We study the effect of $X$ on $Y$ in country 1 and want to make inferences to country 2, Our problem however is that units are heterogeneous and features, $W_1$, that differ across units may be related both to treatment assignment, outcomes, and selection into the sample. 
+
+
+
+```{r}
+
+model <- make_model("R -> X; O -> X; S -> X -> Y <- Z <- S") %>%
+         set_restrictions(labels = list(X = "X01000111"), keep = TRUE) %>%
+         set_restrictions("(Y[Z=1] < Y[Z=0]) | (Y[X=1] < Y[X=0])") %>%
+         set_confound(list(O = "(Y[X=1] == Y[X=0])", 
+                           Z = "(O[Z=1] > O[Z=0])"))
+
+kable(model$parameters_df)
+plot_dag(model)
+
+# S is non randomized and has a possibly different distribution on Z.
+
+```
+
+`r if (knitr:::is_html_output()) '# References {-}'`
+

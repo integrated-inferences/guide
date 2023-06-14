@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1570054879935.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "F3444570",
+    "lastKnownWriteTime" : 1570023525,
+    "last_content_update" : 1570054879935,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "context" : "package:gbiqqtools:::diagnose_strategies"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 31,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_code_browser"
+}

@@ -1,0 +1,1985 @@
+# (PART) Applications {-} 
+
+
+
+```{r part3, include = FALSE}
+source("_packages_used.R")
+#do_diagnosis <- FALSE
+options(knitr.kable.NA = '')
+
+```
+
+
+# Basic Models {#applications}
+
+## The ladder of causation in an $X \rightarrow Y$ model
+
+We first introduce a  simple $X$ causes $Y$ model with no confounding and use this to illustrate the "ladder of causation" [@pearl2018book].
+
+The model is written:
+
+```{r ap_XYnoconf}
+model <- make_model("X -> Y")
+```
+
+<!-- The model implies a "parameter matrix" that maps from parameters to causal types. Inspecting the parameter matrix,  confirms that there are no constraints here on possible nodal types  and no unobserved confounding: -->
+
+
+```{r, echo = FALSE, include = FALSE}
+kable(get_parameter_matrix(model), caption = "Parameter matrix for X causes Y model without confounding")
+```
+
+
+We will  assume a "true" distribution over parameters. Let's assume that the true effect of 0.5, but that this is not known to researchers. The .5 effect comes from the difference between the share of units with a positive effect (.6) and those with a negative effect (.1). (We say share but we may as well think in terms of the probability that a given unit is of one or other type.)
+
+```{r}
+model <- 
+  set_parameters(model, node = "Y", parameters = c(.2, .1, .6, .1))
+
+kable(t(get_parameters(model)))
+```
+
+We can now simulate data using the  model: 
+
+```{r}
+
+data <- make_data(model, n = 10000)
+
+```
+
+With a model and data in hand we update the model thus: 
+
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+updated <- update_model(model, data)
+```
+
+
+From the updated model we can draw posterior inferences over estimands of interest.
+
+We will imagine three estimands, corresponding to Pearl's "ladder of causation." 
+
+* At the first level we are interested in the distribution of some node, perhaps given the value of another node.  This question is answerable from observational data. 
+
+* At the second  level we are interested in treatment effects: how changing one node changes another. This question is answerable from experimental data. 
+
+* At the third level we are interested in counterfactual statements: how would things have been different if some features of the world were different from what they are? Answering this question requires a causal model.
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(update_model(model, data, refresh = 0), "saved/appendix_XY_model_1.rds")
+  }
+updated <- read_rds("saved/appendix_XY_model_1.rds")
+```
+
+Here are the results:
+
+```{r}
+results <- query_model(
+ updated,
+ query = list("Y | X=1" = "Y==1", 
+              ATE = "Y[X=1] - Y[X=0]", 
+              PC  = "Y[X=1] > Y[X=0]"),
+ given = c("X==1", TRUE, "X==1 & Y==1"),
+ using = "posteriors")
+```
+
+```{r, echo = FALSE}
+kable(cbind( "Query (rung)" = c("1 Association", "2 Intervention", "3 Imagining"), results), digits = 2)
+```
+
+We see from the posterior variance on PC that we have the greatest difficulty with  the third rung. In fact the PC is not identified (the  distribution does not tighten even with very large N).  For more intuition we graph the posteriors:
+
+
+```{r, echo = FALSE} 
+if(do_diagnosis){
+ATE_dist <- query_distribution(
+                   model = updated, 
+                   using = "posteriors",
+                   query = "Y[X=1] - Y[X=0]"
+                   )
+PC_dist <- query_distribution(
+                   model = updated, 
+                   using = "posteriors",
+                   query = "Y[X=1] > Y[X=0]",
+                   given = "X==1 & Y==1"
+                   )
+write_rds(ATE_dist, "saved/appendix_ATE_dist.rds")
+write_rds(PC_dist, "saved/appendix_PC_dist.rds")
+}
+ATE_dist <- read_rds("saved/appendix_ATE_dist.rds")
+PC_dist  <- read_rds("saved/appendix_PC_dist.rds")
+```
+
+```{r PChist, echo = FALSE, fig.cap = "ATE is identified, PC is not identified but has informative bounds"}
+par(mfrow = c(1,2))
+hist(ATE_dist, xlim = c(-1,1), main = "Posterior on ATE", xlab = "ATE")  
+hist(PC_dist, xlim = c(0,1), main = "Posterior on PC", xlab = "Probability X=1 caused Y=1")  
+```
+
+
+We find that they do not converge but they do place positive mass in the right range. Within this range, the shape of the posterior depends on the priors only. 
+
+
+## $X$ causes $Y$, with unmodelled confounding
+
+The first model assumed that $X$ was as-if randomly assigned, but we do not need to make such strong assumptions. 
+
+An $X$ causes $Y$ model with confounding can be written:
+
+```{r ap_with_conf}
+model <- make_model("X -> Y; X <-> Y") 
+CausalQueries:::plot_dag(model)
+```
+
+
+If we look at the parameter matrix implied by this model we see that it  has more parameters than nodal types, reflecting the joint assignment probabilities of $\theta_X$ and $\theta_Y$. Here we have parameters for $\Pr(\theta_X=x)$ and $\Pr(\theta_Y |\theta_X=x)$, which allow us to represent $\Pr(\theta_X, \theta_Y)$ via  $\Pr(\theta_X=x)\Pr(\theta_Y |\theta_X=x)$.
+
+```{r, eval= FALSE, echo = FALSE}
+get_parameter_matrix(model)
+```
+
+
+```{r, echo = FALSE}
+kable(get_parameter_matrix(model), caption = "Parameter matrix for X causes Y model with arbitrary confounding")
+```
+
+With the possibility of any type of confounding, the best we can do is place "Manski bounds" on the average causal effect. 
+
+To see this, let's plot a histogram of our posterior on average causal effects, given lots of data. We will assume here that in truth there is no confounding, but that that is not known to researchers.
+
+```{r}
+data5000 <- make_data(
+    model, n = 5000, 
+    parameters = c(.5, .5, .25, .0, .5, .25, .25, 0, .5, .25))
+
+data100 <- data5000[sample(5000, 100), ]
+
+```
+
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(update_model(model, data5000, refresh = 0, iter = 6000), "saved/appendix_XY_model_5000.rds")
+    write_rds(update_model(model, data100, refresh = 0, iter = 6000), "saved/appendix_XY_model_100.rds")
+
+  }
+updated_5000 <- read_rds("saved/appendix_XY_model_5000.rds")
+updated_100  <- read_rds("saved/appendix_XY_model_100.rds")
+```
+
+```{r, echo = FALSE, fig.cap= "Modest gains from additional data when ATE is not identified"}
+if(do_diagnosis){
+prior_ate      <- query_distribution(updated_5000, "c(Y[X=1] - Y[X=0])", using = "priors")
+post_ate_5000  <- query_distribution(updated_5000, "c(Y[X=1] - Y[X=0])", using = "posteriors")
+post_ate_100   <- query_distribution(updated_100, "c(Y[X=1] - Y[X=0])", using = "posteriors")
+
+write_rds(list(prior_ate, post_ate_5000, post_ate_100), "saved/appendix_XY_model_diagnosis.rds")
+}
+
+x <- read_rds("saved/appendix_XY_model_diagnosis.rds")
+prior_ate      <- x[[1]]
+post_ate_5000  <- x[[2]]
+post_ate_100   <- x[[3]]
+
+par(mfrow= c(1,3))
+    hist(prior_ate, xlim = c(-1,1), main = "Prior", xlab = "ATE")
+    hist(post_ate_100, xlim = c(-1,1), main = "Posterior, n = 100", xlab = "ATE")
+    hist(post_ate_5000, xlim = c(-1,1), main = "Posterior, n = 5000", xlab = "ATE")
+
+```
+
+The key thing here is that the posterior on the ATE has shifted, as it should, but it is not tight, even with large data. In fact the distribution of the posterior covers one unit of the range between -1 and 1.
+
+
+## $X$ causes $Y$, with confounding modeled
+
+Say now we have a theory that the relationship between $X$ and $Y$ is confounded by possibly unobserved variable $C$. Although $C$ is unobserved we can still include it in the model and observe the confounding it generates by estimating the model on data generated by the model (but without benefiting from  observing $C$).
+We will assume that it is know that $X$ does not have a negative effet on $X$. In addition we will assume that both $C$ and $X$ have a positive effect on $Y$---though this is not known (and so this is built into the model parameters but not into the priors).  
+
+```{r modeledconfounding}
+
+model <- make_model("C -> X -> Y <- C") %>%
+  
+  set_restrictions("(X[C=1] < X[C=0])") %>%
+
+  set_parameters(
+           statement = c("(Y[X=1] < Y[X=0]) | (Y[C=1] < Y[C=0])"), 
+           parameters = 0)
+```
+
+The ATE estimand in this case is given by:
+
+```{r, echo = FALSE}
+query_model(
+    model, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    using = "parameters") %>%
+  
+  kable
+
+```
+
+A regression based approach won't fare very well here without data on $C$. It would yield a precise but incorrect estimate.
+
+```{r}
+data <- make_data(model, n = 1000)
+
+estimatr::lm_robust(Y~X, data = data) %>%
+  tidy %>% 
+  kable(digits = 2)
+
+```
+
+In contrast, the Bayesian estimate takes account of the fact that we are missing data on $C$.
+
+Our posteriors over the effect of $X$ on $Y$ and the effect of the unobserved confounder ($C$) on $Y$ have a joint distribution with negative covariance. 
+
+To illustrate we update on the same data (note that although relationship between $C$ and $Y$ is resrticted in the parameters it is not restricted in the priors). We then plot the joint posterior over our estimand and a measure of confounding (we will use the effect of $C$ on $Y$, since we have built in already that $C$ matters for $X$).
+  
+```{r, eval = FALSE}
+updated  <- update_model(model, select(data, X, Y))
+
+ate <- 
+  query_distribution(updated, "c(Y[X=1] - Y[X=0])", using = "posteriors")
+
+confound <- 
+  query_distribution(updated, "c(Y[C=1] - Y[C=0])", using = "posteriors")
+
+```
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  
+  data_sparse <- select(data, X, Y)
+  
+  updated  <- update_model(model, data_sparse, refresh = 0, iter = 6000)
+  
+  write_rds(updated, "saved/appendix_modelled_confound_sparse.rds")
+
+ate <- query_distribution(updated, "c(Y[X=1] - Y[X=0])", using = "posteriors")
+
+confound <- query_distribution(updated, "c(Y[C=1] - Y[C=0])", using = "posteriors")
+
+write_rds(data.frame(ate = ate, confound = confound), "saved/appendix_modelled_confound_confound.rds")
+}
+
+```
+
+```{r, echo = FALSE}
+df <- read_rds("saved/appendix_modelled_confound_confound.rds")
+
+df <- cbind(
+  df %>% select(starts_with("ate")) %>%
+    pivot_longer(cols=ate.1:ate.12000, 
+                 names_to = "ID", values_to = "ate"),
+  df %>% select(starts_with("confound")) %>%
+    pivot_longer(cols=confound.1:confound.12000, 
+                 names_to = "ID1", values_to = "confound")) %>%
+  select(ate, confound)
+
+plot(df$confound, df$ate, ylab = "ATE", xlab = "Confound", cex = .2)
+```
+
+
+The strong negative correlation shows that when we update we contemplate possibilities in which there is a strong effect and negative confounding, or a weak or even negative effect and positive confounding. If we knew the extent of confounding we would have tighter posteriors on the estimand, but our ignorance regarding the nature of confounding keeps the  posterior variance on the estimand large.
+
+## Simple mediation model
+
+We define a simple mediation model and illustrate learning about  whether $X=1$ caused $Y=1$ from observations of $M$.
+
+```{r appsimplemed}
+model <- make_model("X -> M -> Y") %>%
+         set_confound(confound = list(X = "M[X=1]==1")) %>%
+         set_parameters(node = "X",  parameters = c(.2, .8, .8, .2)) %>% 
+         set_parameters(node = "M", parameters = c(.2, 0, .8, 0)) %>%
+         set_parameters(node = "Y", parameters = c(.2, 0, .8, 0))
+
+```
+```{r, echo = FALSE}
+model <- make_model("X -> M -> Y; X <-> M") 
+```
+
+```{r}
+CausalQueries:::plot_dag(model)
+```
+Data and estimation:
+
+```{r}
+data <- make_data(model, n = 1000, using = "parameters")
+```
+
+```{r, message = FALSE, eval = FALSE}
+updated <- update_model(model, data)
+```
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(update_model(model, data, refresh = 0), "saved/appendix_XMY_simple.rds")
+  }
+updated <- read_rds("saved/appendix_XMY_simple.rds")
+
+if(do_diagnosis){
+   result <- query_model(
+    updated, 
+    queries = list(COE = "c(Y[X=1] > Y[X=0])"), 
+    given = c("X==1 & Y==1", "X==1 & Y==1 & M==0", "X==1 & Y==1 & M==1"),
+    using = "posteriors")
+    write_rds(result, "saved/appendix_XMY_simple_diag.rds")
+}
+
+result <- read_rds("saved/appendix_XMY_simple_diag.rds")
+```
+
+```{r, eval = FALSE}
+result <- query_model(
+    updated, 
+    queries = list(COE = "c(Y[X=1] > Y[X=0])"), 
+    given = c("X==1 & Y==1", "X==1 & Y==1 & M==0", "X==1 & Y==1 & M==1"),
+    using = "posteriors")
+
+```
+
+```{r, echo = FALSE}
+kable(result)
+```
+
+Note that observation of $M=0$ results in a near 0 posterior that $X$ caused $Y$, while observation of $M=1$ has only a modest positive effect. The mediator thus provides what qualitative scholars call a "hoop" test for the proposition that $X$ caused $Y$.
+
+## Simple moderator model
+
+We define a simple  model with a moderator and illustrate how updating about COE is possible using the value of  a moderator as a clue.
+
+
+```{r appsimpmod}
+model <- make_model("X -> Y; Z -> Y") 
+CausalQueries:::plot_dag(model)
+
+```
+
+
+```{r}
+data <- make_data(
+    model, n = 1000, 
+    parameters = c(.5, .5, .5, .5, 
+                   .01, .01, .01, .01, .01, .01, .01, .01,
+                   .01, .85, .01, .01, .01, .01, .01, .01))
+```
+
+```{r, message = FALSE, eval  = FALSE}
+posterior <- update_model(model, data)
+```
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(update_model(model, data), "saved/appendix_mod_simple.rds")
+  }
+updated <- read_rds("saved/appendix_mod_simple.rds")
+```
+
+
+```{r}
+result <- query_model(
+    updated, 
+    queries = list(COE = "Y[X=1] > Y[X=0]"), 
+    given = list("X==1 & Y==1", "X==1 & Y==1 & Z==0", "X==1 & Y==1 & Z==1"),
+    using = "posteriors")
+
+```
+
+```{r, echo = FALSE}
+kable(result)
+```
+
+
+Knowledge of the moderator provides sharp updating in both directions, depending on what is found.
+
+# Explanation
+
+## Tightening bounds on causes of effects using an unobserved covariate
+
+"Explanation" can sometimes be thought of assessing whether an outcome was due to a cause: "$Y$ because $X$." We saw examples showing the difficulty of identifying the "probability of causation" (whether $X$ caused $Y$ in a case) above (See for example Figure \@ref(fig:PChist)). 
+
+Knowledge of moderators and mediators can help however. In a particularly striking result,  @dawid2011role shows that knowledge derived from moderators can help *even when the moderator is not observed for the case in question*.
+
+We illustrate with a simple example in which data is drawn from a process in which $X$ has a positive effect on $Y$ when $C=1$ and a negative effect otherwise. We will assume $X$ is as-if randomized, though $C$ is not:
+
+```{r appexplamod}
+
+model <- make_model("X -> Y <- C; Y <-> C")
+
+data <- 
+  model %>%
+  set_restrictions("(Y[X=1, C=1] > Y[X=0, C=1]) & 
+                    (Y[X=1, C=0] < Y[X=0, C=0])", keep = TRUE) %>%
+  make_data(n= 200)
+
+```
+
+These restrictions, coupled with flat priors, produce the following  priors (i) on  the effect of $X$ on $Y$ and (ii) that $X$ caused $Y$ in a case with $X=Y=1$:
+
+```{r, echo = FALSE}
+
+query_model(model, 
+            query = list(ATE = "Y[X=1] - Y[X=0]", 
+                         PC  = "Y[X=1] > Y[X=0]"),
+            given = list("All", "X==1 & Y==1")) %>% 
+kable
+
+```
+
+We now compare inferences on the PC (for a case where we have no data on $C$) using one model that has been updated using data on $C$ and one that has not:   
+
+```{r, eval = FALSE}
+update_model(model, select(data, X, Y)) %>%
+  
+  query_model(query = "Y[X=1]>Y[X=0]", given = "X==1 & Y==1",
+              using = "posteriors") 
+
+update_model(model, data) %>%
+
+    query_model(query = "Y[X=1]>Y[X=0]", given = "X==1 & Y==1", 
+              using = "posteriors") 
+
+```
+
+   
+```{r appsimpmod3, echo = FALSE}
+if(do_diagnosis){
+app_PC_C <-  update_model(model, data) %>%
+  query_model(query = list(`X caused Y` = "Y[X=1]>Y[X=0]"), given = "X==1 & Y==1",
+              using = "posteriors") 
+
+write_rds(app_PC_C, "saved/app_PC_C.rds")
+
+app_PC_NoC <-  update_model(model, select(data, X, Y)) %>%
+  query_model(query = list(`X caused Y` = "Y[X=1]>Y[X=0]"), given = "X==1 & Y==1",
+              using = "posteriors")
+
+write_rds(app_PC_NoC, "saved/app_PC_NoC.rds")
+
+}
+
+app_PC_C   <- read_rds("saved/app_PC_C.rds")
+app_PC_NoC <- read_rds("saved/app_PC_NoC.rds")
+```
+
+```{r, echo = FALSE}
+kable(app_PC_NoC, caption = "Probability $X$ caused $Y$ from model updated without data on $C$")
+```
+
+```{r, echo = FALSE}
+kable(app_PC_C, caption ="Probability $X$ caused $Y$ from model updated using data on $C$")
+
+```
+
+We see tight gains even though $C$ is not observed. The remarkable result arises because although $C$ is not observed in the case at hand, the model that has been updated with knowledge of  $C$ lets us figure out that the average effect of 0 is due to strong heterogeneity of effects. Indeed $X=Y=1$ only arises when $C=1$, in which case $X$ causes $Y$. Thus observing  $X=Y=1$ lets us infer that $C=1$ and so in this case  $X$ causes $Y$. 
+
+## Actual Causation: Billy and Suzy's moderator and mediation model {#Billy}
+
+A classic problem in the philosophy of causation examines a story in which Billy and Suzy throw stones at a bottle [@hall2004two]. Both are deadly shots but Suzy's stone hits the bottle first. Had it not, Billy's surely would have. Can we say that Suzy's throw caused the bottle to break if it would have broken even if she hadn't thrown? 
+
+We model a simple version of the Billy and Suzy stone throwing game as a causal model with moderation and mediation in three nodes.
+
+```{r appbillysuzy1}
+
+
+model <- make_model("Suzy -> Billy -> Smash <- Suzy") %>%
+         set_restrictions(c(
+           
+           # If Suzy throws the bottle breaks
+           "(Smash[Suzy=1]==0)",
+
+           # The bottle won't break by itself
+           "(Smash[Billy=0, Suzy = 0]==1)",
+           
+           # Suzy's throw doesn't *encourage* Billy to throw
+           "Billy[Suzy=1]>Billy[Suzy=0]"))
+CausalQueries:::plot_dag(model)
+```
+
+Here "Suzy" means Suzy throws, "Billy": means Billy throws---which he might not do if Suzy throws---and "Smash" means the bottle gets smashed.
+
+The version here is a somewhat less deterministic version of the classic account. Suzy is still an ace shot but now she may or may not throw and Billy may or may not respond positively  to Suzy and if he does respond he may or may not be successful. With all these possibilities we have twelve unit causal types instead of 1.
+
+We have two estimands of interest: counterfactual causation and actual causation. Conditional on Suzy throwing and the bottle breaking, would the bottle not have broken had Suzy not thrown her stone? That's counterfactual causation. The actual causation asks the same question but *conditioning* on the fact that Billy did or did not throw *his* stone---which we know could itself be due to Suzy throwing her stone. If so then we might think of an "active path" from Suzy's throw to the smashing, even though had she not thrown the bottle might have smashed anyhow.
+
+Our results:
+
+```{r}
+actual_cause <- query_model(model, using = "priors",
+  queries = c(
+    Counterfactual = "Smash[Suzy = 1] > Smash[Suzy = 0]",
+    Actual = "Smash[Suzy = 1, Billy = Billy[Suzy = 1] ] > 
+              Smash[Suzy = 0, Billy = Billy[Suzy = 1]]"),
+  given = c("Suzy==1 & Smash==1", "Suzy==1 & Smash==1 & Billy==0", "Suzy==1 & Smash==1 & Billy==1"),
+  expand_grid = TRUE
+  )
+```
+
+```{r, echo = FALSE}
+kable(actual_cause)
+```
+
+Our inferences, *without even observing* Billy's throw distinguish between Suzy being a counterfactual cause and an actual cause. We think it likely that Suzy's throw was an actual cause of the outcome though we are less sure that it was a counterfactual causes. Observing Billy's throw strengthens our inferences. If Billy didn't throw then we are sure Suzy's throw was the actual cause, though we are still in doubt about whether her throw was a counterfactual cause (since Billy might have thrown if she hadn't).  
+
+Note that if we observed Suzy *not* throwing  then we would learn *more* about whether she would be a counterfactual cause since we would have learned more about whether Billy reacts to her and also about whether Billy is a good shot.
+
+
+```{r appbillysuzy3, echo = FALSE}
+actual_cause_2 <- query_model(
+  model, 
+  using = "priors",
+  queries = c(
+    Counterfactual = "Smash[Suzy = 1] > Smash[Suzy = 0]",
+    Actual = "Smash[Suzy = 1, Billy = Billy[Suzy = 1] ] > 
+              Smash[Suzy = 0, Billy = Billy[Suzy = 1]]"),
+    given = c("Suzy==0 & Billy==0", "Suzy==0 & Billy==1",  "Suzy==0 & Billy==1 & Smash==1"),
+    expand_grid = TRUE
+    )
+kable(actual_cause_2, caption = "Inferences when Suzy does *not* throw")
+```
+
+
+## Diagnosis: Inferring a cause from symptoms
+
+Sometimes we want to know whether a particular condition was present that could have caused an observed outcome. This is the stuff of medical diagnosis: on observing symptoms, is the sickness due to $A$ or to $B$? 
+
+We imagine cases in which we do not get to observe the putative cause directly and we want to infer both whether the putative cause was present and whether it caused the outcome. This requires stating a query on both an effect and the level of an unobserved node. 
+
+An illustration:
+
+
+```{r appdiagnosis}
+model <- make_model("A -> S -> Y <- B") %>%
+  set_restrictions(c("(S[A=1]< S[A=0])", 
+                   "(Y[S=1]<Y[S=0])",
+                   "(Y[S = 0, B = 0]== 1)"))
+
+CausalQueries:::plot_dag(model)
+
+query_model(model, 
+       queries = list(A="(Y[A=1] > Y[A =0]) & A==1", B="(Y[B=1] > Y[B =0]) & B==1"),
+       given = list("Y==1",  "Y==1 & S==1"), using = "priors", 
+       expand_grid = TRUE) %>% kable
+
+```
+
+In this example there are two possible causes of interest, $A$ and $B$. With flat priors the $B$ path starts as clearly more probable. Observation of symptom $S$, which is a consequence of $A$,  however raises the chances that the outcome is due to $A$ and lowers the chances that it is due to $B$. 
+
+
+# Process tracing
+
+## What to infer from what
+
+The simplest application of the `CausalQueries` package is to figure out what inferences to make about a case upon observing within-case data, given a model. One might observe many pieces of evidence and have to figure out how to update from these jointly. 
+
+In *Integrated Inferences* we explore an inequality-democratization model where for a case with low inequality and democratization (say) one is interested in whether the democratization was due to the low inequality. In the simple model, inequality can give rise to popular mobilization which in turn forces democratization; or alternatively, inequality could prevent democratization by generating a threat from elites. In addition other forces, such as international pressure, could give rise to democratization. The question is: how do we update on our beliefs that low inequality caused democratization when we observe mobilization or international pressure? 
+
+
+```{r apppt1}
+model <- make_model("I -> M -> D <- I; P -> D") %>% 
+  set_restrictions(c( 
+    "(M[I=1] < M[I=0])", 
+    "(D[I=1] > D[I=0]) | (D[M=1] < D[M=0]) | (D[P=1] < D[P=0])")) 
+```  
+
+We can read inferences directly from `query_model`:
+
+```{r}
+query_model(model, 
+            query = list(`I = 0 caused D = 1` = "D[I=1] != D[I=0]"), 
+            using = "parameters", 
+            given = c("I==0 & D==1", 
+                       "I==0 & D==1 & M==0", 
+                       "I==0 & D==1 & M==1", 
+                       "I==0 & D==1 & P==0", 
+                       "I==0 & D==1 & P==1", 
+                       "I==0 & D==1 & M == 0 & P==0",
+                       "I==0 & D==1 & M == 1 & P==0",
+                       "I==0 & D==1 & M == 0 & P==1",
+                       "I==0 & D==1 & M == 1 & P==1")) %>% kable
+```
+
+We see in this example that learning about a rival cause---the moderator  $P$ (international pressure)---induces larger changes in beliefs than learning about the mediator, $M$ (mobilization). The two clues substitute for each other marginally.
+
+The importance of different clues depends however on what one wants to explain. In the next analysis, we see that if we want to know if inequality explained democratization, learning that $M=0$ has a large impact on beliefs.
+
+```{r, echo = FALSE}
+query_model(model, 
+            query = list(`I = 1 caused D = 1` = "D[I=1] != D[I=0]"), 
+            using = "parameters", 
+            given = c("I==1 & D==1", 
+                       "I==1 & D==1 & M==0", 
+                       "I==1 & D==1 & M==1", 
+                       "I==1 & D==1 & P==0", 
+                       "I==1 & D==1 & P==1")) %>% kable
+```
+
+Note that inferences are taken here based on the model made by `make_model`, without any updating of the model using data. In this sense the approach simply makes the model used for process tracing explicit, but it does not justify. It is possible however to first update a model using data from many cases and then use the updated model to draw inferences about a single case.
+
+## Probative value and $d$-separation
+
+Observation of a node (a "clue") is potentially informative for a query when it is *not* $d$-separated^[$d$-separation is a key idea in the study of directed acyclic graphs; for an introduction see [$d$-separation without tears](http://www.dagitty.net/learn/dsep/index<-.html).] from query-relevant nodes  (See *Integrated Inferences*, Ch 6). 
+
+An implication of this is that the observation of some nodes may render other nodes more or less informative. From the graph alone you can sometimes tell when additional data will be uninformative for a query.
+
+To wit:
+
+```{r appdsepar}
+
+model <- make_model("X -> Y -> S <- W") %>% 
+  set_restrictions(complements("Y", "W", "S"), keep = TRUE)
+
+CausalQueries:::plot_dag(model)
+
+```
+
+```{r, eval = FALSE}
+query_model(model,
+            query = "Y[X=1] > Y[X=0]",
+            using = "parameters",
+            given = c("X==1",
+                      "X==1 & W==1",
+                      "X==1 & S==1",
+                      "X==1 & S==1 & W==1", 
+                      "X==1 & Y==1",
+                      "X==1 & W==1 & S==1 & Y==1")) %>% kable
+
+```
+
+
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+q <- query_model(model,
+            query = "Y[X=1] > Y[X=0]",
+            using = "parameters",
+            given = c("X==1",
+                      "X==1 & W==1",
+                      "X==1 & S==1",
+                      "X==1 & S==1 & W==1", 
+                      "X==1 & Y==1",
+                      "X==1 & W==1 & S==1 & Y==1")) 
+q[,1] <- 1:6
+
+write_rds(q, "saved/appPTinf.rds")
+}
+
+q <- read_rds("saved/appPTinf.rds")
+
+kable(q, caption = "Whether a clue is informative or not depends on what else has been observed: in particular whether the clue is $d$-separated from the query.")
+```
+
+
+In this example $W$ is not informative for the $X$ causes $Y$ query (a query about $\theta^Y$, a parent of $Y$), when $Y$ and $S$ are unobserved (Row 1 = Row 3). It becomes informative, however, when  $S$, a symptom of $Y$, is observed (Row 3 $\neq$ Row 4). But when $Y$ is observed neither $S$ nor $W$ are informative  (Row 5 = Row 6). 
+
+The reason is that $W$ is $d$-separated from $\theta^Y$ when $Y$ and $S$ are unobserved. But $S$ is a "collider" for $Y$ and $W$ and so $W$ *becomes* informative about $Y$ once $S$ is observed, and hence of $\theta^Y$ (so long as  $Y$ is unobserved). When $Y$ is observed however now $S$ and $W$ become $d$-separated from $\theta^Y$ and neither is informative.
+
+
+## Foundations for Van Evera's tests
+
+Students of process tracing often refer to a set of classical "qualitative tests" that are used to link within-case evidence to inferences around specific (often case-level) hypotheses. The four classical tests as described by @collier2011understanding and drawing on @Van-Evera:1997 are "smoking gun" tests, "hoop" tests, "doubly decisive" tests, and "straw-in-the-wind" tests. A hoop test is one which, if failed, bodes especially badly for a claim; a smoking gun test is one that bodes well for a hypothesis if passed; a doubly decisive test is strongly conclusive no matter what is found, and a straw-in-the-wind test is suggestive, though not conclusive, either way.
+
+In some treatments (such as @humphreys2015mixing) formalization involves specifying a prior that a hypothesis is true and an independent set of beliefs about the probability of seeing some data if the hypothesis is true and if it is false. Then updating proceeds using Bayes' rule. 
+
+This simple approach suffers from two related weaknesses however: first, there is no good reason to expect these probabilities to be independent; second, there is nothing in the set-up to indicate how beliefs around the probative value of clues can be established or justified. 
+
+Both of these problems are easily resolved if the problem is articulated using fully specified causal models.
+
+Many different causal models might justify Van Evera's tests. We illustrate using one in which the requisite background knowledge to justify the tests can be derived from a factorial experiment and in which one treatment serves as a clue for the effect of another.
+
+For the illustration we first make use of a function that generates data from a model with a constrained set of types for $Y$ and a given prior distribution over clue $K$.
+
+```{r}
+van_evera_data <- function(y_types, k_types)
+  
+  make_model("X -> Y <- K") %>%
+  
+  set_restrictions(labels = list(Y = y_types), keep = TRUE) %>%
+  
+  set_parameters(param_type = "define", node = "K", parameters = c(1 - k_types, k_types)) %>%
+  
+  make_data(n = 1000)
+```
+
+We then use a function that draws inferences, given different values of a clue $K$, from a model that has been updated using available data. Note that the model that is updated has no constraints on $Y$, has flat beliefs over the distribution of $K$, and imposes no assumption that $K$ is informative for how $Y$ reacts to $X$. 
+
+```{r}
+van_evera_inference <- function(data)
+  
+  make_model("X -> Y <- K") %>%
+  
+  update_model(data = data) %>%  
+  
+  query_model(query = "Y[X=1] > Y[X=0]", 
+              given = c(TRUE, "K==0", "K==1"),
+              using = "posteriors")
+```
+
+We can now generate posterior beliefs, given $K$, for different types of tests where the tests are now justified by different types of data, coupled with a common prior causal model.
+  
+Results:
+
+```{r, eval = FALSE}
+doubly_decisive <- van_evera_data("0001", .5) %>% van_evera_inference
+
+hoop            <- van_evera_data(c("0001", "0101"), .9) %>% van_evera_inference
+
+smoking_gun     <- van_evera_data(c("0001", "0011"), .1) %>% van_evera_inference
+
+straw_in_wind   <- van_evera_data(c("0001", "0101", "0011"), .5) %>% van_evera_inference
+```
+
+
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+doubly_decisive <- van_evera_data("0001", .5) %>% van_evera_inference
+
+hoop            <- van_evera_data(c("0001", "0101"), .9) %>% van_evera_inference
+
+smoking_gun     <- van_evera_data(c("0001", "0011"), .1) %>% van_evera_inference
+
+straw_in_wind   <- van_evera_data(c("0001", "0101", "0011"), .5) %>% van_evera_inference
+
+write_rds(list(doubly_decisive, hoop, smoking_gun, straw_in_wind), "saved/app_vanevera.rds")
+}
+
+tests <- read_rds("saved/app_vanevera.rds")
+
+tests[[1]] %>% kable(caption= "Doubly decisive test")
+tests[[2]] %>%  kable(caption= "Hoop test")
+tests[[3]] %>% kable(caption= "Smoking gun test")
+tests[[4]] %>% kable(caption= "Straw in the wind test")
+
+```
+
+
+We see that these tests all behave as expected. Importantly, however, the approach to thinking about the tests is quite different to that described in @collier2011understanding or @humphreys2015mixing. Rather than having a belief about the probative value of a clue, and a prior over a hypothesis, inferences are drawn directly from a causal model that relates a clue to possible causal effects. Critically, with this approach,  the inferences made from observing clues can be justified by reference to a more fundamental,  agnostic model, that has been updated in light of data. The updated model yields both a prior over the proposition, belief about probative values, and guidance for what conclusions to draw given knowledge of $K$. 
+
+## Clue selection: clues at the center of chains can be more informative
+
+Model querying can also be used to assess which types of clues are more informative among a set of informative clues. Consider a chain linking $X$ to $Y$ via $M_1$, $M_2$, $M_3$. To keep things simple let's assume that the chain is monotonic: no node in the chain has a negative effect on the next node in the chain.
+
+Which clue is most informative for the proposition that $X$ caused $Y$ in a case with $X=Y=1$?
+
+In all case we will conclude that $X$ did not cause $Y$ if we see a 0 along the chain (since a 1 can not cause a 0). But what do we conclude if we see a 1?
+
+```{r appcluesonchain}
+model <- make_model("X -> M1 -> M2 -> M3 -> Y") %>%
+  set_restrictions(labels = list(M1 = "10", M2 = "10", M3 = "10", Y = "10"))
+```
+
+In imposing monotonicity and using default parameter values we are assuming that the effect of each node on the next node is 1/3. What does this imply for our query? We get the answer using `query_model`.
+
+```{r}
+query_model(model, 
+            query = "Y[X=1] > Y[X=0]", 
+            given = c("X==1 & Y==1", "X==1 & Y==1 & M1==1", "X==1 & Y==1 & M2==1", 
+                      "X==1 & Y==1 & M3==1", "X==1 & Y==1 & M1==1 & M2==1 & M3==1"),
+            using= "parameters") %>% kable
+```
+
+A couple of features are worth noting. First without any data our beliefs that $X$ caused $Y$ are quite low. This is due to the fact that even though the ATE at each step is reasonably large, the ATE over the whole chain is small, only $(1/3)^4)$ (incidentally, a beautiful number: 0.01234568).
+
+Second we learn from which nodes we learn the most. We update most strongly from positive evidence on the middle mediator. One can also show that not only is there greater updating higher if a positive outcome is seen on the middle mediator, but the *expected* reduction in posterior variance is also greater (expected reduction in posterior variance takes account of the probability of observing different outcomes, which can also be calculated from the model given available data.)^[These quantities can be calculated by the `CQtools` package, still in alpha, via: `CQtools::expected_learning(model, "Y[X=1] > Y[X=0]", given = "X==1 & Y==1", strategy = "M2")`]
+
+Last, while we update most strongly when we observe  positive evidence on all steps, even that does not produce a large posterior probability that $X=1$ caused $Y=1$. Positive evidence on a causal chain is often not very informative. Explanations for this are in @dawid2019bounding.
+
+
+# Identification
+
+## Illustration of the backdoor criterion
+
+Perhaps the most common approach to identifying causal effects in observational research is to condition on possible confounders. The "backdoor" criterion for identifying an effect of $X$ on $Y$ involves finding a set of nodes to condition on that collectively block all "backdoor paths" between $X$ and $Y$. The intuition is that if these paths are blocked, then any systematic correlation between $X$ and $Y$ reflects the effect of $X$ on $Y$.
+
+To illustrate the backdoor criterion we want to show that estimates of the effect of $X$ on $Y$ are identified if we have data on a node that blocks a backdoor path---$C$---but not otherwise. With `CausalQueries` models however, rather than conditioning on $C$ we simply include data on $C$ in our model and update as usual.
+
+```{r appbackdoor, eval = TRUE}
+
+model <- make_model("C -> X -> Y <- C")  %>%
+         set_restrictions("(Y[C=1]<Y[C=0])")
+
+
+# Four types of data: Large, small, door open, door closed
+N <- 10000
+df_closed_door_large <- make_data(model, n = N)
+df_open_door_large   <- mutate(df_closed_door_large, C = NA)
+df_closed_door_small <- df_closed_door_large[sample(N, 200), ]
+df_open_door_small   <- df_open_door_large[sample(N, 200), ]
+
+```
+
+```{r, message = FALSE, echo = FALSE}
+if(do_diagnosis){
+
+  model <- make_model("C -> X -> Y <- C")  %>%
+         set_parameters(type = "prior_mean")  %>%
+         set_restrictions("(Y[C=1]<Y[C=0])")
+
+# parameters <- model$parameters
+# parameters[c("Y.Y1000", "Y.Y1100",  "Y.Y1001",  "Y.Y1101")] <- .125
+# model <- set_parameters(model, parameters)
+
+query_model(model, "Y[X=1] > Y[X=0]", using = "parameters")
+
+df_closed_door_large <- make_data(model, n = N)
+df_open_door_large   <- mutate(df_closed_door_large, C = NA)
+df_closed_door_small <- df_closed_door_large[sample(N, 200), ]
+df_open_door_small   <- df_open_door_large[sample(N, 200), ]
+
+updated1 <- update_model(model, df_closed_door_large)
+updated2 <- update_model(model, df_open_door_large)
+updated3 <- update_model(model, df_closed_door_small)
+updated4 <- update_model(model, df_open_door_small)
+
+dist1 <- query_distribution(updated1, query = "Y[X=1] - Y[X=0]", using = "posteriors")
+dist2 <- query_distribution(updated2, query = "Y[X=1] - Y[X=0]", using = "posteriors")
+dist3 <- query_distribution(updated3, query = "Y[X=1] - Y[X=0]", using = "posteriors")
+dist4 <- query_distribution(updated4, query = "Y[X=1] - Y[X=0]", using = "posteriors")
+
+write_rds(list(dist1 = dist1, dist2 = dist2, dist3=dist3, dist4=dist4), "saved/appendix_backdoor.rds")
+
+
+}
+
+back <- read_rds("saved/appendix_backdoor.rds")
+
+v <- query_model(model, "Y[X=1] - Y[X=0]", using = "parameters")$mean
+
+par(mfrow = c(2,2))
+hist(back$dist4, xlim = c(-1, 1)*.4, main = "Small n, backdoor open", xlab = "ATE")
+abline(v = v, col = "red")
+hist(back$dist3, xlim = c(-1, 1)*.4, main = "Small n, backdoor blocked", xlab = "ATE")
+abline(v = v, col = "red")
+hist(back$dist2, xlim = c(-1, 1)*.4, main = "Large n, backdoor open", xlab = "ATE")
+abline(v = v, col = "red")
+hist(back$dist1, xlim = c(-1, 1)*.4, main = "Large n, backdoor blocked", xlab = "ATE")
+abline(v = v, col = "red")
+
+
+```
+
+
+We see that with small $n$ (200 units), closing the backdoor (by including data on $C$) produces a tighter distribution on the ATE. With large $N$ (10,000 units) the distribution around the estimand collapses when the backdoor is closed but not when it is open.
+
+## Identification: Instruments
+
+We illustrate how you can learn about whether $X=1$ caused $Y=1$ by taking advantage of an "instrument," $Z$. 
+
+We start with a model that builds in the instrumental variables  exclusion restriction (no unobserved confounding between $Z$ and $Y$, no paths between $Z$ and $Y$ except through $X$) but does not include a monotonicity restriction (no negative effect of $Z$ on $X$). 
+
+```{r appinstruments}
+model <- make_model("Z -> X -> Y; X <-> Y")  
+
+CausalQueries:::plot_dag(model)
+```
+
+```{r, echo = FALSE}
+pars <- c( .5, .5,
+           .1, .2, .6, .1,
+           .1, .1, .7, .1, 
+           .1, .1, .7, .1,
+           .1, .1, .7, .1,
+           .1, .1, .7, .1)
+
+data <- make_data(model, n = 5000, parameters = pars)
+```
+
+```{r appinstruments4, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  updated <- update_model(model, data)
+  write_rds(updated, "saved/appendix_IV_simple.rds")
+  }
+updated <- read_rds("saved/appendix_IV_simple.rds")
+```
+
+
+```{r, echo = TRUE}
+result <- query_model(
+    updated, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    given = list(TRUE, "X[Z=1] > X[Z=0]",  "X==0",  "X==1"),
+    using = "posteriors")
+
+```
+
+```{r appinstruments6, echo = FALSE}
+kable(result)
+```
+
+We calculate the average causal effect (a) for all (b) for the compliers and (c) conditional on values of $M$. 
+
+We see here that the effects are strongest for the "compliers"---units for whom $X$ responds positively to $Z$; in addition they are stronger for the treated than for the untreated. Moreover we see that the posterior variance on the complier average effect is low.  If our model also imposed a monotonicity assumption then it would be lower still.
+
+```{r}
+model <- make_model("Z -> X -> Y")  %>%
+         set_restrictions(decreasing("Z", "X")) %>%
+         set_confound(confound = list(X = "Y[X=1]==1")) 
+```
+
+```{r appinstruments8, include = FALSE}
+if(do_diagnosis){
+  updated <- update_model(model, data)
+  write_rds(updated, "saved/appendix_IV_simple2.rds")
+  }
+updated <- read_rds("saved/appendix_IV_simple2.rds")
+result <- query_model(
+    updated, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    given = list(TRUE, "X[Z=1] > X[Z=0]",  "X==0",  "X==1"),
+    using = "posteriors")
+
+```
+
+```{r, echo = FALSE}
+kable(result)
+```
+
+
+
+## Identification through the frontdoor
+
+A less well known approach to identification uses information on the causal path from $X$ to $Y$. Consider the following model:
+
+```{r appfrontdoor}
+
+frontdoor <- make_model("X -> M -> Y; X <-> Y") 
+
+CausalQueries:::plot_dag(frontdoor)
+
+```
+
+Although in both the instrumental variables (IV) setup and the frontdoor setup we are trying to deal with confounding between $X$ and $Y$, the two differ in that in the IV set up we make use of a variable that is prior to $X$ whereas in the frontdoor model we make use of a variable between $X$ and $Y$. In both cases we need other exclusion restrictions: here we see that there is no unobserved confounding between $X$ and $M$ or between $M$ and $Y$. Importantly too there is no direct path from $X$ to $Y$, only the path that runs through $M$.
+
+Below we plot posterior distributions given observations on 2000 units, with and without data on $M$:
+
+```{r appfrontdoor2, echo = FALSE}
+
+if(do_diagnosis) {
+  data <- make_data(frontdoor, n = 2000)
+  
+  updated_1 <- update_model(frontdoor, mutate(data, M = NA))
+  
+  updated_2 <- update_model(frontdoor, data)
+  
+  Q1 <- query_distribution(updated_1, using = "posteriors", query = "Y[X=1] - Y[X=0]")
+  Q2 <- query_distribution(updated_2, using = "posteriors", query = "Y[X=1] - Y[X=0]")
+
+  write_rds(list(Q1=Q1, Q2=Q2), "saved/appendix_frontdoor.rds")
+}
+
+frontdoor <- read_rds("saved/appendix_frontdoor.rds")
+par(mfrow = c(1,2))
+hist(frontdoor$Q1, xlim = c(-.3, .3), main= "Inferences given X,Y, data only", xlab = "ATE")
+hist(frontdoor$Q2, xlim = c(-.3, .3), main = "Inferences given X,Y, and M data", xlab = "ATE")
+```
+
+The spike on the right confirms that we have identification.
+
+
+## Simple sample selection bias
+
+Say we are interested in assessing the share of Republicans in a population but Republicans are (possible) systematically likely to be absent from our sample. What inferences can we make given our sample?
+
+We will assume that we know when we have missing data, though of course we do not know the value of the missing data. 
+
+To tackle the problem we will include sample selection into our model:
+
+```{r appsimpleselc}
+
+model <- make_model("R -> S") %>%
+  set_parameters(node = c("R", "S"), parameters = list(c(2/3,1/3), c(1/3, 0, 1/3, 1/3)))
+
+data <- make_data(model, n = 1000) %>%
+        mutate(R = ifelse(S==0, NA, R ))
+
+```
+
+From this data and model, the priors and posteriors for population and sample quantities are:
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+  write_rds(update_model(model, data, refresh = 0), "saved/appendix_simple_selection1.rds")
+  }
+
+updated <- read_rds("saved/appendix_simple_selection1.rds")
+
+results <- query_model(updated, queries = "R==1", given = c(TRUE, "S==1"), using = c("parameters", "priors", "posteriors"), expand_grid = TRUE)
+
+kable(results)
+```
+
+For the population average effect we tightened our posteriors relative to the priors, though credibility intervals remain wide, even with large data, reflecting our uncertainty about the nature of selection.  Our posteriors on the sample mean are accurate and tight.
+
+Importantly we would not do so well if our data did not indicate that we had missingness.
+
+
+```{r appsimpleselc4, echo = FALSE}
+data <- make_data(model, n = 10000) %>%
+        filter(S==1)
+
+if(do_diagnosis){
+  write_rds(update_model(model, data, refresh = 0), "saved/appendix_simple_selection2.rds")
+  }
+
+updated <- read_rds("saved/appendix_simple_selection2.rds")
+
+results <- query_model(updated, queries = "R==1", given = c(TRUE, "S==1"), using = c("parameters", "posteriors"), expand_grid = TRUE)
+
+kable(results)
+
+```
+
+We naively conclude that all cases are sampled and that population effects are the same as sample effects. The problem here arises because the causal model does not encompass the data gathering process. 
+
+
+## Addressing both sample selection bias and confounding
+
+Consider the following model from @bareinboim2016causal (their Figure 4C). The key feature is that data is only seen for units with $S=1$ ($S$ for sampling).
+
+In this model the relationship between $X$ and $Y$ is confounded. Two strategies work to address confounding: controlling for either $Z$ or for $W1$ *and* $W2$ works. But only the first strategy addresses the sample selection problem properly. The reason is that $Z$ is independent of $S$ and so variation in $Z$ is not affected by selection on $S$.  
+
+```{r appsimpleselcconf, eval = FALSE}
+selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S")
+```
+
+```{r, echo = FALSE}
+selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S")
+CausalQueries:::plot_dag(selection)
+```
+
+To keep the parameter and type space small we also impose a set of restrictions: $S$ is non decreasing in $W_1$, $X$ is not decreasing in either $W1$ or $W2$, $Y$ is not decreasing $Z$ or $X$ and $X$ affects $Y$ only if $Z=1$. $W_2=1$ if and only if both $W_1=1$ and $Z=1$. These all reduce the problem to one with 18 nodal types and 288 causal types. 
+
+Worth noting that in this model although selection is related to patterns of confounding, it is not related to causal effects: the effect of $X$ on $Y$ is not different from units that are or are not selected. 
+
+Given these priors we will assume a true (unknown) data generating process with no effect of $X$ on $Y$, in which $W_1$ arises with a $1/3$ probability but has a strong positive effect on selection into the sample when it does arise.  
+
+```{r appsimpleselcconf3, echo = FALSE} 
+
+if(do_diagnosis) {
+  
+selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S") %>%
+    set_restrictions(c(
+                     "(S[W1=1] < S[W1=0])",
+                     "(X[W2=1] < X[W2=0])",
+                     "(X[W1=1] < X[W1=0])",
+                     "(Y[Z=1]  < Y[Z=0])",
+                     "(Y[X=1]  < Y[X=0])")) %>%
+    set_restrictions(labels = list(W2 = c("0001", "1111")), keep = TRUE) %>%
+    set_parameters(statement = "(S[W1=1] > S[W1=0])",
+                   node = "S", parameters = .14) %>%
+    set_parameters(statement = "(Y[X=1] != Y[X=0])",
+                   node = "Y", parameters = 0) %>%
+    set_parameters(label = "0001", node = "X", parameters = .85)
+
+selection$parameters_df
+df  <- make_data(selection, n = 30000, using = "parameters")
+df0 <- dplyr::filter(df, S==1)
+df1 <- dplyr::mutate(df0, Z = NA, W1 = NA, W2 = NA)
+df2 <- dplyr::mutate(df0, Z = NA)
+df3 <- dplyr::mutate(df0, W1 = NA, W2 = NA)
+
+sapply(0:1, function(w1) {sapply(0:1, function(w2)  with(dplyr::filter(df0, W1 == w1, W2==w2), mean(Y[X==1]) - mean(Y[X==0])))})
+
+
+  
+# summary(lm(Y~X*W2_norm ,  data = mutate(df0, W1_norm = W1- mean(W1), W2_norm = W2- mean(W2))))
+
+
+M1 <- update_model(selection, df1)
+M2 <- update_model(selection, df2)
+M3 <- update_model(selection, df3)
+
+OUT0 <- query_model(selection, 
+                    using = c("parameters", "priors"), 
+                    queries = "Y[X=1] - Y[X=0]")
+OUT <- lapply(list(M1, M2, M3), function(M) 
+  query_model(M, using = "posteriors", queries = "Y[X=1] - Y[X=0]"))
+
+check <- query_model(M2, using = "posteriors", queries = 
+              c(
+                "Y[X=1, W1=1, W2= 1] - Y[X=0, W1=1, W2= 1]",
+                "Y[X=1, W1=0, W2= 1] - Y[X=0, W1=0, W2= 1]",
+                "Y[X=1, W1=1, W2= 0] - Y[X=0, W1=1, W2= 0]",
+                "Y[X=1, W1=0, W2= 0] - Y[X=0, W1=0, W2= 0]",
+                "Y[X=1, Z= 1] - Y[X=0, W1=0, Z= 1]",
+                "Y[X=1, Z= 0] - Y[X=0, W1=0, Z= 0]"))
+
+write_rds(list(M1=M1, M2=M2, M3=M3, OUT0=OUT0, OUT=OUT, df0=df0, df1=df1, df2=df2, df3=df3, selection), "saved/17_selection_list.rds")
+}
+
+selection_list <- read_rds("saved/17_selection_list.rds")
+
+```
+
+The estimand values given the true parameters and priors for this model are as shown below. 
+
+```{r appsimpleselcconf5, echo = FALSE}
+
+kable(selection_list$OUT0, caption = "Estimand values")
+```
+
+This confirms a zero true effect, though priors are dispersed, centered on a positive effect.
+
+We can see the inference challenge from observational data using regression analysis with and without conditioning on $Z$ and $W_1, W_2$.
+
+```{r, echo = FALSE, message = FALSE, results='asis'}
+
+lm1 <- lm(Y~X,  data = selection_list$df0)
+
+lm2 <- lm(Y~X*W1_norm + X*W2_norm, data = mutate(selection_list$df0, W1_norm = W1 - mean(W1),            W2_norm = W2 - mean(W2)))
+lm3 <- lm(Y~X*Z_norm, data = mutate(selection_list$df0, Z_norm = Z - mean(Z)))
+stargazer(lm1, lm2, lm3, type = 'html', header = FALSE, keep = "X")
+```
+
+Naive analysis is far off; but even after conditioning on $W_1, W_2$ we still wrongly infer a positive effect. 
+
+Bayesian inferences given different data strategies are shown below:
+
+```{r appsimpleselcconf7, echo = FALSE}
+kable(
+  cbind(
+  data = c("X,Y", "X,Y, W1, W2", "X, Y, Z"),
+  bind_rows(selection_list$OUT)[, c("mean", "sd")]
+  # [c(1,3,5),]
+  ))
+
+
+```
+
+We see the best performance is achieved for the model with data on $Z$---in this case the mean posterior estimate is closest to the truth--0--and the standard deviation is lowest also. However the gains in choosing $Z$ over $W1, W2$ are not as striking as in the regression estimates since knowledge of the model structure protects us from error.
+
+
+## Learning from a collider!
+
+Conditioning on a collider can be a bad idea as it can introduce a correlation between variables that might not have existed otherwise [@elwert2014endogenous]. But that doesn't mean colliders should be ignored in analysis altogether. For a Bayesian, knowledge of the value of a collider can still be informative. 
+
+Pearl describes a model similar to the following as a case for which controlling for covariate $W$ induces bias in the estimation of the effect of $X$ on $Y$, which could otherwise be estimated without bias using simple differences in means.
+
+```{r applearncoll}
+
+model <- make_model("X -> Y <- U1 -> W <- U2 -> X") %>%
+  
+  set_restrictions(labels = list(Y = c("0001", "1111"), W = "0001"), keep = TRUE) %>%
+  set_restrictions("(X[U2=1]<X[U2=0])") %>%
+  set_parameters(node = c("U1", "Y"), parameters = list(c(1/4, 3/4), c(2/3, 1/3)))
+
+CausalQueries:::plot_dag(model)
+
+```
+
+```{r applearncoll2}
+data <- make_data(model, 
+                  n = 25000, 
+                  vars = c("W", "X", "Y"), 
+                  using = "parameters")
+```
+
+
+The effect of $X$ on $Y$ is .5 but average effects as well as the probability of causation, are different for units with $W=0$ and $W=1$ (this, even though $W$ does not affect $Y$):
+
+```{r, echo = FALSE, message = FALSE}
+
+  query_model(model, queries = list(`Y(1)-Y(0)` = "Y[X=1] - Y[X=0]"), 
+              using = "parameters",
+              given = list(
+                TRUE, 
+                "W==0",
+                "W==1",
+                "X==1 & Y==1",
+                "X==1 & Y==1 & W==0",
+                "X==1 & Y==1 & W==1")) %>% 
+    kable
+```
+
+
+
+These are the quantities we seek to recover.  The ATE can be gotten fairly precisely in a simple regression. But controlling for $W$ introduces bias in the estimation of this effect (whether done using a simple control or an interactive model):
+
+```{r applearncol4, echo = FALSE, warning = FALSE, results='asis'}
+M1 <- lm(Y~X, data = data)
+M2 <- lm(Y~X+W, data = data)
+M3 <- lm(Y~X*W_norm, data = mutate(data, W_norm = W - mean(W)))
+
+stargazer::stargazer(M1, M2, M3, type = "html", header = FALSE)
+  
+```
+
+How does the Bayesian model do, with and without data on $W$?
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+  
+  updated_no_W <- update_model(model, select(data, X,Y))
+  
+  write_rds(updated_no_W, "saved/appendix_collider1.rds")
+  
+  Q1 <- query_model(updated_no_W, queries = list(`Y(1)-Y(0)` = "Y[X=1] - Y[X=0]"), 
+              using = "posteriors",
+              given = list(
+                TRUE, 
+                "W==0",
+                "W==1",
+                "X==1 & Y==1",
+                "X==1 & Y==1 & W==0",
+                "X==1 & Y==1 & W==1"))
+  write_rds(Q1, "saved/appendix_colliderQ.rds")
+  
+  updated_W <- update_model(model,  select(data, X,Y, W))
+  write_rds(updated_W, "saved/appendix_collider2.rds")
+
+  Q2 <- query_model(updated_W, queries = list(`Y(1)-Y(0)` = "Y[X=1] - Y[X=0]"), 
+              using = "posteriors",
+              given = list(
+                TRUE, 
+                "W==0",
+                "W==1",
+                "X==1 & Y==1",
+                "X==1 & Y==1 & W==0",
+                "X==1 & Y==1 & W==1"))
+  write_rds(Q2, "saved/appendix_colliderQW.rds")
+  }
+updated_no_W <- read_rds("saved/appendix_collider1.rds")
+updated_W <- read_rds("saved/appendix_collider2.rds")
+colliderQ <- read_rds("saved/appendix_colliderQ.rds")
+colliderQW <- read_rds("saved/appendix_colliderQW.rds")
+```
+
+Without $W$ we have:
+
+```{r applearncoll6, echo = FALSE}
+kable(colliderQ  , caption = "Collider excluded from model")
+
+```
+
+
+Thus we estimate the treatment effect well. What's more we can estimate the probability of causation when $W=1$ accurately, even though we have not observed $W$. The reason is that if $W=1$ then, given the model restrictions,  we know that both $U_1=1$ and $U_2=1$ which is enough. We are not sure however what to infer when $W=0$  since this could be due to either  $U_1=0$ or $U_2=0$. 
+
+When we incorporate data on $W$ our posteriors are:
+
+```{r applearncoll8, echo = FALSE}
+kable(colliderQW, caption = "Collider included in model")
+
+
+```
+
+We see  including the collider does not induce error in estimation of the ATE, even though it does in a regression framework. Where we do well before we continue to do well. However the new information lets us improve our model and, in particular, we see that we now get a good and tight estimate for the probability that $X=1$ caused $Y=1$ in a case where $W=0$.
+
+In short, though conditioning on a collider induces error in a regression framework; including the collider as data for updating our causal model doesn't hurt us and can help us.
+
+<!-- In cases in which $W=0$, $X=1$ causes $Y=1$ when $U2=1$ (and $U1 = 0$). Joint observation of $W$ and $Y$ lets us learn about the probability that $U1=0$ and $U2 =1$ and in particular lets us learn that U1=0 is less common that supposed in the priors. -->
+
+# Mixing methods
+
+In @humphreys2015mixing we describe an approach to mixed methods in which within-case inference from a small set of cases are combined with cross sectional data from many cases to form integrated inferences. Reconceived of as a process of updating causal models, the distinction between within-case and cross case data becomes difficult to maintain---both are, after all, just nodes on a model. However the basic procedure can still be implemented, with, in this case, a rooted justification for *why* within case information is informative for estimands of interest. 
+
+## Using within case data to help with identification
+
+Here is a model in which a little within-case data adds a lot of leverage to assessing estimands of interest that cannot be estimated confidently with $X$, $Y$ data alone. In this  model  a front door type criterion is half satisfied. We assume $X\rightarrow M \rightarrow Y$ but we allow confounding to take the form of $X$  less likely in cases where $Y=1$ regardless of $X$.
+
+With simple $X,Y$ data, even on many cases (20,000 here), we cannot get precise estimates and we greatly underestimate the effect of $X$ on $Y$; with full data on $M$ in many cases we do very well. 
+
+But we *also* do well even with quite partial data on $M$, e.g.  if we have data for 100 out of 20,000 cases.
+
+Thus a little within-case data helps us make sense of the $X,Y$ data we have.
+
+The model:
+
+
+
+```{r appmm2}
+model <- 
+  make_model("X -> M -> Y; M <-> X; X <-> Y") 
+
+CausalQueries:::plot_dag(model)
+```
+
+Parameters: We imagine a true model with a treatment effect of .25 but positive confounding ($X=1$ more likely in cases in which $Y=1$, regardless of $X$. 
+
+```{r appmm3}
+model <- 
+  make_model("X -> M -> Y;  X <-> Y") 
+
+model <- model %>%  
+  set_parameters(
+       node = c("X", "M", "Y"),
+       parameters = c(0.75, 0.25,
+         .25, 0, .5, .25,
+         .25, 0, .5, .25,
+         .25, 0, .5, .25))
+
+query_model(model, list(ATE = "Y[X=1] - Y[X=0]"), using = "parameters")  %>% kable()
+
+```
+
+We use the model to simulate different types of data we might have access to thus:
+
+```{r}
+n <- 20000
+
+full_data <-  make_data(model, n, using = "parameters")
+
+XY_data <- full_data %>% select(X, Y)
+
+some_data  <- full_data %>%  mutate(M = ifelse((1:n) %in% sample(1:n, 100), M, NA))
+
+```
+
+
+Naive analysis:
+
+```{r}
+summary(lm(Y~X, data = full_data))$coef %>% 
+  kable(digits = 2)
+```
+
+Note that  the estimated ATE is too high -- over twice  what it should be.
+
+In contrast as seen in the next graph the `CausalQueries` estimate using $X,Y$ data only is low -- close to our prior at 0 and estimated with wide posterior variance.
+
+With full data on $X, M$ and $Y$ we get a tight estimate on the ATE, though our estimate of the nature of confounding is not identified---though it has much tighter bounds than before. With partial data on $M$ (100 cases out of 20000) we do nearly as well. A small amount of data is enough to narrow bounds on confounding and improve our estimates of the ATE considerably.
+
+```{r appmm6, include = FALSE}
+
+if(do_diagnosis){
+# X, Y data only
+updated_XY       <- update_model(model, XY_data, iter = 6000)
+write_rds(updated_XY, "saved/17_mixing1XY.rds")
+
+# Full Data
+updated_full    <- update_model(model, full_data, iter = 6000)
+write_rds(updated_full, "saved/17_mixing2XY.rds")
+
+# Partial Data
+updated_partial <- update_model(model, some_data, iter = 6000)
+write_rds(updated_partial, "saved/17_mixing3XY.rds")
+}
+
+
+updated_XY <-  read_rds("saved/17_mixing1XY.rds")
+updated_full <- read_rds("saved/17_mixing2XY.rds")
+updated_partial <- read_rds("saved/17_mixing3XY.rds")
+
+```
+
+```{r, eval = FALSE}
+
+# X, Y data only
+updated_XY      <- update_model(model, XY_data)
+
+# Full Data
+updated_full    <- update_model(model, full_data)
+
+# Partial Data
+updated_partial <- update_model(model, some_data)
+```
+
+
+```{r appmm8, echo = FALSE}
+
+plot_posterior <- function(model, main = "", prior = FALSE) {
+  
+  pars <- get_parameters(model)
+    
+  if(prior) {
+    model <- set_prior_distribution(model)
+    lambdas <- model$prior_distribution %>% data.frame
+    }
+    
+  if(!prior) lambdas <- model$posterior_distribution %>% data.frame
+
+  lambdas      <- 
+    lambdas  %>%
+    mutate(ATE = M.01*(Y.01_X.0 - Y.10_X.1) + M.10*(Y.10_X.1 - Y.01_X.0),
+           confound = X.1 - X.0)
+
+  plot(lambdas$confound, lambdas$ATE, xlim = c(-1,1), ylim = c(-.7, .7), main = main, xlab = "Confounding", ylab = "ATE", pch = 20, cex = .5)
+  abline(v = pars["X.1"] - pars["X.0"], col = "red")
+  abline(a = .25, b = 0, col = "red")
+  abline(v = mean(lambdas$confound))
+  abline(a = mean(lambdas$ATE), b = 0)
+}
+```
+
+```{r ch17mmfig, echo = FALSE, fig.cap = "Red lines denote estimand values, black lines show posterior means. Full data allows narrowing of posterior variance on confounding and tight esimates of treatment effects. But even limited data on $M$ gets us quite far (bottom right panel)."}
+par(mfrow = c(2,2))
+
+plot_posterior(model, main = "prior", prior = TRUE)
+plot_posterior(updated_XY, main = "data on X,Y only")
+plot_posterior(updated_full, main = "full data on X, Y and M")
+plot_posterior(updated_partial, main = "XY for all, M for some")
+```
+
+
+## Distinguishing paths
+
+Here is another example of mixing methods where a little within-case data goes a long way. We imagine that available data makes us very confident that $X$ causes $Y$ but we want to know about channels. In such cases, with high confidence about overall effects, and *absent unobserved confounding*, a little data on mediators might be highly informative.
+
+
+```{r apppaths}
+model <- make_model("X -> M1 -> Y <- M2 <- X") %>%
+  set_restrictions(c(decreasing("X", "M1"), 
+                     decreasing("M1", "Y"),
+                     decreasing("X", "M2"), 
+                     decreasing("M2", "Y"))) %>%
+  set_parameters(node = c("M1", "M2"), parameters = list(c(0,1,0), c(.5, 0,.5)), normalize=FALSE)  %>%
+  set_parameters(statement = "(Y[M1=1] == Y[M1=0])", parameters = 0)  
+
+CausalQueries:::plot_dag(model)
+```
+
+We imagine that in truth $X$ always causes $Y$ and it does so via $M1$, though this is not known *ex ante*:
+
+```{r apppaths2}
+Q1 <- query_model(model, 
+  queries = list(ate = te("X", "Y"), 
+                 via_M1 = "(M1[X=1]>M1[X=0]) & (Y[M1=1]>Y[M1=0])", 
+                 via_M2 = "(M2[X=1]>M2[X=0]) & (Y[M2=1]>Y[M2=0])"), 
+  using = c("parameters", "priors"),
+  expand_grid = TRUE) 
+```
+
+```{r apppaths3, echo = FALSE}
+
+Q1 %>% arrange(Using) %>% select(-Given) %>% kable(caption = "Priors and parameters")
+
+```
+
+Now suppose we have access to large $X$, $Y$, data.
+
+```{r apppath4, echo = FALSE}
+
+# Updating
+if(do_diagnosis){
+
+n <- 1000
+
+full_data <-  make_data(model, n, using = "parameters")
+
+XY_data  <- full_data %>% select(X, Y)
+
+some_data  <- full_data %>%  mutate(
+  M1 = ifelse((1:n) %in% sample(1:n, 20), M1, NA),
+  M2 = ifelse(is.na(M1), NA, M2))
+
+updated_XY    <- update_model(model, XY_data)
+updated_mixed <- update_model(model, some_data)
+write_rds(updated_XY, "saved/17_twopaths1.rds")
+write_rds(updated_mixed, "saved/17_twopaths2.rds")
+
+via_M1 <- query_distribution(updated_XY, "(M1[X=1]>M1[X=0]) & (Y[M1=1]>Y[M1=0])", using = "posteriors")
+via_M2 <- query_distribution(updated_XY, "(M2[X=1]>M2[X=0]) & (Y[M2=1]>Y[M2=0])", using = "posteriors")
+# plot(via_M1, via_M2)
+
+}
+updated_XY <- read_rds("saved/17_twopaths1.rds")
+updated_mixed  <- read_rds("saved/17_twopaths2.rds")
+
+
+# Inferences with model updated by knowledge of XY only 
+query_model(updated_XY, 
+  queries = list(ate = te("X", "Y"), 
+                 via_M1 = "(M1[X=1]>M1[X=0]) & (Y[M1=1]>Y[M1=0])", 
+                 via_M2 = "(M2[X=1]>M2[X=0]) & (Y[M2=1]>Y[M2=0])"), 
+  using = c("posteriors"),
+  expand_grid = TRUE) %>% kable(caption = "Inferences with 1000 observations; data on X, Y, only")
+```
+
+We infer that that $X$ certainly causes $Y$. But we are unsure about channels. 
+
+However, this changes dramatically with data on $M_1$ and $M_2$. Here we assume data on only 20 cases.
+
+```{r apppaths6}
+query_model(updated_mixed, 
+  queries = list(ate = te("X", "Y"), 
+                 via_M1 = "(M1[X=1]>M1[X=0]) & (Y[M1=1]>Y[M1=0])", 
+                 via_M2 = "(M2[X=1]>M2[X=0]) & (Y[M2=1]>Y[M2=0])"), 
+  using = c("posteriors"),
+  expand_grid = TRUE)  %>% kable(caption = "Inferences with 1000 observations for X, Y,  20 observations for M1, M2")
+
+```
+
+The data now convinces us that $X$ must work only through one channel. Thus, again, small within case data can dramatically alter conclusions from large $N$ data when that data has little discriminatory power for the estimands of interest.
+
+
+## Nothing from nothing
+
+Many of the models we have looked at---especially for process tracing---have a lot of structure, viz:  
+
+* conditional independence assumptions
+* no confounding assumptions, and 
+* monotonicity assumptions, or other restrictions 
+
+What happens if you have none of these? Can access to observational data render clues meaningful for inferences on causal effects?
+
+We show the scope for learning from a mediator for a "good case"---a world in which in fact (though unknown *ex ante* to the researcher): 
+
+* $X$ causes $Y$ through $M$
+* $X$ is a necessary condition for $M$ and $M$ is a sufficient condition for $Y$ -- and so $Y$ is monotonic in $X$ and 
+* there is no confounding
+
+
+Here is the data:
+
+```{r appnana}
+
+data <- make_model("X -> M -> Y") %>% 
+  
+        make_data(n = 2000, 
+                  parameters = c(.5, .5, .2, 0, .8, 0, 0, 0, .8, .2))
+
+```
+
+```{r, echo = FALSE}
+
+kable(cor(data), digits = 2, caption = "Data contains strong correlations.")
+
+```
+
+
+We imagine inferences are made starting from two types of model. In both we allow all possible links and we impose no restrictions on nodal types. Even though there are only three nodes, this model has 128 causal types ($2\times 4 \times 16$). In addition: 
+
+* In `model_1` we allow confounding between all pairs of nodes. This results in 127 free parameters. 
+
+* In `model_2` we assume that $X$ is known to be randomized. There are now only 64 free parameters.
+
+Here are the models:
+
+```{r appnana3}
+model_1 <- 
+  make_model("X -> M -> Y <- X; X <-> M; M <->Y; X <-> Y") 
+
+model_2 <- 
+  make_model("X -> M -> Y <- X; M <->Y") 
+
+```
+
+```{r, echo = FALSE, fig.cap= "Two models. The model on the right might be justified if $X$ is known to be randomized."}
+par(mfrow = 1:2)
+CausalQueries:::plot_dag(model_1)
+# title(main = list("X not known to be randomized", cex = .5))
+CausalQueries:::plot_dag(model_2)
+# title("X  known to be randomized")
+# text(0, -1.3, "X  known to be randomized")
+```
+
+
+After updating we query the models to see how inferences depend on $M$ like this:
+
+```{r, eval = FALSE}
+
+model_1 <- update_model(model_1, data, iter = 6000)
+
+query_model(model_1, 
+            queries = "Y[X=1] > Y[X=0]",
+            given = c("X==1 & Y==1", "X==1 & M==1 & Y==1"),
+            using = c("priors", "posteriors"), 
+            expand_grid = TRUE)
+
+```
+
+
+```{r, echo = FALSE}
+
+if(do_diagnosis){
+
+model_1 <- update_model(model_1, data, iter = 6000)
+
+model_2 <- update_model(model_2, data, iter = 6000)
+
+q1 <- query_model(model_1, 
+            queries = "Y[X=1] > Y[X=0]",
+            given = c("X==1 & Y==1", "X==1 & M==1 & Y==1", "X==1 & M==0 & Y==1"),
+            using = c("priors", "posteriors"), 
+            expand_grid = TRUE)
+
+q2 <- query_model(model_2, 
+            queries = "Y[X=1] > Y[X=0]",
+            given = c("X==1 & Y==1", "X==1 & M==1 & Y==1", "X==1 & M==0 & Y==1"),
+            using = c("priors", "posteriors"), 
+            expand_grid = TRUE)
+
+write_rds(model_1, "saved/App_somethingnothing_model_1.rds")
+write_rds(model_2, "saved/App_somethingnothing_model_2.rds")
+write_rds(q1, "saved/App_somethingnothing1.rds")
+write_rds(q2, "saved/App_somethingnothing2.rds")
+}
+
+q1 <- read_rds("saved/App_somethingnothing1.rds")
+q2 <- read_rds("saved/App_somethingnothing2.rds")
+
+q1 %>% arrange(Using) %>% kable( 
+      caption = "Can observation of large N data render mediator $M$ informative for case level inference? Observational data.")
+
+kable(q2 %>% arrange(Using), 
+      caption = "Can observation of large N data render mediator $M$ informative for case level inference? X randomized.")
+```
+
+We find that even with an auspicious monotonic data generating process in which $M$ is a total mediator, $M$ gives no traction on causal inference in Model 1 but it gives considerable leverage in Model 2: $M$ is informative, especially if $M=0$, when $X$ is known to be randomized, but it provides essentially no guidance if it is not.
+
+```{r appnana6, eval = FALSE, echo = FALSE}
+model1 <- read_rds("saved/App_somethingnothing_model_1.rds")
+
+kable(cbind(prior = get_parameters(model1, param_type = "flat"),
+            posterior = get_parameters(model1, param_type = "posterior_mean")), digits = 2)
+```
+
+# External validity and inference aggregation
+
+## Transportation of findings across contexts
+
+Say we study the effect of $X$ on $Y$ in case 0 (a country, for instance) and want to make inferences to case 1 (another country). Our problem however is that effects are heterogeneous and features  that differ across units may be related both to treatment assignment, outcomes, and selection into the sample. This is the problem studied by @pearl2014external. In particular  @pearl2014external show for which nodes data is needed in order to  "licence" external claims, given a model. 
+
+We illustrate with a simple model in which a confounder has a different distribution in a study site and a target site.
+
+```{r extval}
+
+model <- make_model("Case -> W  -> X -> Y <- W") %>%
+  set_restrictions("W[Case = 1] < W[Case = 0]") %>%
+  set_parameters(node = "X", statement = "X[W=1]>X[W=0]", parameters = 1/2)%>%
+  set_parameters(node = "Y", statement = complements("W", "X", "Y"), parameters = .17) %>%
+  set_parameters(node = "Y", statement = decreasing("X", "Y"), parameters = 0) 
+
+CausalQueries:::plot_dag(model)
+
+
+```
+
+
+We start by checking some basic quantities in the priors and the posteriors, we will then see how we do with data.
+
+```{r appev2}
+query_model(model,
+            queries = list(Incidence = "W==1", 
+                           ATE = "Y[X=1] - Y[X=0]", 
+                           CATE = "Y[X=1, W=1] - Y[X=0, W=1]"),
+            given = c("Case==0", "Case==1"),
+            using = c("priors", "parameters"), expand_grid = TRUE) %>% kable
+
+```
+
+We see that the incidence of $W$ as well as the ATE of $X$ on $Y$ is larger in case 1 than in case 0 (in parameters, though not in priors). However the effect of $X$ on $Y$ conditional on $W$ is the same in both places. 
+
+We now update the model *using data on $X$ and $Y$ only from one case* (case 1) and data on *W* from both and check inferences on the other.
+
+The function `make_data` lets us generate data like this by specifying a multistage data strategy:
+
+```{r appev3, eval = FALSE}
+data <- make_data(model, n = 1000, 
+                  vars = list(c("Case", "W"), c("X", "Y")), 
+                  probs = c(1,1),
+                  subsets = c(TRUE, "Case ==1"))
+
+transport <- update_model(model, data)
+
+query_model(transport,
+            queries = list(Incidence = "W==1", 
+                           ATE = "Y[X=1] - Y[X=0]", 
+                           CATE = "Y[X=1, W=1] - Y[X=0, W=1]"),
+            given = c("Case==0", "Case==1"),
+            using = c("posteriors", "parameters"), expand_grid = TRUE)
+
+```
+
+
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+
+  data <- make_data(model, n = 10000, 
+                  vars = list(c("Case", "W"), c("X", "Y")), 
+                  probs = c(1,1),
+                  subsets = c(TRUE, "Case == 0"))
+
+  transport <- update_model(model, data)
+
+  write_rds(query_model(transport,
+            queries = list(Incidence = "W==1", 
+                           ATE = "Y[X=1] - Y[X=0]", 
+                           CATE = "Y[X=1, W=1] - Y[X=0, W=1]"),
+            given = c("Case==0", "Case==1"),
+            using = c("posteriors", "parameters"), expand_grid = TRUE),
+            "saved/app_transport.rds")
+}
+
+q <- read_rds("saved/app_transport.rds")
+
+kable(q, caption = "Extrapolation when two sites differ on $W$ and $W$ is observable in both sites")
+
+```
+
+We do well in recovering the (different) effects both in the location we study and the one in which we do not. In essence querying the model for the out of sample case requests a type of post stratification. We get the right answer, though as always this depends on  the model being correct.
+
+Had we attempted to make the extrapolation without data on $W$ in country 1 we would get it wrong. In that case however we would also report greater posterior variance. The posterior variance here captures the fact that we know things could be different in country 1, but we don't know in what way they are different. Note that we get the CATE right since in the model this is assumed to be the same across cases.
+
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+
+  data2 <- make_data(model, n = 10000, 
+                  vars = list(c("Case"), c("W", "X", "Y")), 
+                  probs = c(1,1),
+                  subsets = c(TRUE, "Case == 0"))
+
+  transport2 <- update_model(model, data2)
+
+  write_rds(query_model(transport2,
+            queries = list(Incidence = "W==1", 
+                           ATE = "Y[X=1] - Y[X=0]", 
+                           CATE = "Y[X=1, W=1] - Y[X=0, W=1]"),
+            given = c("Case==0", "Case==1"),
+            using = c("posteriors", "parameters"), expand_grid = TRUE),
+            "saved/app_transport2.rds")
+}
+
+q2 <- read_rds("saved/app_transport2.rds")
+
+kable(q2, caption = "Extrapolation when two sites differ on $W$ and $W$ is not observable in target country.")
+
+```
+
+## Combining observational and experimental data
+
+An interesting weakness of experimental studies is that, by dealing so effectively with self selection into treatment, they limit our ability to learn about self selection. Often however we want to know what causal effects would be specifically for people that would take up a treatment in non experimental settings. This kind of problem is studied for example by @knox2019design.
+
+A causal model can encompass both experimental and observational data and let you answer this kind of question. To illustrate, imagine that node $R$ indicates whether a unit was assigned to be randomly assigned to treatment assignment ($X=Z$ if $R=1$) or took on its observational value ($X=O$ if $R=0$). We assume the exclusion restriction that entering the experimental sample is not related to $Y$ other than through assignment of $X$. 
+
+```{r appcombexpob, message = FALSE, warning = FALSE}
+model <- make_model("R -> X -> Y; O -> X <- Z; O <-> Y") %>%
+  
+	set_restrictions("(X[R=1, Z=0]!=0) | (X[R=1, Z=1]!=1) | (X[R=0, O=0]!=0) | (X[R=0, O=1]!=1)")
+
+CausalQueries:::plot_dag(model)
+```
+
+```{r, echo = FALSE, include = FALSE}
+P <- get_parameter_matrix(model)
+kable(P[,1:4])
+```
+
+
+The parameter matrix has just one type for $X$ since $X$ really operates here as a kind of switch, inheriting the value of $Z$ or $O$ depending on $R$. Parameters allow for complete confounding between $O$ and $Y$ but $Z$ and $Y$ are unconfounded.
+
+We imagine parameter values in which there is a true .2 effect of $X$ on $Y$. However the effect is positive (.6) for cases in which $X=1$ under observational assignment but negative (-.2) for cases in which $X=0$ under observational assignment.
+
+```{r}
+
+model <- model %>%
+	set_parameters(node = "Y", confound = "O==0", parameters = c(.8, .2,  0,  0)) %>%
+	set_parameters(node = "Y", confound = "O==1", parameters = c( 0,  0, .6, .4))
+
+```
+
+ 
+To parse this expression: we allow different parameter values for the four possible nodal types for $Y$ when $O=0$ and when $O=1$. When $O=0$ we have $(\lambda_{00} = .8, \lambda_{10} = .2, \lambda_{01} = 0, \lambda_{11} = 0)$ which implies a negative treatment effect and many $Y=0$ observations.  When $O=1$ we have $(\lambda_{00} = 0, \lambda_{10} = 0, \lambda_{01} = .6, \lambda_{11} = .4)$ which implies a positive treatment effect and many $Y=1$ observations.  
+
+The estimands:
+
+```{r, echo = FALSE}
+result <- query_model(
+    model, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    given = list(TRUE, "R==0", "R==1"),
+    using = "parameters")
+kable(result, caption = "estimands")
+```
+
+
+The priors:
+
+```{r appcombexpobs2, echo = FALSE}
+result <- query_model(
+    model, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    given = list(TRUE, "R==0", "R==1"),
+    using = "priors")
+kable(result, caption = "priors")
+```
+
+Data:
+
+
+```{r}
+data <- make_data(model, n = 800)
+```
+
+
+The true effect is .2 but naive analysis on the observational data would yield a strongly upwardly biased estimate.
+
+```{r, eval = FALSE}
+estimatr::difference_in_means(Y~X, data = filter(data, R==0))
+```
+
+```{r, echo  = FALSE, warning = FALSE, message = FALSE}
+x <- estimatr::difference_in_means(Y~X, data = filter(data, R==0))
+kable(summary(x)[[1]], digits = 3, caption = "Inferences on the ATE from differences in means")
+```
+
+The `CausalQueries` estimates are:
+
+```{r, eval = FALSE}
+posterior <- update_model(model, data)
+```
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(update_model(model, data), "saved/appendix_exp_obs.rds")
+  }
+updated <- read_rds("saved/appendix_exp_obs.rds")
+```
+
+```{r, echo = FALSE}
+result <- query_model(
+    updated, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    given = list(TRUE, "R==0", "R==1"),
+    using = "posteriors")
+kable(result)
+```
+
+
+Much better. 
+
+This model used both the experimental and the observational data. It is interesting to ask whether the observational data improved the estimates from the experimental data or did everything depend on the experimental data?
+
+To see, lets do updating using experimental data only:
+
+```{r, eval = FALSE}
+updated_no_O <- update_model(model, dplyr::filter(data, R==1))
+```
+
+
+```{r, message = FALSE, warning = FALSE, include = FALSE}
+if(do_diagnosis){
+  write_rds(update_model(model, dplyr::filter(data, R==1)), "saved/appendix_exp_obs_2.rds")
+  }
+updated_no_O <- read_rds("saved/appendix_exp_obs_2.rds")
+```
+
+```{r appcombexpopp8, echo = FALSE}
+result <- query_model(
+    updated_no_O, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    given = list(TRUE, "R==0", "R==1"),
+    using = "posteriors")
+kable(result)
+```
+
+In this case we get a tightening of posterior variance and a more accurate result when we use the observational data but the gains are relatively small. They would be smaller still if we had more data, in which case inferences from the experimental data would be more accurate still. 
+
+In both cases the estimates for the average effect in the randomized and the observationally assigned group are  the same. This is how it should be since these are, afterall, randomly assigned into these groups. 
+
+Heterogeneity in this model lies between those that are in treatment and those that are in control *in the observational* sample. We learn nothing about this heterogeneity from the experimental data alone but we learn a lot from the mixed model, picking up the strong self selection into treatment in the observational group: 
+
+```{r, echo = FALSE}
+result2 <- query_model(
+    updated, 
+    queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
+    given = list("R==1 & X==0", "R==1 & X==1", "R==0 & X==0", "R==0 & X==1"),
+    using = "posteriors")
+
+kable(result2)
+```
+
+
+## A jigsaw puzzle: Learning across populations
+
+Consider a situation in which we believe the same model holds in multiple sites but in which learning about the model requires combining data about different parts of the model from multiple studies. 
+
+```{r jigsaw, eval = TRUE}
+model <- make_model("X -> Y <- Z -> K") %>%
+
+          set_parameters(
+            statement = list("(Y[X=1, Z = 1] > Y[X=0, Z = 1])",  
+                             "(K[Z = 1] > K[Z = 0])"),
+            node = c("Y","K"), 
+            parameters = c(.24,.85))
+
+CausalQueries:::plot_dag(model)
+
+```
+
+We imagine we have access to three types of data;
+
+1. Study 1 is a factorial study examining the joint effects of $X$ and $Z$ on $Y$, $K$ is not observed
+2. Study 2 is an RCT looking at the relation between $Z$ and $K$. $X$ and $Y$ are not observed. 
+3. Study 3 is an experiment looking at the effects of $X$ on $Y$, ancillary data on context, $K$ is collected but $Z$ is not observed
+
+```{r}
+
+df <- make_data(model, 300, using = "parameters") %>%
+  
+      mutate(study = rep(1:3, each = 100),
+             K = ifelse(study == 1, NA, K),
+             X = ifelse(study == 2, NA, X),
+             Y = ifelse(study == 2, NA, Y),
+             Z = ifelse(study == 3, NA, Z)
+             )
+
+```
+
+```{r, echo = FALSE}
+if(do_diagnosis){
+
+updated1 <- update_model(model, filter(df, study == 1))
+updated2 <- update_model(model, filter(df, study == 2))
+updated3 <- update_model(model, filter(df, study == 3))
+updated_all <- update_model(model, df)
+
+subs <- list(
+              "X == 1 & Y == 1 & K == 1",
+              "X == 1 & Y == 1 & K == 0")
+subs2 <- list(
+              "X == 1 & Y == 1 & K == 1",
+              "X == 1 & Y == 1 & K == 0",
+              "X == 1 & Y == 1 & K == 1 & Z == 1",
+              "X == 1 & Y == 1 & K == 0 & Z == 1",
+              "X == 1 & Y == 1 & K == 1 & Z == 0",
+              "X == 1 & Y == 1 & K == 0 & Z == 0")
+
+# If updating done using case data only
+result1 <- query_model(updated1, queries = "Y[X=0] == 0", given = subs, using = "posteriors")
+result2 <- query_model(updated2, queries = "Y[X=0] == 0", given = subs, using = "posteriors")
+result3 <- query_model(updated3, queries = "Y[X=0] == 0", given = subs, using = "posteriors")
+result4 <- query_model(updated_all, queries = "Y[X=0] == 0", given = subs2, using = "posteriors")
+
+write_rds(list(result1, result2, result3, result4), "saved/app_frankenstein.rds")
+}
+
+```
+
+
+
+Tables \@ref(tab:frank1) -  \@ref(tab:frank3) show conditional inferences for the probability that $X$ caused $Y$ in $X=Y=1$ cases conditional on $K$ for each study, analyzed individually 
+
+```{r frank1, echo = FALSE}
+
+frank <- read_rds("saved/app_frankenstein.rds")
+
+kable(frank[[3]][,-c(1,3)], caption = "Clue is uninformative in Study 1")
+```
+
+```{r frank2, echo = FALSE}
+kable(frank[[1]][,-c(1,3)], caption = "Clue is also uninformative in Study 2 (factorial)")
+```
+
+```{r frank3, echo = FALSE}
+kable(frank[[2]][,-c(1,3)], caption = "Clue is also uninformative in Study 3 (experiment studying $K$)")
+```
+
+In no case is  $K$ informative. In study 1 data on $K$ is not available, in study 2 it is available but researchers do not know, quantitatively, how it relates to  $Z$. In the third study the $Z,K$ relationship is well understood but the joint relation between  $Z,X$, and $Y$ is not understood.
+
+Table \@ref(tab:frank4) shows the inferences when the data are combined with joint updating across all parameters.
+
+```{r frank4, echo = FALSE}
+kable(frank[[4]][,-c(1,3)], caption = "Clue is informative after combining studies linking $K$ to $Z$ and $Z$ to $Y$")
+```
+
+Here fuller understanding of the model lets researchers use information on $K$ to update on values for $Z$ and in turn update on the likely effects of $X$ on $Y$. Rows 3-6 highlight that the updating works through inferences on $Z$ and there if $Z$ is known, as in Study 2, there are no additional gains from knowledge of $K$. 
+
+The collection of studies collectively allow for inferences that are not possible from any one study.

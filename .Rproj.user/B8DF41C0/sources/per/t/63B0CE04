@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1576085957951.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1325126327",
+    "id" : "63B0CE04",
+    "lastKnownWriteTime" : 1576086594,
+    "last_content_update" : 1576086594741,
+    "path" : "C:/Dropbox/WZB/caus/4 Memos/rarity motivation/rarity.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "79,0",
+        "last_setup_crc32" : "",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

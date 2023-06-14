@@ -1,0 +1,52 @@
+---
+title: "optimization"
+author: "Macartan"
+date: "9/9/2019"
+output: html_document
+---
+
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# A decision model
+
+Parent of type $j\in \{G, N\}$ in ESB $i$ decides whether to send their child to school $k$
+
+  We assume they receive utility from attending school $k$ of:
+
+  $$u_{ijk} = \delta_k^{\beta_1^j}q_k^{\beta_2^j} (\alpha^j_k)^{\beta_3^j}n_k^{\beta_4^j} - 1(k\neq i)c$$
+
+  where:
+
+  * $\delta$ is proximity to the school
+* $q$ is school quality
+* $\alpha$ is share of types that are similar to oneself
+* $n$ is school size
+* $c$ is a cost incurred for not attending your ESB school
+
+The $\beta$ parameters are our estimands of interest
+
+Using a quantile response approach we assume that the probability $j$ chooses school $k$ is then
+
+$$\frac{exp(\lambda_j u_{ijk})}{\sum_s exp(\lambda_j u_{ijk}) }$$
+
+where $\lambda^j$ is an overall rationality parameter, indexed here by group.
+
+This can be interpreted as optimal choice given ideosyncratic utility shocks to different schools.
+
+Note that for sufficiently large $c$ there is no sorting at all. 
+
+* From this  we can derive a likelihood for the number of students in school $j$ in period $t$ given data from $t-1$.
+
+* We have ten parameters. 
+
+We also assume that school quality depends on the number of students and, perhaps, class homogeneity, and, perhaps, previous year's quality.
+
+How might this system evolve?
+
+
+## Next step:
+
+Simulate, assuming a negative weight on $n$ and positive weights on all other factors.

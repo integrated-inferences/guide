@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 11 External validity and inference aggregation | Causal Models: Guide to CausalQueries</title>
+  <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="generator" content="bookdown 0.17 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 11 External validity and inference aggregation | Causal Models: Guide to CausalQueries" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="github-repo" content="rstudio/causalmodels" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 11 External validity and inference aggregation | Causal Models: Guide to CausalQueries" />
+  
+  <meta name="twitter:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  
+
+<meta name="author" content="Macartan Humphreys and Alan Jacobs" />
+
+
+<meta name="date" content="2020-06-10" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="mixing-methods.html"/>
+<link rel="next" href="notation.html"/>
+<script src="libs/jquery/jquery.min.js"></script>
+<link href="libs/gitbook/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="headers\style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Model based causal inference: A guide to gbiqq</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="part"><span><b>I Causal Models</b></span></li>
+<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a><ul>
+<li class="chapter" data-level="1.1" data-path="cm.html"><a href="cm.html#two-approaches-to-inference"><i class="fa fa-check"></i><b>1.1</b> Two approaches to inference</a></li>
+<li class="chapter" data-level="1.2" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-difference-in-means"><i class="fa fa-check"></i><b>1.2</b> Recovering the ATE with Difference in Means</a></li>
+<li class="chapter" data-level="1.3" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-a-causal-model"><i class="fa fa-check"></i><b>1.3</b> Recovering the ATE with a Causal Model</a></li>
+<li class="chapter" data-level="1.4" data-path="cm.html"><a href="cm.html#going-further"><i class="fa fa-check"></i><b>1.4</b> Going further</a></li>
+</ul></li>
+<li class="part"><span><b>II The Package</b></span></li>
+<li class="chapter" data-level="2" data-path="package.html"><a href="package.html"><i class="fa fa-check"></i><b>2</b> Installation</a></li>
+<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a><ul>
+<li class="chapter" data-level="3.1" data-path="defining-models.html"><a href="defining-models.html#getting-going"><i class="fa fa-check"></i><b>3.1</b> Getting going</a></li>
+<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="defining-models.html"><a href="defining-models.html#nodal-types"><i class="fa fa-check"></i><b>3.2.1</b> Nodal types</a></li>
+<li class="chapter" data-level="3.2.2" data-path="defining-models.html"><a href="defining-models.html#causal-types"><i class="fa fa-check"></i><b>3.2.2</b> Causal types</a></li>
+<li class="chapter" data-level="3.2.3" data-path="defining-models.html"><a href="defining-models.html#parameters-dataframe"><i class="fa fa-check"></i><b>3.2.3</b> Parameters dataframe</a></li>
+<li class="chapter" data-level="3.2.4" data-path="defining-models.html"><a href="defining-models.html#parameter-matrix"><i class="fa fa-check"></i><b>3.2.4</b> Parameter matrix</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="defining-models.html"><a href="defining-models.html#restrictions"><i class="fa fa-check"></i><b>3.3</b> Setting restrictions</a></li>
+<li class="chapter" data-level="3.4" data-path="defining-models.html"><a href="defining-models.html#confounding"><i class="fa fa-check"></i><b>3.4</b> Allowing confounding</a></li>
+<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="defining-models.html"><a href="defining-models.html#custom-priors"><i class="fa fa-check"></i><b>3.5.1</b> Custom priors</a></li>
+<li class="chapter" data-level="3.5.2" data-path="defining-models.html"><a href="defining-models.html#prior-warnings"><i class="fa fa-check"></i><b>3.5.2</b> Prior warnings</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="defining-models.html"><a href="defining-models.html#parameters"><i class="fa fa-check"></i><b>3.6</b> Setting Parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a><ul>
+<li class="chapter" data-level="4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#data-for-stan"><i class="fa fa-check"></i><b>4.1</b> Data for <code>stan</code></a></li>
+<li class="chapter" data-level="4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#stan-code"><i class="fa fa-check"></i><b>4.2</b> <code>stan</code> code</a></li>
+<li class="chapter" data-level="4.3" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a></li>
+<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#arbitrary-parameters"><i class="fa fa-check"></i><b>4.4.1</b> Arbitrary parameters</a></li>
+<li class="chapter" data-level="4.4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#non-binary-data"><i class="fa fa-check"></i><b>4.4.2</b> Non binary data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a><ul>
+<li class="chapter" data-level="5.1" data-path="querying-models.html"><a href="querying-models.html#case-level-queries"><i class="fa fa-check"></i><b>5.1</b> Case level queries</a></li>
+<li class="chapter" data-level="5.2" data-path="querying-models.html"><a href="querying-models.html#posterior-queries"><i class="fa fa-check"></i><b>5.2</b> Posterior queries</a></li>
+<li class="chapter" data-level="5.3" data-path="querying-models.html"><a href="querying-models.html#query-distribution"><i class="fa fa-check"></i><b>5.3</b> Query distribution</a></li>
+<li class="chapter" data-level="5.4" data-path="querying-models.html"><a href="querying-models.html#token-and-general-causation"><i class="fa fa-check"></i><b>5.4</b> Token and general causation</a></li>
+<li class="chapter" data-level="5.5" data-path="querying-models.html"><a href="querying-models.html#complex-queries"><i class="fa fa-check"></i><b>5.5</b> Complex queries</a></li>
+</ul></li>
+<li class="part"><span><b>III Applications</b></span></li>
+<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a><ul>
+<li class="chapter" data-level="6.1" data-path="applications.html"><a href="applications.html#the-ladder-of-causation-in-an-x-rightarrow-y-model"><i class="fa fa-check"></i><b>6.1</b> The ladder of causation in an <span class="math inline">\(X \rightarrow Y\)</span> model</a></li>
+<li class="chapter" data-level="6.2" data-path="applications.html"><a href="applications.html#x-causes-y-with-unmodelled-confounding"><i class="fa fa-check"></i><b>6.2</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with unmodelled confounding</a></li>
+<li class="chapter" data-level="6.3" data-path="applications.html"><a href="applications.html#x-causes-y-with-confounding-modeled"><i class="fa fa-check"></i><b>6.3</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with confounding modeled</a></li>
+<li class="chapter" data-level="6.4" data-path="applications.html"><a href="applications.html#simple-mediation-model"><i class="fa fa-check"></i><b>6.4</b> Simple mediation model</a></li>
+<li class="chapter" data-level="6.5" data-path="applications.html"><a href="applications.html#simple-moderator-model"><i class="fa fa-check"></i><b>6.5</b> Simple moderator model</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a><ul>
+<li class="chapter" data-level="7.1" data-path="explanation.html"><a href="explanation.html#tightening-bounds-on-causes-of-effects-using-an-unobserved-covariate"><i class="fa fa-check"></i><b>7.1</b> Tightening bounds on causes of effects using an unobserved covariate</a></li>
+<li class="chapter" data-level="7.2" data-path="explanation.html"><a href="explanation.html#Billy"><i class="fa fa-check"></i><b>7.2</b> Actual Causation: Billy and Suzy’s moderator and mediation model</a></li>
+<li class="chapter" data-level="7.3" data-path="explanation.html"><a href="explanation.html#diagnosis-inferring-a-cause-from-symptoms"><i class="fa fa-check"></i><b>7.3</b> Diagnosis: Inferring a cause from symptoms</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a><ul>
+<li class="chapter" data-level="8.1" data-path="process-tracing.html"><a href="process-tracing.html#what-to-infer-from-what"><i class="fa fa-check"></i><b>8.1</b> What to infer from what</a></li>
+<li class="chapter" data-level="8.2" data-path="process-tracing.html"><a href="process-tracing.html#probative-value-and-d-separation"><i class="fa fa-check"></i><b>8.2</b> Probative value and <span class="math inline">\(d\)</span>-separation</a></li>
+<li class="chapter" data-level="8.3" data-path="process-tracing.html"><a href="process-tracing.html#foundations-for-van-everas-tests"><i class="fa fa-check"></i><b>8.3</b> Foundations for Van Evera’s tests</a></li>
+<li class="chapter" data-level="8.4" data-path="process-tracing.html"><a href="process-tracing.html#clue-selection-clues-at-the-center-of-chains-can-be-more-informative"><i class="fa fa-check"></i><b>8.4</b> Clue selection: clues at the center of chains can be more informative</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a><ul>
+<li class="chapter" data-level="9.1" data-path="identification.html"><a href="identification.html#illustration-of-the-backdoor-criterion"><i class="fa fa-check"></i><b>9.1</b> Illustration of the backdoor criterion</a></li>
+<li class="chapter" data-level="9.2" data-path="identification.html"><a href="identification.html#identification-instruments"><i class="fa fa-check"></i><b>9.2</b> Identification: Instruments</a></li>
+<li class="chapter" data-level="9.3" data-path="identification.html"><a href="identification.html#identification-through-the-frontdoor"><i class="fa fa-check"></i><b>9.3</b> Identification through the frontdoor</a></li>
+<li class="chapter" data-level="9.4" data-path="identification.html"><a href="identification.html#simple-sample-selection-bias"><i class="fa fa-check"></i><b>9.4</b> Simple sample selection bias</a></li>
+<li class="chapter" data-level="9.5" data-path="identification.html"><a href="identification.html#addressing-both-sample-selection-bias-and-confounding"><i class="fa fa-check"></i><b>9.5</b> Addressing both sample selection bias and confounding</a></li>
+<li class="chapter" data-level="9.6" data-path="identification.html"><a href="identification.html#learning-from-a-collider"><i class="fa fa-check"></i><b>9.6</b> Learning from a collider!</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a><ul>
+<li class="chapter" data-level="10.1" data-path="mixing-methods.html"><a href="mixing-methods.html#using-within-case-data-to-help-with-identification"><i class="fa fa-check"></i><b>10.1</b> Using within case data to help with identification</a></li>
+<li class="chapter" data-level="10.2" data-path="mixing-methods.html"><a href="mixing-methods.html#distinguishing-paths"><i class="fa fa-check"></i><b>10.2</b> Distinguishing paths</a></li>
+<li class="chapter" data-level="10.3" data-path="mixing-methods.html"><a href="mixing-methods.html#nothing-from-nothing"><i class="fa fa-check"></i><b>10.3</b> Nothing from nothing</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a><ul>
+<li class="chapter" data-level="11.1" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#transportation-of-findings-across-contexts"><i class="fa fa-check"></i><b>11.1</b> Transportation of findings across contexts</a></li>
+<li class="chapter" data-level="11.2" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#combining-observational-and-experimental-data"><i class="fa fa-check"></i><b>11.2</b> Combining observational and experimental data</a></li>
+<li class="chapter" data-level="11.3" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#a-jigsaw-puzzle-learning-across-populations"><i class="fa fa-check"></i><b>11.3</b> A jigsaw puzzle: Learning across populations</a></li>
+</ul></li>
+<li class="part"><span><b>IV Notation</b></span></li>
+<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a><ul>
+<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a><ul>
+<li class="chapter" data-level="12.1.1" data-path="notation.html"><a href="notation.html#parents"><i class="fa fa-check"></i><b>12.1.1</b> Parents, children, and all that</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2" data-path="notation.html"><a href="notation.html#syntax"><i class="fa fa-check"></i><b>12.2</b> Causal syntax</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/macartan/gbiqq/" target="blank">Uses gbiqq</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Causal Models: Guide to <code>CausalQueries</code></a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="external-validity-and-inference-aggregation" class="section level1">
+<h1><span class="header-section-number">Chapter 11</span> External validity and inference aggregation</h1>
+<div id="transportation-of-findings-across-contexts" class="section level2">
+<h2><span class="header-section-number">11.1</span> Transportation of findings across contexts</h2>
+<p>Say we study the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> in case 0 (a country, for instance) and want to make inferences to case 1 (another country). Our problem however is that effects are heterogeneous and features that differ across units may be related both to treatment assignment, outcomes, and selection into the sample. This is the problem studied by <span class="citation">Pearl and Bareinboim (<a href="#ref-pearl2014external" role="doc-biblioref">2014</a>)</span>. In particular <span class="citation">Pearl and Bareinboim (<a href="#ref-pearl2014external" role="doc-biblioref">2014</a>)</span> show for which nodes data is needed in order to “licence” external claims, given a model.</p>
+<p>We illustrate with a simple model in which a confounder has a different distribution in a study site and a target site.</p>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb116-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;Case -&gt; W  -&gt; X -&gt; Y &lt;- W&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb116-2" title="2"><span class="st">  </span><span class="kw">set_restrictions</span>(<span class="st">&quot;W[Case = 1] &lt; W[Case = 0]&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb116-3" title="3"><span class="st">  </span><span class="kw">set_parameters</span>(<span class="dt">node =</span> <span class="st">&quot;X&quot;</span>, <span class="dt">statement =</span> <span class="st">&quot;X[W=1]&gt;X[W=0]&quot;</span>, <span class="dt">parameters =</span> <span class="dv">1</span><span class="op">/</span><span class="dv">2</span>)<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb116-4" title="4"><span class="st">  </span><span class="kw">set_parameters</span>(<span class="dt">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="dt">statement =</span> <span class="kw">complements</span>(<span class="st">&quot;W&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="dt">parameters =</span> <span class="fl">.17</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb116-5" title="5"><span class="st">  </span><span class="kw">set_parameters</span>(<span class="dt">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="dt">statement =</span> <span class="kw">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="dt">parameters =</span> <span class="dv">0</span>) </a>
+<a class="sourceLine" id="cb116-6" title="6">model<span class="op">$</span>parameters_df</a></code></pre></div>
+<pre><code>##    param_names param_value param_set node nodal_type
+## 1       Case.0     0.50000      Case Case          0
+## 2       Case.1     0.50000      Case Case          1
+## 3         W.00     0.33333         W    W         00
+## 4         W.01     0.33333         W    W         01
+## 5         W.11     0.33333         W    W         11
+## 6         X.00     0.16667         X    X         00
+## 7         X.10     0.16667         X    X         10
+## 8         X.01     0.50000         X    X         01
+## 9         X.11     0.16667         X    X         11
+## 10      Y.0000     0.03132         Y    Y       0000
+## 11      Y.1000     0.00000         Y    Y       1000
+## 12      Y.0100     0.00000         Y    Y       0100
+## 13      Y.1100     0.00000         Y    Y       1100
+## 14      Y.0010     0.03132         Y    Y       0010
+## 15      Y.1010     0.03132         Y    Y       1010
+## 16      Y.0110     0.00000         Y    Y       0110
+## 17      Y.1110     0.00000         Y    Y       1110
+## 18      Y.0001     0.39040         Y    Y       0001
+## 19      Y.1001     0.00000         Y    Y       1001
+## 20      Y.0101     0.03132         Y    Y       0101
+## 21      Y.1101     0.00000         Y    Y       1101
+## 22      Y.0011     0.03132         Y    Y       0011
+## 23      Y.1011     0.39040         Y    Y       1011
+## 24      Y.0111     0.03132         Y    Y       0111
+## 25      Y.1111     0.03132         Y    Y       1111
+##    gen priors
+## 1    1      1
+## 2    1      1
+## 3    2      1
+## 4    2      1
+## 5    2      1
+## 6    3      1
+## 7    3      1
+## 8    3      1
+## 9    3      1
+## 10   4      1
+## 11   4      1
+## 12   4      1
+## 13   4      1
+## 14   4      1
+## 15   4      1
+## 16   4      1
+## 17   4      1
+## 18   4      1
+## 19   4      1
+## 20   4      1
+## 21   4      1
+## 22   4      1
+## 23   4      1
+## 24   4      1
+## 25   4      1</code></pre>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb118-1" title="1"><span class="kw">plot</span>(model)</a></code></pre></div>
+<p><img src="causalmodels_files/figure-html/extval-1.png" width="672" /></p>
+<p>We start by checking some basic quantities in the priors and the posteriors, we will then see how we do with data.</p>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb119-1" title="1"><span class="kw">query_model</span>(model,</a>
+<a class="sourceLine" id="cb119-2" title="2">            <span class="dt">queries =</span> <span class="kw">list</span>(<span class="dt">Incidence =</span> <span class="st">&quot;W==1&quot;</span>, </a>
+<a class="sourceLine" id="cb119-3" title="3">                           <span class="dt">ATE =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>, </a>
+<a class="sourceLine" id="cb119-4" title="4">                           <span class="dt">CATE =</span> <span class="st">&quot;Y[X=1, W=1] - Y[X=0, W=1]&quot;</span>),</a>
+<a class="sourceLine" id="cb119-5" title="5">            <span class="dt">given =</span> <span class="kw">c</span>(<span class="st">&quot;Case==0&quot;</span>, <span class="st">&quot;Case==1&quot;</span>),</a>
+<a class="sourceLine" id="cb119-6" title="6">            <span class="dt">using =</span> <span class="kw">c</span>(<span class="st">&quot;priors&quot;</span>, <span class="st">&quot;parameters&quot;</span>), <span class="dt">expand_grid =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span>kable</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Incidence</td>
+<td align="left">Case==0</td>
+<td align="left">priors</td>
+<td align="right">0.339</td>
+<td align="right">0.234</td>
+</tr>
+<tr class="even">
+<td align="left">Incidence</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.333</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">Incidence</td>
+<td align="left">Case==1</td>
+<td align="left">priors</td>
+<td align="right">0.666</td>
+<td align="right">0.235</td>
+</tr>
+<tr class="even">
+<td align="left">Incidence</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.667</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">Case==0</td>
+<td align="left">priors</td>
+<td align="right">0.002</td>
+<td align="right">0.139</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.333</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">Case==1</td>
+<td align="left">priors</td>
+<td align="right">0.001</td>
+<td align="right">0.139</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.573</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">CATE</td>
+<td align="left">Case==0</td>
+<td align="left">priors</td>
+<td align="right">0.000</td>
+<td align="right">0.169</td>
+</tr>
+<tr class="even">
+<td align="left">CATE</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.812</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">CATE</td>
+<td align="left">Case==1</td>
+<td align="left">priors</td>
+<td align="right">0.000</td>
+<td align="right">0.169</td>
+</tr>
+<tr class="even">
+<td align="left">CATE</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.812</td>
+<td align="right"></td>
+</tr>
+</tbody>
+</table>
+<p>We see that the incidence of <span class="math inline">\(W\)</span> as well as the ATE of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> is larger in case 1 than in case 0 (in parameters, though not in priors). However the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> conditional on <span class="math inline">\(W\)</span> is the same in both places.</p>
+<p>We now update the model <em>using data on <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> only from one case</em> (case 1) and data on <em>W</em> from both and check inferences on the other.</p>
+<p>The function <code>make_data</code> lets us generate data like this by specifying a multistage data strategy:</p>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb120-1" title="1">data &lt;-<span class="st"> </span><span class="kw">make_data</span>(model, <span class="dt">n =</span> <span class="dv">1000</span>, </a>
+<a class="sourceLine" id="cb120-2" title="2">                  <span class="dt">vars =</span> <span class="kw">list</span>(<span class="kw">c</span>(<span class="st">&quot;Case&quot;</span>, <span class="st">&quot;W&quot;</span>), <span class="kw">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>)), </a>
+<a class="sourceLine" id="cb120-3" title="3">                  <span class="dt">probs =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>),</a>
+<a class="sourceLine" id="cb120-4" title="4">                  <span class="dt">subsets =</span> <span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="st">&quot;Case ==1&quot;</span>))</a>
+<a class="sourceLine" id="cb120-5" title="5"></a>
+<a class="sourceLine" id="cb120-6" title="6">transport &lt;-<span class="st"> </span><span class="kw">update_model</span>(model, data)</a>
+<a class="sourceLine" id="cb120-7" title="7"></a>
+<a class="sourceLine" id="cb120-8" title="8"><span class="kw">query_model</span>(transport,</a>
+<a class="sourceLine" id="cb120-9" title="9">            <span class="dt">queries =</span> <span class="kw">list</span>(<span class="dt">Incidence =</span> <span class="st">&quot;W==1&quot;</span>, </a>
+<a class="sourceLine" id="cb120-10" title="10">                           <span class="dt">ATE =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>, </a>
+<a class="sourceLine" id="cb120-11" title="11">                           <span class="dt">CATE =</span> <span class="st">&quot;Y[X=1, W=1] - Y[X=0, W=1]&quot;</span>),</a>
+<a class="sourceLine" id="cb120-12" title="12">            <span class="dt">given =</span> <span class="kw">c</span>(<span class="st">&quot;Case==0&quot;</span>, <span class="st">&quot;Case==1&quot;</span>),</a>
+<a class="sourceLine" id="cb120-13" title="13">            <span class="dt">using =</span> <span class="kw">c</span>(<span class="st">&quot;posteriors&quot;</span>, <span class="st">&quot;parameters&quot;</span>), <span class="dt">expand_grid =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<table>
+<caption><span id="tab:unnamed-chunk-110">Table 11.1: </span>Extrapolation when two sites differ on <span class="math inline">\(W\)</span> and <span class="math inline">\(W\)</span> is observable in both sites</caption>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Incidence</td>
+<td align="left">Case==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.336</td>
+<td align="right">0.007</td>
+</tr>
+<tr class="even">
+<td align="left">Incidence</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.333</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">Incidence</td>
+<td align="left">Case==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.661</td>
+<td align="right">0.007</td>
+</tr>
+<tr class="even">
+<td align="left">Incidence</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.667</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">Case==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.340</td>
+<td align="right">0.011</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.333</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">Case==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.570</td>
+<td align="right">0.009</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.573</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">CATE</td>
+<td align="left">Case==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.810</td>
+<td align="right">0.009</td>
+</tr>
+<tr class="even">
+<td align="left">CATE</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.812</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">CATE</td>
+<td align="left">Case==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.810</td>
+<td align="right">0.009</td>
+</tr>
+<tr class="even">
+<td align="left">CATE</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.812</td>
+<td align="right"></td>
+</tr>
+</tbody>
+</table>
+<p>We do well in recovering the (different) effects both in the location we study and the one in which we do not. In essence querying the model for the out of sample case requests a type of post stratification. We get the right answer, though as always this depends on the model being correct.</p>
+<p>Had we attempted to make the extrapolation without data on <span class="math inline">\(W\)</span> in country 1 we would get it wrong. In that case however we would also report greater posterior variance. The posterior variance here captures the fact that we know things could be different in country 1, but we don’t know in what way they are different. Note that we get the CATE right since in the model this is assumed to be the same across cases.</p>
+<table>
+<caption><span id="tab:unnamed-chunk-111">Table 11.2: </span>Extrapolation when two sites differ on <span class="math inline">\(W\)</span> and <span class="math inline">\(W\)</span> is not observable in target country.</caption>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Incidence</td>
+<td align="left">Case==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.329</td>
+<td align="right">0.007</td>
+</tr>
+<tr class="even">
+<td align="left">Incidence</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.333</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">Incidence</td>
+<td align="left">Case==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.675</td>
+<td align="right">0.007</td>
+</tr>
+<tr class="even">
+<td align="left">Incidence</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.667</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">Case==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.319</td>
+<td align="right">0.011</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.333</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">Case==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.572</td>
+<td align="right">0.009</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.573</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">CATE</td>
+<td align="left">Case==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.811</td>
+<td align="right">0.009</td>
+</tr>
+<tr class="even">
+<td align="left">CATE</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="right">0.812</td>
+<td align="right"></td>
+</tr>
+<tr class="odd">
+<td align="left">CATE</td>
+<td align="left">Case==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.811</td>
+<td align="right">0.009</td>
+</tr>
+<tr class="even">
+<td align="left">CATE</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="right">0.812</td>
+<td align="right"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="combining-observational-and-experimental-data" class="section level2">
+<h2><span class="header-section-number">11.2</span> Combining observational and experimental data</h2>
+<p>An interesting weakness of experimental studies is that, by dealing so effectively with self selection into treatment, they limit our ability to learn about self selection. Often however we want to know what causal effects would be specifically for people that would take up a treatment in non experimental settings. This kind of problem is studied for example by by <span class="citation">Knox et al. (<a href="#ref-knox2019design" role="doc-biblioref">2019</a>)</span>.</p>
+<p>A causal model can encompass both experimental and observational data and let you answer this kind of question. To illustrate, imagine that node <span class="math inline">\(R\)</span> indicates whether a unit was assigned to be randomly assigned to treatment assignment (<span class="math inline">\(X=Z\)</span> if <span class="math inline">\(R=1\)</span>) or took on its observational value (<span class="math inline">\(X=O\)</span> if <span class="math inline">\(R=0\)</span>). We assume the exclusion restriction that entering the experimental sample is not related to <span class="math inline">\(Y\)</span> other than through assignment of <span class="math inline">\(X\)</span>.</p>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb121-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;R -&gt; X -&gt; Y; O -&gt; X &lt;- Z; O &lt;-&gt; Y&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb121-2" title="2"><span class="st">  </span></a>
+<a class="sourceLine" id="cb121-3" title="3"><span class="st">    </span><span class="kw">set_restrictions</span>(<span class="st">&quot;(X[R=1, Z=0]!=0) | (X[R=1, Z=1]!=1) | (X[R=0, O=0]!=0) | (X[R=0, O=1]!=1)&quot;</span>)</a>
+<a class="sourceLine" id="cb121-4" title="4"></a>
+<a class="sourceLine" id="cb121-5" title="5"><span class="kw">plot</span>(model)</a></code></pre></div>
+<p><img src="causalmodels_files/figure-html/appcombexpob-1.png" width="672" /></p>
+<p>The parameter matrix has just one type for <span class="math inline">\(X\)</span> since <span class="math inline">\(X\)</span> really operates here as a kind of switch, inheriting the value of <span class="math inline">\(Z\)</span> or <span class="math inline">\(O\)</span> depending on <span class="math inline">\(R\)</span>. Parameters allow for complete confounding between <span class="math inline">\(O\)</span> and <span class="math inline">\(Y\)</span> but <span class="math inline">\(Z\)</span> and <span class="math inline">\(Y\)</span> are unconfounded.</p>
+<p>We imagine parameter values in which there is a true .2 effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>. However the effect is positive (.4) for cases in which <span class="math inline">\(X=1\)</span> under observational assignment but negative (-.2) for cases in which <span class="math inline">\(X=0\)</span> under observational assignment.</p>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb122-1" title="1">model &lt;-<span class="st"> </span>model <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb122-2" title="2"><span class="st">    </span><span class="kw">set_parameters</span>(<span class="dt">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="dt">confound =</span> <span class="st">&quot;O==0&quot;</span>, <span class="dt">parameters =</span> <span class="kw">c</span>(.<span class="dv">8</span>, <span class="fl">.2</span>,  <span class="dv">0</span>,  <span class="dv">0</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb122-3" title="3"><span class="st">    </span><span class="kw">set_parameters</span>(<span class="dt">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="dt">confound =</span> <span class="st">&quot;O==1&quot;</span>, <span class="dt">parameters =</span> <span class="kw">c</span>( <span class="dv">0</span>,  <span class="dv">0</span>, <span class="fl">.6</span>, <span class="fl">.4</span>))</a></code></pre></div>
+<p>To parse this expression: we allow different parameter values for the four possible nodal types for <span class="math inline">\(Y\)</span> when <span class="math inline">\(O=0\)</span> and when <span class="math inline">\(O=1\)</span>. When <span class="math inline">\(O=0\)</span> we have <span class="math inline">\((\lambda_{00} = .8, \lambda_{10} = .2, \lambda_{01} = 0, \lambda_{11} = 0)\)</span> which implies a negative treatment effect and many <span class="math inline">\(Y=0\)</span> observations. When <span class="math inline">\(O=1\)</span> we have <span class="math inline">\((\lambda_{00} = 0, \lambda_{10} = 0, \lambda_{01} = .6, \lambda_{11} = .4)\)</span> which implies a positive treatment effect and many <span class="math inline">\(Y=1\)</span> observations.</p>
+<p>The estimands:</p>
+<table>
+<caption><span id="tab:unnamed-chunk-114">Table 11.3: </span>estimands</caption>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">-</td>
+<td align="left">parameters</td>
+<td align="right">0.2</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">R==0</td>
+<td align="left">parameters</td>
+<td align="right">0.2</td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">R==1</td>
+<td align="left">parameters</td>
+<td align="right">0.2</td>
+</tr>
+</tbody>
+</table>
+<p>The priors:</p>
+<table>
+<caption><span id="tab:appcombexpobs2">Table 11.4: </span>priors</caption>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">-</td>
+<td align="left">priors</td>
+<td align="right">-0.002</td>
+<td align="right">0.257</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">R==0</td>
+<td align="left">priors</td>
+<td align="right">-0.002</td>
+<td align="right">0.257</td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">R==1</td>
+<td align="left">priors</td>
+<td align="right">-0.002</td>
+<td align="right">0.257</td>
+</tr>
+</tbody>
+</table>
+<p>Data:</p>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb123-1" title="1">data &lt;-<span class="st"> </span><span class="kw">make_data</span>(model, <span class="dt">n =</span> <span class="dv">800</span>)</a></code></pre></div>
+<p>The true effect is .2 but naive analysis on the observational data would yield a strongly upwardly biased estimate.</p>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb124-1" title="1">estimatr<span class="op">::</span><span class="kw">difference_in_means</span>(Y<span class="op">~</span>X, <span class="dt">data =</span> <span class="kw">filter</span>(data, R<span class="op">==</span><span class="dv">0</span>))</a></code></pre></div>
+<table>
+<caption><span id="tab:unnamed-chunk-117">Table 11.5: </span>Inferences on the ATE from differences in means</caption>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">Estimate</th>
+<th align="right">Std. Error</th>
+<th align="right">t value</th>
+<th align="right">Pr(&gt;|t|)</th>
+<th align="right">CI Lower</th>
+<th align="right">CI Upper</th>
+<th align="right">DF</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>X</td>
+<td align="right">0.743</td>
+<td align="right">0.033</td>
+<td align="right">22.69</td>
+<td align="right">0</td>
+<td align="right">0.678</td>
+<td align="right">0.808</td>
+<td align="right">178</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>CausalQueries</code> estimates are:</p>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb125-1" title="1">posterior &lt;-<span class="st"> </span><span class="kw">update_model</span>(model, data)</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">-</td>
+<td align="left">posteriors</td>
+<td align="right">0.203</td>
+<td align="right">0.031</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">R==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.203</td>
+<td align="right">0.031</td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">R==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.203</td>
+<td align="right">0.031</td>
+</tr>
+</tbody>
+</table>
+<p>Much better.</p>
+<p>This model used both the experimental and the observational data. It is interesting to ask whether the observational data improved the estimates from the experimental data or did everything depend on the experimental data?</p>
+<p>To see, lets do updating using experimental data only:</p>
+<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb126-1" title="1">updated_no_O &lt;-<span class="st"> </span><span class="kw">update_model</span>(model, dplyr<span class="op">::</span><span class="kw">filter</span>(data, R<span class="op">==</span><span class="dv">1</span>))</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">-</td>
+<td align="left">posteriors</td>
+<td align="right">0.24</td>
+<td align="right">0.035</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">R==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.24</td>
+<td align="right">0.035</td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">R==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.24</td>
+<td align="right">0.035</td>
+</tr>
+</tbody>
+</table>
+<p>In this case we get a tightening of posterior variance and a more accurate result when we use the observational data but the gains are relatively small. They would be smaller still if we had more data, in which case inferences from the experimental data would be more accurate still.</p>
+<p>In both cases the estimates for the average effect in the randomized and the observationally assigned group are the same. This is how it should be since these are, afterall, randomly assigned into these groups.</p>
+<p>Heterogeneity in this model lies between those that are in treatment and those that are in control <em>in the observational</em> sample. We learn nothing about this heterogeneity from the experimental data alone but we learn a lot from the mixed model, picking up the strong self selection into treatment in the observational group:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">R==1 &amp; X==0</td>
+<td align="left">posteriors</td>
+<td align="right">0.203</td>
+<td align="right">0.031</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">R==1 &amp; X==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.203</td>
+<td align="right">0.031</td>
+</tr>
+<tr class="odd">
+<td align="left">ATE</td>
+<td align="left">R==0 &amp; X==0</td>
+<td align="left">posteriors</td>
+<td align="right">-0.183</td>
+<td align="right">0.027</td>
+</tr>
+<tr class="even">
+<td align="left">ATE</td>
+<td align="left">R==0 &amp; X==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.593</td>
+<td align="right">0.048</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="a-jigsaw-puzzle-learning-across-populations" class="section level2">
+<h2><span class="header-section-number">11.3</span> A jigsaw puzzle: Learning across populations</h2>
+<p>Consider a situation in which we believe the same model holds in multiple sites but in which learning about the model requires combining data about different parts of the model from multiple studies.</p>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb127-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- Z -&gt; K&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb127-2" title="2"></a>
+<a class="sourceLine" id="cb127-3" title="3"><span class="st">          </span><span class="kw">set_parameters</span>(</a>
+<a class="sourceLine" id="cb127-4" title="4">            <span class="dt">statement =</span> <span class="kw">list</span>(<span class="st">&quot;(Y[X=1, Z = 1] &gt; Y[X=0, Z = 1])&quot;</span>,  </a>
+<a class="sourceLine" id="cb127-5" title="5">                             <span class="st">&quot;(K[Z = 1] &gt; K[Z = 0])&quot;</span>),</a>
+<a class="sourceLine" id="cb127-6" title="6">            <span class="dt">node =</span> <span class="kw">c</span>(<span class="st">&quot;Y&quot;</span>,<span class="st">&quot;K&quot;</span>), </a>
+<a class="sourceLine" id="cb127-7" title="7">            <span class="dt">parameters =</span> <span class="kw">c</span>(.<span class="dv">24</span>,.<span class="dv">85</span>))</a>
+<a class="sourceLine" id="cb127-8" title="8"></a>
+<a class="sourceLine" id="cb127-9" title="9"><span class="kw">plot</span>(model)</a></code></pre></div>
+<p><img src="causalmodels_files/figure-html/jigsaw-1.png" width="672" /></p>
+<p>We imagine we have access to three types of data;</p>
+<ol style="list-style-type: decimal">
+<li>Study 1 is an experiment looking at the effects of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>, ancillary data on context, <span class="math inline">\(K\)</span> is collected but <span class="math inline">\(Z\)</span> is not observed</li>
+<li>Study 2 is a factorial study examining the joint effects of <span class="math inline">\(X\)</span> and <span class="math inline">\(Z\)</span> on <span class="math inline">\(Y\)</span>, <span class="math inline">\(K\)</span> is not observed</li>
+<li>Study 3 is an RCT looking at the relation between <span class="math inline">\(Z\)</span> and <span class="math inline">\(K\)</span>. <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are not observed.</li>
+</ol>
+<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb128-1" title="1">df &lt;-<span class="st"> </span><span class="kw">make_data</span>(model, <span class="dv">300</span>, <span class="dt">using =</span> <span class="st">&quot;parameters&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb128-2" title="2"><span class="st">  </span></a>
+<a class="sourceLine" id="cb128-3" title="3"><span class="st">      </span><span class="kw">mutate</span>(<span class="dt">study =</span> <span class="kw">rep</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dt">each =</span> <span class="dv">100</span>),</a>
+<a class="sourceLine" id="cb128-4" title="4">             <span class="dt">K =</span> <span class="kw">ifelse</span>(study <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, <span class="ot">NA</span>, K),</a>
+<a class="sourceLine" id="cb128-5" title="5">             <span class="dt">X =</span> <span class="kw">ifelse</span>(study <span class="op">==</span><span class="st"> </span><span class="dv">2</span>, <span class="ot">NA</span>, X),</a>
+<a class="sourceLine" id="cb128-6" title="6">             <span class="dt">Y =</span> <span class="kw">ifelse</span>(study <span class="op">==</span><span class="st"> </span><span class="dv">2</span>, <span class="ot">NA</span>, Y),</a>
+<a class="sourceLine" id="cb128-7" title="7">             <span class="dt">Z =</span> <span class="kw">ifelse</span>(study <span class="op">==</span><span class="st"> </span><span class="dv">3</span>, <span class="ot">NA</span>, Z)</a>
+<a class="sourceLine" id="cb128-8" title="8">             )</a></code></pre></div>
+<p>Tables <a href="external-validity-and-inference-aggregation.html#tab:frank1">11.6</a> - <a href="external-validity-and-inference-aggregation.html#tab:frank3">11.8</a> show conditional inferences for the probability that <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span> in <span class="math inline">\(X=Y=1\)</span> cases conditional on <span class="math inline">\(K\)</span> for each study, analyzed individually</p>
+<table>
+<caption><span id="tab:frank1">Table 11.6: </span>Clue is uninformative in Study 1</caption>
+<thead>
+<tr class="header">
+<th align="left">Given</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 1</td>
+<td align="right">0.501</td>
+<td align="right">0.165</td>
+</tr>
+<tr class="even">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 0</td>
+<td align="right">0.502</td>
+<td align="right">0.162</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption><span id="tab:frank2">Table 11.7: </span>Clue is also uninformative in Study 2 (factorial)</caption>
+<thead>
+<tr class="header">
+<th align="left">Given</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 1</td>
+<td align="right">0.530</td>
+<td align="right">0.123</td>
+</tr>
+<tr class="even">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 0</td>
+<td align="right">0.529</td>
+<td align="right">0.121</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption><span id="tab:frank3">Table 11.8: </span>Clue is also uninformative in Study 3 (experiment studying <span class="math inline">\(K\)</span>)</caption>
+<thead>
+<tr class="header">
+<th align="left">Given</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 1</td>
+<td align="right">0.503</td>
+<td align="right">0.161</td>
+</tr>
+<tr class="even">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 0</td>
+<td align="right">0.502</td>
+<td align="right">0.161</td>
+</tr>
+</tbody>
+</table>
+<p>In no case is <span class="math inline">\(K\)</span> informative. In study 1 data on <span class="math inline">\(K\)</span> is not available, in study 2 it is available but researchers do not know, quantitatively, how it relates to <span class="math inline">\(Z\)</span>. In the third study the <span class="math inline">\(Z,K\)</span> relationship is well understood but the joint relation between <span class="math inline">\(Z,X\)</span>, and <span class="math inline">\(Y\)</span> is not understood.</p>
+<p>Table <a href="external-validity-and-inference-aggregation.html#tab:frank4">11.9</a> shows the inferences when the data are combined with joint updating across all parameters.</p>
+<table>
+<caption><span id="tab:frank4">Table 11.9: </span>Clue is informative after combining studies linking <span class="math inline">\(K\)</span> to <span class="math inline">\(Z\)</span> and <span class="math inline">\(Z\)</span> to <span class="math inline">\(Y\)</span></caption>
+<thead>
+<tr class="header">
+<th align="left">Given</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 1</td>
+<td align="right">0.760</td>
+<td align="right">0.085</td>
+</tr>
+<tr class="even">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 0</td>
+<td align="right">0.493</td>
+<td align="right">0.066</td>
+</tr>
+<tr class="odd">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 1 &amp; Z == 1</td>
+<td align="right">0.799</td>
+<td align="right">0.094</td>
+</tr>
+<tr class="even">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 0 &amp; Z == 1</td>
+<td align="right">0.799</td>
+<td align="right">0.094</td>
+</tr>
+<tr class="odd">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 1 &amp; Z == 0</td>
+<td align="right">0.488</td>
+<td align="right">0.067</td>
+</tr>
+<tr class="even">
+<td align="left">X == 1 &amp; Y == 1 &amp; K == 0 &amp; Z == 0</td>
+<td align="right">0.488</td>
+<td align="right">0.067</td>
+</tr>
+</tbody>
+</table>
+<p>Here fuller understanding of the model lets researchers use information on <span class="math inline">\(Z\)</span> to update on values for <span class="math inline">\(Z\)</span> and in turn update on the likely effects of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>. Rows 3-6 highlight that the updating works through inferences on <span class="math inline">\(Z\)</span> and there are no gains when <span class="math inline">\(Z\)</span> is known, as in Study 2.</p>
+<p>The collection of studies collectively allow for inferences that are not possible from any one study.</p>
+
+</div>
+</div>
+
+
+
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-knox2019design">
+<p>Knox, Dean, Teppei Yamamoto, Matthew A Baum, and Adam J Berinsky. 2019. “Design, Identification, and Sensitivity Analysis for Patient Preference Trials.” <em>Journal of the American Statistical Association</em>, 1–27.</p>
+</div>
+<div id="ref-pearl2014external">
+<p>Pearl, Judea, and Elias Bareinboim. 2014. “External Validity: From Do-Calculus to Transportability Across Populations.” <em>Statistical Science</em> 29 (4): 579–95.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="mixing-methods.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="notation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook/js/app.min.js"></script>
+<script src="libs/gitbook/js/lunr.js"></script>
+<script src="libs/gitbook/js/clipboard.min.js"></script>
+<script src="libs/gitbook/js/plugin-search.js"></script>
+<script src="libs/gitbook/js/plugin-sharing.js"></script>
+<script src="libs/gitbook/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook/js/jquery.highlight.js"></script>
+<script src="libs/gitbook/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": false,
+"twitter": false,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": false,
+"google": false,
+"instapper": false
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["causalmodels.pdf"],
+"toc": {
+"collapse": "section"
+},
+"toolbar": {
+"position": "static"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

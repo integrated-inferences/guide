@@ -1,0 +1,818 @@
+# (PART) Foundations  {-}
+
+# Causal Models {#models}
+
+```{r, include = FALSE}
+source("_packages_used.R")
+```
+
+***
+
+We provide a lay language primer on the logic of causal models.
+
+***
+
+
+While social scientific methods can be addressed to many sorts of questions, matters of causation have long been central to theoretical and empirical work in political science, economics, sociology, and psychology. Causality is also the chief focus of this book. 
+
+Causal knowledge, however, is not just the end goal of much empirical social science; it is also a key *input* into causal inference. Rarely do we arrive at causal inquiry fully agnostic about causal relations in the domain of interest. Moreover, our beliefs about how the world works---as we show later in this book---have profound implications for how the research process and inference should unfold. 
+
+What we need is a language for expressing our prior causal knowledge such that we can full exploit it, drawing inferences and making research design decisions in ways that are logically consistent with our beliefs, and such that others can readily see and assess those underlying premises. Causal models provide such a language.
+
+In this chapter we provide a basic introduction to causal models. Subsequent chapters in Part I layer on other foundational components of the book's framework, including a causal-model-based understanding of theory, the definition of common causal estimands within causal models, and the basics of Bayesian inference.
+
+<!-- Causal questions, however, can come in many forms. Before we address how causal inferences can be drawn, we must first define what we mean by causation and unpack and define the different kinds of causal estimands in which we might be interested. -->
+
+<!-- We start with a description of the causal estimands of interest. We first define a causal effect and then introduce causal graphs and estimands. We give an example of a simple causal model that we return to to illustrate key ideas throughout the paper. -->
+
+## The counterfactual model
+
+We begin with what we might think of as a meta-model, the counterfactual model of causation. The counterfactual model is the dominant approach to causal relations in the social sciences. At its core, a counterfactual understanding of causation captures a simple notion of causation as "difference-making."^[The approach is sometimes attributed to David Hume, whose writing contains ideas both about causality as regularity and causality as counterfactual. On the latter the key idea is "if the first object had not been, the second never had existed" [@hume2000enquiry, Section VIII]. More recently, the counterfactual view has been set forth by @splawa1990application and @lewis1973counterfactuals. See also  @lewis1986causation.] In the counterfactual view, to say that $X$ caused $Y$ is to say: *had* $X$ been different, $Y$ *would have been* different. Critically, the antecedent, "had $X$ been different,"  imagines a *controlled* change in $X$---an intervention that altered $X$'s value---rather than a naturally arising difference in $X$. The counterfactual claim, then, is not that $Y$ is different in those cases in which $X$ is different; it is, rather, that if one could have *made* $X$ different, $Y$ would have been different.
+
+Turning to a substantive example, consider, for instance, the claim that India democratized ($Y$) because it had a relatively high level of economic equality ($X$) (drawing on the logic of @boix2003democracy). In the counterfactual view, this is equivalent to saying that, had India *not* had a high level of equality---where we imagine that we *made* equality in India lower---the country would not have democratized. High economic equality made a difference.
+
+<!-- Causal effects are thus unmeasurable quantities. They are not differences between possible observations in the world, but differences between outcomes in the world and counterfactual outcomes that need to be inferred rather than measured.       -->
+
+Along with this notion of causation as difference-making, we also want to allow for variability in how $X$ acts on the world. $X$ might sometimes make a difference, for some units of interest, yet sometimes not. High levels of equality might generate democratization in some countries or historical settings but not in others. Moroever, while equality might make democratization happen in some times in places, it might prevent that same outcome in others. In political science, we commonly employ the "potential outcomes" framework to describe the different kinds of counterfactual causal relations that might prevail between variables \citep{Rubin1974}. In this framework we characterize how a given unit responds to a causal variable by positing the outcomes that it *would* take on at different values of the causal variable.
+
+It is quite natural to think about potential outcomes in the context of medical treatment. Consider a situation in which some individuals in a diseased population are observed to have received a drug ($X=0$) while others have not ($X=0$). Assume that, subsequently, a researcher observes which individuals become healthy ($Y=1$) and which do not ($Y=0$). Let us further stipulate that each individual belongs to one of four unobserved response ''types,'' defined by the potential effect of treatment on the individual:^[We implicitly invoke the assumption that the treatment or non-treatment of one patient has no effect on the outcomes of other patients. This is known as the stable unit treatment value assumption (SUTVA). See also \citet{HerronQuinn} for a similar classification of types.]
+
+* **a**dverse: Those who would get better if and only if they do not receive the treatment
+* **b**eneficial: Those who would get better if and only if they do receive the treatment
+* **c**hronic: Those who will remain sick whether or not they receive treatment
+* **d**estined: Those who will get better whether or not they receive treatment
+
+We can express this same idea by specifying the set of "potential outcomes" associated with each type of patient, as illustrated in Table \@ref(tab:PO).
+
+<!-- \begin{table}[h!]
+\begin{tabular}{l|cccc} \small
+
+& Type a & Type b & Type c & Type d \\
+
+& **a**dverse effects & **b**eneficial Effects & **c**hronic cases & **d**estined cases \\
+\hline
+Not treated &    Healthy &       Sick &       Sick &    Healthy \\
+Treated &       Sick &    Healthy &       Sick &    Healthy \\
+\end{tabular}  
+\caption{Potential Outcomes: What would happen to each of four possible types of case if they were or were not treated.}
+\label{tabPO}
+\end{table} -->
+
+
+| \small      |          Type a          |            Type b           |         Type c         |          Type d         |
+|-------------|:------------------------:|:---------------------------:|:----------------------:|:-----------------------:|
+|             | **a**dverse effects | **b**eneficial Effects | **c**hronic cases | **d**estined cases |
+| Not treated |          Healthy         |             Sick            |          Sick          |         Healthy         |
+| Treated     |           Sick           |           Healthy           |          Sick          |         Healthy         |
+
+Table: (\#tab:PO). Potential outcomes: What would happen to each of four possible types of case if they were or were not treated.
+
+
+In each column, we have simply written down the outcome that a patient of a given type would experience if they are not treated, and the outcome they would experience if they are treated. 
+
+Throughout the book, we generalize from this toy example. Whenever we have one causal variable and one outcome, and both variables are binary (i.e., each can take on two possible values, 0 or 1), then there are only four sets of possible potential outcomes, or "causal types." More generally, for any pair of causal and outcome variables, the four types are:
+
+* **a**: A negative causal effect of $X$ on $Y$
+* **b**: A positive causal effect of $X$ on $Y$
+* **c**: No causal effect, with $Y$ "stuck" at 0
+* **d**: No causal effect, with $Y$ "stuck" at 1
+
+Put in terms of a set of potential outcomes, this gives us Table \@ref(tab:POGEN):
+
+| \small      |          Type a          |            Type b           |         Type c         |          Type d         |
+|-------------|:------------------------:|:---------------------------:|:----------------------:|:-----------------------:|
+|             | $Y=$ | $Y=$ | $Y=$ | $Y=$ |
+| Make $X=0$  |            1             |              0              |           0            |             1           |
+| Make $X=1$  |            0             |              1              |           0            |             1           |
+Table: (\#tab:POGEN). Generalizing from Table \@ref(tab:PO), the table gives for each causal type the values that $Y$ would take on if $X$ is set at $0$ and if $X$ is set at 1.
+
+
+
+<!-- Let $Y(x)$ denote the "potential" outcome (the value $Y$ would take on) when $X=x$. Then, if $X$ is a binary variable, the effect of $X$ on $Y$ is simply defined as $Y(1) -  Y(0)$.  -->
+
+<!-- These types differ in their ''potential outcomes'' | that is on what outcomes, $Y$,  they *would* have depending on their treatment condition $X$ . More formally, we let $Y(x)$ denote a case or type's potential outcome  when $X=x$. Thus, the potential outcomes are $Y(0)=1, Y(1)=0$ for type $a$; $Y(0)=0, Y(1)=1$ for type $b$; $Y(0)=0, Y(1)=0$ for type $c$; and $Y(0)=1, Y(1)=1$ for type $d$.   -->
+
+
+
+
+<!-- For any given response type, the causal effect of $X$ on $Y$ is $Y(1) -  Y(0)$. Thus, the causal effect is $-1$ for $a$ types, $1$ for $b$ types, and $0$ for both $c$ and $d$ types. -->
+
+Returning to our democratization example, let $X=1$ represent a high level of economic equality and $X=0$ its absence, with $Y=1$ representing democratization and $Y=0$ its absence. An $a$ type, then, is any case in which a high level of equality, if it occurs, *prevents* democratization in a country that would otherwise have democratized. The causal effect of high equality in an $a$ type is $= -1$. A $b$ type is a case in which high equality, if it occurs, generates democratization in a country that would otherwise have remained non-democratic (effect $= 1$). A $c$ type is a case that will not democratize regardless of the level of equality (effect $= 0$); and a $d$ type is one that will democratize regardless of the level of equality (again, effect $= 0$).
+
+In this setting, a causal *explanation* of a given case outcome amounts to a statement about its type. The claim that India democratized because of a high level of equality is equivalent to saying that India democratized and is $b$ type. To claim that Sierra Leone democratized because of low inequality is equivalent to saying that Sierra Leone democratized and is an $a$ type. To claim, on the other hand, that Malawi democratized for reasons having nothing to do with its level of economic equality is to characterize Malawi as a $d$ type (which alreqdy specifies its outcome).
+
+We can also use potential-outcomes reasoning for more complex causal relations. For example, supposing there are two binary causal variables $X_1$ and $X_2$, we can specify any given case's potential outcomes for each of the different possible combinations of causal conditions---there now being four such conditions (as each causal variable may take on $0$ or $1$ when the other is at $0$ or $1$). We now have 16 causal types: 16 different response patterns that $Y$ might display to changes in $X_1$ and $X_2$. The full set is represented in Table \@ref(tab:PO16). (The type numberings are, of course, arbitrary here and included for ease of reference.) 
+
+We can read off this table that a type 4 is a case in which $X_1$ has a positive causal effect on $Y$ but $X_2$ has no effect, whereas a type 6 is case in which $X_2$ has a positive effect but $X_2$ has none. We also capture interactions, or ways in which the effect of one variable might be conditioned by the value of the other. For instance, a type 5 is case in which $X_2$ has a postive causal effect if and only if $X_1$ is 0, and where $X_1$ has a negative causal effect only when $X_2=1$.
+
+As one might imagine, the number of causal types increases rapidly as the number of considered causal variables increases, as it also would if we allowed $X$ or $Y$ to take on more than 2 possible values. However, the basic principle of representing possible causal relations as patterns of potential outcomes remains unchanged.
+
+<!-- let $Y(x_1, x_2)$ denote the outcome when $X_1=x_1$ and  $X_2=x_2$. Then the quantity $\left(Y(1, 1) - Y(0, 1)\right) - \left(Y(1, 0) - Y(0, 0)\right)$ describes the interactive effect of two treatments: it captures how the effect of $X_1$ changing from $0$ to $1$ is different between those situations in which $X_2=1$ and those situations in which $X_2=0$. -->
+
+
+------------------------------------------------------------------------------------
+   **Type**    if $X_1=X_2=0$   if $X_1=0,X_2=1$  if $X_1=1,X_2=0$   if $X_1=X_2=1$ 
+-------------  ---------------  ----------------  -----------------  ---------------
+      1               0                0             0                    0      
+
+      2               0                0             0                    1      
+
+      3               0                0             1                    0      
+
+      4               0                0             1                    1      
+
+      5               0                1             0                    0      
+
+      6               0                1             0                    1      
+
+      7               0                1             1                    0      
+
+      8               0                1             1                    1      
+
+      9               1                0             0                    0      
+
+      10              1                0             0                    1      
+
+      11              1                0             1                    0      
+
+      12              1                0             1                    1      
+
+      13              1                1             0                    0      
+
+      14              1                1             0                    1      
+
+      15              1                1             1                    0      
+
+      16              1                1             1                    1      
+------------------------------------------------------------------------------
+Table: (\#tab:PO16) With two binary causal variables, there are 16 causal types: 16 ways in which $Y$ might respond to changes in the two variables.
+
+Readers will note that, in the counterfactual framework, causal relations are conceptualized as deterministic. A given case has a set of potential outcomes. Any randomness enters the analysis as incomplete knowledge of the factors influencing an outcome. But, in principle, if we knew all of the relevant causal conditions and the complete set of potential outcomes for a case, we could perfectly predict the actual outcome in that case. This understanding of causality---as ontologically deterministic, but empirically imperfectly understood---is compatible with views of causation commonly employed by qualitative researchers (see, e.g., @mahoney2008toward), and with understandings of causal determinism going back at least to @laplace1901philosophical. As we will see, we can readily express this kind of incompleteness of knowledge within a causal model framework; indeed, the way in which causal models manage uncertainty is central to how they allow us to pose questions of interest and to learn from evidence.
+
+A further important, if somewhat counter-intuitive implication, of the counterfactual framework lies in how it forces us to think about multiple causes. When seeking to explain the outcome in a case, researchers sometimes proceed as though competing explanations amount to rival causes, where $X_1$ being a cause of $Y$ implies that $X_2$ was not. Did Malawi democratize because it was a relatively economically equal society *or* because of international pressure to do so? In the counterfactual model, however, causal relations are non-rival. If two out of three people vote for an outcome under majority rule, for example, then both of the two supporters caused the outcome: the outcome would not have occurred if *either* supporter's vote were different. Put differently, when we say that $X$ caused $Y$ in a given case, we will generally mean that $X$ was *a* cause, $X$ will rarely be *the* cause in the sense of being the *only* thing a change in which would have changed the outcome. Malawi might not have democratized if *either* a relatively high level of economic equality or international pressure had been absent. For most social phenomena that we study, there will be multiple, and sometimes a great many, difference-makers for any given case outcome.
+
+<!-- ## Counter-intuitive implications of the counterfactual model -->
+
+<!-- Although the counterfactual framework is now widely employed, it contains a set of implications that might sit uncomfortably with common conceptions of how causal inference operates. -->
+
+<!-- Second, it is often intuitive to think of causal processes as sets of transitive relations: if $A$ causes $B$ and  $B$ causes $C$, then we might think that $A$ causes $C$. Yet, in the counterfactual model, causal relations are *not* transitive. In a classic illustration, imagine a boulder that rolls down a hill, causing you to duck, and that ducking in turn saves your life. As a counterfactual matter, the boulder clearly caused the ducking and the ducking your survival. But the boulder rolling down the hill did not save your life. To consider an example from the social realm, think about situations in which action begets reaction. For instance, a rebellion causes a military crackdown, and the military crackdown causes the regime to survive; yet the rebellion did not cause the regime to survive. (For discussions see @hall2004two and @paul2013causation.) The insight has implications both for process tracing and for correlational approaches to establishing causation. Finding in a causal link in a case from $A$ to $B$ and a causal link from $B$ to $C$ is not equivalent to finding that $A$ caused $C$. Likewise, identifying a population-level causal effect of $X$ on some suspected mediator $M$, and another effect of $M$ on $Y$, does not establish an $X\rightarrow Y$ causal relationship. -->
+
+<!-- <!-- I do not find the next point convincing. --> 
+
+<!-- Third, notions of causality going back at least to Hume [@hume2000enquiry] treat causal relations as characterized by spatio-temporal contiguity between cause and effect, or at least of the intermediate steps between them. Yet in the counterfactural model, there is no requirement that causes be temporally or spatially connected to their effects. For instance, *potentially* intervening events that did *not* occur can have causal effects, even though they make no spatio-temporal contact with the observable events that seem to lie along the path from $X$ to $Y$. The plague that put Friar John into quarantine meant that he did not deliver the letter to Romeo to inform him that Juliet was not dead, which in turn led to Romeo's death. There is a *causal* path from the plague to Romeo's death, but no *spatio-temporal* one.  -->
+
+<!-- Fourth, hypothesis-testing at the case level sometimes proceeds as though competing explanations amount to rival causes, where $A$ caused $B$ implies that $C$ did not. But in the counterfactual model, causal relations are neither rival nor decomposable. If two out of three people vote for an outcome under majority rule, for example, then both of the two supporters caused the outcome: the outcome would not have occurred if *either* supporter's vote were different. The causes are not rival. Now, imagine that all three of three voters supported an outcome. Then the three votes jointly caused the outcome. However, this joint cause is not decomposable into its component parts: none of the individual votes had *any* effect on the outcome. A change in any one vote would have made no difference. -->
+
+<!-- <!-- Does the latter example above  satisfy minimality? Is a graph minimal that points from all three yesses to the outcome? --> 
+
+<!-- Thus, there appear to be some tensions between the counterfactual model and some common notions of causality. These tensions largely disappear, however, once we properly specify causal models as systems of causal relations. For this work, Directed Acyclic Graphs provide a powerful tool.    -->
+
+## Causal Models and Directed Acyclic Graphs
+
+Potential outcomes tables can capture quite a lot. We could, for instance, summarize our beliefs about the relationship between economic equality and democratization by saying that we think that the world is comprised of a mixture of $a$, $b$, $c$, and $d$ types, as defined above. We could get more specific and express a belief about what proportions of cases in the world are of each of the four types. For instance, we might believe that $a$ types and $d$ types are quite rare while $b$ and $c$ types are more common. Moreover, our belief about the proportions of $b$ (positive effect) and $a$ (negative effect) cases imply a belief about equality's *average* effect on democratization as, in a binary setup, this quantity is imply the proportion of $b$ types minus the proportion of $a$ types.
+
+As we have seen, beliefs about even more complex causal relations can be fully expressed in potential-outcomes notation. However, as causal structures become more complex---especially, as the number of variables in a domain increases---a causal model can be a powerful organizing tool. In this section, we show how causal models and their visual counterparts, directed acyclic graphs (DAGs), can represent substantive beliefs about counterfactual causal relationships in the world. The key ideas in this section can be found in many texts (see, e.g., Halpern and Pearl (2005) and Galles and Pearl (1998)), and we introduce here a set of basic principles that readers will need to follow the argumentation in this book. 
+
+To slightly shift the frame of our running example, suppose that we believe the level of economic inequality can have an effect on whether a country democratizes. We might believe inequality affects the likelihood of democratization by generating demands for redistribution, which in turn can cause the mobilization of lower-income citizens, which in turn can cause democratization. We might also believe that mobilization itself is not just a function of redistributive preferences but also of the degree of ethnic homogeneity, which shapes capacities of lower-income citizens for collective action.  We can visualize this model in Figure \@ref(fig:simpleDAG).
+
+```{r simpleDAG, echo = FALSE, out.width='70%', fig.width = 7, fig.height = 7,  fig.align="center", out.width='.5\\textwidth', fig.cap = "A simple causal model in which high inequality ($I$) affects the democratization ($D$) via redistributive demands and mass mobilization ($M$), which is also a function of ethnic homogeneity ($E$). The arrows show relations of causal dependence between variables.  The graph does not capture the ranges of the variables and the functional relations between them."}
+par(mar=c(1,1,3,1))
+hj_dag(x = c(0, 1, 2, 1, 3, 3),
+       y = c(2, 2, 2, 0, 2, 3),
+       names = c(
+         "I", 
+         "R",
+         "M",
+         "E", 
+         "D", 
+         expression(paste(U[D])) 
+         ),
+       arcs = cbind( c(1, 2, 4, 3, 6),
+                     c(2, 3, 3, 5, 5)),
+       title = "A Model of Inequality's Effect on Democratization",
+       padding = .4, contraction = .15) 
+
+```
+
+In the context of this example, let us now consider the three components of a causal model: variables, functions, and distributions.
+
+**The variables.** The first component of a causal model is the set of variables across which the model characterizes causal relations. On the graph in Figure \@ref(fig:simpleDAG), the 6 included variables are represented by the 6 nodes. 
+
+Notice that some of these variables have arrows pointing *into* them: $R, M$, and $D$ are endogenous variables, meaning that their values are determined entirely by other variables in the model.
+
+Other variables have arrows pointing out of them but no arrows pointing into them: $I, E$ and $U_D$ are exogenous variables. Exogenous variables are those that influence other variables in the model but themselves have no causes specified in the model. While $I$ and $E$ have natural interpretations, we might wonder what $U_D$ represents as it does not feature in our substantive claims about how democratization arises. In the world of causal models, $U$ terms are typically used to capture unspecified exogenous influences. Far from being nuisance terms, $U$ variables constitute a key way in which we express uncertainty about the world and, in turn, are often the locus of learning about the questions we are asking. In the present example, we believe democratization to be potentially affected by mobilization, but we also know that democratization is affected by other things, even if we do not know what they are. We can thus think of $U_D$ as a set of unknown factors---factors other than mobilization---that affect democratization.^[Conventionally, we denote the set of exogenous variables as \(\mathcal{U}\) and the set of endogenous variables as \(\mathcal{V}\).] 
+
+In a causal-model framework, we sometimes use familial terms to describe relations among variables. For instance, two nodes directly connected by an arrow are known as "parent" and "child," while two nodes with a child in common (both directly affect the same variable) are "spouses." We can also say that $I$ is an "ancestor" of $D$ (a node upstream from $D$'s parent) and conversely that $D$ is a descendant of $I$ (a node downstream from $I$'s child).
+
+In identifying the variables, we also need to specify the \emph{ranges} across which they can potentially vary. We might specify, for instance, that all variables in the model are binary, taking on the values 0 or 1. We could, alternatively, define a set of categories across which a variable ranges or allow a variable to take on any real number value or any value between a set of bounds. ^[If we let \(\mathcal{R}\) denote a set of ranges for all variables in the model, we can indicate $X$'s range, for instance, by writing \(\mathcal{R}(X)=\{0,1\}\). The variables in a causal model together with their ranges---the triple \((\mathcal{U}, \mathcal{V}, \mathcal{R})\)---are sometimes called a \emph{signature}, \(\mathcal{S}\).]
+
+<!-- Going forward, we set every variable in our working example to be binary. -->
+
+**The functions.** Next, we need to specify our beliefs about the causal relations among the variables in our model. How is the value of one variable affected by, and how does it affect, the values of others? For each endogenous variable---each variable influenced by others in the model---we need to express beliefs about how its value is affected by its parents, its immediate causes.
+
+The graph already represents some aspects of these beliefs: the arrows, or directed edges, tell us which variables we believe to be direct causal inputs into other variables. So, for instance, we believe that democratization ($D$) is determined jointly by mobilization ($M$) and some exogenous, unspecified factor (or set of factors), $U_D$. We can think of $U_D$ as all of the other influences on democratization, besides mobilization, that we either do not know of or have decided not to explicitly include in the model. We believe, likewise, that $M$ is determined by $I$ and an unspecified exogenous factor (or set of factors), $U_M$. And we are conceptualizing inequality ($I$) as shaped solely by a factors exogenous to the model, captured by $U_I$. (For all intents and purposes, $I$ behaves as an exogenous variable here since its value is determined solely by an exogenous variable.) 
+
+We can also, however, express more specific beliefs about causal relations in the form of a causal function.^[The collection of all causal functions in the model can be denoted as $\mathcal{F}$.] Specifying a function means writing down whatever general or theoretical knowledge we have about the direct causal relations between variables. A function specifies how the value that one variable takes on is determined by the values that other variables---its parents---take on. 
+
+<!-- For each endogenous variable, we can specify two kinds of variables as direct causes:  (i) other endogenous variables, which we call the variable's *parents*;^[For variable $V_i$, we write its parents as $PA_i$.] and (ii) an exogenous variable. Thus, for instance, the variable $Y$ in Figure \@ref(fig:simpleDAG) has as its direct causes the variable $R$, its parent (an endogenous variable itself) and the random-disturbance, $U_Y$.^[Any variable with no parents in $\mathcal V$ must be a function of a member of $\mathcal U$; otherwise, we could not consider it endogenous. A variable that is a function of one or more members of $\mathcal V$, however, can be modeled without a $U_i$ term if we believe that it is fully determined by variables specified in $\mathcal V$.]  -->
+
+We can specify this relationship in a vast variety of ways. Let's consider a few examples, using various variables in our running model:
+
+* Suppose that we believe that an outcome always occurs whenever a causal condition is present. Redistributive demands, for instance, always occur whenever inequality is present. We we can express this belief with a simple function for $R$: $R=I$. 
+
+* We can similarly express set-theoretic relations of any kind among any number of factors. We may, for instance, believe that an outcome occurs when and only when _two_ conditions are present. Redistributive demands and ethnic homogeneity may be individually necessary and jointly sufficient conditions for mobilization. We can express this belief with a slightly more complex function: $M=E R$. According to this function, $M=1$ (mobilization occurs) if _both_ $E=1$ (ethnic homogeneity is present) and $R=1$ (redistributive preferences are present), but $M=0$ (mobilization does not occur) otherwise. Note that this formulation also builds in causal heterogeneity: here, we are saying that redistributive preferences have an effect on mobilization when and only when ethnic homogeneity is present, and vice versa. 
+
+* We can model one variable as a linear function of another. Moreover, we can express uncertainty about the strength of this relationship. For instance, we can write $R=\beta I$, where $\beta$ is a parameter that we do not know the value of at the outset of a study (but, as we will see, may learn about from the data).
+
+* We can, further, encode uncertainty about the role of other, unknown factors in determining a variable's value. If we believe $D$ to be linearly affected by $M$ but also subject to forces that we do not yet understand and have not yet specified in our theory, then we can write: $D=\beta*M+U_D$, where $U_D$ represents a random disturbance. 
+
+* We may even be uncertain about whether or in what direction one variable affects another. Or we may believe that their relationship varies across cases for reasons that we do not yet understand. We can capture this type of uncertainty as an interaction such as: $D=M U_D$. Here, the value of our random-disturbance term does not merely represent noise around an $M \rightarrow D$ relationship. Rather, $U_D$ now conditions, or moderates, the strength, sign, or existence of the relationship itself. Which of these $U_D$ conditions will depend on the $U_D$'s specified range. For instance, if we allow $U_D$ to take on the values $-1, 0$ or $1$, then $U_D$ will determine whether $M$ has a negative effect, no effect, or a positive effect on $D$. If instead, $U_D$ is allowed to vary continuously between $0$ and $1$, inclusive, then it conditions the strength and existence of a positive causal effect of $M$ on $D$, though not the sign of that effect.  As we discuss in later chapters, our investigation might then center on drawing inferences about $U_D$ in order to assess $M$'s causal effect.
+
+* We can express more fundamental uncertainty about functional form, such as whether two variables are related in a linear or exponential fashion. Consider, for instance, $D=\beta M^{U_D}$. Here, $D$ and $M$ are linearly related if $U_D=1$, but exponentially if $U_D$ is anything other than $1$.^[Here the difference between $\beta$ and $U_D$ is that $\beta$ is a parameter that we believe takes a constant value for all units, even if its value is unknown, while $U_D$ represents some unknown factor or combination of factors the value of which may vary across units, over a pre-specified range.]
+
+* Causal functions can take fully non-parametric form. Let us, for instance, allow $U_D$ to range across the values $a, b, c$, and $d$. We can then write down the following causal function for $D$:
+  * if $U_D=a$, then $D=1-M$
+  * if $U_D=b$, then $D=M$
+  * if $U_D=c$, then $D=0$
+  * if $U_D=d$, then $D=1$
+  
+Readers may recognize in this last causal function an expression of our original four causal types from earlier in this chapter.^[The types here map directly into the four types, $a$, $b$, $c$, $d$, used in @humphreys2015mixing and into principal strata employed by Rubin and others. The literature on probabilistic models also refers to such strata as "canonical partitions" or "equivalence classes." Note that this model is not completely general as the multinomial distribution assumes that errors are iid.] Here, $U_D$ is an unknown factor that is conditioning the effect of mobilization on democratization, determining whether $M$ has a negative effect, a positive effect, no effect with democratization never occurring, or no effect with democratization bound to occur regardless of mobilization. 
+
+We will make considerable use of functions similar to this last one in the pages and chapters to come. It is thus worth dwelling for a moment on what this kind of function is doing. We have started with a graph in which mobilization can have an effect on democratization and the understanding that this effect, both its existence and its sign, may vary across cases. Cases, in other words, may be of different causal types. Further, we do not know what it is that shapes $D$'s response to $M$---what makes a case one type versus another. We thus use $U_D$ as a stand-in for the unknown and unspecified moderators of $M$'s effect. We might, at this stage, wonder what the point is of including $U_D$ in the model; are we not essentially just placing a question mark on the graph? We are, and that is precisely the point. As we will see in later chapters, non-substantive, causal-type nodes can play a key role in specifying (a) what we are uncertain about in a causal network and (b) what we would like to find out. Embedding our questions about the world directly into a model of the world, in turn, allows us to answer those questions in ways systematically and transparently guided by prior knowledge.
+
+The larger point is that functions can be written to be quite specific or extremely general, depending on the state of prior knowledge about the phenomenon under investigation. The use of a structural model *does not require precise knowledge of specific causal relations*, even of the functional forms through which two variables are related. 
+
+<!-- In fact, we can include factors as another variable's "parents" even if we are unsure that those factors matter. Including variables on the righthand side in a functional equation allows for the possibility that those variables matter, and in turn sets us up to investigate their possible effect empirically.^[For instance, in $B=AU_B+C$, $A$ will only affect $B$ if $U_B$ takes on a non-zero value. ] -->
+
+A few important aspects of causal functions stand out. First, unlike regression equations and other equations describing data patterns, these functions express *causal* beliefs. When we write $D=\beta M$ as a function, we do not just mean that we believe the values of $M$ and $D$ in the world to be linearly related. We mean that we believe that the value of $M$ *determines* the value of $D$ through this linear function. Functions are, in this sense, meant as *directional* statements, with causes on the righthand side and an outcome on the left.
+
+Second, to specify functions is to unpack a potentially complex web of causal relations into its constituent causal links. For each variable, we do not need to think through entire sequences of causation that might precede it. We need only specify how we believe it to be affected by its parents---that is to say, those variables pointing directly into it. Our outcome of interest, $D$, may be a shaped by multiple, long chains of causality. To theorize how $D$ is generated, however, we write down how we believe $D$ is shaped by its immediate causes, $M$ and $U_D$. We then, separately, express a belief about how $M$ is shaped by _its_ direct causes, $R$ and $E$. A variable's function must include as inputs all, and only, those variables that point directly into that variable.^[The set of a variable's parents is required to be minimal in the sense that a variable is not included among the parents if, given the other parents, the child does not depend on it in any state that arises with positive probability.]
+
+Third, as in the general potential-outcomes framework, all relations in a causal model are conceptualized as in principle deterministic: a variable's value is fully *determined* by the values of its parents---i.e., by the righthand side terms in its functional equation. We express uncertainty about causal relations, however, either as unknown paramaters (e.g., $\beta$, above) or as random disturbances, the $U$ terms. 
+
+Fourth and relatedly, in a properly specified causal model *the values of the exogenous variables*---those with no arrows pointing in to them---*are sufficient to determine the values of all other variables in the model.*  Consistent with more informal usage, we refer to a given set of values for all exogenous terms in a model as a *context*. In causal model, context determines all other values. For instance, in Figure \@ref(fig:simpleDAG), knowing the values of $I$, $E$, and $U_D$ as well as the causal functions (including the values of any parameters they contain) would tell us the values of $R$, $M$, and $D$.
+
+<!-- ]  Variables that have no parents are called *roots*.^[Thus in our usage all elements of $\mathcal{U}$ are roots, but so are variables in $\mathcal{V}$ that depend on variables in $\mathcal{U}$ only.]  We will say that $\mathcal{F}$ is a set of *ordered structural equations* if no variable is its own descendant and if no element in $\mathcal{U}$ is parent to more than one element of \(\mathcal{V}\).^[This last condition can be achieved by shifting any parent of multiple children in $\mathcal{U}$ to $\mathcal{V}$.] -->
+
+<!-- Do we need to define roots? -->
+
+<!-- For notational simplicity we generally write functional equations in the form $c(a,b)$ rather than $f_c(a,b)$. -->
+
+<!-- **The distributions**. So far, we have specified the variables in the model and their causal relations, possibly with uncertainty. These relations imply  -->
+
+<!-- In general, $U$ terms---capturing unspecified disturbances---represent features of the world that we are *not* able to directly observe. In some cases, we may not even have a specific conceptualization of the phenomena in the world to which a $U$ term corresponds. Nonetheless, we may be able to make *inferences* about the value of a $U$ term from observed data. Indeed, given the role of the exogenous terms in a model in determining the operation of the world that the model describes, learning about a case's context becomes central to model-based causal inquiry and, as we shall see, lies at the heart of the framework that we are elaborating. -->
+
+**The distributions.**  Putting these components together gives what is termed a *structural causal model.* In a structural causal model, all endogenous variables are, either directly or by implication, functions of a case's context (the values of the set of exogenous variables).^[More formally, a **structural causal model** *over* signature $\mathcal{S}=<\mathcal{U},\mathcal{V},\mathcal{R}>$ is a pair $<\mathcal{S}, \mathcal{F}>$, where $\mathcal{F}$ is a set of ordered structural equations containing a function  $f_i$  for each element $Y\in \mathcal{V}$. We say that $\mathcal{F}$ is a set of ordered structural equations if no variable is its own descendant and if no element in $\mathcal{U}$ is parent to more than one element of \(\mathcal{V}\). This last condition can be achieved by shifting any parent of multiple children in $\mathcal{U}$ to $\mathcal{V}$. This definition thus includes an assumption of acyclicity, which is not found in all definitions in the literature.] What we have not yet inscribed into the model, however, is any beliefs about how *likely* or *common* different kinds of contexts might be. Thus, for instance, a structural causal model consistent with Figure \@ref(fig:simpleDAG) stipulates that $I$, $E$, and $U_D$ may have effects on $D$, but it says nothing in itself about the distribution of $I$, $E$, and $U_D$ themselves, beyond limitations on their ranges.^[Thus $P(d|i,e, u_D)$ would defined by this structural model (as a degenerate distribution), but $P(i)$, $P(e)$, $P(u_D)$, and $P(i,e, u_D)$ would not be.] We have not said anything, for instance, about how common high inequality is across the relevant domain of cases, how common ethnic homogeneity is, or how unspecified inputs are distributed.  
+
+In many research situations, we will have beliefs not just about how the world works under different conditions, but also about what kinds of conditions are more likely than others. We can express these beliefs about context as probability distributions over the models exogenous terms.^[We assume that the exogenous terms, the elements of $\mathcal{U}$, are generated independently of one another. While this is not without loss of generality, it is not as constraining as it might at first appear: any graph in which two exogenous variables are not independent can be replaced by a graph in which these two terms are listed as endogenous (possibly unobserved) nodes, themselves generated by a third variable. Note also that one could envision "incomplete probabilistic causal models" in which researchers claim knowledge regarding distributions over *subsets* of $\mathcal{U}$.]  For instance, a structural causal model might support a claim of the form: "$R$ has a positive effect on $M$ if and only if $E=1$ holds." We might, then, add to this a belief that $E=1$ in 25\% of cases in the population of interest. Including this belief about context implies, in turn, that $R$ has a positive effect on $M$ a quarter of the time. As with the functions, we can also (and typically would) build uncertainty into this belief by specifying a *distribution* over possible shares of cases with ethnic homogeneity, with our degree of uncertainty captured by the distribution's variance. 
+
+<!-- Am trying to render all the indented paragraphs below as a single, multi-paragraph footnote. Have read up and tried all sorts of things, no luck yet. -->
+
+<!-- Thus, a probabilistic causal model is a structural causal model coupled with a probability distribution over the model's exogenous variables. A corresponding probabilistic model, however, might support a stronger claim of the form: "Condition $C$ arises with frequency $\pi^C$, and so $X$ causes $Y$ with probability $\pi^C$." -->
+
+***
+
+Technical Note on the Markov Property
+  The assumptions that no variable is its own descendant and that the $U$ terms are generated independently make the model *Markovian*, and the parents of a given variable are Markovian parents. Knowing the set of Markovian parents allows one to write relatively simple factorizations of a joint probability distribution, exploiting the fact ("the Markov condition")  that all nodes are *conditionally independent* of their nondescendants, conditional on their parents. Variables $A$ and $B$ are "conditionally independent" given $C$ if $P(a|b,c) = P(a|c)$ for all values of $a, b$ and $c$.  
+  To see how this Markovian property allows for simple factorization of $P$ for Figure \@ref(fig:simpleDAG), note that $P(X, R, Y)$ can always be written as: 
+  $$P(X, R, Y) = P(X)P(R|X)P(Y|R, X)$$ 
+  If we believe, as in the figure, that $X$ causes $Y$ only through $R$ then we have the slightly simpler factorization:
+  $$P(X, R, Y) = P(X)P(R|X)P(Y|R)$$ 
+  Or, more generally:
+
+\begin{equation} 
+P(v_1,v_2,\dots v_n) = \prod P(v_i|pa_i)
+(\#eq:markov)
+\end{equation} 
+
+  The distribution $P$ on $\mathcal{U}$ induces a  joint probability distribution on $\mathcal{V}$ that captures  not just information about how likely different states are to arise but also the relations of conditional independence between variables that are implied by the underlying causal process. For example, if we thought that $X$ caused $Y$ via $R$ (and only via $R$), we would then hold that $P(Y | R) = P(Y | X, R)$: in other words if $X$ matters for $Y$ only via $R$ then, conditional on $R$, $X$ should not be informative about $Y$.   
+  In this way, a probability distribution $P$ over a set of variables can be consistent with some causal models but not others. This does not, however, mean that a specific causal model can be extracted from $P$. To demonstrate with a simple example for two variables, any probability distribution on $(X,Y)$ with $P(x)\neq P(x|y)$ is consistent both with a model in which $X$ is a parent of $Y$ and with a model in which $Y$ is a parent of $X$.
+
+***
+  
+Once we introduce beliefs about the distribution of values of the exogenous terms in a model, we have specified a *probabilistic causal model.* We need not say much more, for the moment, about the probabilistic components of causal models. But to foreshadow the argument to come, our prior beliefs about the likelihoods of different contexts play a central role in the framework that we present in this book. We will see how the encoding contextual knowledge---beliefs that some kinds of conditions are more common than others---forms a key foundation for causal inference. At the same time, our expressions of *uncertainty* about context represent scope for learning: it is the very things that we are, at a study's outset, uncertain about that we can update our beliefs about as we encounter evidence.
+
+
+### Features of causal models
+
+The diagram in Figure \@ref(fig:simpleDAG) is called a causal graph. Though we have already been making use of this causal graph to help us visualize elements of a causal model, we now explicitly point out a number of general features of causal graphs as we will be using them throughout this book. Causal graphs have their own distinctive "grammar," a set of rules that give them important analytical features.
+
+A causal graph represents elements of a causal model as a set of nodes (or vertices), representing variables, connected by a collection of single-headed arrows (or directed edges).  We draw an arrow from node $A$ to node $B$ if and only if we believe that $A$ can have a direct effect on $B$. The resulting diagram is  a *directed acyclic* graph (DAG) if there are no paths along directed edges that lead from any node back to itself---i.e., if the graph contains no causal cycles. 
+
+The drawing of causal graphs follows two rules. ^[These two conditions define a ''causal DAG'' [@hernan2006instruments]. Further, the specification that $\mathcal{F}$ is a set of ordered structural equations ensures that the graph is acyclic.] First, the *absence* of an arrow between $A$ and $B$ means that $A$ is not a direct cause of $B$.^[By "direct" we mean that the $A$ is a parent of $B$: i.e., the effect of $A$ on $B$ is not fully mediated by one or more other variables in the model.] Here lies an important asymmetry: drawing such an arrow does not mean that we know that $A$ *does* directly cause $B$; but omitting such an arrow implies that we know that $A$ does *not* directly cause $B$. We say more, in other words, with the arrows we omit than with the arrows that we include.
+
+Returning to Figure \@ref(fig:simpleDAG), we have here expressed the belief that redistributive preferences exert no direct effect on democratization; we have done so by *not* drawing an arrow directly from $R$ to $D$. In the context of this model, saying that redistributive preferences have no direct effect on democratization is to say that any effect of redistributive preferences on democratization *must* run through mobilization; there is no other pathway through which such an effect can operate. This might be a way of encoding the knowledge that mass preferences for redistribution cannot induce autocratic elites to liberalize the regime absent collective action in pursuit of those preferences. 
+
+The same goes for the effects of $I$ on $M$, $I$ on $D$, and $E$ on $D$: the graph in Figure \@ref(fig:simpleDAG) implies that we believe that these effects also do not operate directly, but only along the indicated, mediated paths.
+
+Meanwhile, the existence of an arrow from $A$ to $B$ does not imply that $A$ always, or even ever, has a direct effect on $B$. Consider, for instance, the arrow running from $R$ to $M$. The existence of this arrow requires that $M$ appear somewhere in the $M$'s functional equation as a variable's functional equation must include all variables pointing directly into it. Imagine, though, that $M$'s causal function is specified as: $M = RE$. This function allows for the *possibility* that $R$ affects $M$, as it will whenever $E=1$. However, it also allows that $R$ will have no effect, as it will when $E=0$. 
+
+This example also, incidentally, demonstrates another important consequence of context, the values of the exogenous variables: a case's context determines not just the settings on the endogenous variables, but also the causal *effects* that prevail among the variables. Under the functional equation $M=RE$, a case's ethnic-compositional context determines whether or not redistributive preferences will have an effect on mobilization. 
+
+The second rule of drawing DAGs is that any cause common to multiple variables on the graph must itself be represented on the graph. If $A$ and $B$ on a graph are both affected by some third variable, $C$, then we must represent this common cause. Put differently, any two variables without common causes on the graph are taken to be indepedent of one another. Thus, the graph in Figure \@ref(fig:simpleDAG) implies that the values of $I$, $E$, and $U_D$ are all determined independently of one another. If in fact we believed that a country's level of inequality and its ethnic composition were both shaped by, say, its colonial heritage, then this DAG would *not* be an accurate representation of our beliefs about the world. To make it accurate, we would need to add to the graph a variable capturing that colonial heritage and include arrows running from colonial heritage to both $I$ and $E$. 
+
+This rule ensures that the graph captures all potential correlations among variables that are implied by our beliefs. If $I$ and $E$ are in fact driven by some common cause, then this means not just that these two variables will be correlated but also that each will be correlated with any consequences of the other. For instance, a common cause of $I$ and $E$ would also imply a correlation between $R$ and $E$. $R$ and $E$ are implied to be independent in the current graph but would be implied to be correlated if a common node pointed into both $I$ and $E$.
+
+Of particular interest in Figure \@ref(fig:simpleDAG) is the implied independence of $U_D$ from every other node. Imagine, for instance, an additional node pointing into both $I$ and $U_D$. This would represent a classic form of confounding: the assignment of cases to values on the explanatory variable would be correlated with case's potential outcomes on $D$. The omission of any such pathway is precisely equivalent to expressing the belief that $I$ is exogenous, or (as if) randomly assigned.
+
+The flip side of this second rule is that a causal graph, to do the work it must do, does *not* need to include everything we know about a substantive domain of interest. We may know quite a lot about the causes of economic inequality, for example. But we can safely omit these other factors from the graph as long as they do not have effects on other variables in the graph (via some path that does not run through $I$). Likewise, we can choose to capture any number of unspecified factors in a $U$ term. We may be aware of a vast range of forces shaping whether countries democratize, but choose to bracket them for the purposes of an examination of the role of economic inequality. The $U_D$ achieves this bracketing and is permissble as long as none of these unspecified factors also act on the other variables included in the model (since, if they do, then we would have a common cause of two included variables and would then need to capture the implied correlation between them). 
+
+Moreover, as a matter of convention, explicitly including $U$ terms is optional. In practice, $U$'s are often excluded from the visual representation of a model on the understanding that every variable on the graph is subject to some unaccounted-for influence and thus, implicitly, has a $U$ term pointing into it. In this book, we will generally draw the $U$ terms where they are of particular theoretical or analytical interest but will otherwise omit them. Whether we include or omit $U$ terms, we will generally treat those nodes in a graph that have no arrows pointing into them as the exogenous variables that define the context.
+
+As should be clear, a DAG does not represent all features of a causal model. What it does record is which variables enter into the structural equation for every other variable: what can directly cause what. But the DAG contains no other information about the form of those causal relations. Thus, for instance, the DAG in Figure \@ref(fig:simpleDAG) tells us that $M$ is function of both $R$ and $E$, but it does not tell us whether that joint effect is additive ($R$ and $E$ separately increase mobilization), interactive (the effect of each depends on the value of the other), or whether either effect if linear, curvilinear or something else. 
+
+This lack of information about functional forms often puzzles those encountering causal graphs for the first time; surely it would be convenient to visually differentiate, say, additive from conditioning effects. As one thinks about the variety of possible causal functions, it quickly becomes clear that there would be no simple visual way of capturing all possible functional relations. Moreover, as we shall now see, causal graphs are a tool designed with a particular analytic purpose in mind---a purpose to which we now turn.
+
+
+### Conditional independence from DAGs
+
+If we encode our prior knowledge using the grammar of a causal graph, we can put that knowledge to work for us in powerful ways. In particular, the rules of DAG-construction allow for an easy reading of the *conditional independencies* implied by our beliefs.
+
+To begin thinking about conditional independence, it can be helpful to conceptualize dependencies between variables as generating *flows of information*. Let us first consider a simple relationship of dependence. Returning to Figure \@ref(fig:simpleDAG), the arrow running from $I$ to $R$, implying a direct causal dependency, means that if we expect $I$ and $R$ to be correlated. Put differently, observing the value of one of these variables also gives us information about the value of the other. If we measured redistributive preferences, the graph implies that we would also be in a better position to infer the level of inequality, and vice versa. Likewise, $I$ and $M$ are also linked in a relationship of dependence: since inequality can affect mobilization (through $R$), knowing the the level of inequality would allow us to improve our estimate of the level of mobilization and vice versa.
+
+In contrast, consider $I$ and $E$, which are in this graph indicated as being *independent* of one another. Learning the level of inequality, according to this graph, would give us no information whatsoever about the degree of ethnic homogeneity, and vice-versa.
+
+Moreover, sometimes what you learn depends on *what you already know.* Suppose that we already knew the level of redistributive preferences. Would we then be in a position to learn about the level of inequality by observing the level of mobilization? According to this graph we would not: since the causal link---and, hence, flow of information between $I$ and $M$---runs through $R$, and we already know $R$, there is nothing left to be learned about $I$ by also observing $M$. Anything we could have learned about inequality by observing mobilization is already captured by the level of redistributive preferences, which we have already seen. While $I$ and $M$ are dependent---one is informative about the other---if we have *not* seen $R$, they are independent of one another (uninformative about each other) if we have seen $R$. We can express this idea by saying that $I$ and $M$ are *conditionally independent given $R$*. 
+
+We say that two variables, $A$ and $C$, are "conditionally independent" given a set of variables $\mathcal B$ if, once we have knowledge of the values in $\mathcal B$, knowledge of $A$ provides no information about $C$ and vice-versa. Taking $\mathcal B$ into account thus "breaks" any relationship that might exist unconditionally between $A$ and $C$. 
+
+To take up another example, suppose that war is a cause of both military casualties and price inflation, as depicted in Figure \@ref(fig:warDAG). Casualties and inflation will then be (unconditionally) correlated with one another because of their shared cause. If I learn that there have been military casualties, this information will lead me to think it more likely that there is also war and, in turn, price inflation (and vice versa). However, assuming that war is their only common cause, we would say that military casualties and price inflation are *conditionally independent given war.* If we already know that there is war, then we can learn nothing further about the level of casualties (price inflation) by learning about price inflation (casualties). We can think of war, when observed, as blocking the flow of information between its two consequences; everything we would learn about inflation from casualties is already contained in the observation that there is war. Put differently, if we were just to look at cases where war is present (i.e., if we hold war constant), we should find no correlation between military casualties and price inflation; likewise, for cases in which war is absent.  
+
+
+```{r warDAG, echo = FALSE, fig.width = 8, fig.height = 5,  fig.align="center", out.width='.5\\textwidth', fig.cap = "This graph represents a simple causal model in which war ($W$) affects both military casualties ($C$) and price inflation ($P$)."}
+par(mar=c(1,1,3,1))
+hj_dag(x = c(0, 1, 1),
+       y = c(1, 2, 0),
+       names = c(
+         "W", 
+         "C",
+         "P"
+         ),
+       arcs = cbind( c(1, 1),
+                     c(2, 3)),
+       title = "A Model of War's Effect on Casualties and Prices",
+       padding = .4, contraction = .15) 
+
+```
+
+Relations of conditional independence are central to the strategy of statistical control, or covariate adjustment, in correlation-based forms of causal inference, such as regression. In a regression framework, identifying the causal effect of an explanatory variable, $X$, on a dependent variable, $Y$, requires the assumption that $X$'s value is conditionally independent of $Y$'s potential outcomes (over values of $X$) given the model's covariates. To draw a causal inference from a regression coefficient, in other words, we have to believe that including the covariates in the model "breaks" any biasing correlation between the value of the causal variable and its unit-level effect.
+
+As we will explore, however, relations of conditional independence are of more general interest in that they tell us, given a model, *when information about one feature of the world may be informative about another feature of the world, given what we already know*. By identifying the possibilities for learning, relations of conditional independence can thus guide research design.
+
+
+<!-- Some possibilities are excluded by the framework, however: for example, one cannot represent uncertainty regarding whether $A$ causes $B$ or $B$ causes $A$. -->
+
+<!-- It would be nice to make a less general statement than the above as it sounds like none of this has any relevance if we think there's reciprocal causation in the causal system of interest; and that sounds like it excludes A LOT of problems political scientists are interested in. Pearl has a bit of discussion of the fact that one can compute the effect of interventions for models with cyclic features as well. So can we put this point more narrowly? Have been looking into this a bit but not yet sure exactly how to do that. -->
+
+
+
+
+<!-- The above point is something I want to get more clarity around. Also, why we are defining roots as we are. -->
+
+<!-- In Figure \@ref(fig:simpleDAG) we show a simple DAG that represents a situation in which $X$ is a parent of $M$, and $M$ is a parent of $Y$. In this example, the three variables $U_X$, $U_M$, and $U_Y$ are all exogenous and thus elements of \(\mathcal{U}\). $X$, $M$, and $Y$ are endogenous and members of  \(\mathcal{V}\). If these three variables were binary, then there would be eight possible realizations of outcomes, i.e., of \(\mathcal{V}\). In the underlying model,  $U_X$ is an ancestor of $X$, $M$, and $Y$ which are all descendants of $U_X$. The elements of $\mathcal{U}$ are all roots, though $X$ is also  a root as it has no parent in $\mathcal{V}$.   -->
+
+ 
+<!-- In addition we will usually omit variables from a graph only if they are single parents---this has the advantage of clarifying that all uncertainty is over the value of roots, and not over functional forms given roots; this is without loss of generality as parameters for functional equations can themselves be represented as roots.      -->
+
+<!-- As a very simple example one might imagine that $A$ an $B$ are independently generated binary variables; $C$ is an indicator for whether $A$ and $B$ have the same value. Then obviously if you know $C$, then knowing $A$ tells you everything about $B$. -->
+
+To see more systematically ow a DAG can reveal conditional independencies, it is useful spell out three pairs of features of the flow of information in causal graphs:
+
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 4,  fig.align="center", out.width='.9\\textwidth', fig.cap = "\\label{fig:CI} Three elementary relations of conditional independence."}
+par(mfrow = c(3,1))
+par(mar=c(1,1,3,1))
+hj_dag(x = c(-1, 0, 1), y = c(1,1,1), names = c( "A", "B", "C" ),
+       arcs = cbind( c(1, 2),
+                     c(2, 3)),
+       title = "(a) A path of arrows pointing in the same direction.", padding = .4, contraction = .15) 
+hj_dag(x = c(-1, 0, 1), y = c(1,1,1), names = c( "A", "B", "C" ),
+       arcs = cbind( c(2, 2),
+                     c(1, 3)),
+       title = "(b) A forked path.", padding = .4, contraction = .15) 
+hj_dag(x = c(-1, 0, 1), y = c(1,1,1), names = c( "A", "B", "C" ),
+       arcs = cbind( c(1, 3),
+                     c(2, 2)),
+       title = "(c) An inverted fork (collision).", padding = .4, contraction = .15) 
+
+```
+
+
+(1a) Information can flow unconditionally along a path of arrows pointing in the same direction. In Panel 1 of Figure \ref{fig:CI}, information flows across all three nodes. Learning about any one will tell us something about the other two. 
+
+(1b) Learning the value of a variable along a path of arrows pointing in the same direction *blocks* flows of information across that variable. Knowing the value of $B$ in Panel 1 renders $A$ no longer informative about $C$, and vice versa: anything that $A$ might tell us about $C$ is already captured by the information about $B$.
+
+(2a) Information can flow unconditionally across the branches of any forked path. In Panel 2 learning only $A$ can provide information about $C$ and vice-versa.
+
+(2b) Learning the value of the variable at the forking point blocks *flows* of information across the branches of a forked path. In Panel 2, learning $A$ provides no information about $C$ if we already know the value of $B$.^[Readers may recognize this statement as the logic of adjusting for a confound that is a cause of both an explanatory variable and a dependent variable in order to achieve conditional independence.]
+
+(3a) When two or more arrowheads collide, generating an inverted fork, there is no unconditional flow of information between the incoming sequences of arrows. In Panel 3, learning only $A$ provides no  information about $C$, and vice-versa. 
+
+(3b) Collisions can be sites of *conditional* flows of information. In the jargon of causal graphs, $B$ in Panel 2 is a "collider" for $A$ and $C$.^[In the familial language of causal models, a collider is a child of two or more parents.] Although information does not flow unconditionally across colliding sequences, it does flow across them *conditional* on knowing the value of the collider variable or any of its downstream consequences. In Panel 2, learning $A$ *does* provide new information about $C$, and vice-versa, *if* we also know the value of $B$ (or, in principle, the value of anything that $B$ causes). 
+
+The last point is somewhat counter-intuitive and warrants further discussion. It is easy enough to see that, for two variables that are correlated unconditionally, that correlation can be "broken" by controlling for a third variable. In the case of collision, two variables that are *not* correlated when taken by themselves *become* correlated when we condition on (i.e., learn the value of) a third variable, the collider. The reason is in fact quite straightforward once one sees it: if an outcome is a joint function of two inputs, then if we know the outcome, information about one of the inputs can provide information about the other input. For example, if I know that you have brown eyes, then learning that your mother has blue eyes makes me more confident that your father has brown eyes. 
+
+Looking back at our democratization DAG in Figure \@ref(fig:simpleDAG), $M$ is a collider for $R$ and $E$, its two inputs. Suppose that we again have the functional equation $M=RE$. Knowing about redistributive preferences alone provides no information whatsoever about ethnic homogeneity since the two are determined independently of one another. On the other hand, imagine that you already know that there was no mobilization. Now, if you observe that there *were* redistributive preferences, you can figure out the level of ethnic homogeneity: it must be 0. (And likewise in going from homogeneity to preferences.)
+
+Using these basic principles, conditional independencies can be read off any DAG. We do so by checking every path connecting two variables of interest and ask whether, along those paths, the flow of information is open or blocked, given any other variables whose values are already observed. Conditional independence is established when *all* paths are blocked given what we already know; otherwise, conditional independence is absent.
+
+As an exercise, see whether you can identify the relations of conditional independence between $A$ and $D$ in Figure \ref{fig:CItest}. 
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 2,  fig.align="center", out.width='.9\\textwidth', fig.cap = "\\label{fig:CItest} An exercise: $A$ and $D$ are conditionally independent, given which other variable(s)?"}
+par(mfrow = c(1,1))
+par(mar=c(1,1,3,1))
+hj_dag(x = 1:4, y = c(1, 1,1,1), names = c( "A", "B", "C", "D" ),
+       arcs = cbind( c(1, 3, 3),
+                     c(2, 2, 4)),
+       title = " ", padding = .4, contraction = .15) 
+
+```
+
+Are A and D independent:
+
+* unconditionally?
+
+Yes. $B$ is a collider, and information does not flow across a collider if the value of the collider variable or its consequences is not known. Since no information can flow between $A$ and $C$, no information can flow between $A$ and $D$ simply because any such flow would have to run through $C$.
+
+* if you condition on $B$?
+
+No. Conditioning on a collider opens the flow of information across the incoming paths. Now, information flows between $A$ and $C$. And since information flows between $C$ and $D$, $A$ and $D$ are now also connected by an unbroken path. While $A$ abnd $D$ were independent when we conditioned on nothing, they cease to be independent when we condition on $B$.
+
+* if you condition on $C$?
+
+Yes. Conditioning on $C$, in fact, has no effect on the situation. Doing so cuts off $B$ from $D$, but this is irrelevant to the $A$-$D$ relationship since the flow between $A$ and $D$ was already blocked at $B$, an unobserved collider. 
+
+* if you condition on $B$ and $C$?
+
+Yes. Now we are doing two, countervailing things at once. While conditioning on $B$ opens the path connecting $A$ and $D$, conditioning on $C$ closes it again, leaving $A$ and $D$ conditionally independent.
+
+Analyzing a causal graph for relations of independence represents one payoff to formally encoding our beliefs about the world in a causal model. We are, in essence, drawing out implications of those beliefs: given what we believe about a set of direct causal relations (the arrows on the graph), what must this logically imply about other dependencies and independencies on the graph, conditional on having observed some particular set of nodes? We show in a later chapter how these implications can be deployed to guide research design, by indicating which parts of a causal system are potentially informative about other parts that may be of interest.
+
+### A simple running example
+
+We will illistrate these core ideas with a simple running example of a model of government corruption and survival. 
+
+We begin with two binary features of context. Consider, first, that a country may or may not have a free press ($X$). Second, the country's government may or may not be sensitive to public opinion ($S$).^[Government sensitivity here can be thought of as government sophistication (does it take the actions of others into account when making decisions?) or as a matter of preferences (does it have a dominant strategy to engage in corruption?).] Let us then stipulate what follows from these conditions. The government will engage in corruption ($C=1$) unless it is sensitive to public opinion and there is a free press. Moreover, if and only if there is both government corruption and a free press, the press will report on the corruption ($R=1$). Finally, the government will be removed from office ($Y=1$) if it has acted corruptly and this gets reported in the press; otherwise, the government remains in office. 
+
+As a set of equations, this simple causal model may be written as follows:
+
+$\begin{array}{ll}
+C = 1-X\times S &  \mbox{Whether the government is corrupt}\\
+R = C\times X &  \mbox{Whether the press reports on corruption}\\
+Y = C\times R & \mbox{Whether the government is removed from office}
+\end{array}$
+
+One thing that these equations make clear is that the variables in our model function in various places as causal-type nodes for one another. For instance, we can see from equation for $C$ that the causal effect of a free press ($X$) on corruption ($C$) depends on whether the government is sensitive to public opinion ($S$): $S$ determines $C$'s response to $X$ (as does $X$ for $S$'s effect on $C$). A similar relationship holds for $C$ and $X$ in their effect on $R$ and for $C$ and $R$ in their effect on $Y$. As we will see below, the model also implies more complex causal-type relationships. We can, further, substitute through the causal processes to write down the functional equation for the outcome in terms of the two initial causal variables: $Y=(1-S)X$.^[Equivalently, in Boolean terms, where $Y$ stands for the occurrence of government removal, $Y= \neg S \land X$; and the function for the outcome "government retained" can be written  $\neg Y = (S\land X) \lor (S\land\neg X) \lor (\neg S \land \neg X)$ or, equivalently, $\neg Y = S + \neg S \neg X$.] 
+
+Let us, further, allow our two primary causal variables---the existence of a free press and the existence of a sensitive government---to vary probabilistically. In particular, we represent the probability of a free press with the population parameter $\lambda^X_1$ and the probability of a sensitive government with the parameter $\lambda^S_1$. To generate draws based on these  probabilities, we then introduce two random variables with uniform distributions between 0 and 1, $U_X$ and $U_S$, and posit that we get a free press, $\theta^X=\theta^X_1$ whenever $u_X < \lambda^X_1$ and a sensitive government, $\theta^S=\theta^S_1$, whenever $u_S < \lambda_1^S$. 
+
+This gives the following equations for $X$ and $S$:
+
+$\begin{array}{ll}
+X = \mathbb{1}(u_X < \lambda^X_1) & \mbox{Whether the press is free}\\
+S = \mathbb{1}(u_S < \lambda^S_1) & \mbox{Whether the government is sensitive}\\
+\end{array}$
+
+
+<!-- where $\pi^S$ and $\pi^X$ are parameters governing the probability of $S$ and $X$, respectively, taking on the value of 1. -->
+
+<!-- To generate a probabilistic causal model, we also need distributions on $\mathcal U = (U_S, U_X)$. These are given by:  -->
+
+<!-- $\begin{array}{ll} -->
+<!-- u_S \sim \text{Unif}[0,1] &  \mbox{Stochastic component of government type} \\ -->
+<!-- u_X \sim \text{Unif}[0,1] &  \mbox{Stochastic component of press freedom} -->
+<!-- \end{array}$ -->
+
+Note that in this model, only the most "senior" specified variables, $X$ and $S$, have a stochastic component (i.e., $\lambda^X_1$ and $\lambda^S_1$ lie between 0 and 1). All other endogenous variables are deterministic functions of other specified variables.
+
+<!-- Does that work? The term "specified" is quite useful here -- since otherwise really every variable except the U's is a deterministic function. Do we want to just come out and formally distinguish, earlier, between specified and unspecified variables? -->
+
+
+
+
+
+```{r running, echo = FALSE, fig.width = 11, fig.height = 11.5, fig.align="center", out.width='\\textwidth', fig.cap = "The figure shows a simple causal model. $S$ and $X$ are stochastic, other variables determined by their parents, as shown in bottom right panel.", fig.align="center", warning = FALSE}
+
+
+x = c(0,0, 1, 1, 2)
+y = c(2,0, 2, 0, 1)
+
+names = c("S:\nSensitive\ngovernment\n\n", "\nX:\nFree Press", "C:\n Corruption", "R:\n Media report", "Y:\nGovernment\nreplaced")
+
+hj_dag(x =  c(x, 0, 0),
+       y = c(y, 0.25, 1.75),
+       names = c(names, " ", " "),
+       arcs = cbind( c(1,2,2, 3, 4, 3, 6, 7),
+                     c(3,3,4, 5, 5, 4, 2, 1)),
+       title = "Free Press and Government Survival",
+       add_functions = 0, 
+       contraction = .15,
+       add_functions_text = "Structural Equations: Y = CR, R = CX, C = 1-XS",
+       padding = .2)
+
+text(c(0,0), c(.25, 1.75), c(expression(paste(U[X])), expression(paste(U[S]))))
+
+```
+
+
+<!-- In figure above, can we not put proper indicator variable notation in the structural equations for the U's? NOT EASY -->
+
+The corresponding causal diagram for this model is shown in Figure \@ref(fig:running). The graph explicitly includes the processes determining the two key causal variables variables (the $\lambda$ and $U$ terms). 
+
+## Causal models from the literature
+
+We can provide more of a sense of how one might encode prior knowledge in a causal model by asking how we might construct models in light of extant scholarly works. We undertake this exercise here for three well-known works in comparative politics and international relations: Pierson's seminal book on welfare-state retrenchment (@pierson1994dismantling); Elizabeth Saunders' research on leaders' choice of military intervention strategies (@saunders2011leaders); and Przeworski and Limongi's work on democratic survival (@przeworski1997modernization), an instructive counterpoint to Boix's (@boix2003democracy) argument about a related dependent variable. For each, we represent in the form of a causal model the causal knowledge that we might plausibly think we take away from the work in question. Readers might represent these knowledge bases differently; our present aim is merely to illustrate how causal models are constructed, rather than to defend a particular representation (much less the works in question) as accurate.
+
+
+### Pierson on dismantling the welfare state
+
+The argument in Pierson's 1994 book  *Dismantling the Welfare State* challenged prior notions of post-1980 welfare-state retrenchment in OECD countries as a process driven primarily by socioeconomic pressures (slowed growth, rising unemployment, rising deficits, aging populations) and the rise of market-conservative ideologies (embodied, e.g., the ascendance of Thatcher and Reagan). Pierson argues that socioeconomic and ideological forces put retrenchment on the policy agenda, but do not ensure its enactment because retrenchment is a politically perilous process of imposing losses on large segments of the electorate. Governments will only impose such losses if they can do so in ways that allow them avoid blame for doing so---by, for instance, making the losses hard to perceive or responsibility for them difficult to trace. These blame-avoidance opportunities are themselves conditioned by the particular social-program structures that governments inherit. 
+
+ <!-- $C$=conservative government; $S$=socioeconomic pressures; $P$=program structure; $A$=retrenchment being on the agenda; $B$=blame-avoidance opportunities; $R$=retrenchment; $U_R$=random influences on retrenchment -->
+
+```{r, echo = FALSE, fig.width = 10, fig.height = 7, fig.align="center", out.width='.7\\textwidth', fig.cap = "\\label{fig:DAGPierson} A graphical representation of Pierson (1994).", warning = FALSE, message = FALSE}
+
+par(mfrow = c(1,1))
+par(mar=c(1,1,3,1))
+hj_dag(x = c(1,2,3,1,1,2,3),
+       y = c(1,1,2,3,2,2,3),
+       names = c(
+         expression(paste("P: Program structure")),
+         expression(paste("B: Blame-avoidance\nopportunity")),  
+         expression(paste("R: Retrenchment")),
+         expression(paste("C: Conservative\ngovt")),
+         expression(paste("S: Socioeconomic\npressures")),
+         expression(paste("A: On Agenda")),
+         expression(paste(U[R]: "Random influence\n on retrenchment"))),
+       arcs = cbind( c(1,2, 4,5,6,7),
+                     c(2,3, 6,6,3,3)),
+       title = "Government Rentenchment (Pierson, 1994)",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+```
+
+While the argument has many more specific features (e.g., different program-structural factors that matter, various potential strategies of blame-avoidance), its essential components can be captured with a relatively simple causal model. We propose such a model in graphical form in Figure \ref{DAGPierson}. Here, the outcome of retrenchment ($R$) hinges on whether retrenhcment makes it onto the agenda ($A$) and on whether blame-avoidance strategies are available to governments ($B$), and on some unspecified random input ($U_R$). Retrenchment emerges on the policy agenda as a consequence of both socioeconomic developments ($S$) and the ascendance of ideologically conservative political actors ($C$). Inherited program structures ($P$), meanwhile, determine the availability of blame-avoidance strategies.
+
+A few features of this graph warrant attention. As we have discussed, it is the omitted arrows in any causal graph that imply the strongest statements. The graph in Panel (a) implies that $C$, $S$, $P$, and $U_R$---which are neither connected along a directed path nor downstream from a common cause---are independent of one another. This implies, for instance, that whether conservatives govern is independent of whether program structures will allow for blame-free retrenchment. Thus, as Pierson argues, a Reagan or Thatcher can come to power but nonetheless run up against an opportunity structure that would makes retrenchment politically perilous. Further, in this graph any effect of program structures on retrenchment *must* run through their effects on blame-avoidance opportunities. One could imagine relaxing this restriction by, for instance, drawing an arrow from $P$ to $A$: program structures might additionally affect retrenchment by conditioning the fiscal costliness of the welfare state, thus helping to determine whether reform makes it onto the agenda.
+
+Where two variables *are* connected by an arrow, moreover, this does not imply that a causal effect will always operate. Consider, for instance, the arrow pointing from $A$ to $R$. The fact that $A$ sometimes affects $R$ and sometimes does not is, in fact, central to Pierson's argument: conservatives and socioeconomic pressures forcing retrenchment on the agenda will *not* generate retrenchment if blame-avoidance opportunities are absent. 
+
+The graph also reflects a choice about where to begin. We could, of course, construct a causal account of how conservatives come to power, how socioeconomic pressures arose, or why programs were originally designed as they were. Yet it is perfectly permissible for us to bracket these antecedents and start the model with $C$, $S$, and $P$, as long as we do not believe that these variables have any antecedents in common. If they do have common causes, then this correlation should be captured in the DAG.^[In DAG syntax, this correlation can be captured by placing the common cause(s) explicitly on the graph or by drawing a dashed line between the correlated nodes, leaving the source of the correlation unspecified.]
+
+The DAG itself tells us about the possible direct causal dependencies but is silent on the ranges of and functional relations among the variables. How might we express these? With three endogenous variables, we need three functions indicating how their values are determined. Moreover, every variable pointing directly into another variable must be part of that second variable's function. Let us assume all variables are binary, with each condition either absent or present. We can capture quite a lot of Pierson's theoretical logic with the following quite simple functional equations:
+
+* $A=CS$, implying that retrenchment makes it on the agenda if and only if both conservatives are in power and socioeconomic pressures are high.
+* $B=P$, implying that blame-avoidance opporunities arise when and only when program structures take a particular form
+* $R=ABU_R$. 
+
+This last functional equation requires a little bit of explanation. Here we are saying that retrenchment will only occur if retrenchment is on the agenda and blame-avoidance opportunities are present (as the expression zeroes out if either of these are 0). Yet even if both are present, the effect on retrenchment also hinges on the value of $U_R$. $U_R$ thus behaves as a causal-type variable with respect to the effect of an $AB$ combination on $R$ and allows for two possible types. When $U_R=1$, the $AB$ combination has a positive causal effect on retrenchment. When $U_R=0$, $AB$ has no causal effect: retrenchment will not occur regardless of the presence of $AB$. A helpful way to conceptualize what $U_R$ is doing is that is capturing a collection of features of a case's context that might render the case susceptible or not susceptible to an $AB$ causal effect. For instance, Pierson's analysis suggests that a polity's institutional structure might widely diffuse veto power such that stakeholders can block reform even when retrenchment is on the agenda and could be pursued without electoral losses. We could think of such a case as having a $U_R$ value of 0, implying that $AB$ has no causal effect. A $U_R=1$ case, with a positive effect, would be one in which the government has the institutional capacity to enact reforms that it has the political will to pursue.
+
+### Saunders (2011) 
+
+@saunders2011leaders asks why, when intervening militarily abroad, do leaders sometimes seek to transform the *domestic* political institutions of the states they target but sometimes seek only to shape the states' external behaviors. Saunders' central explanatory variable is the nature of leaders' causal beliefs about security threats. When leaders are "internally focused," they believe that threats in the international arena derive from the internal characteristics of other states. Leaders who are "externally focused," by contrast, understand threats as emerging strictly from other states' foreign and security policies. These basic worldviews, in turn, affect the cost-benefit calculations they make about intervention strategies, via two mechanisms. Most simply, these beliefs affect perceptions of the likely security gains from a transformative intervention strategy. In addition, these beliefs affect the kinds of strategic capabilities in which leaders invest, which in turn effects the costliness and likelihood of success of alternative intervention strategies. Calculations about the relative costs and benefits of different strategies then shape the choice between a transformative and non-transformative approach to intervention. Yet leaders can, of course, only choose one of these options if they decide to intervene at all. The decision about whether to intervene depends, in turn, on at least two kinds of considerations. A leader is more likely to intervene against a given target when the nature of the dispute makes the leader's preferred strategy---given their causal beliefs---appear feasible in this situation; yet leaders may also be pushed to intervene by international or domestic audiences.
+
+Figure \ref{fig:DAGSaunders} depicts the causal dependencies in Saunders' argument in DAG form. Working from left to right, we see that causal beliefs ($C$) affect the expected net relative benefits of the two strategies ($B$) both via a direct pathway and via an indirect pathway running through preparedness investments ($P$). Characteristics of a given target state or dispute ($T$) likewise influence $B$. The decision about whether to intervene ($I$) is then a function of three factors: causal beliefs ($C$), the expected relative net benefits of the strategies ($B$), and audience pressures ($A$). Finally, the choice of strategy ($S$) is a function of whether or not intervention occurs at all ($I$), cost-benefit comparisons between the two strategies ($B$), and other, idiosyncratic factors that may operate in various cases ($U_S$).
+
+```{r, echo = FALSE, fig.width = 10, fig.height = 7, fig.align="center", out.width='.7\\textwidth', fig.cap = "\\label{fig:DAGSaunders} A graphical representation of Saunders' (2011) argument.", warning = FALSE, message = FALSE}
+
+par(mfrow = c(1,1))
+par(mar=c(1,1,3,1))
+hj_dag(x = c(1,2,2,1, 3, 3,3,3.5),
+       y = c(1,0,2,2, 2, 1,0, .5),
+       names = c(
+         expression(paste("C: Causal beliefs")),
+         expression(paste("P: Preparedness\ninvestment")),  
+         expression(paste("B: Benefits expected\nfrom transfers")),  
+         expression(paste("T: Target\ncharacteristics")),
+         expression(paste("A: Audience pressures")),
+         expression(paste("I: Intervention")),
+         expression(paste("S: Intervention strategy")),
+         expression(paste(U[S]: "Random influence\non strategy")) 
+         ),
+       arcs = cbind( c(1,1, 2,1, 4, 3, 3,5,6,8),
+                     c(2,3, 3,6, 3, 6, 7,6,7,7)),
+       title = "(b) Military intervention strategies (Saunders, 2011)",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+```
+
+This relatively complex DAG illustrates how readily DAGs can depict the multiple pathways through which a given variable might affect another variable, as with the multiple pathways linking $C$ to $I$ and $B$ (and, thus, all of its causes) to $S$. In fact, this graphical representation of the dependencies in some ways throws the multiplicity of pathways into even sharper relief than does a narrative exposition of the argument. For instance, Saunders draws explicit attention to how causal beliefs operate on expected net benefits via both a direct and indirect pathway, both of which are parts of an indirect pathway from $C$ to the outcomes of interest, $I$ and $S$. What is a bit easier to miss without formalization is that $C$ also acts *directly* on the choice to intervene as part of the feasibility logic: when leaders assess whether their generally preferred strategy would be feasible if deployed against a particular target, the generally preferred strategy is itself a product of their causal beliefs. The DAG also makes helpfully explicit that the two main outcomes of interest---the choice about whether to intervene and the choice about how---are not just shaped by some of the same causes but are themselves causally linked, with the latter depending on the former.
+
+Omitted links are also notable. For instance, the lack of an arrow between $T$ and $A$ suggests that features of the target that affect feasibility have no effect on audience pressures. If instead we believed, for instance, that audiences take feasibility into account in demanding intervention, we would want to include a $T \rightarrow A$ arrow.
+
+Turning to variable ranges and functional equations, it is not hard to see how one might readily capture Saunders' logic in a fairly straightforward set-theoretic manner. All variables except $S$ could be treated as binary with, for instance, $C=1$ representing internally focused causal beliefs, $P=1$ representing preparedness investments in transformation, $B=1$ representing expectations that transformation will be more net beneficial than non-transformation, $T=1$ meaning that a target has characteristics that make transformation a feasible strategy, and so on. Although there are two strategies, we in fact need three values for $S$ because it must be defined for all values of the other variables---i.e., it must take on a distinct categorical value if there is no intervention at all. We could then define functions, such as:
+
+* $B=CPT$, implying that transformation will only be perceived to be net beneficial in a case if and only if the leader has internally focused causal beliefs, the government is prepared for a transformative strategy, and the target has characteristics that make transformation feasible
+* $I=(1-|B-C|)+(1-(1-|B-C|))A$, implying that intervention can occur under (and only under) either of two alternative sets of conditions: if the generally preferred strategy and the more net-beneficial strategy in a given case are the same (i.e., such that $B-C=0$) or, when this alignment is absent (i.e., such that $|B-C|=0$), where audiences pressure a leader to intervene.
+
+### Przeworski and Limongi (1997)
+
+Przeworski and Limongi (@przeworski1997modernization) argue that democratization occurs for reasons that are, with respect to socioeconomic or macro-structural conditions, largely idiosyncratic; but once a country has democratized, a higher level of economic development makes democracy more likely to survive. Economic development thus affects whether or not a country is a democracy, but only after a democratic transition has occurred, not before. Thus, unlike in @boix2003democracy, democratization in Przeworski and Limongi's argument is exogenous, rather than being determined by other variables in the model. Moreover, the dynamic component of Przeworski and Limongi's argument---the fact that both the presence of democracy and the causal effect of development on democracy depend on whether a democratic transition occurred at a previous point in time---forces us to think about how to capture over-time processes in a causal model. 
+
+We represent Przeworski and Limongi's argument in the DAG in Figure \@ref(fig:DAGPL). The first thing to note is that we can capture dynamics by considering democracy at different points in time as separate nodes. According to the graph, whether a country is a democracy in a given period ($D_t$) is a function, jointly, of whether it was a democracy in the previous period ($D_{t-1}$) and of the level of per capita GDP in the current period, as well as of other unspecified forces ($U_{D_t}$) that lie outside the model.
+
+```{r DAGPL, echo = FALSE, fig.width = 10, fig.height = 7, fig.align="center", out.width='.7\\textwidth', fig.cap = "A graphical representation of Przeworski and Limongi's argument, where $D_{t-1}$=democracy in the previous period; $GDP_t$=per capita GDP in the current period; $D_t$=democracy in the current period.", warning = FALSE, message = FALSE}
+
+par(mfrow = c(1,1))
+par(mar=c(1,1,3,1))
+hj_dag(x = c(1,1,2,2),
+       y = c(2,0,1,2),
+       names = c(
+         expression(paste(D[t-1]: "Democracy,\nlast period")),
+         expression(paste(GDP[t]: "GDP per capita,\nthis period")),  
+         expression(paste(D[t]: "Democracy,\nthis period")),  
+         expression(paste(U[D[t]]: "Random influence\non democracy,\nthis period"))
+         ),
+       arcs = cbind( c(1,2, 4),
+                     c(3,3, 3)),
+       title = "(c) Democratization (Przeworski and Limongi, 1997)",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+```
+
+Second, the arrow running from $GDP_{t-1}$ to $D_t$ means that $GDP$ *may* affect democracy, not that it always does. Indeed, Przeworski and Limongi's argument is that development's effect depends on a regime's prior state: GDP matters for whether democracies continue to be democracies, but not for whether autocracies go on to become democracies. The *lack* of an arrow between $D_{t-1}$ and $GDP_{t-1}$, however, implies a (possibly incorrect) belief that democracy and $GDP$ in the last period are independent of one another.
+
+Finally, we might consider the kind of causal function that could capture Przeworski and Limongi's causal logic. In this function, $GDP$ should reduce the likelihood of a transition *away* from democracy but not affect the probability of a transition *to* democracy, which should be exogenously determnined. One possible translation of the argument into functional terms is:
+
+
+$$d_t = 1 (p(1-d_{t-1}) + d_{t-1}(1-q(1-gdp)) > u_{D_t})$$
+
+
+where
+
+* $d_t$ and $d_{t-1}$ are binary, representing current and last-period democracy, respectively
+* $p$ is a parameter, varying from 0 to 1, representing the probability that an autocracy democratizes
+* $q$ is a parameter, varying from 0 to 1, representing the probability that a democracy with a GDP of 0 reverts to autocracy
+* $gdp$ represents national per capita GDP, normalized on a 0 to 1 scale for the population of interest.
+* $u_{D_t}$ represents a random, additional input into democracy with a uniform distribution on the 0 to 1 scale
+* the indicator function, ${1}$, evaluates the inequality and generates a value of $1$ if and only if it is true
+
+Unpacking the equation, the likelihood that a country is a democracy in a given period rises and falls with the expression to the left of the $>$-operator. This expression itself has two parts, reflecting the difference between the determinants of *transitions to* democracy (captured by the first part) and the determinants of democratic *survival* (captured by the second). The first part comes into play---i.e., is non-zero---only for non-democracies. For non-democracies, the expression evaluates simply to $p$, the exogenous probability of democratization. The second part is non-zero only for democracies, where it evaluates to $1-q$---the inverse of the reversion parameter---times $1-gdp$: thus, the reversion probability falls as national income rises. The inequality is then evaluated by "asking" whether the expression on the left (either $p$ or $(1-q)gdp$) is greater than a number ($u_{D_t}$) randomly drawn from a uniform distribution between 0 and 1. Thus, higher values for the expression increase the likelihood of democracy while the randomness of the $u_{D_t}$ threshold captures the role of other, idiosyncratic inputs.
+
+Note how, while the functional equation nails down certain features of the process, it leaves others up for grabs. In particular, the parameters $p$ and $q$ are assumed to be constant for all autocracies and for all democracies, respectively, but their values are left unspecified. And one could readily write down a function that left even more openness---by, for instance, including an unknown parameter that translates $GDP$ into a change in the probability of reversion or allowing for non-linearities, with unknown parameters, in this effect.
+
+
+## Steps for constructing causal models
+
+We close with two summaries for how you construct a causal model. First, in Box REF, we summarize the general steps. Second, in Box REF we describe how you can do this in code to produce an object that you can later use for analysis.
+
+### Abstract procedure
+
+***
+
+Box: **Steps for constructing causal models**
+
+1. Identify a set of variables in a domain of interest
+
+  * You should specify the range of each variable: is it continuous or discrete?
+  * May include $U$ terms representing unspecified, random influences
+
+2. Draw a causal graph (DAG) representing beliefs about causal dependencies among these variables
+
+  * Capture direct effects only
+  * Arrows indicate *possible*, not constant or certain, causal effects
+  * The absence of an arrow between two variables indicates a belief of *no* direct causal relationship between them
+  * Ensure that the graph captures all correlations among variables. This means that either (a) any common cause of two or more variables is included on the graph (with implications for Step 1) or (b) correlated variables are connected with a dashed, undirected edge.
+  
+3. Write down one causal function for each endogenous variable
+
+  * Each variable's function must include all variables directly pointing into it on the graph
+  * Functions may take any form, as long as each set of possible causal values maps onto a single outcome value
+  * Functions may express arbitrary amounts of uncertainty about causal relations
+  
+4. State probabilistic beliefs about the distributions of the exogenous variables
+
+  * How common or likely to do we think different values of the exogenous variables are?
+  * Are they independently distributed? If in step 2 you drew an undirected edge between nodes then you believe that the connected variables are not independently distributed.
+
+***
+
+
+### Model construction in code
+
+Our `gbiqq` package provides a set of functions to implement all of these steps concisely for *binary* models -- models in which all variables are dichotomous.
+
+```{r, message = FALSE}
+
+# Steps 1 and 2 
+# We define a model with three binary variables and specified edges between them:
+model <- make_model("X -> M -> Y")
+
+# Step 3
+# Unrestricted functional forms are allowed by default, though these can 
+# also be reduced. Here we impost monotonicity be removing one type for 
+# M and one for Y
+model <- set_restrictions(model, 
+                          node_restrict = list(M = "10", Y="10"))
+
+# Step 4
+# We set priors over the distribution of (remaining) causal types.
+# Here we set "jeffreys priors"
+model <- set_priors(model, prior_distribution = "jeffreys")
+
+# We now have a model defined as an R object. 
+# Later we will ask questions of this model and update it using data.
+
+```
+
+These steps are enough to fully describe a binary causal model. Later in this book we will see how we can ask questions of a model like this but also how to use data to train it. 
+
+<!-- If we want to know whether two variables, $A$ and $C$, are conditionally independent given some set of variables, $\mathcal B$, we need to find out whether any paths between $A$ and $C$ are "active" given $\mathcal B$. Put slightly differently, the question is whether variables in $\mathcal{B}$ block information flows from $A$ to $C$---or rather allow, or even create, such flows. This can be assessed as follows. For each possible path between $A$ and $C$, we check whether there are three connected variables $X, Y, Z$^[Where $X$ and/or $Y$ may be $A$ and/or $B$.] on that path that either: -->
+
+<!-- (a) form a "chain" $X\rightarrow Y \rightarrow Z$ (going either direction) or "fork" $X\leftarrow Y\rightarrow Z$, with $Y \subset \mathcal{B}$,^[For instance, under this criterion, if we have $A\rightarrow W\rightarrow Y \rightarrow B$, and $Y$ is an element of the set $\mathcal{B}$, then this path is not active given $\mathcal{B}$. Similarly, if we have $A \leftarrow X\leftarrow Y\rightarrow Z \rightarrow B$, and $Y$ is in $\mathcal{B}$, then the path is not active given $\mathcal{B}$.] or  -->
+
+<!-- (b) form an "inverted fork" $X \rightarrow Y \leftarrow Z$, with neither $Y$ nor its descendants in $\mathcal C$.^[For instance, if we have $A \rightarrow W \rightarrow Y \leftarrow Z \leftarrow B$, and $Y$ is *not* in $\mathcal{C}$, then the path is not active given $\mathcal{C}$. In other words, "inverted fork" paths are not unconditionally active. Knowing only $A$, in this setup, tells us nothing about $B$, and vice-versa.]  -->
+
+<!-- If either of these conditions holds, then the path is blocked (not active) given $\mathcal C$. In the first case, any possible information flows along the path are *blocked* by a variable in $\mathcal C$. In the second case, *no* variable in $\mathcal C$ is *creating* an information flow that would not otherwise be present. If there are no active paths, then $A$ and $B$ are conditionally independent given $\mathcal C$. In the graph-analytic language of Pearl and others, $A$ and $B$ are said to be "$d$-separated" by $\mathcal{C}$.^[There are multiple techniques for establishing $d-$separation. Pearl's guide "$d-$separation without tears" appears in an appendix to @pearl2009causality.]   -->
+
+<!-- Thus, in Figure \@ref(fig:simpleDAG), we can readily see that $X$ and $Y$ are conditionally independent given $R$: $X$ and $Y$ are *d-*separated by $R$.  Conversely, $R$ and $U_Y$ are unconditionally independent. However, conditioning on $Y$ $d-$*connects* $R$ and $U_Y$, generating a dependency between them. If and only if we know the outcome, $Y$, then learning $R$ yields information about $U_Y$. To foreshadow a point that we develop further later in the book, this analysis reveals how we can, and cannot, learn empirically about elements of our models. For instance, if $U_Y$ is a variable of interest but not directly observable, then information on $R$ is unhelpful if we have not observed the outcome, $Y$, but *is* informative if we have. -->
+
+
+<!-- ###Interventions in causal graphs -->
+
+<!-- A second advantage of causal graphs is that they provide a useful structure for thinking through causal effects. In a causal-model framework, we think of a variable's causal effect as being the effect of an imagined *intervention*: a manipulation of some variable, $X$, that provides $X$ with a value that is *not* determined by its parents.  In an intervention, it is as if the causal function for $X$ is replaced by the function $X=x$, with $x$ being the constant value to which we have set $X$. If we take $X$ to be binary, to keep things simple, then the causal effect of $X$ on $Y$ is the difference between the value $Y$ would take on under the intervention $X=0$ (which can be written as $do (X)=0$) and the value $Y$ would take on under the intervention $X=1$ ($do(X)=1$).  -->
+
+<!-- As this manipulative account of causation makes clear, analyzing the effect of $X$ requires us we to set aside the "natural causes" of $X$ itself in a particular way. We can readily see how this works graphically by considering a modified version of our free press/government survival model as displayed in Figure \ref{fig:DAGdirect}. As compared with Figure \ref {fig:simpleDAG}, this DAG represents a model in which $X$ has effects on $Y$ both indirectly through $R$ and directly. We might imagine, for instance, that part of the effect of a free press ($X$) on government turnover ($Y$) runs via media reports of official corruption ($R$) while part of the effect runs through a deterrent effect of a free press that reduces graft and thus leaves greater public resources for investment in public goods (neither of which mediating variables are represented on the graph). -->
+
+<!-- Suppose that we want to estimate the effect of an increase in media reports of corruption, $R$, on government survival, $Y$. We thus want to know the difference between the value that $Y$ would take on if the number of media reports were set at a  high level and the value $Y$ would take on if media reports were set to low. As should be clear from the graph, we cannot estimate this difference by comparing the observed value of $Y$ when media report levels are high to the observed value of $Y$ when media report levels are low. The reason is that $R$ has an ancestor, $X$, that affects $Y$ via a path that does not run through $R$. Thus, the value that $Y$ takes on when $R$ is observed to be high (or low) will be determined not just by $R$ but also by $X$, which is itself systematically correlated with $R$ by being its ancestor. The difference between $Y$'s values at two values of $R$ will thus itself be a combination of $R$'s effect and of $X$'s effect. -->
+
+<!-- Instead, the query, "What is the effect of $R$ on $Y$?", must be conceived of in a way that separates out the effect of $X$ on $R$. We can represent the empirical conditions that we would need to estimate this effect in Figure \ref{fig:DAGdirectmut}. We have "mutilated" the original DAG by removing all arrows pointing into our causal variable, $R$ (here, simply the arrow running from $X$ to $R$). This graph represents a world in which $R$ has been manipulated, rather than naturally caused. (Equivalently, it is a world in which $R$ is purely exogenous.) And what the mutilated graph tells us is that, in an empirical situation in which the  dependency of $R$ on $X$ could be removed, $R$'s causal effect on $Y$ *could* be estimated by comparing $Y$'s values at high and low levels of $R$.^[In the formulation used in  @pearl2009causality, an intervention involving an endogenous variable $V_i$ can be written as $do(V_i)=v_i'$, or for notational simplicity $\hat{v}_i'$ (meaning $V_i$ is forced to take the particular value $v_i'$). The resulting distribution can be written as a modified version of Equation \@ref(eq:markov): -->
+
+<!-- \begin{equation}  -->
+<!-- P(v_1,v_2,\dots v_n|\hat{v}_i) = \prod_{-i}P(v_j|pa_j)\mathbb{1}(v_i = v_i')(\#eq:eqdo) -->
+<!-- \end{equation} -->
+
+<!-- where $-i$ indicates that the product is formed over all variables $V_j$ other than $V_i$, and the indicator function ensures that probability mass is only placed on vectors (or worlds) with $v_i = v_i'$. This new distribution has a graphical interpretation, representing the probability distribution over a graph in which all arrows into $V_i$ are removed.  The difference between Equation \@ref(eq:markov) and \@ref(eq:eqdo) is the difference between an *observed* probability distribution and the effect of an *intervention*. The key differences is that, when we intervene to manipulate a variable, we break the link between the variable and its "natural" causes.] -->
+
+<!-- It is a separate question how such an empirical situation might be generated. But it is not hard to see from Figure \ref{fig:DAGdirect} that the  dependency of $R$ on $X$ could be removed either via (i) directly manipulating $R$ in a manner orthogonal to $X$ or (ii) controlling for $X$, since any variation in $R$ conditional on $X$ would itself be independent of $X$. Equivalently, using graph-analytic logic, we can also see that conditioning on $X$ blocks the path between $R$ and $Y$ that generates the confound (called a "backdoor"), thus expunging the confounding effect from the observed correlation between $R$ and $Y$. -->
+
+
+<!-- ```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.5\\textwidth', fig.cap = "\\label{fig:DAGdirect} As compared with Figure \ref {fig:simpleDAG}, this DAG represents a model in which $X$ has effects on $Y$ both indirectly through $R$ and directly. We might imagine, for instance, that part of the effect of a free press ($X$) on government turnover ($Y$) runs via media reports of offical corruption ($R$) while part of the effect runs through a deterrent effect of a free press that reduces graft and thus leaves greater public resources for investment in public goods (neither of which mediating variables are represented on the graph)."} -->
+<!-- par(mar=c(1,1,3,1)) -->
+<!-- hj_dag(x = c(0, 1, 2), -->
+<!--        y = c(2, 3, 2), -->
+<!--        names = c("X", "R", "Y"), -->
+<!--        arcs = cbind( c(1, 2, 1), -->
+<!--                      c(2, 3, 3)), -->
+<!--        title = "A DAG with Indirect and Direct Effects", -->
+<!--        padding = .4, contraction = .15)  -->
+
+<!-- ``` -->
+
+
+<!-- ```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.5\\textwidth', fig.cap = "\\label{fig:DAGdirectmut} This DAG represents a 'mutilated' version of the previous graph in which the causes of $R$ have been removed, and thus captures the empirical relations that would be required to hold to estimate the effect of $R$ on $Y$."} -->
+<!-- par(mar=c(1,1,3,1)) -->
+<!-- hj_dag(x = c(0, 1, 2), -->
+<!--        y = c(2, 3, 2), -->
+<!--        names = c("X", "R", "Y"), -->
+<!--        arcs = cbind( c(2, 1), -->
+<!--                      c(3, 3)), -->
+<!--        title = "A 'Mutilated' DAG for Estimating the Effect of R on Y", -->
+<!--        padding = .4, contraction = .15)  -->
+
+<!-- ``` -->
+
+
+
+
+
+<!-- Suppose, for instance, that democracy ($D$) causes higher levels of private investment ($I$) and greater public-goods provision ($P$), and that both of these cause faster economic growth ($G$). If we want to know the joint distribution of public-goods provision and democracy, we would use Equation \ref{eqmarkov}, conditioning on the values of the parents of these two variables. If, however, we want to know what level of growth would be produced by an increase public-goods provision---a causal question---we have to ask  -->
+
+
+
+<!-- ```{r, echo = FALSE, fig.width = 11, fig.height = 11.5, fig.align="center", out.width='\\textwidth', fig.cap = "\\label{fig:intervention} The main panel shows a simple causal model. $S$ and $X$ are stochastic, other variables determined by their parents, as shown in bottom right panel. Other panels show four possible histories that can arise depending on values taken by $S$ and $X$, along with causal relations in each case. The equations for $S$ and $X$ are written with indicator variables, which take a value of 1 whenever the $u$ value is less than the $\\pi$ value.", fig.align="center", warning = FALSE} -->
+
+<!-- hj_dag(x = c(1, 2, 2, 3), -->
+<!--        y = c(1, 2, 0, 1), -->
+<!--        names = c("D","I", "P", "G"), -->
+<!--        arcs = cbind( c(1, 1, 3, 2), -->
+<!--                      c(2, 3, 4, 4)), -->
+<!--        add_functions = 0, -->
+<!--        contraction = .2 -->
+<!--        ) -->
+<!-- title("A causal model") -->
+<!-- ``` -->
+
+
+
+<!-- Not completely following the logic this next paragraph or sure if it is helpful here -->
+
+<!-- So far, although not completely general, the focus on causal DAGs is consistent with most approaches used in qualitative work on process tracing, in qualitative case analysis, and in econometric approaches. Some of these approaches commonly assume simple functional forms but these impositions are not implied by the general approach. For example econometric models often impose linear assumptions---for example in work on linear structural equations. Qualitative case analysis often assume all units are binary and that outcomes are deterministic. Under some representations the latter assumption implies conditional independencies that cannot be read from the graph, and thus violate stability conditions commonly assumed of the probability distributions that graphs are meant to represent (though it is still always that case that one can tell from the graph whenever two sets of variables are not conditionally independent given some other set). In our running example described below we give an example of such deterministic relations. -->
+
+
+
+
+
+

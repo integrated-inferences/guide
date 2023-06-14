@@ -1,0 +1,11 @@
+
+possible <- data.frame(select(g_df, event), count = 1)
+possible <- expand_data(data_events = possible, model)
+possible <- possible[with(possible, eval(parse(text = condition[[i]]))),]
+possible <- gbiqq:::collapse_data(possible, model, remove_family = TRUE)
+
+
+possible <- data.frame(select(g_df, event), count = 1) %>%
+            expand_data(model) %>%
+            filter(eval(parse(text = condition[[i]]))) %>%
+            collapse_data(model, remove_family = TRUE)

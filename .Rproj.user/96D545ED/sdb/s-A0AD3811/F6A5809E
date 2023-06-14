@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "#' Modulus Estimation\n#' \n#' @param x matrix of regressors\n#' @param y vector of response variables\n#' @param lambdarange range for the estimation parameter expr(lambda) - default c(-2,2)\n#' @param tr logical value. if tr = TRUE warning messages for the likelihood functions are suppressed - default FALSE\n#' @return An object of class \\code{transformation} with the following arguments\n#' @return llike The value of \\code{profile log-likelihood} at its maximum\n#' @return logvector The profile log-likelihood evaluated at \\code{lambdavector}\n#' @return lambdavector A sequence with optional values for \\code{lambda}\n#' @return family Employed family of transformations\n#' @return yt Vector of the transformed response variable \\code{y}\n#' @return modelt An object of type \\code{lm} employing the transformed vector \\code{yt} as the response variable\n#' @keywords internal\nmodulusEst <- function(y, x, lambdarange = c(-2, 2), tr = FALSE, ...) {\n  qr <- qr(x) \n  k <- ncol(x)\n  u <- abs(y) + 1L\n  n <- length(y)\n  yt <- rep(NA, n)\n  lglike <- function(lambda, ...) {\n    if (abs(lambda) > 0.05) \n      yt <- sign(y)*(u^lambda - 1L)/lambda \n    else \n      yt <-  sign(y)*log(u) \n      zt <- yt/exp(mean(sign(y)*(lambda - 1L)*log(u)))\n    if(any(is.nan(abs(zt))) | any(is.infinite(zt))) \n      lglike <- -Inf\n    else \n      llike <- suppressWarnings(-n/ 2L * log((sum(qr.resid(qr, zt)^2L))/n))\n    llike\n  }  \n  res <-suppressWarnings( optimize(f = function(lambda) lglike(lambda), lambdarange, tol = 0.0001, maximum = TRUE) )\n  lambdaoptim <-  res$maximum\n  logoptim <-res$objective\n  lambdavector <- seq(lambdarange[1], lambdarange[2], 0.01)\n  l <- length(lambdavector)\n  lambdavector[l + 1L]  <- lambdaoptim\n  lambdavector <- sort(lambdavector)\n  logvector <- sapply(lambdavector, lglike)\n  if(abs(lambdaoptim > 0.05))\n    yt <- sign(y)*(u^lambdaoptim - 1L)/lambdaoptim\n  else \n   yt <- sign(y)*log(u)\n  zt <- yt/exp(mean(sign(y)*(lambdaoptim - 1L)*log(u)))\n  suppressWarnings( modelt <- lm(zt ~ ., data.frame(zt, x[, 2L:k])))\n  ans <- list()\n  if(is.infinite(ans$llike <- res$objective ) & tr != TRUE) \n    stop(\"log-likelihood is infinite or not defined for components y and x\")\n  ans$lambdahat <- lambdaoptim\n  ans$logvector <- logvector\n  ans$lambdavector <- lambdavector\n  ans$family <- \"Modulus\"\n  ans$yt <- yt\n  ans$zt <- zt\n  ans$modelt <- modelt\n  class(ans) <- \"transformation\"\n  ans\n}",
+    "created" : 1502201306967.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2269694645",
+    "id" : "F6A5809E",
+    "lastKnownWriteTime" : 1488661270,
+    "last_content_update" : 1488661270,
+    "path" : "C:/Users/Macartan/AppData/Local/Temp/wzb2ff/transforma/R/modulusEst.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

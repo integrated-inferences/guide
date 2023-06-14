@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1543503492759.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2518347207",
+    "id" : "54ED0660",
+    "lastKnownWriteTime" : 1533035771,
+    "last_content_update" : 1533035771,
+    "path" : "~/Dropbox/ProcessTracing/6 Book/ii/08-mixing-methods.Rmd",
+    "project_path" : "08-mixing-methods.Rmd",
+    "properties" : {
+        "cursorPosition" : "208,149",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

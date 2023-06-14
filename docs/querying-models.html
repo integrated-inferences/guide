@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 5 Querying models | Causal Models: Guide to CausalQueries</title>
+  <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="generator" content="bookdown 0.17 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 5 Querying models | Causal Models: Guide to CausalQueries" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="github-repo" content="rstudio/causalmodels" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 5 Querying models | Causal Models: Guide to CausalQueries" />
+  
+  <meta name="twitter:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  
+
+<meta name="author" content="Macartan Humphreys and Alan Jacobs" />
+
+
+<meta name="date" content="2020-06-10" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="updating-models-with-stan.html"/>
+<link rel="next" href="applications.html"/>
+<script src="libs/jquery/jquery.min.js"></script>
+<link href="libs/gitbook/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="headers\style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Model based causal inference: A guide to gbiqq</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="part"><span><b>I Causal Models</b></span></li>
+<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a><ul>
+<li class="chapter" data-level="1.1" data-path="cm.html"><a href="cm.html#two-approaches-to-inference"><i class="fa fa-check"></i><b>1.1</b> Two approaches to inference</a></li>
+<li class="chapter" data-level="1.2" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-difference-in-means"><i class="fa fa-check"></i><b>1.2</b> Recovering the ATE with Difference in Means</a></li>
+<li class="chapter" data-level="1.3" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-a-causal-model"><i class="fa fa-check"></i><b>1.3</b> Recovering the ATE with a Causal Model</a></li>
+<li class="chapter" data-level="1.4" data-path="cm.html"><a href="cm.html#going-further"><i class="fa fa-check"></i><b>1.4</b> Going further</a></li>
+</ul></li>
+<li class="part"><span><b>II The Package</b></span></li>
+<li class="chapter" data-level="2" data-path="package.html"><a href="package.html"><i class="fa fa-check"></i><b>2</b> Installation</a></li>
+<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a><ul>
+<li class="chapter" data-level="3.1" data-path="defining-models.html"><a href="defining-models.html#getting-going"><i class="fa fa-check"></i><b>3.1</b> Getting going</a></li>
+<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="defining-models.html"><a href="defining-models.html#nodal-types"><i class="fa fa-check"></i><b>3.2.1</b> Nodal types</a></li>
+<li class="chapter" data-level="3.2.2" data-path="defining-models.html"><a href="defining-models.html#causal-types"><i class="fa fa-check"></i><b>3.2.2</b> Causal types</a></li>
+<li class="chapter" data-level="3.2.3" data-path="defining-models.html"><a href="defining-models.html#parameters-dataframe"><i class="fa fa-check"></i><b>3.2.3</b> Parameters dataframe</a></li>
+<li class="chapter" data-level="3.2.4" data-path="defining-models.html"><a href="defining-models.html#parameter-matrix"><i class="fa fa-check"></i><b>3.2.4</b> Parameter matrix</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="defining-models.html"><a href="defining-models.html#restrictions"><i class="fa fa-check"></i><b>3.3</b> Setting restrictions</a></li>
+<li class="chapter" data-level="3.4" data-path="defining-models.html"><a href="defining-models.html#confounding"><i class="fa fa-check"></i><b>3.4</b> Allowing confounding</a></li>
+<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="defining-models.html"><a href="defining-models.html#custom-priors"><i class="fa fa-check"></i><b>3.5.1</b> Custom priors</a></li>
+<li class="chapter" data-level="3.5.2" data-path="defining-models.html"><a href="defining-models.html#prior-warnings"><i class="fa fa-check"></i><b>3.5.2</b> Prior warnings</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="defining-models.html"><a href="defining-models.html#parameters"><i class="fa fa-check"></i><b>3.6</b> Setting Parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a><ul>
+<li class="chapter" data-level="4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#data-for-stan"><i class="fa fa-check"></i><b>4.1</b> Data for <code>stan</code></a></li>
+<li class="chapter" data-level="4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#stan-code"><i class="fa fa-check"></i><b>4.2</b> <code>stan</code> code</a></li>
+<li class="chapter" data-level="4.3" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a></li>
+<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#arbitrary-parameters"><i class="fa fa-check"></i><b>4.4.1</b> Arbitrary parameters</a></li>
+<li class="chapter" data-level="4.4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#non-binary-data"><i class="fa fa-check"></i><b>4.4.2</b> Non binary data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a><ul>
+<li class="chapter" data-level="5.1" data-path="querying-models.html"><a href="querying-models.html#case-level-queries"><i class="fa fa-check"></i><b>5.1</b> Case level queries</a></li>
+<li class="chapter" data-level="5.2" data-path="querying-models.html"><a href="querying-models.html#posterior-queries"><i class="fa fa-check"></i><b>5.2</b> Posterior queries</a></li>
+<li class="chapter" data-level="5.3" data-path="querying-models.html"><a href="querying-models.html#query-distribution"><i class="fa fa-check"></i><b>5.3</b> Query distribution</a></li>
+<li class="chapter" data-level="5.4" data-path="querying-models.html"><a href="querying-models.html#token-and-general-causation"><i class="fa fa-check"></i><b>5.4</b> Token and general causation</a></li>
+<li class="chapter" data-level="5.5" data-path="querying-models.html"><a href="querying-models.html#complex-queries"><i class="fa fa-check"></i><b>5.5</b> Complex queries</a></li>
+</ul></li>
+<li class="part"><span><b>III Applications</b></span></li>
+<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a><ul>
+<li class="chapter" data-level="6.1" data-path="applications.html"><a href="applications.html#the-ladder-of-causation-in-an-x-rightarrow-y-model"><i class="fa fa-check"></i><b>6.1</b> The ladder of causation in an <span class="math inline">\(X \rightarrow Y\)</span> model</a></li>
+<li class="chapter" data-level="6.2" data-path="applications.html"><a href="applications.html#x-causes-y-with-unmodelled-confounding"><i class="fa fa-check"></i><b>6.2</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with unmodelled confounding</a></li>
+<li class="chapter" data-level="6.3" data-path="applications.html"><a href="applications.html#x-causes-y-with-confounding-modeled"><i class="fa fa-check"></i><b>6.3</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with confounding modeled</a></li>
+<li class="chapter" data-level="6.4" data-path="applications.html"><a href="applications.html#simple-mediation-model"><i class="fa fa-check"></i><b>6.4</b> Simple mediation model</a></li>
+<li class="chapter" data-level="6.5" data-path="applications.html"><a href="applications.html#simple-moderator-model"><i class="fa fa-check"></i><b>6.5</b> Simple moderator model</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a><ul>
+<li class="chapter" data-level="7.1" data-path="explanation.html"><a href="explanation.html#tightening-bounds-on-causes-of-effects-using-an-unobserved-covariate"><i class="fa fa-check"></i><b>7.1</b> Tightening bounds on causes of effects using an unobserved covariate</a></li>
+<li class="chapter" data-level="7.2" data-path="explanation.html"><a href="explanation.html#Billy"><i class="fa fa-check"></i><b>7.2</b> Actual Causation: Billy and Suzy’s moderator and mediation model</a></li>
+<li class="chapter" data-level="7.3" data-path="explanation.html"><a href="explanation.html#diagnosis-inferring-a-cause-from-symptoms"><i class="fa fa-check"></i><b>7.3</b> Diagnosis: Inferring a cause from symptoms</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a><ul>
+<li class="chapter" data-level="8.1" data-path="process-tracing.html"><a href="process-tracing.html#what-to-infer-from-what"><i class="fa fa-check"></i><b>8.1</b> What to infer from what</a></li>
+<li class="chapter" data-level="8.2" data-path="process-tracing.html"><a href="process-tracing.html#probative-value-and-d-separation"><i class="fa fa-check"></i><b>8.2</b> Probative value and <span class="math inline">\(d\)</span>-separation</a></li>
+<li class="chapter" data-level="8.3" data-path="process-tracing.html"><a href="process-tracing.html#foundations-for-van-everas-tests"><i class="fa fa-check"></i><b>8.3</b> Foundations for Van Evera’s tests</a></li>
+<li class="chapter" data-level="8.4" data-path="process-tracing.html"><a href="process-tracing.html#clue-selection-clues-at-the-center-of-chains-can-be-more-informative"><i class="fa fa-check"></i><b>8.4</b> Clue selection: clues at the center of chains can be more informative</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a><ul>
+<li class="chapter" data-level="9.1" data-path="identification.html"><a href="identification.html#illustration-of-the-backdoor-criterion"><i class="fa fa-check"></i><b>9.1</b> Illustration of the backdoor criterion</a></li>
+<li class="chapter" data-level="9.2" data-path="identification.html"><a href="identification.html#identification-instruments"><i class="fa fa-check"></i><b>9.2</b> Identification: Instruments</a></li>
+<li class="chapter" data-level="9.3" data-path="identification.html"><a href="identification.html#identification-through-the-frontdoor"><i class="fa fa-check"></i><b>9.3</b> Identification through the frontdoor</a></li>
+<li class="chapter" data-level="9.4" data-path="identification.html"><a href="identification.html#simple-sample-selection-bias"><i class="fa fa-check"></i><b>9.4</b> Simple sample selection bias</a></li>
+<li class="chapter" data-level="9.5" data-path="identification.html"><a href="identification.html#addressing-both-sample-selection-bias-and-confounding"><i class="fa fa-check"></i><b>9.5</b> Addressing both sample selection bias and confounding</a></li>
+<li class="chapter" data-level="9.6" data-path="identification.html"><a href="identification.html#learning-from-a-collider"><i class="fa fa-check"></i><b>9.6</b> Learning from a collider!</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a><ul>
+<li class="chapter" data-level="10.1" data-path="mixing-methods.html"><a href="mixing-methods.html#using-within-case-data-to-help-with-identification"><i class="fa fa-check"></i><b>10.1</b> Using within case data to help with identification</a></li>
+<li class="chapter" data-level="10.2" data-path="mixing-methods.html"><a href="mixing-methods.html#distinguishing-paths"><i class="fa fa-check"></i><b>10.2</b> Distinguishing paths</a></li>
+<li class="chapter" data-level="10.3" data-path="mixing-methods.html"><a href="mixing-methods.html#nothing-from-nothing"><i class="fa fa-check"></i><b>10.3</b> Nothing from nothing</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a><ul>
+<li class="chapter" data-level="11.1" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#transportation-of-findings-across-contexts"><i class="fa fa-check"></i><b>11.1</b> Transportation of findings across contexts</a></li>
+<li class="chapter" data-level="11.2" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#combining-observational-and-experimental-data"><i class="fa fa-check"></i><b>11.2</b> Combining observational and experimental data</a></li>
+<li class="chapter" data-level="11.3" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#a-jigsaw-puzzle-learning-across-populations"><i class="fa fa-check"></i><b>11.3</b> A jigsaw puzzle: Learning across populations</a></li>
+</ul></li>
+<li class="part"><span><b>IV Notation</b></span></li>
+<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a><ul>
+<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a><ul>
+<li class="chapter" data-level="12.1.1" data-path="notation.html"><a href="notation.html#parents"><i class="fa fa-check"></i><b>12.1.1</b> Parents, children, and all that</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2" data-path="notation.html"><a href="notation.html#syntax"><i class="fa fa-check"></i><b>12.2</b> Causal syntax</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/macartan/gbiqq/" target="blank">Uses gbiqq</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Causal Models: Guide to <code>CausalQueries</code></a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="querying-models" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Querying models</h1>
+<p>Models can be queried using the <code>query_distribution</code> and <code>query_model</code> functions. The difference between these functions is that <code>query_distribution</code> examines a single query and returns a full distribution of draws from the distribution of the estimand (prior or posterior); <code>query_model</code> takes a collection of queries and returns a dataframe with summary statistics on the queries.</p>
+<p>The simplest queries ask about causal estimands given particular parameter values and case level data. Here is one surprising result of this form:</p>
+<div id="case-level-queries" class="section level2">
+<h2><span class="header-section-number">5.1</span> Case level queries</h2>
+<p>The <code>query_model</code> function takes causal queries and conditions (<code>given</code>) and specifies the parameters to be used. The result is a dataframe which can be displayed as a table.</p>
+<p>For a case level query we can make the query <em>given</em> a particular parameter vector, as below:</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt; M -&gt; Y &lt;- X&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb57-2" title="2"><span class="st">  </span></a>
+<a class="sourceLine" id="cb57-3" title="3"><span class="st">  </span><span class="kw">set_restrictions</span>(<span class="kw">c</span>(<span class="kw">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;M&quot;</span>), </a>
+<a class="sourceLine" id="cb57-4" title="4">                     <span class="kw">decreasing</span>(<span class="st">&quot;M&quot;</span>, <span class="st">&quot;Y&quot;</span>), </a>
+<a class="sourceLine" id="cb57-5" title="5">                     <span class="kw">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb57-6" title="6"><span class="st">  </span></a>
+<a class="sourceLine" id="cb57-7" title="7"><span class="st">  </span><span class="kw">query_model</span>(<span class="dt">queries =</span> <span class="st">&quot;Y[X=1]&gt; Y[X=0]&quot;</span>,</a>
+<a class="sourceLine" id="cb57-8" title="8">              <span class="dt">given =</span> <span class="kw">c</span>(<span class="st">&quot;X==1 &amp; Y==1&quot;</span>, </a>
+<a class="sourceLine" id="cb57-9" title="9">                        <span class="st">&quot;X==1 &amp; Y==1 &amp; M==1&quot;</span>, </a>
+<a class="sourceLine" id="cb57-10" title="10">                        <span class="st">&quot;X==1 &amp; Y==1 &amp; M==0&quot;</span>),</a>
+<a class="sourceLine" id="cb57-11" title="11">              <span class="dt">using =</span> <span class="kw">c</span>(<span class="st">&quot;parameters&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb57-12" title="12"><span class="st">  </span></a>
+<a class="sourceLine" id="cb57-13" title="13"><span class="st">  </span><span class="kw">kable</span>(</a>
+<a class="sourceLine" id="cb57-14" title="14">    <span class="dt">caption =</span> <span class="st">&quot;In a monotonic model with flat priors, knowledge</span></a>
+<a class="sourceLine" id="cb57-15" title="15"><span class="st">    that $M=1$ *reduces* confidence that $X=1$ caused $Y=1$&quot;</span>)</a></code></pre></div>
+<table>
+<caption><span id="tab:unnamed-chunk-43">Table 5.1: </span>In a monotonic model with flat priors, knowledge
+that <span class="math inline">\(M=1\)</span> <em>reduces</em> confidence that <span class="math inline">\(X=1\)</span> caused <span class="math inline">\(Y=1\)</span></caption>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q 1</td>
+<td align="left">X==1 &amp; Y==1</td>
+<td align="left">parameters</td>
+<td align="right">0.615</td>
+</tr>
+<tr class="even">
+<td align="left">Q 1</td>
+<td align="left">X==1 &amp; Y==1 &amp; M==1</td>
+<td align="left">parameters</td>
+<td align="right">0.600</td>
+</tr>
+<tr class="odd">
+<td align="left">Q 1</td>
+<td align="left">X==1 &amp; Y==1 &amp; M==0</td>
+<td align="left">parameters</td>
+<td align="right">0.667</td>
+</tr>
+</tbody>
+</table>
+<p>This example shows how inferences change given additional data on <span class="math inline">\(M\)</span> in a monotonic <span class="math inline">\(X \rightarrow M \rightarrow Y \leftarrow X\)</span> model. Surprisingly observing <span class="math inline">\(M=1\)</span> <em>reduces</em> beliefs that <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span>, the reason being that perhaps <span class="math inline">\(M\)</span> and not <span class="math inline">\(X\)</span> was responsible for <span class="math inline">\(Y=1\)</span>.</p>
+</div>
+<div id="posterior-queries" class="section level2">
+<h2><span class="header-section-number">5.2</span> Posterior queries</h2>
+<p>Queries can also draw directly from the posterior distribution provided by <code>stan</code>. In this next example we illustrate the joint distribution of the posterior over causal effects, drawing directly from the posterior dataframe generated by <code>update_model</code>:</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" title="1">data  &lt;-<span class="st"> </span><span class="kw">fabricate</span>(<span class="dt">N =</span> <span class="dv">100</span>, <span class="dt">X =</span> <span class="kw">complete_ra</span>(N), <span class="dt">Y =</span> X)</a>
+<a class="sourceLine" id="cb58-2" title="2"></a>
+<a class="sourceLine" id="cb58-3" title="3">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb58-4" title="4"><span class="st">  </span><span class="kw">set_confound</span>(<span class="kw">list</span>(<span class="dt">X =</span> <span class="st">&quot;Y[X=1]&gt;Y[X=0]&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-5" title="5"><span class="st">  </span><span class="kw">update_model</span>(data, <span class="dt">iter  =</span> <span class="dv">4000</span>)</a>
+<a class="sourceLine" id="cb58-6" title="6"></a>
+<a class="sourceLine" id="cb58-7" title="7">model<span class="op">$</span>posterior_distribution <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb58-8" title="8"><span class="st">  </span><span class="kw">data.frame</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-9" title="9"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(X_<span class="fl">1.1</span> <span class="op">-</span><span class="st"> </span>X_<span class="fl">1.0</span>, Y<span class="fl">.01</span> <span class="op">-</span><span class="st"> </span>Y<span class="fl">.10</span>)) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb58-10" title="10"><span class="st">  </span><span class="kw">geom_point</span>()</a></code></pre></div>
+<p><img src="causalmodels_files/figure-html/unnamed-chunk-45-1.png" width="672" /></p>
+<p>We see that beliefs about the size of the overall effect are related to beliefs that <span class="math inline">\(X\)</span> is assigned differently when there is a positive effect.</p>
+</div>
+<div id="query-distribution" class="section level2">
+<h2><span class="header-section-number">5.3</span> Query distribution</h2>
+<p><code>query_distribution</code> works similarly except that the query is over an estimand. For instance:</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb59-2" title="2"><span class="st">  </span><span class="kw">query_distribution</span>(<span class="kw">increasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="dt">using =</span> <span class="st">&quot;priors&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb59-3" title="3"><span class="st"> </span><span class="kw">hist</span>(<span class="dt">main =</span> <span class="st">&quot;Prior on Y increasing in X&quot;</span>)  </a></code></pre></div>
+<pre><code>## Prior distribution added to model</code></pre>
+<p><img src="causalmodels_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+</div>
+<div id="token-and-general-causation" class="section level2">
+<h2><span class="header-section-number">5.4</span> Token and general causation</h2>
+<p>Note that in all these cases we use the same technology to make case level and population inferences. Indeed the case level query is just a conditional population query. As an illustration of this imagine we have a model of the form <span class="math inline">\(X \rightarrow M \rightarrow Y\)</span> and are interested in whether <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span> in a case in which <span class="math inline">\(M=1\)</span>. We answer the question by asking “what would be the probability that <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span> in a case in which <span class="math inline">\(X=M=Y=1\)</span>?” (line 3 below). This speculative answer is the same answer as we would get were we to ask the same question having updated our model with knowledge that in a particular case, indeed, <span class="math inline">\(X=M=Y=1\)</span>. See below:</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;M-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb61-2" title="2"><span class="st">  </span><span class="kw">set_restrictions</span>(<span class="kw">c</span>(<span class="kw">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;M&quot;</span>), <span class="kw">decreasing</span>(<span class="st">&quot;M&quot;</span>, <span class="st">&quot;Y&quot;</span>))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb61-3" title="3"><span class="st">  </span><span class="kw">update_model</span>(<span class="dt">data =</span> <span class="kw">data.frame</span>(<span class="dt">X =</span> <span class="dv">1</span>, <span class="dt">M =</span> <span class="dv">1</span>, <span class="dt">Y =</span> <span class="dv">1</span>), <span class="dt">iter =</span> <span class="dv">8000</span>)</a>
+<a class="sourceLine" id="cb61-4" title="4"></a>
+<a class="sourceLine" id="cb61-5" title="5"><span class="kw">query_model</span>(</a>
+<a class="sourceLine" id="cb61-6" title="6">            model, </a>
+<a class="sourceLine" id="cb61-7" title="7">            <span class="dt">query =</span> <span class="st">&quot;Y[X=1]&gt; Y[X=0]&quot;</span>,</a>
+<a class="sourceLine" id="cb61-8" title="8">            <span class="dt">given =</span> <span class="kw">c</span>(<span class="st">&quot;X==1 &amp; Y==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M==1&quot;</span>),</a>
+<a class="sourceLine" id="cb61-9" title="9">            <span class="dt">using =</span> <span class="kw">c</span>(<span class="st">&quot;priors&quot;</span>, <span class="st">&quot;posteriors&quot;</span>),</a>
+<a class="sourceLine" id="cb61-10" title="10">            <span class="dt">expand_grid =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<table>
+<caption><span id="tab:unnamed-chunk-48">Table 5.2: </span>Posteriors equal priors for a query that conditions on data used to form the posterior</caption>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q 1</td>
+<td align="left">X==1 &amp; Y==1</td>
+<td align="left">priors</td>
+<td align="right">0.209</td>
+<td align="right">0.207</td>
+</tr>
+<tr class="even">
+<td align="left">Q 1</td>
+<td align="left">X==1 &amp; Y==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.224</td>
+<td align="right">0.212</td>
+</tr>
+<tr class="odd">
+<td align="left">Q 1</td>
+<td align="left">X==1 &amp; Y==1 &amp; M==1</td>
+<td align="left">priors</td>
+<td align="right">0.248</td>
+<td align="right">0.221</td>
+</tr>
+<tr class="even">
+<td align="left">Q 1</td>
+<td align="left">X==1 &amp; Y==1 &amp; M==1</td>
+<td align="left">posteriors</td>
+<td align="right">0.252</td>
+<td align="right">0.221</td>
+</tr>
+</tbody>
+</table>
+<p>We see the conditional inference is the same using the prior and the posterior distributions.</p>
+</div>
+<div id="complex-queries" class="section level2">
+<h2><span class="header-section-number">5.5</span> Complex queries</h2>
+<p>The Billy Suzy bottle breaking example illustrates complex queries. See Section <a href="explanation.html#Billy">7.2</a>.</p>
+
+</div>
+</div>
+
+
+
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="updating-models-with-stan.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="applications.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook/js/app.min.js"></script>
+<script src="libs/gitbook/js/lunr.js"></script>
+<script src="libs/gitbook/js/clipboard.min.js"></script>
+<script src="libs/gitbook/js/plugin-search.js"></script>
+<script src="libs/gitbook/js/plugin-sharing.js"></script>
+<script src="libs/gitbook/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook/js/jquery.highlight.js"></script>
+<script src="libs/gitbook/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": false,
+"twitter": false,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": false,
+"google": false,
+"instapper": false
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["causalmodels.pdf"],
+"toc": {
+"collapse": "section"
+},
+"toolbar": {
+"position": "static"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

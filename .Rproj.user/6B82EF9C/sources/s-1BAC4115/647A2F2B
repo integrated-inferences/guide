@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567271143493.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "647A2F2B",
+    "lastKnownWriteTime" : 1578904294,
+    "last_content_update" : 1578904294219,
+    "path" : "C:/Dropbox/github/integrated_inferences/03-theory-as-causal-models.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "973,0",
+        "scrollLine" : "949"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

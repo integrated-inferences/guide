@@ -1,0 +1,607 @@
+---
+title: "What is a theory?"
+author: "Macartan Humphreys and Alan Jacobs"
+header-includes:
+  - \usepackage{multirow}
+  - \usepackage{graphicx}
+  - \newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
+  - \usepackage{bbold, mathabx}
+bibliography: bib.bib
+output: 
+  beamer_presentation:
+    slide_level: 2
+---
+
+```{r, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include = FALSE}
+source("../6 Book/ii/hj_dag.R")
+```
+
+# 7 What is a theory?
+## What is a theory?
+
+We talk a lot about theory but are often not very precise in what we mean by a theory; or how it relates to models or empirical claims.
+
+Are all of these theories? Are they theories in the same sense of the word?
+
+* Rational choice theory 
+* Game theory
+* Modernization theory; dependency theory
+* Melzer and Richard's "Rational Theory of the Size of Government"
+
+## Different notions
+
+**Theory as tautology.** "The number of Nash equilibria is generically odd in finite games." This is a theoretical claim. Unless there are errors in the derivation of the result, the claim is true in the sense that the conclusions follow from the assumptions. There is no evidence to look for in the world to test the claim. 
+
+**Theory as model.**  "$X$ can have a positive effect on $Y$ because $X$ can cause $M$ and $M$ can cause $Y$." An implication:  if $M$ does not obtain, then under the theory, $X$ does not cause $Y$.   Note you can  make claims about the world *only by assuming a mapping from elements in the model to elements in the world.*  This  model best thought of as an *object* [@clarke2012model]; whether the model itself is true or false is, in this usage, not a coherent question. 
+
+**Theory as empirical claim.** "Natural resources cause conflict." This is a theoretical claim. It is not deep but it possesses generality. It is not true by definition, and empirical evidence can be used to assess it. Theory in this sense can certainly be right or wrong.
+
+<!-- ## Different notions -->
+
+<!-- How about: "The first world war was caused by inequality?" -->
+
+<!-- Theoretical claim or empirical proposition? -->
+
+
+## What is a theory?
+
+We sometimes talk about a theory *of* some claim, or a *theory for why* some fact.
+
+e.g. 
+
+**Claim:** Countries with natural resources are more likely to have conflicts
+
+**Theory 1:**  When there are more natural resources, the government does not collect taxes, and this weakens state-society linkages leading to greater risks of conflict
+
+Perhaps Theory 1 requires its own theory
+
+**Theory 2:** The government does not collect taxes because politicians are short sighted and do not anticipate the effects of a weakened tax infrastructure on state stability.
+
+etc.
+
+
+Here the the theory supports some claim that is implied by it. 
+
+
+## What is a theory?
+
+But sometimes people seem to mean the opposite.
+
+**Modernization Theory**: As countries become wealthier they democratize
+
+A set of models that could support this theory:
+
+* **Model 1**: People demand more rights are they become materially better off
+* **Model 2**: As countries get wealthier inequality goes down and so the threat to elites from democratization goes down
+
+
+## Our approach
+
+* Let's accept the fact that we are only *ever* taking about models. People, countries, laws, ethnicities, tables, chairs. This causes that, that causes this. All models. Just ways of making sense of things. 
+
+* To say that a model is a "theory" is a claim about how a model relates to other models. 
+
+* A model is a theory of a second  model if the second model can be derived from the first (possibly given ancillary "data").  
+
+<!-- * In this sense  "is a theory of" is a  binary operator on a set of models and data^[We might think of $M$ as a set of models and $C$ as a set of conditions, the "set of departure" then is $M \times C$ and the "set of destination" is $M$] -->
+
+<!-- ## Example -->
+
+<!-- * Model $M_2$: "Socrates is mortal" -->
+<!-- * Model $M_1$: "All men are mortal" -->
+<!-- * Data $D$: "Socrates is a man" -->
+
+<!-- $$M_1, D \rightarrow M_2$$ -->
+
+<!-- Given $D$, $M_1$ is a theory of $M_2$ -->
+
+<!-- ## Deduction, Induction -->
+
+<!-- * $M_2$ is deduced from $M_1$ -->
+<!-- * But that does not mean that there is anything *logical* about $M_1$ itself -->
+
+<!-- ## What kind of claim? -->
+
+<!-- You may accept that $M_1$ is a theory of $M_2$, accept that $M_2$ is true under $M_1,D$, believe  $D$, believe model $M_2$, but reject $M_1$ -->
+
+
+<!-- * $M_1$ All men are fools -->
+<!-- * $D$ The president is a man -->
+<!-- * $M_2$ The president is a fool -->
+
+
+<!-- ## What kind of claim? -->
+
+<!-- You may accept that $M_1$ is a theory of $M_2$, accept that $M_2$ is true under $M_1,D$,  believe model $M_1$, believe model $M_2$, but not believe $D$ -->
+
+
+<!-- * $M_1$ You cannot make omlettes without breaking eggs -->
+<!-- * $D$ The president makes omlettes -->
+<!-- * $M_2$ The president breaks eggs -->
+
+
+<!-- ## So be careful: -->
+
+<!-- Say you form a conclusion, of the form:  $A$ causes $B$.  -->
+
+<!-- Is this conclusion a claim: -->
+
+<!-- a. about the world? -->
+<!-- b. about the world, given your model -->
+<!-- c. about the world, given the data -->
+<!-- d. about the world, given the data and model -->
+
+
+<!-- ## So be careful: -->
+
+<!-- Say you form a conclusion, of the form:  $\Pr(M_2) = .9$.  -->
+
+<!-- Is this conclusion a claim: -->
+
+<!-- a. about $M_1$ -->
+<!-- b. about $M_1$, given   $M_2$ -->
+<!-- c. about $M_1$, given $D$ -->
+<!-- d. about $M_1$, given $D, M_2$ -->
+
+
+<!-- ## For discussion: Are theories probabilistic? -->
+
+<!-- In Pearl's treatment a theory is a functional model with restrictions on the ranges of $U$.  -->
+
+<!-- For example. Return to our four causal types: -->
+
+<!-- $$X \rightarrow Y \leftarrow T$$ -->
+<!-- and restrict $T$ to $b,c,d$.  -->
+<!-- This places 0 weight on adverse effects, but says nothing about the size of treatment effects. The theory says what can happen under different circumstance but not how *likely* anything is to happen.  -->
+
+<!-- ## Puzzle -->
+
+<!-- Can such a notion of theory allow for the possibility of mixed strategies? -->
+
+
+<!-- ```{r,out.width="45%", fig.align='center'} -->
+<!-- library(hop) -->
+<!-- gt_bimatrix(nash = FALSE, arrow1=FALSE, X =  matrix(c(1,0,0,"z"),2,2),labels1 = c("L","R")) -->
+<!-- ``` -->
+
+<!-- Imagine the claim: -->
+
+<!-- "When players play  games in this family they play $L$ with prob. $\frac{z}{1+z}$" -->
+
+
+<!-- ## Puzzle -->
+
+<!-- Easy as a probabilistic model: -->
+
+<!-- * $s_1 = 1(e_1 < \frac{z}{1+z})$ -->
+<!-- * $s_2 = 1(e_2 < \frac{z}{1+z})$ -->
+<!-- * $U_1 = U_2 = z(s_1s_2) + (1-s_1)(1-s_2)$ -->
+
+<!-- and -->
+
+<!-- * $e_1 \sim U[0,1]$ -->
+<!-- * $e_2 \sim U[0,1]$ -->
+
+
+## Theories in levels: a "high-level"" model
+
+Take the simplest possible $X,Y$ model
+
+```{r echo=FALSE, fig.align="center", out.width='.7\\textwidth', eval = TRUE}
+
+knitr::include_graphics("figures/higherlevelmodel.png")
+
+```
+
+* Now, let's say we wanted to know *why* $X$ might cause $Y$
+
+* The answer would be another model: a *lower-level* model
+
+
+## Theory as lower-level model: Mediation
+
+```{r, echo = FALSE, fig.width = 6, fig.height = 3, fig.align="center", out.width='.9\\textwidth'}
+
+par(mfrow = c(1,2))
+par(mar=c(1.5,1.5,3.5,1.5))
+hj_dag(x = c(1,1,2,2),
+       y = c(1,2,1,2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(theta^X)),  
+         expression(paste("Y")),  
+         expression(paste(theta[Y]^{higher}))),
+       arcs = cbind( c(2,1, 4),
+                     c(1,3, 3)),
+       title = "(a) Simplest X causes Y graph",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1  , 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(theta^X)),  
+         expression(paste("Y")),  
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(K)),
+         expression(paste(theta^K)) 
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,5, 3, 5, 3)),
+       title = "(b) Lower level graph 1:\nMediator specified",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+
+```
+
+* What have we done?
+
+    * Split up the random component of $Y$
+    
+    * Broken $\theta_Y^{higher}$ into a random cause of $K$ and a random cause of $Y$, given $K$
+
+## Theory as lower-level model: Moderation
+
+```{r, echo = FALSE, fig.width = 6, fig.height = 3, fig.align="center", out.width='.9\\textwidth'}
+
+par(mfrow = c(1,2))
+par(mar=c(1.5,1.5,3.5,1.5))
+hj_dag(x = c(1,1,2,2),
+       y = c(1,2,1,2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(theta^X)),  
+         expression(paste("Y")),  
+         expression(paste(theta[Y]^{higher}))),
+       arcs = cbind( c(2,1, 4),
+                     c(1,3, 3)),
+       title = "(a) Simplest X causes Y graph",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1.5, 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(theta^X)),  
+         expression(paste("Y")),  
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(K)),
+         expression(paste(theta^K)) 
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,3, 3, 5, 3)),
+       title = "(c) Lower level graph 2:\nOrthogonal second cause",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+
+```
+
+* What have we done?
+
+    * Split up the random component of $Y$
+    
+    * Broken $\theta_Y^{higher}$ into $K$ (and its random cause) and a random cause of $Y$, given $X$ and $K$
+
+
+## Levels of theories
+
+A causal model, $M^\prime$, is a *theory* of $M$ if $M$ can be derived from $M^\prime$.
+
+Two ways one model implies another:
+
+* Implications can arise by suppression of detail
+    * $(X\rightarrow M \rightarrow Y)\Rightarrow (X\rightarrow  Y)$
+    
+* Or by conditioning --- i.e., providing data
+    * $f_1: Y=X_1X_2$ coupled with data $X_2=1$, implies  $f_2: Y=X_1$. 
+
+* In both cases, rules need to be followed
+
+    * E.g., Common causes or their resulting dependencies need to be preserved
+
+## Compatible and incompatible models
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 5, fig.align="center", out.width='.9\\textwidth', fig.cap = "\\label{fig:K} A model with one explanatory  variable (a), two lower level models that can imply it (b and c), and one model that does not (d)."}
+
+par(mfrow = c(2,2))
+par(mar=c(1.5,1.5,3.5,1.5))
+hj_dag(x = c(1,1,2,2),
+       y = c(1,2,1,2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(theta^X)),  
+         expression(paste("Y")),  
+         expression(paste(theta[Y]^{higher}))),
+       arcs = cbind( c(2,1, 4),
+                     c(1,3, 3)),
+       title = "(a) Simplest X causes Y graph",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1  , 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(theta^X)),  
+         expression(paste("Y")),  
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(K)),
+         expression(paste(theta^K)) 
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,5, 3, 5, 3)),
+       title = "(b) Lower level graph 1:\nMediator specified",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1.5, 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(theta^X)),  
+         expression(paste("Y")),  
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(K)),
+         expression(paste(theta^K)) 
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,3, 3, 5, 3)),
+       title = "(c) Lower level graph 2:\nOrthogonal second cause",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1.5, 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(theta^X)),  
+         expression(paste("Y")),  
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(K)),
+         expression(paste(theta^K)) 
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5, 5),
+                     c(1,3, 3, 5, 3, 1)),
+       title = "(d) An incompatible graph",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+```
+
+
+## Rules for deriving higher level models from lower level models
+
+**1 Aggregating nodes:** A higher-level model $M^\prime$, can be a representation of $M$ in which multiple nodes in $M^\prime$ have been aggregated into a single node or in which one or more nodes have been dropped. Conversely, $M$, can be theorized by a lower-level model, $M^\prime$, in which new nodes have been added and existing nodes split.
+
+
+* When we move up a level and eliminate a node, we must preserve all causal dependencies among remaining nodes. 
+* In particular, all of the eliminated node's parents become parents of all of that node's children. 
+
+* Note that there are no "data" required here; rather there is an elobration or simplifcation of detail
+
+
+## Rules for deriving higher level models from lower level models
+
+
+**2 Conditioning** A higher level model may be formed by conditioning on values of nodes in a lower level model. Conversely, a higher-level functional model, $M$, can be theorized via a lower-level $M^\prime$ in which conditions shaping the operation of the causal effect in $M$, unspecified in $M$, are now specified. 
+
+## Levels
+
+The mapping from theories to higher-level claims may not be one-to-one. Consider two theories:
+
+\begin{itemize}
+\item[$L_1$:] $X_1 \rightarrow X_2  \rightarrow Y$ 
+\item[$L_2$:] $X_1 \rightarrow Y  \leftarrow X_2$ 
+\end{itemize}
+
+Note, in $L_2$, $X_1$ and $X_2$ are independent, but they are not independent in $L_1$. Also, in $L_1$, $X_1$ is independent of $Y$ conditional on $X_2$; but this is not the case in $L_2$. 
+
+Now consider the following higher-level models:
+
+\begin{itemize}
+\item[$H_1$:] $X_1 \rightarrow Y$
+\item[$H_2$:] $X_2 \rightarrow Y$
+\item[$H_3$:] $X_1 \rightarrow X_2$
+\end{itemize}
+
+Both $H_1$ and $H_2$ are consistent with both $L_1$ and $L_2$. 
+However, $H_3$ can be supported only by $L_1$ and not by $L_2$. 
+
+The *conditional* higher-level model $((X_1 \rightarrow Y)|X_2 = x_2)$ can be supported by model $L_2$ but not by model $L_1$. 
+
+
+<!-- ## Gains from a theory -->
+
+<!-- Say a lower-level theory *affords us*  inferences from new data $K$ about  $Q$, given $W$. Then the expected posterior variance is: -->
+
+<!-- $$E_{k, q} \left(\left( \int q' P(q' | k, w)dq' - q\right)^2\right)$$ -->
+<!-- where the expectation is taken over the joint distribution of $K$ and $Q$, given $W$.  -->
+
+<!-- This is an expected loss---or the *Bayes risk*. The inner term $P(q'|k, w)$ is the posterior distribution on $q'$ given observation of $k$ and $w$.  -->
+
+<!-- We can use this as a measure of the gains from theory. Of course the inferences are conditional on the theory. -->
+
+<!-- ## Game to DAG mapping -->
+
+
+<!-- ```{r game1, echo=FALSE, out.width = "75%", fig.width = 15, fig.height = 12, fig.cap = "\\label{fig:tree} A Game Tree. Solid lines represent choices on the (unique) equilibrium path of the subgames starting after nature's move for the case in which  $b=0$."} -->
+
+<!-- H <-  matrix(c(rep("O", 32),  -->
+<!-- rep("X=1, S=1", 8), rep("X=1, S=0", 8), rep("X=0, S=1", 8), rep("X=0, S=0",8 ), -->
+<!-- rep(rep(c("C","NC"), each = 4 ), 4), -->
+<!-- rep(rep(c("R","NR"), each = 2 ), 8), -->
+<!-- rep(c("Y","NY"), 16)),  -->
+<!--  32)[32:1,] -->
+
+<!-- in.history = function(action) rowSums(H==action)>0 -->
+
+<!-- P <- cbind(rep(1, 32),  -->
+<!--            rep(2, 32),  -->
+<!--            rep(3, 32),  -->
+<!--            rep(4, 32))[32:1,] -->
+<!-- U <- matrix(NA, 32, 4) -->
+<!-- U[,2] <- in.history("C") -    -->
+<!--           2*in.history("Y") +  -->
+<!--           2*(in.history("X=0, S=0")+ in.history("X=1, S=0"))*in.history("C")  -->
+
+
+<!-- # Media gains only when it does reliable story  -->
+<!-- U[,3] <- in.history("NR") +    -->
+<!--           2*in.history("R")*in.history("C")*(in.history("X=1, S=0")+ in.history("X=1, S=1"))  -->
+
+
+<!-- # Voters prefer firing if reports on corrupt politician -->
+<!-- U[,4] <- in.history("NY") +    -->
+<!--           2*in.history("Y")*in.history("C")*in.history("R")  -->
+
+
+<!-- gt_tree(H,U,P, player.names = c("Nature", "Gov", "Media", "Voters"),          -->
+<!--   mark.branches=((ncol(H)-1):2), -->
+<!--   print.utilities = c(FALSE, TRUE, TRUE, TRUE), -->
+<!--   force_solution = TRUE, warnings = FALSE) -->
+
+<!-- text(6.6, (1:32)[in.history("Y") & in.history("R")]- .02, expression(italic(+b)) , cex = 1.2)  -->
+
+<!-- ``` -->
+
+
+
+<!-- ## Translation to DAG -->
+
+<!-- To draw this *equilibrium* as a DAG we include nodes for: -->
+
+<!-- * features that determine the game being played -- eg parameters -->
+<!-- * every action taken -->
+<!-- * the utilities at the end of the game.  -->
+
+<!-- The solution concept may be buried in the structural equations. Or it could be a node. -->
+
+
+<!-- ## Translation to DAG -->
+
+
+<!-- ```{r, echo = FALSE, fig.width = 18, fig.height = 9, out.width="100%", fig.cap = "\\label{fig:gamedag} The left panel shows a  graph that describes  relations between nodes suggested by the  game  and which can imply the running example. The game itself  appear as a node, which are in turn determined by exogneous factors.   Right panel shows a still lower level model.", fig.align="center", warning = FALSE} -->
+
+<!-- par(mfrow = c(1,2)) -->
+<!-- par(mar=c(1,1,3.5,1)) -->
+
+
+<!-- x = c(0, 1, 2, 2,  3,  3, 4, 5) -->
+<!-- y = c(0, 0, 2, -2, 2, -2.5, -2, 0) -->
+
+<!-- names = c("S, X, b",                                        #1  -->
+<!--           "Subgame",                                           #2  -->
+<!--           "E: Gov's Beliefs\nabout responses by\n Media and Voters",    #3 -->
+<!--           "Corruption",                                       #4 -->
+<!--           "",            #5 -->
+<!--           "Report",                                       #6 -->
+<!--           "Remove\nGovernment",                                       #7 -->
+<!--           "Utilities"                          #8 -->
+<!-- ) -->
+
+<!-- hj_dag(x =  x, -->
+<!--        y = y, -->
+<!--        names = c(names, " ", " "), -->
+<!--        arcs = cbind( c(1,rep(2,5)  ,3, c(4,6,7),  4, 4, 6), -->
+<!--                      c(2,3:4, 6:8,      4,  rep(8, 3), 6, 7, 7)), -->
+<!--        title = "Lower DAG: Backwards induction in a game with 3 players  with one  move  each", -->
+<!--        contraction = .22, -->
+<!--        padding = .5) -->
+
+
+
+<!-- x = c(0, 1, 2, 2,  3,  3, 4, 5) -->
+<!-- y = c(0, 0, 2, -2, 2, -2.5, -2, 0) -->
+
+<!-- names = c("Context",                                        #1  -->
+<!--           "Game",                                           #2  -->
+<!--           "1's Beliefs\nabout actions \n 2|1 and 3|2,1",    #3 -->
+<!--           "Action 1",                                       #4 -->
+<!--           "2's Beliefs\nabout actions \n 3|2,1",            #5 -->
+<!--           "Action 2",                                       #6 -->
+<!--           "Action 3",                                       #7 -->
+<!--           "Utilities"                          #8 -->
+<!-- ) -->
+
+<!-- hj_dag(x =  x, -->
+<!--        y = y, -->
+<!--        names = c(names, " ", " "), -->
+<!--        arcs = cbind( c(1,rep(2,6)  ,3, 5, c(4,6,7),  4, 4, 6), -->
+<!--                      c(2,3:8,      4, 6, rep(8, 3), 6, 7, 7)), -->
+<!--        title = "Still lower: Backwards induction, 3 player game with one  move for each player", -->
+<!--        contraction = .2, -->
+<!--        padding = .5) -->
+
+<!-- ``` -->
+
+<!-- ## Challenge -->
+
+<!-- What really is in your model? -->
+
+<!-- Return to this  probabilistic model of a coordination game: -->
+
+<!-- * $s_1 = 1(e_1 < \frac{z}{1+z})$ -->
+<!-- * $s_2 = 1(e_2 < \frac{z}{1+z})$ -->
+<!-- * $U_1 = U_2 = z(s_1s_2) + (1-s_1)(1-s_2)$ -->
+
+<!-- and -->
+
+<!-- * $e_1 \sim U[0,1]$ -->
+<!-- * $e_2 \sim U[0,1]$ -->
+
+<!-- What would  be on a lower level model?  -->
+
+<!-- * Does utility maximization appear somewhere? -->
+<!-- * Beliefs about the strategies of others? Beliefs about the beliefs of others? Strategy selection even given beliefs? -->
+<!-- * Does the **class of games** apper somewhere? -->
+
+
+<!-- ## Exercise -->
+
+<!-- Work in pairs: -->
+
+<!-- * Define a simple normal form game with two players and multiple Nash equilibria. Translate it into a DAG and write down a set of structural equations: -->
+<!--     1. Under the assumption that you have access to a solution concpet that specifies a unique solution -->
+<!--     2. Under the assumption that you have no basis to choose among the Nash equilibria -->
+<!--     3. Choose a causal quantity of interest (such as the effect of some parameter on behavior) and describe informally what the gains of the solution concept are in case 1 and 2. -->
+
+
+<!-- ## Exercise -->
+
+<!-- Work in pairs: -->
+
+<!-- * Define a simple Bayesian game and identify a weak perfect Bayesian Nash equilibrium -->
+<!-- * Draw a DAG of the game -->
+
+
+<!-- ## References -->

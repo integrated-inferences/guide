@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567268280698.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "856A0DB8",
+    "lastKnownWriteTime" : 1578846215,
+    "last_content_update" : 1578846215792,
+    "path" : "C:/Dropbox/github/integrated_inferences/02-causal-models.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "117,24",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

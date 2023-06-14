@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1560970121392.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "458568154",
+    "id" : "EF77A950",
+    "lastKnownWriteTime" : 1560639161,
+    "last_content_update" : 1560639161,
+    "path" : "~/Dropbox/ProcessTracing/6 Book/ii/02-causal-models.Rmd",
+    "project_path" : "02-causal-models.Rmd",
+    "properties" : {
+        "cursorPosition" : "146,78",
+        "scrollLine" : "126"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

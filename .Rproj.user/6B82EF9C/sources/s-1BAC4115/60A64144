@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1576777624293.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "60A64144",
+    "lastKnownWriteTime" : 1558382239,
+    "last_content_update" : 1558382239,
+    "path" : "C:/Dropbox/ProcessTracing/6 Book/Notes/frontdoor.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "19,119",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 47,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

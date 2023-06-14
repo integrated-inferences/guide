@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1543503855000.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "EB7B8A97",
+    "lastKnownWriteTime" : 8749685097959399468,
+    "last_content_update" : 1543503855000,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "context" : "package:biqq:::losses"
+    },
+    "relative_order" : 11,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_code_browser"
+}

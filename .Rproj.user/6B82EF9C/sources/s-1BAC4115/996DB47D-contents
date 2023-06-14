@@ -1,0 +1,27 @@
+---
+title: "Untitled"
+author: "Macartan"
+date: "12/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+What type distribution maximizes flat data.
+
+p_{00} = (1-\lambda^X_1)(\lambda^Y_{00} + \lambda^Y_{01})
+p_{01} = (1-\lambda^X_1)(\lambda^Y_{11} + \lambda^Y_{10})
+p_{10} = \lambda^X_1(\lambda^Y_{00} + \lambda^Y_{10})
+p_{11} = \lambda^X_1(\lambda^Y_{11} + \lambda^Y_{01})
+
+Multinomial probability of the form:
+
+$$p_{00}^np_{01}^np_{10}^np_{11}^n$$
+
+Has the same solution as maximization of:
+$$p_{00}p_{01}p_{10}p_{11}$$
+
+It looks like any solution in which $\lambda^Y_{00} = \lambda^Y_{11}$ and $\lambda^Y_{01} = \lambda^Y_{10}$ should produce the same result.

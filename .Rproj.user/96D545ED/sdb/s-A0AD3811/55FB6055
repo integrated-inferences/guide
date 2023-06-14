@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "#' Select transformartion formula\n#'\n#' Chooses the 'best' transformation in the sense of AIC, R.Squared, Skewness or Kurtosis; For positive y compares between Box-Cox, Dual and Manly transformations; For all values of y it compares between Yeo-Johnson, Manly, Modulus and Bickel-Doksum  \n#' @param formula object of type formula with the model to transform\n#' @param data an optional data frame containing the variables in the model \n#' @param \\dots additional arguments to be passed to the estimation function;  see doselectTransformation()\n#' @return an object of class \\code{transformation}; see doselectTransformation()\n#' @keywords internal\n#' @export\nselectTransformation.formula <- function(formula, data = list(), ...){\n  model_frame <- model.frame(formula = formula, data = data)\n  if (is.null(y <- model.response(model_frame)))\n    stop(\"Dependent variable y must not be empty\")\n  if (is.null(x <- model.matrix(attr(model_frame,\"terms\"), data = model_frame))) \n    stop(\"Matrix of covariates X must not be empty\")\n  data <- data.frame(y = y, x = x)\n  doselectTransformation(data,...)\n}\n",
+    "created" : 1502201318240.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "19670897",
+    "id" : "55FB6055",
+    "lastKnownWriteTime" : 1488658730,
+    "last_content_update" : 1488658730,
+    "path" : "C:/Users/Macartan/AppData/Local/Temp/wzdf20/transforma/R/selectTransformation.formula.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

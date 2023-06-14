@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1561064805565.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2663183339",
+    "id" : "1E9BE884",
+    "lastKnownWriteTime" : 1561064945,
+    "last_content_update" : 1561064945839,
+    "path" : "~/Dropbox/ProcessTracing/7 Teaching/11A Process tracing from causal model ID illustration.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "267,30",
+        "scrollLine" : "252"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

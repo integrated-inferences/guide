@@ -1,0 +1,668 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Causal Questions {#questions}
+
+***
+
+Although a lot  of empirical work focuses on identifying average causal effects, there is a rich array of other well defined causal questions that can be asked about how variables relate to each other causally. We decribe major families of question and illustrate how these can all be described as questions about the values of nodes in a causal model.
+
+***
+
+```{r, include = FALSE}
+source("_packages_used.R")
+```
+
+The study of causation is central to most empirical social science, whether quantitative analyses of large sets of cases or qualitative, small-$N$ case studies. Yet a general interest in causality masks tremendous heterogeneity in the kinds of causal questions that scholars tend to ask. 
+
+Returning to our inequality and democratization example, we might seek, for instance, to know inequality's average impact on democratization across some set of cases. Alternatively, we might be interested in a particular case---say, Mongolia in 1995---and want to know whether this is a context in which inequality has an effect---a question about causal effects at the case level. Relatedly---but distinctly---we might wonder whether the level of democracy in Mongolia in 1995 is causally attributable to the level of inequality in that case. And we may be interested in _how_ causal effects unfold, inquiring about the pathway or mechanism through which inequality affects democratization---a question we can also ask at two levels. We can ask whether inequality affected democratization in Mongolia through mobilization of the masses; and we can ask how commonly inequality affects democratization through mobilization across a broad set of cases.
+
+Rather separate methodological literatures have been devoted to the study of average causal effects, the analysis of case-level causal effects and explanations, and the identification of causal pathways. It is typically understood that their analysis requires quite distinct sets of tools. In this chapter, we take a key integrative step in showing that each of these queries can be readily captured in a causal model. More specifically, we demonstrate how causal queries can be represented as question about one or more _nodes_ on a causal graph. When we assimilate our causal questions into a causal model, we are placing what we want to know in formal relation to both what we _already_ know and what we can potentially _observe_. As we will see in later chapters, this move allows us then to deploy the model to generate strategies of inference: to determine which observations, if we made them, would be likely to yield the greatest leverage on our query, given our prior knowledge about the way the world works. And by the same logic, once we see the evidence, this integration allows us to  "update" on our query---figure out in systematic fashion what we _have_ learned---in a manner that takes background knowledge into account.
+
+In the remainder of this chapter, we walk through the conceptualization and causal-model interpretation of five key causal queries:
+
+* Case-level causal effects
+
+* Case-level causal attribution
+
+* Case-level explanation
+
+* Average causal effects
+
+* Causal pathways
+
+These five are not exhaustive of the causal questions that can be captured in causal graphs, but they are among the more common foci of social scientific investigation.
+
+
+<!-- * What is the average effect of a given increase in inequality is on the level of democracy for a given population of cases? -->
+
+<!-- * Case-level causal effects: What is the effect of $X$ on $Y$ in a given case? -->
+
+<!-- * Causal attribution: Did the condition $X$, present in a case, cause the outcome, $Y$, that occurred in that case? -->
+
+<!-- * Actual causes: Which of the antecedent conditions present in the case either was a counterfactual cause of the outcome or *could* have been a counterfactual cause given the way in which events actually played out? -->
+
+<!-- * Average causal effects: What is the mean effect of $X$ on $Y$ across a population of cases? -->
+
+<!-- * Causal pathways: How did $X$ exert its effect on $Y$ in a case? How does $X$ affect $Y$ in a population of cases? -->
+
+<!-- Some causal questions involve realized values of variables only, some involve counterfactual statements, and some involve combinations of these.  -->
+
+ <!-- In what follows we advocate an approach in which causal questions --- which we term *queries* --- can be defined as questions about the *values of exogenous nodes on a causal graph*, including unobservable $U$ terms. ^[With some abuse of notation we use $Q$ generically to refer to the query itself and the the set of variables whose values determine the query. Thus a query may be written as the random variable $Q =\mathbb{1}((u_X = 1) \& (u_Y = 0))$, which takes on a value $q=1$ if both $u_X = 1$ and $u_Y = 0$ and 0 otherwise. Assessing this query requires understanding the values of particular roots, or query nodes, $\{U_X, U_Y\}$ which we also refer to as $Q$.]  Addressing a given causal question then involves using data on observed features of a graph to make inferences about those unobserved or unobservable features of the graph that define the query. These inferences are, of course, always conditional on the graph itself.  -->
+
+<!-- (a) uncertainty about causal questions is represented as uncertainty about  and (b)  -->
+
+<!-- THIS ALL SEEMS LIKE NUANCE WE DON'T REALLY NEED HERE.
+
+In this framework, inferences about causation amount to inferences about the *context* that a case is in: that is, whether conditions in the case (the relevant exogenous-variable values) are such that a given causal effect, causal pathway, etc. would have been operating. We can translate questions about causation into questions about context because, in a structural causal model, the values of all exogenous variables are sufficient to determine the value of all endogenous nodes: context determines outcomes. This further implies that, for any manipulation of an exogenous or endogenous variable, there exist one or more exogenous nodes on the graph that suffice to determine the effect on all endogenous variables in the graph: context determines *effects*. Likewise, the settings on the model's exogenous variables determine the pathway(s) through which one variable in the model will affect another. -->
+
+<!-- It is important to note a difference between this formulation and the conceptualization of causality typically employed in the potential outcomes framework. We characterize causal inference as learning about a unit *as it is*, conditional on a causal model, rather than learning about the unit as it is and as it could be. Suppose, for instance, that in a causal model a car will start if it has gas and if the key is turned.^[A version of this example is in @darwiche1994symbolic.] In a standard potential outcomes setup, the question "Does turning the key cause the car to start?" is equivalent to asking, "Would the car start if the key is turned?" and "Would the car start if the key is not turned?" In our model-based framework, the question of the key-turning's causal effect is somewhat differently framed as a question about an exogenous variable: "Does the car have gas?" In the model-based framework, then, our query becomes a question about the state of affairs in the case---about the case's *context*---rather than a pair of factual and counterfactual questions about outcomes with and without treatment. These two framings are fully consistent with one another, and counterfactual reasoning is no less important in the model-based framework; it has simply been displaced to the causal model, which encodes all counterfactual relations. -->
+<!-- <!-- moreover this can always be done formally, even if the causal model contains no additional assumptions about the causal process.      --> -->
+
+## Causal queries
+
+### Case-level causal effects
+
+The simplest causal question is whether some causal effect operates in an individual case. Does $X$ have an effect on $Y$ in this case? For instance, is Yemen in 1995 a case in which a change in economic inequality would produce a change in whether or not the country democratizes? We could put the question more specifically as a query about a causal effect in a particular direction, for instance: Does inequality have a positive effect on democratization in the case of Yemen in 1995?
+
+In counterfactual terms, a query about case-level causation is a question about what would happen if we could manipulate a variable in the case: if we could hypothetically manipulate $X$'s value in the case, would $Y$'s value also change? To ask whether a positive (or negative) effect operates for a case is to ask whether a particular counterfactual relation holds in that case. If we assume a binary setup for simplicity, to ask whether inequality has a positive effect on democratization is to ask: if we set $I$ to $0$ would $D$ take on a value of $0$, _and_ if we set $I$ to $1$, would $D$ take on a value of $1$? (_Both_ of these conditions must hold for $I$ to have a positive effect on $D$.)
+
+<!-- The closely connected question of causal attribution [@yamamoto2012understanding] asks: did $X$ cause $Y$'s value in this case? -->
+
+We can easily represent this kind of query in the context of a causal model. We show the DAG for such a model in Figure \ref{fig:casequery}. As introduced in Chapter \@ref(theory), $\theta^Y$ here represents the causal type characterizing $Y$'s response to $X$ and, if $X$ and $Y$ are binary, can take on one of four values: $\theta^Y_{10}$, $\theta^Y_{01}$, $\theta^Y_{00}$, and $\theta^Y_{11}$ (which map onto our original $a, b, c$ and $d$ types). Importantly, given that the value of nodes (or variables) is allowed to vary across cases, this setup allows for $\theta_Y$---the causal effect of $X$ on $Y$---to vary across cases. Thus, $X$ may have a positive effect on $Y$ in one case (with $\theta^Y=\theta^Y_{01}$), $X$ may have a negative ($\theta^Y=\theta^Y_{10}$) or no effect ($\theta^Y=\theta^Y_{00}$ or $\theta^Y_{11}$) on $Y$ in other cases.
+
+<!-- Consider again our four causal types, above. In this setup, $X$'s causal effects on $Y$ can vary across cases. We can readily translate this setup, in which different cases have different causal effects, into a structural causal model. We can do so by letting $Y$ be a function both of $X$ and of a *causal-type variable* that encodes potential outcomes, a variable that we will denote as $Q$. We represent this simple model graphically in Figure \ref{fig:DAGtypes}. Here $Q$ can be thought of as variable that conditions the effect of $X$ on $Y$.  -->
+
+<!-- We then need to specify the values that $Q$ can take on, $Q$'s range. With a binary causal variable of interest, we can write down a value of $Q$ as $q_{ij}$. The pair of subscripts simply conveys the type's potential outcomes: $i$ represents the value that $Y$ takes on if $X=0$ while $j$ represents the value that $Y$ takes on if  $X=1$. Thus, in a binary framework, $Q$ can take on four values, corresponding to our original four types: $q_{00}$ (a $c$ type), $q_{10}$ (an $a$ type), $q_{01}$ (a $b$ type) and $q_{11}$ (a $d$ type). This setup also allows us to write down a simple, closed-form functional equation for å$Y$ in terms of its parents, $X$ and $Q$: $Y(x,q_{ij}) =  i(1-x) + jx$.^[To generate this closed-form function, we decompose $q_{ij}$ into its component parts, $i$ and $j$. Note that there is no loss of generality in the functional form linking $X$ and $Q$ to $Y$. In a causal model framework, the structural equations, such as those linking $X$ and $Y$ conditional on another node, can be entirely non-parametric.] -->
+
+```{r, echo = FALSE, fig.width = 8, fig.height = 5,  fig.align="center", out.width='.5\\textwidth', fig.cap = "\\label{fig:casequery} This DAG is a graphical representation of the simple causal setup in which the effect of $X$ on $Y$ in a given case depends on the case's causal type, represented by $\\theta^Y$. With a single binary causal variable of interest, we let $\\theta_Y$ take on values $\\theta^Y_{ij}$, with $i$ representing the value $Y$ takes on if $X=0$ and $j$ representing the value $Y$ takes on if $X=1$. With a binary framework outcome, $\\theta^Y$ ranges over the four values: $\\theta^Y_{00}$, $\\theta^Y_{10}$, $\\theta^Y_{01}$ and $\\theta^Y_{11}$."}
+par(mar=c(1,1,3,1))
+hj_dag(x = c(0, 1, 1),
+       y = c(1, 1, 2),
+       names = c(
+                expression(paste(X)),
+                expression(paste(Y)),
+                expression(paste(theta^Y))),
+       arcs = cbind( c(1, 3),
+                     c(2, 2)),
+       title = "A DAG Capturing a Case-Level Causal Effect",
+       padding = .4, contraction = .15)
+
+```
+
+
+
+<!-- Let $\lambda_1^Q$ denote a multinomial distribution over these four values and let t -->
+
+In this model, then, the query, "What is $X$'s causal effect in this case?" simply becomes _a question about the value of $\theta_Y$_. 
+
+Of course, $\theta_Y$ is not directly observable: causal types are intrinsically unobserved properties of cases. So, as we will see in later chapters, research design becomes a challenge of determining which _observable_ nodes in the graph are potentially informative about the unobservable nodes that constitute our causal queries. 
+
+<!-- We note that, in this discussion, we are employing a more generic property of causal graphs. In a graph of the general form $X \rightarrow Y \leftarrow Z$, the effect of $X$ on $Y$ in a case will depend on the value of $Z$ in that case. $Z$ in this structure might be a random disturbance term, $U_Y$, or a variable with a substantive interpretation. Either way, where a node has multiple parents, we should generally conceive of the parents as exerting their effects interactively. There are special situations in which $X$'s effect will not depend on the value of $Z$. For instance, if $Z$ operates only additively on $Y$ (say, $Y=X+Z$) and $Y$ is not bounded, then $Z$ is irrelevant to $X$'s causal effect, which will be homogeneous across cases and fixed by the model. But, in general, the causal effect of a parent on its child will depend on the value(s) of the other parent(s) (its spouse(s)).^[Nodes that share a child are spouses.] In this sense, for a given $X \rightarrow Y$ relationship, any other parents of $Y$ can be thought of as causal-type variables; these are the variables that define $X$'s case-level causal effect. Put differently, learning about the case-level effect of a causal variable on an outcome means learning about the outcome's other cause(s). -->
+
+<!-- Note also that, in the above illustration, the variable $Q$ is not specified in substantive terms; it is a carrier for causal information. However, social scientific theories commonly use substantive concepts as causal-type variables. The effect of fiscal stimulus on economic growth is theorized to depend on the unemployment rate; the effect of public opinion on policy is held to depend on institutional arrangements; the effect of natural resources on civil war might depend on the level of economic development. Any time one variable moderates the influence of another, the two variables operate as causal-type nodes for one another's effects on the outcome. Later in this chapter and in other chapters, we work with further examples in which the exogenous variables that define a query have a stronger substantive interpretation.    -->
+
+<!-- More generally, work in graphical models defines the causal effect of $X$ on $Y$ in terms of the changes in $Y$ that arise from interventions on $X$. For example, using the notation for interventions given above we can describe the effect of a change in $X$ from $x'$ to $x''$ on the probability that $Y=1$ in unit $i$ as: -->
+
+
+### Case-level causal attribution
+
+A query about causal attribution is related to, but different from, a query about a case-level causal effect. When asking about $X$'s case-level effect, we are asking, "*Would* a change in $X$ cause a change in $Y$ in this case?" The question of causal attribution is slightly different: "*Did* $X$ cause $Y$ to take on the value it did in this case?" More precisely, we are asking, "Given the values that $X$ and $Y$ _in fact_ took on in this case, would $Y$'s value have been different if $X$'s value had been different?" 
+
+For instance, given that we know that inequality in Taiwan was relatively low and that Taiwan democratized in 1996, was  low inequality a _cause_ of Taiwan's democratization in 1996? Put differently, given low economic inequality and democratization in Taiwan in 1996, would the outcome in this case have been different if inequality had been high?
+
+This goes beyond simply asking whether Taiwan is a case in which inequality has a causal effect on democratization. Whereas a case-level causal effect is defined in terms of a single $\theta$ node, we define a causal-attribution query in terms of a larger set of nodes. To attribute $Y$'s value in a case to $X$, we need to know not only whether this is the kind of case in which $X$ could have an effect on $Y$ but also whether the context is such that $X$'s value *in fact* made a difference. 
+
+Consider, for instance, the general setup in Figure \@ref(fig:attribquery). Here, $Y$ is a function of two variables, $X$ and $W$. This means that $\theta^Y$ is somewhat more complicated than in a setup with one causal variable: $\theta^Y$ must here define $Y$'s response to different combinations of two other variables, $X$ and $W$, since _both_ of these variables point directly into $Y$. Thus, $\theta^Y$ must cover the full set of possible causal interactions between two binary causal variables. 
+
+
+
+```{r attribquery, echo = FALSE, fig.width = 8, fig.height = 5,  fig.align="center", out.width='.5\\textwidth', fig.cap = "\\label{fig:attribquery} This DAG is a graphical representation of the simple causal setup in which $Y$ depends on two variables $X1$ and $X2$. How $Y$ responds to X1 and X2 depnds on $\\theta^Y$, the DAG itself does not provide information on whether or how X1 and X2 interact with each other."}
+par(mar=c(1,1,3,1))
+hj_dag(x = c(0, 0, 1, 1),
+       y = c(2, 0, 1, 2),
+       names = c(
+                expression(paste(X1)),
+                expression(paste(X2)),
+                expression(paste(Y)),
+                expression(paste(theta^Y))),
+       arcs = cbind( c(1, 4, 2),
+                     c(3, 3, 3)),
+       title = "A DAG Capturing Causal Attribution",
+       padding = .4, contraction = .15)
+
+```
+
+We already saw the set of causal types for a set up like this in Chapter 2 (see Table \@ref(tab:PO16)).  In the table, there are four column headings representing the four possible combinations of $X1$ and $X2$ values. Each row represents one possible pattern of $Y$ values as $X1$ and $X2$ move through their four combinations. 
+
+Labelling is a little difficult with so many types. One approach used  in Chapter \@ref(models) is to represent change in $X1$ on the horizontal axis, and change in the second variable, $X2$, on the vertical axis. The value of $X1$ increases from 0 to 1 as we move to the _right_ (from $i$ to $j$ or from $g$ to $h$). And the value of $X2$ increases from 0 to 1 as we move _up_ (from $i$ to $g$ or from $j$ to $h$).
+
+One way to conceptualize the size of the causal-type "space" is to note that $X1$ can have any of our four causal effects (the four binary types) on $Y$ when $X2=0$; and $X1$ can have any of four causal effects when $X2=1$.^[This is precisely equivalent to noting that $X2$'s effect on $Y$ can be of any of the four types when $X1=0$ and of any of the four types when $X1=1$.] This yields 16 possible response patterns to combinations of $X1$ and $X2$ values. 
+<!-- Thus, for instance, $\theta_{00}^{10}$ (type 5) describes a response pattern in which $W$ has a positive effect on $Y$ when $X=0$ but has no effect, with $Y$ stuck at $0$, when $X=1$; and in which $X$ has no effect when $W=0$ and a negative effect when $W=1$. For $\theta_{11}^{00}$ (type 11), $W$ has a negative effect on $Y$ regardless of $X$'s value; and $X$ has no effect regardless of $W$'s value. -->
+
+<!-- \begin{table}[h!] -->
+<!--   \centering -->
+<!--   \def\arraystretch{1.3} -->
+<!--     \begin{tabular}{ccccccc} -->
+<!--     \hline -->
+<!--     \textbf {} & \textbf {Type} &  $(Y | X=0,$ & $(Y |X=0, $ & $(Y | X=1, $ & $(Y | X=1, $\\ -->
+<!--          & & $W=0)$ & W=1)$ & $W=0)$ & $W=1)$ \\  \hline -->
+<!--     1 & $\theta_{00}^{00}$ 			&  0     & 0     & 0     & 0  \\ -->
+<!--     2 & $\theta_{00}^{01}$ 	& 0     & 0     & 0     & 1 \\ -->
+<!--     3 & $\theta_{01}^{00}$ 	& 0     & 0     & 1     & 0 \\ -->
+<!--     4 & $\theta_{01}^{01}$ 			& 0     & 0     & 1     & 1 \\ -->
+<!--     5 & $\theta_{00}^{10}$ 	& 0     & 1     & 0     & 0 \\ -->
+<!--     6 & $\theta_{00}^{11}$ 			& 0     & 1     & 0     & 1 \\ -->
+<!--     7 & $\theta_{01}^{10}$ 	& 0     & 1     & 1     & 0 \\ -->
+<!--     8 & $\theta_{01}^{11}$ 		& 0     & 1     & 1     & 1 \\ -->
+<!--     9 & $\theta_{10}^{00}$			& 1     & 0     & 0     & 0 \\ -->
+<!--     10 & $\theta_{10}^{01}$ 	& 1     & 0     & 0     & 1 \\ -->
+<!--     11 & $\theta_{11}^{00}$			& 1     & 0     & 1     & 0 \\ -->
+<!--     12 & $\theta_{11}^{01}$		& 1     & 0     & 1     & 1 \\ -->
+<!--     13 & $\theta_{10}^{10}$			& 1     & 1     & 0     & 0 \\ -->
+<!--     14 & $\theta_{10}^{11}$		& 1     & 1     & 0     & 1 \\ -->
+<!--     15 & $\theta_{11}^{10}$		& 1     & 1     & 1     & 0 \\ -->
+<!--     16 & $\theta_{11}^{11}$			& 1     & 1     & 1     & 1 \\ -->
+<!--     \bottomrule -->
+<!--     \end{tabular}% -->
+<!--    \caption{The table defines the 16 values (causal types) that $\theta^Y$ can take on, given a binary $X$ and $W$ as parents of $Y$. The `Type' column lists each of the 16 values, while the four columns to its right define each value in terms of the potential outcomes that it implies.} -->
+<!--   \label{tab:types2x}% -->
+<!-- \end{table} -->
+
+
+A query about causal attribution---whether $X1 = 1$ caused $Y=1$--for the model in in Figure \@ref(fig:attribquery), would be defined in terms of both $X2$ and $\theta_Y$. Parallel to our Taiwan example, suppose that we have a case in which $Y=1$ and in which $X1$ was also 1, and we want to know whether $X1$ caused $Y$ to take on the value it did. Answering this question requires knowing whether the case's type is such that $X1$ would have had a positive causal effect on $Y$, _given the value of $X2$_ (which we might think of as the context). Thus, given that we start with knowledge of $X1$'s and $Y$'s values, our query about causal attribution amounts to a query about two nodes on the graph: (a) the value of $X2$ and (b) whether the value of $\theta^Y$ is such that $X1$ has a positive causal effect given $X2$'s value.
+
+Suppose, for instance, that we were to observe $X2=1$. We then need to ask whether the causal type, $\theta_Y$, is such that $X1$ has a positive effect when $X2=1$. Consider type 8, or $\theta_{01}^{11}$. This is a causal type in which $X1$ has a positive effect when $X2=0$ but no effect when $X2=1$. Put differently, $X2=1$ is a sufficient condition for $Y=1$, meaning that $X1$ makes no difference to the outcome when $X2=1$. 
+
+<!-- Looking down the table, we can readily identify the causal types that qualify by focusing on the two superscripts---which provide responses to $X$ when $W=1$---and looking for a $01$ in that upper row.  -->
+In all we have  four qualifying types: $\theta_{00}^{01}$, $\theta_{01}^{01}$, $\theta_{10}^{01}$, and $\theta_{11}^{01}$ (or 2, 4, 10, and 12).  In other words, we can attribute a $Y=1$ outcome to $X1=1$ when $X2=1$ and the causal type is one of these four. By parallel reasoning, we can also attribute a $Y=1$ outcome to $X1=1$ when $X2=0$ and the causal type is any of $\theta_{01}^{00}$, $\theta_{01}^{01}$, $\theta_{01}^{10}$, and $\theta_{01}^{11}$. 
+
+Thus, a question about causal attribution is a question about the *joint* value of a set of nodes: about whether the _combination_ of context and causal type is such that changing $X$ would have changed the outcome.
+
+
+### Case-level explanation
+
+So far we have been dealing with causes in the standard counterfactual sense: antecedent conditions a change in which would have produced a different outcome. Sometimes, however, we are interested in identifying antecedent conditions that were not counterfactual difference-makers but that nonetheless _generated_ or _produced_ the outcome. Consider, for instance, a situation in which an outcome was overdetermined: multiple conditions were present, each of which on their own, _could_ have generated the outcome. Then none of these conditions caused the outcome in the counterfactual sense; yet one or more of them may have been distinctively important in *producing* the outcome. The concept of an *actual cause* may be useful in putting a finer point on this kind of causal question.  
+
+Let us first approach the concept at an intuitive level. An antecedent condition, $A$, that played a role in generating an outcome might not be a counterfactual cause because, had it not occurred, some second chain of events set in motion by $B$ would have unfolded, generating the outcome anyway. In the standard counterfactual scenario, $A$ is not a counterfactual cause: take away $A$ and the outcome still happens because of the chain of events emanating from $B$. Yet let us imagine that the fact that $A$ _did_ occur _prevented_ part of $B$'s chain of consequences from unfolding and itself producing the outcome. Then let us imagine a tweaked counterfactual comparison in which we *fix* the observed fact that $B$'s causal sequence did not fully unfold. We can then ask: *conditional on $B$'s sequence not fully unfolding*, would $A$ have been a counterfactual cause of the outcome? If so, then we say that $A$ is an "actual cause"" of the outcome. We have, in a sense, identified $A$ as distinctively important in the production of the outcome, even if it was not a case-level cause in the usual sense.
+
+More formally, and using the definition provided by [@halpern2015modification], building on [@halpern2005causesa] and others, we say that a condition ($X$ taking on some value $x$) was an *actual cause* of an outcome (of $Y$ taking on some value $y$), where $x$ and $y$ may be collections of events, if:
+
+1. $X=x$ and $Y=y$ both happened
+2. there is some set of variables, $\mathcal W$, such that if they were fixed at the levels that they actually took in the case, and if $X$ were to be changed, then $Y$ would change (where $\mathcal W$ can also be an empty set)
+3. no strict subset of $X$ satisfies 1 and 2 (there is no redundant part of the condition, $X=x$)
+
+The definition thus describes a condition that *would* have been a counterfactual cause of the outcome if we were to imagine holding constant some set of events that in fact occurred (and that, in reality, might not have been constant if the actual cause had not in fact occurred).
+
+A motivating example used in much of the literature on actual causes [e.g.  @hall2004two] imagines  two characters, Sally and Billy, simultaneously throwing stones at a bottle. Both are great shots and hit whatever they aim at. Sally's stone hits first, and so the bottle breaks. However, Billy's stone *would* have hit had Sally's not hit, and would have broken the bottle. Did Sally's throw cause the bottle to break? Did Billy's?
+
+By the usual definition of causal effects, neither Sally's nor Billy's action had a causal effect: without either throw, the bottle would still have broken. We commonly encounter similar situations in the social world. We observe, for instance, the onset of an economic crisis and the breakout of war---either of which would be sufficient to cause the government's downfall---but with the economic crisis occurring first and toppling the government before the war could do so. Yet neither economic crisis nor war made a difference to the outcome.
+
+To return to the bottle example, while neither Sally's nor Billy's throw is a counterfactual cause, there is an important sense in which Sally's action obviously broke the bottle, and Billy's did not. This intuition is confirmed by applying the definition above. Consider first the question: Did Sally's throw break the bottle? Conditions 1 and 3 are easily satisfied, since Sally \emph{did} throw and the bottle \emph{did} break (Condition 1), and "Sally threw" has no strict subsets (Condition 3).
+
+Condition 2 is met if Sally's throw made a difference, counterfactually speaking; and in determining this, we are permitted to condition on (to fix in the counterfactual comparison) any event or set of events that actually happened (or on on none at all). To see why Condition 2 is satisfied, we have to think of there being three steps in the process: Sally and Billy throw, Sally's or Billy's rock hits the bottle, and the bottle breaks. In actuality, Billy's stone did not hit the bottle. And conditioning on this actually occurring event (Billy's stone not hitting), the bottle would *not* have broken had Sally not thrown. From the perspective of counterfactual causation, it may seem odd to condition on Billy's stone not hitting the bottle when thinking about Sally not throwing the stone since Sally's throwing the stone was the very thing that prevented Billy from hitting the bottle. Yet Halpern argues that this is an acceptable thought experiment for establishing the importance of Sally's throw since conditioning is constrained to the actual facts of the case. Moreover, the same logic shows why Billy is not an actual cause. The reason is that Billy's throw is only a cause in those conditions in which Sally did not hit the bottle. But because Sally \emph{did} actually hit the bottle, we are not permitted to condition on Sally not hitting the bottle in determining actual causation. We thus cannot---even through conditioning on actually occurring events---construct any counterfactual comparison in which Billy's throw is a counterfactual cause of the bottle's breaking.
+
+The striking result here is that there can be grounds to claim that a condition was the actual cause of an outcome even though, under the counterfactual definition, the effect of that condition on the outcome is 0. (At the same time, all counterfactual causes are automatically actual causes; they meet Condition 2 by conditioning on nothing at all, an empty set $\mathcal W$.) One immediate methodological implication follows: since actual causes need not be causes, there are risks in research designs that seek to understand causal effects by tracing back actual causes---i.e., the way things actually happened. If we traced back from the breaking of the bottle, we might be tempted to identify Sally's throw as the cause of the outcome. We would be right only in an actual-causal sense, but wrong in the standard, counterfactual causal sense. Chains of events that appear to "generate" an outcome are not always causes. ^[Perhaps more surprising, it is possible that the expected causal effect is negative but that $X$ is an actual cause in expectation. For instance, say that 10% of the time Sally's shot intercepted Billy's shot but without hitting the bottle. In that case the average causal effect of Sally's throw on bottle breaking is $-0.1$ yet 90% of the time Sally's throw is an actual cause of bottle breaking (and 10% of the time it is an actual cause of non-breaking). For related discussions see @menzies1989probabilistic.]
+
+As with other causal queries, the question "Was $X=x$ the actual cause of $Y=y$?" can be redefined as a question about which values for exogenous nodes produce conditions under which $X$ could have made a difference. To see how, let us run through the Billy and Sally example again, but formally in terms of a model. Consider Figure \ref{fig:actualquery}, where we represent Sally's throw ($S$), Billy's throw ($B$), Sally's rock hitting the bottle ($H^S$), Billy's rock hitting the bottle ($H^B$), and the bottle cracking ($C$). Each endogenous variable has a $\theta$ term associated with it, capturing its response to its parents. We capture the possible "preemption" effect with the arrow pointing from $H^S$ to $H^B$, allowing that whether Sally's rock hits to affect whether Billy's rock hits. 
+
+Let us again imagine that Sally threw ($S=1$), Billy threw ($B=1$), and the bottle cracked ($C=1$). Let us say that $\theta^{H^B}$ takes on a value such that (a) $H^B=0$ whenever $H^S=1$ (Sally's hit preempts Billy's) and (b) $B$ has a positive effect on $H^B$ when $H^S=0$  (Billy's throw hits if Sally's doesn't). Further, assume that $S$ has a positive effect on $H^S$. Let us finally posit that $\theta^C$ takes on a value such that $C=1$ if $H^B$ equals $1$.^[That is, $\theta^C$ equals some value $\theta_{ij}^{11}$, where $H^S$ operates along the horizontal axis and $H^B$ along the vertical and $i$ and $j$ can be any 0 or 1 values.] This is a set of $\theta$ values under which the query, "Does $S$ have a causal effect on $C$?" must be answered in the negative. Similarly, this is a context in which $C=1$ cannot be causally attributed to $S=1$. If Sally had not thrown, then Sally's rock would not have hit the bottle, which means that Billy's rock would have hit, and the bottle would still have cracked---still, $C=1$.
+
+However, it is still possible that $S=1$ was an actual cause of $C=1$. To complete this query, we need to ask whether there is some node value that we can hold fixed at the value that it _actually_ assumed in the case such that $S$ would have a causal effect on the outcome. Fixing $B=1$ (Billy throws) cannot help (since if Billy throws, Billy hits, and the bottle cracks anyway). However, under $S=1$ and $B=1$, given the $\theta$ values we have posited, $H^B=0$: Billy's rock does not hit. If we hold constant that $H^B=0$, then there is an "opportunity" for $S$ to matter in that $C$ is no longer forced to 1 (by Billy's rock hitting). But for $S$ to matter under his scenario, something else has to be true: $\theta^C$'s value must allow for $H^S$ to have a positive effect on $C$ when $H^B=0$. 
+
+Using our two-cause notation (with $H^S$ on the horizontal axis, and $H^B$ on the vertical), and given that we have already stipulated that $C=1$ when $H^B=1$, the one permissible value for $\theta^C$ is $\theta^{11}_{01}$. This is causal type in which neither $H^B$ nor $H^S$ can be causal if both Billy and Sally throw: whenever one variable is 1, the other has no effect. But it is also a type in which each has a causal effect if the other is held at 0. 
+
+It is also the case, as we have said, that all counterfactual causes are actual causes. They are, quite simply, counterfactual causes when we hold _nothing_ fixed ($\mathcal W$ is the empty set). Thus, in fact, any $\theta^S$, $\theta^{H^S}$ and $\theta^C$ values in which $S$ has a positive effect when $B=1$ will do. This includes, for instance, a $\theta^C$ value in which Billy's hitting has no effect on the bottle (perhaps Billy doesn't throw hard enough!): e.g., $\theta^{01}_{01}$. Here, Sally's throw is both a counterfactual cause and an actual cause of the bottle's cracking. The larger point is that actual cause queries can, like all other causal queries, be defined as questions about the values of nodes in a causal model.
+
+
+```{r, echo = FALSE, fig.width = 8, fig.height = 5,  fig.align="center", out.width='.5\\textwidth', fig.cap = "\\label{fig:actualquery} This DAG is a graphical representation of the simple causal setup in which the effect of $X$ on $Y$ in a given case depends on the case's causal type, represented by $\\theta^Y$. With a single binary causal variable of interest, we let $\\theta_Y$ take on values $\\theta^Y_{ij}$, with $i$ representing the value $Y$ takes on if $X=0$ and $j$ representing the value $Y$ takes on if $X=1$. With a binary framework outcome, $\\theta^Y$ ranges over the four values: $\\theta^Y_{00}$, $\\theta^Y_{10}$, $\\theta^Y_{01}$ and $\\theta^Y_{11}$."}
+par(mar=c(1,1,3,1))
+hj_dag(x = c(0, 0, 1, 1, 1, 1, 3, 3),
+       y = c(2, 0, 2, 3, 0, -1, 1, 2),
+       names = c(
+                expression(paste(S)),
+                expression(paste(B)),
+                expression(paste(H^S)),
+                expression(paste(theta^H^S)),
+                expression(paste(H^B)),
+                expression(paste(theta^H^B)),
+                expression(paste(C)),
+                expression(paste(theta^C))),
+       arcs = cbind( c(1, 2, 4, 6, 3, 5, 3, 8),
+                     c(3, 5, 3, 5, 7, 7, 5, 7)),
+       title = "A DAG Capturing an Actual Cause",
+       padding = .4, contraction = .15)
+
+```
+
+Actual causes are conceptually useful whenever there are two sufficient causes for an outcome, but one preempts the operation of the other. For instance, we might posit that both the United States' development of the atomic bomb was a sufficient condition for U.S. victory over Japan in World War II, and that U.S. conventional military superiority was also a sufficient condition and would have operated via a land invasion of Japan. Neither condition was a counterfactual cause of the outcome because both were present. However, holding constant the _absence_ of a land invasion, the atomic bomb was a difference-maker, rendering it an actual cause. The concept of actual cause thus helps capture the sense in which the atomic bomb contributed to the outcome, even if it was not a counterfactual cause.
+
+Similarly, the question of how *common* it is for a condition to be an actual cause can be expressed as values of nodes, possibly including nodes that record parameter values for the relevant exogenous nodes.
+
+<!-- We should try to be more specific here and for notable causes about what the nodes we'd want to learn about are. -->
+
+
+An extended notion [@halpern2016actual, p 81] of actual causes restricts the imagined counterfactual deviations to states that are more likely to arise (more "normal") than the factual state. We will call this notion a ''notable cause.'' Similarly, one cause, $A$, is "more notable" than another cause, $B$, if a deviation in $A$ from its realized state is (believed to be) more likely than a deviation in $B$ from its realized state.
+
+For intuition, we might wonder why a Republican was elected to the presidency in a given election. In looking at some minimal winning coalition of states that voted Republican, we might distinguish between a set of states that *always* vote Republican and a set of states that usually go Democratic but voted Republican this time. If the coalition is minimal winning, then every state that voted Republican is a cause of the outcome in the standard (difference making) sense. However, only the states that usually vote Democratic are notable causes since it is only for them that the counterfactual scenario (voting Democratic) was more likely to arise than the factual scenario. In a sense, we take the "red" states' votes for the Republican as given---placing it, as it were, in the causal background---and identify as "notable" those conditions that mattered and easily could have gone differently. By the same token, we can say that, among those states that voted Republican this time, those that more commonly vote Democratic are *more* notable causes than those that less commonly vote Democratic.
+
+Again, whether something is a notable cause, or the likelihood in some population that a condition is a notable cause, can be expressed as a claim about the value of a set of root nodes.
+
+Though not a focus of our applied examples we show formally how to estimate these estimands in the Appendix, section XXX.
+
+<!-- So there are 2 things being defined: notable vs. not notable, and more vs. less notable. -->
+
+<!-- The election example seems to be illustrating the first of these since it refers to the volatile states being notable.  -->
+
+<!-- But the reasoning doesn't line up with the definition of notable given here: we haven't said that these are states that usually vote non-Republican. We've only said that their voting non-R is more likely than the other states' voting non-R. -->
+
+<!-- Shall I fix by simply changing the volatile states to ones that usually vote D? -->
+
+<!-- Also, we are not saying what the nodes in Q are, just that there are some. Could we say that they're the same nodes as for a plain actual cause PLUS nodes going into X (a possible notable cause) representing parameters of the distribution of X? -->
+
+### Average causal effects
+
+A more general query asks about an average causal effect in some population. In counterfactual terms, a question about average causal effects is: if we manipulated the value of $X$ for all cases in the population---first setting $X$ to one value for all cases, then changing it to another value for all cases---by how much would the average value of $Y$ in the population change? Like other causal queries, a query about an average causal effect can be conceptualized as learning about a node in a causal model. 
+
+We can do this by conceiving of any given case as being a member of a population composed of different causal types. When we seek to estimate an average causal effect, we seek information about the *shares* of these causal types in the population. 
+
+More formally and adapted from @humphreys2015mixing, we can use $\lambda^Y_{ij}$ to refer to the *share* of cases in a population that has causal type $\theta^Y_{ij}$. Thus, given our four causal types above, $\lambda^Y_{10}$ is the proportion of cases in the population with negative effects; $\lambda_{01}$ is the proportion of cases with positive effects; and so on. We can, of course, also think of these shares as probabilities; that is, we can think of any given case as being ``drawn'' from a multinomial distribution with probabilities $\lambda = (\lambda^Y_{10}, \lambda^Y_{01}, \lambda^Y_{00}, \lambda^Y_{11})$. One nice feature of this setup, with both $X$ and $Y$ as binary, the average causal effect can be simply characterized as the share of positive-effect cases less the share of negative-effect cases: $\lambda^Y_{01} - \lambda^Y_{10}$. 
+
+Graphically, we can represent this setup by including $\lambda^Y$ in a more complex causal graph as in Figure \ref{fig:DAGace}. As in our setup for case-level causal effects, $X$'s effect on $Y$ in a case depends on (and only on) the case's causal type, $\theta^Y$. The key difference is that we now model the case's type not as exogenously given, but as a function of two additional variables: the distribution of causal types in a population and a random process through which the case's type is "drawn" from that distribution. We represent the type distribution as $\lambda^Y$ (a vector of values for the proportions $\lambda^Y_{10}, \lambda^Y_{01}, \lambda^Y_{00}, \lambda^Y_{11}$) and the random process drawing a $\theta^Y$ value from that distribution as $U_\theta$. 
+
+
+<!-- We might stipulate, for instance, that $U_\theta$ has a uniform distribution, between 0 and 1. We could write down the structural equation for $\theta^Y$ as:  -->
+
+<!-- $\theta^Y=$ -->
+
+<!--   $\theta^Y_{10}$ if $U_\theta < \lambda^Y_{10}$ -->
+
+<!--   $\theta^Y_{01}$ if $\lambda^Y_{10} < U_\theta < \lambda^Y_{10} + \lambda^Y_{01}$ -->
+
+<!--   $\theta^Y_{00}$ if $\lambda^Y_{10} + \lambda^Y_{01} < U_\theta < \lambda^Y_{10} + \lambda^Y_{01} + \lambda^Y_{00}$ -->
+
+<!--   $\theta^Y_{11}$ if $\lambda^Y_{10} + \lambda^Y_{01} + \lambda^Y_{00} < U_\theta < \lambda^Y_{10} + \lambda^Y_{01} + \lambda^Y_{00} + \lambda^Y_{11}$ -->
+
+
+<!-- \begin{equation}  -->
+<!-- (\#eq:Q) -->
+<!-- \end{equation}  -->
+
+<!-- *** -->
+
+In this model, our causal query---about $X$'s average causal effect---is thus defined by the vector $\lambda^Y$, and specifically by the shares of negative- and positive-causal-effect cases, respectively, in the population. What is $X$'s average effect on $Y$ amounts to asking: what are the values of $\lambda^Y_{10}$ and $\lambda^Y_{01}$? As with $\theta^Y$, $\lambda^Y$ is not directly observable. And so the empirical challenge is to figure out what we _can_ observe that would allow us to learn about $\lambda^Y$'s component values?^[Note also that $\lambda^Y$ can be thought of as itself drawn from a distribution, such as a Dirichlet. The hyperparameters of this underlying distribution of $\lambda$ would then represent our uncertainty over $\lambda$ and hence over average causal effects in the population.]
+
+<!-- Of course, like $\theta^Y$, $\lambda^Y$ is not directly observable. Thus, inference about average causal effects will necessarily involve using information about *observable* nodes to learn both about unobservables of interest. We might, for instance, use observations of $X$ and $Y$ to learn about a case's causal type ($Q$) and, possibly repeating across many cases, about the share of different types in the population ($\lambda$). -->
+
+<!-- **I have decided not to incorporate $U_\lambda$ in the graph because it would actually require a node for the distribution's hyperparameters as well and I think would in any case cloud the point we want to make here.** -->
+
+<!-- Formally, this kind of average causal effect is also calculated using Equation \ref{ate}, though for a model that is not conditional on the case at hand. -->
+
+
+
+```{r, echo = FALSE, fig.width = 8, fig.height = 5,  fig.align="center", out.width='.5\\textwidth', fig.cap = "\\label{fig:DAGace} This DAG is a graphical representation of a causal setup in which cases are drawn from a population composed of different causal types. As before, $X$'s effect on $Y$ is a function of a causal-type variable, $\\theta^Y$. Yet here we explicitly model the process through which the case's type is drawn from a distribution of types in a population. The variable $\\lambda$ is a vector representing the multinomial distribution of causal types in the population while $U_\\theta$ is a random variable representing the draw of each case from the distribution defined by $\\lambda$. A case's causal type, $\\theta^Y$, is thus a joint function of $\\lambda^Y$ and $U^{\\theta_Y}$."}
+par(mar=c(1,1,3,1))
+hj_dag(x = c(0, 2, 2, 1, 3),
+       y = c(1, 1, 2, 3, 3),
+       names = c("X", "Y", expression(paste(theta^Y)), expression(paste(lambda^Y)), expression(paste(U^theta))),
+       arcs = cbind( c(1, 3, 4, 5),
+                     c(2, 2, 3, 3)),
+       title = "A DAG with Causal Type Drawn from a Population-level Distribution of Causal Types",
+       padding = .4, contraction = .15) 
+
+```
+
+
+We can, of course, likewise pose queries about other population-level causal quantities. For instance, we could ask for what proportion of cases in the population $X$ has a positive effect: this would be equivalent to asking the value of $\lambda^Y_{01}$, one element of the $\lambda^Y$ vector. Or we could ask about the proportion of cases in which $X$ has no effect, which would be asking about $\lambda^Y_{00} + \lambda^Y_{11}$.
+
+<!-- **ARE WE IN FACT GOING TO CARRY A DISCUSSION OF ACTUAL AND NOTABLE CAUSES THROUGH THE BOOK? IF NOT, WE SHOULD CUT THE NEXT TWO SUBSECTIONS. IT WILL TAKE PEOPLE A LONG TIME TO GET THE ACTUAL CAUSE IDEA, SO ONLY WORTH THE EFFORT IF THERE'S A PAYOFF.** -->
+
+<!-- MH: STRONLY THINK WE SHOULD -- I SEE A CONTRIBUTION HERE AS BEING AN EXPANSION OF THE QUESTIONS WE ASK -->
+
+
+### Causal Paths
+
+To develop richer causal understandings, researchers often seek to describe the causal path or paths through which effects propagate. Consider the DAG in Figure \@ref(fig:DAGpaths), in which $X$ can affect $Y$ through two possible pathways: directly and via $M$. Assume again that all variables are binary, taking on values of $0$ or $1$. As we have seen in Chapter \@ref(theory), mediation models require causal-type nodes that point into any mediators as well as into the outcome variable. So here we have drawn in a causal-type variable defining $M$'s response to $X$, $\theta^M$, and a causal-type variable capturing $Y$'s response, $\theta^Y$. Importantly, $\theta^Y$ defines $Y$'s response to _two_ parent variables: $M$ and $X$. 
+
+Suppose that we observe $X=1$ and $Y=1$ in a case. Suppose, further, that we have reasonable confidence that $X$ has had a positive effect on $Y$ in this case. We may nonetheless be interested in knowing whether that causal effect ran *through* $M$. We will refer to this as a query about a causal path. A causal path query, of course, goes beyond assessing whether some mediating event along the path occurred. We cannot, for instance, establish that the top path in Figure \ref{fig:DAGpaths} was operative simply by determining the value of $M$ in this case---though that will likely be useful information. 
+
+Rather, the question of whether the top (mediated) causal path is operative is a composite question of two parts: First, does $X$ have an effect on $M$ in this case? Second, does that effect---the difference in $M$'s value caused by a change in $X$---in turn *cause* a change in $Y$'s value? In other words, what we want to know is whether the effect of $X$ on $Y$ depends on---*will not operate without*---the effect of $X$ on $M$.^[A very similar question is taken up in work on  mediation where the focus goes to understanding quantities such as the "indirect effect"" of $X$ on $Y$ via $M$. Formally, the indirect effect would be $$Y(X=1, M = M(X=1,\theta^M), 
+\theta^Y) - Y(X = 1, M = M(X=0, \theta^M), \theta^Y))$$, which captures the difference to $Y$ if $M$ were to change in the way that it would change due to a change in $X$, but without an actual change in $X$ [@pearl2009causality p 132, @imai2010general].] Framing the query in this way makes clear that asking whether a causal effect operated via a given path is in fact asking about a specific set of causal effects lying along that path.
+
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.5\\textwidth', fig.cap = "\\label{fig:DAGpaths} Here $X$ has effects on $Y$ both indirectly through $M$ and directly."}
+par(mar=c(1,1,3,1))
+hj_dag(x = c(0, 1, 2, 1, 2),
+       y = c(2, 3, 2, 4, 3),
+       names = c("X", "M", "Y", expression(paste(theta^M)), expression(paste(theta^Y))),
+       arcs = cbind( c(1, 2, 1, 4, 5),
+                     c(2, 3, 3, 2, 3)),
+       title = "A DAG with Two Causal Paths",
+       padding = .4, contraction = .15) 
+
+```
+
+
+As we can show, we can also define a causal-path query as a question about specific nodes on a causal graph. In particular, just as we have defined other questions about causal effects in terms of causal-type nodes, a causal path can also be defined in terms of the values of type nodes: specifically, in the present example, in terms of the nodes $\theta^M$ and $theta^Y$. To see why, let us first note that there are two combinations of effects that would allow $X$'s positive effect on $Y$ to operate via $M$: (1) $X$ has a positive effect on $M$, which in turn has a positive effect on $Y$; or (2) $X$ has a negative effect on $M$, which has a negative effect on $Y$. 
+
+Thus, in establishing whether $X$ affects $Y$ through $M$, the first question is whether $X$ affects $M$ in this case. Whether or not it does is a question about the value of the causal-type node, $\theta^M$. Let us assume that $\theta^M$ can take on four possible values corresponding to the four possible responses to $X$: $\theta^M_{10}, \theta^M_{01}, \theta^M_{00}, \theta^M_{11}$.^[In other words, $X$'s effect on $M$ could be negative, positive, absent with $M$ stuck at $0$, or absent with $M$ stuck at $1$, respectively.] For sequence (1) to operate, $\theta^M$ must take on the value $\theta^M_{01}$, representing a positive effect of $X$ on $M$. For sequence (2) to operate, $\theta^M$ must take on the value $\theta^M_{10}$, representing a negative effect of $X$ on $M$.
+
+$\theta^Y$, as for our causal-attribution example, defines $Y$'s response to different combinations of two other variables---here, $X$ and $M$---since _both_ of these variables point directly into $Y$. Another way to think about this setup is that $M$ is not just a possible mediator of $X$'s indirect effect; $M$ is also a potential _moderator_ of $X$'s direct effect. Where $X$ can have both an mediated effect through $M$ and a direct effect, $X$ and $M$ also potentially _interact_ in affecting $Y$. 
+
+This results in sixteeen possible values for $\theta^Y$---again as shown above in Table \@ref(tab:PO16).
+
+<!-- We spell out potential outcomes for the 16 resulting types---each a possible value of $\theta^Y$---in Table \@ref(tab:typespaths), which is parallel to Table \@ref(tab:types2x). Within $\theta$'s sub- and superscripts, the value of $X$ increases from 0 to 1 as we move to the right while the value of $M$ increases from 0 to 1 as we move up. -->
+
+<!-- \begin{table}[h!] -->
+<!--   \centering -->
+<!--   \def\arraystretch{1.3} -->
+<!--     \begin{tabular}{ccccccc} -->
+<!--     \hline -->
+<!--     \textbf {} & \textbf {Type} &  $(Y | X=0,$ & $(Y |X=0, $ & $(Y | X=1, $ & $(Y | X=1, $\\ -->
+<!--          & & $M=0)$ & $M=1)$ & $M=0)$ & $M=1)$ \\  \hline -->
+<!--     1 & $\theta_{00}^{00}$ 			&  0     & 0     & 0     & 0  \\ -->
+<!--     2 & $\theta_{00}^{01}$ 	& 0     & 0     & 0     & 1 \\ -->
+<!--     3 & $\theta_{01}^{00}$ 	& 0     & 0     & 1     & 0 \\ -->
+<!--     4 & $\theta_{01}^{01}$ 			& 0     & 0     & 1     & 1 \\ -->
+<!--     5 & $\theta_{00}^{10}$ 	& 0     & 1     & 0     & 0 \\ -->
+<!--     6 & $\theta_{00}^{11}$ 			& 0     & 1     & 0     & 1 \\ -->
+<!--     7 & $\theta_{01}^{10}$ 	& 0     & 1     & 1     & 0 \\ -->
+<!--     8 & $\theta_{01}^{11}$ 		& 0     & 1     & 1     & 1 \\ -->
+<!--     9 & $\theta_{10}^{00}$			& 1     & 0     & 0     & 0 \\ -->
+<!--     10 & $\theta_{10}^{01}$ 	& 1     & 0     & 0     & 1 \\ -->
+<!--     11 & $\theta_{11}^{00}$			& 1     & 0     & 1     & 0 \\ -->
+<!--     12 & $\theta_{11}^{01}$		& 1     & 0     & 1     & 1 \\ -->
+<!--     13 & $\theta_{10}^{10}$			& 1     & 1     & 0     & 0 \\ -->
+<!--     14 & $\theta_{10}^{11}$		& 1     & 1     & 0     & 1 \\ -->
+<!--     15 & $\theta_{11}^{10}$		& 1     & 1     & 1     & 0 \\ -->
+<!--     16 & $\theta_{11}^{11}$			& 1     & 1     & 1     & 1 \\ -->
+<!--     \bottomrule -->
+<!--     \end{tabular}% -->
+<!--    \caption{The table defines the 16 values (causal types) that $\theta_Y$ can take on, given a binary $X$ and $M$ as parents of $Y$. The `Type' column lists each of the 16 values, while the four columns to its right define each value in terms of the potential outcomes that it implies.} -->
+<!--   \label{tab:typespaths}% -->
+<!-- \end{table} -->
+
+<!-- ------------------------------------------------------------------- -->
+<!--    **Type**    $(Y | X=0,$  $(Y |X=0,$   $(Y | X=1,$   $(Y | X=1,$   -->
+<!--                   $M=0)$       $M=1)$       $M=0)$        $M=1)$     -->
+<!-- -------------  -----------  -----------  ------------  ------------ -->
+<!-- $\theta_{0j}^{gh}$             0            0             0             0       -->
+
+<!--       2             0            0             0             1       -->
+
+<!--       3             0            0             1             0       -->
+
+<!--       4             0            0             1             1       -->
+
+<!--       5             0            1             0             0       -->
+
+<!--       6             0            1             0             1       -->
+
+<!--       7             0            1             1             0       -->
+
+<!--       8             0            1             1             1       -->
+
+<!--       9             1            0             0             0       -->
+
+<!--       10            1            0             0             1       -->
+
+<!--       11            1            0             1             0       -->
+
+<!--       12            1            0             1             1       -->
+
+<!--       13            1            1             0             0       -->
+
+<!--       14            1            1             0             1       -->
+
+<!--       15            1            1             1             0       -->
+
+<!--       16            1            1             1             1       -->
+<!-- ------------------------------------------------------------------- -->
+
+<!-- Table: (\#tab:typespaths)$Y$'s 16 causal types---values of $Q^Y$---given binary $X$ and $M$ as parents of $Y$ -->
+
+
+What values of $\theta^Y$
+<!-- , of those displayed in Table \@ref(tab:typespaths),  -->
+then are compatible with the operation of the $M$ causal path? Let us first consider this question with respect to sequence (1), in which $X$ has a positive effect on $M$, and that positive effect is necessary for $X$'s positive effect on $Y$ to occur. For this sequence to operate, $\theta^M$ must take on the value of $\theta^M_{01}$. When it comes to $\theta^Y$, then, what we need to look for types in which $X$'s effect on $Y$ _depends on $M$'s taking on the value it does as a result of $X$'s positive effect on $M$_. 
+
+We are thus looking for causal types that represent two kinds of counterfactual causal relations operating on nodes. First, $X$ must have a positive effect on $Y$ when $M$ changes as it should given $X$'s positive effect on $M$. Second, that change in $M$, generated by a change in $X$, must be *necessary* for $X$'s positive effect on $Y$ to operate. The thought experiment here thus imagines a situation in which $X$ changes from $0$ to $1$,^[This is the natural thought experiment when explaining a case with realized value of $X=1$, in which the outcome can be thought of as having been generated by a change from $X=0$. The identification of types does hinge, however, on the direction in which we imagine types changing. In other situations, we might observe $X=Y=0$ and thus conceive of the outcome as having been generated by a change from $X=1$ to $X=0$ (again, assuming a positive effect of $X$ on $Y$). When we do this, query 2 below changes: we are now looking for types in which $Y=1$ when $X=0$ but $M=1$. (Does $Y$ stay at $1$ when $X$ moves to $0$ but $M$ doesn't?) The queries are then satisfied by types $6$ and $8$, rather than $2$ and $6$.] but $M$ does *not* change to the value that it should as a result of this change in $X$. We then inspect our types to see if $Y$ would change from $0$ to $1$ in this situation. It is this counterfactual that isolates the causal significance of the path that runs through $M$. It is only if $Y$ would *not* change to $1$ in this situation that we have identified a causal-type for which the $M$-mediated path matters. 
+
+Assuming a positive effect of $X$ on $M$ ($\theta^M=\theta^M_{01}$), we thus need to apply three queries to $\theta^Y$:^[Using standard potential outcomes notation, we can express the overall query, conditioning on a positive effect of $X$ on $M$, via the inequality $Y(1, M(1)) - Y(0, M(0)) > Y(1, M(0)) - Y(0, M(0))$. The three specific queries formulated below simply correspond to the three unique elements of this expression. We can also readily map the path query that we are defining here---does the positive effect of $X$ on $Y$ depend on $X$'s effect on $M$---onto a query posed in terms of indirect effects. For instance, in our binary setup, conditioning our path query on a positive causal effect of $X$ on $Y$, a positive effect of $X$ on $M$, and an imagined change from $X=0$ to $X=1$ generates precisely the same result (identifies the same $\theta^Y$ types) as asking which $\theta^Y$ types are consistent with a positive indirect effect of $X$ on $Y$, conditioning on a positive total effect and $X=1$.]
+
+1. Is $X=1$ a counterfactual cause of $Y=1$? Establishing this positive effect of $X$ involves two queries:
+
+    a) Where $X=0$, does $Y=0$? As we are assuming $X$ has a positive effect on $M$, if $X=0$ then $M=0$ as well. We thus look down the $X=0, M=0$ column and eliminate those types in which we do not observe $Y=0$. This eliminates types $9$ through $16$.
+
+    b) Where $X=1$, does $Y=1$? Again, given $X$'s assumed positive effect on $M$, $M=1$ under this condition. Looking down the $X=1, M=1$ column, we eliminate those types where we do not see $Y=1$. We retain only types $2, 4, 6,$ and $8$.
+
+2. Is $X$'s effect on $M$ necessary for $X$'s positive effect on $Y$? That is, do we see $Y=1$ *only* if $M$ takes on the value that $X=1$ generates ($M=1$)? To determine this, we inspect the _counterfactual_ condition in which $X=1$ yet $M=0$, and we ask: does $Y=0$? Of the four remaining types, only $2$ and $6$ pass this test. 
+
+
+
+
+<!-- \begin{table}[h!]
+  \centering
+    \begin{tabular}{cccccc}
+    \hline
+    **Type** &  $(Y | X=0,$ & $(Y |X=0, $ & $(Y | X=1, $ & $(Y | X=1, $ \\
+         & $M=0)$ & $M=1)$ & $M=0)$ & $M=1)$ \\  \hline
+        1 			&  0     & 0     & 0     & 0 \\
+    2 	& 0     & 0     & 0     & 1 \\
+    3 	& 0     & 0     & 1     & 0 \\
+    4 			& 0     & 0     & 1     & 1 \\
+    5 	& 0     & 1     & 0     & 0 \\
+    6 			& 0     & 1     & 0     & 1 \\
+    7 	& 0     & 1     & 1     & 0 \\
+    8 		& 0     & 1     & 1     & 1 \\
+    9			& 1     & 0     & 0     & 0 \\
+    10 	& 1     & 0     & 0     & 1 \\
+    11			& 1     & 0     & 1     & 0 \\
+    12		& 1     & 0     & 1     & 1 \\
+    13			& 1     & 1     & 0     & 0 \\
+    14		& 1     & 1     & 0     & 1 \\
+    15		& 1     & 1     & 1     & 0 \\
+    16			& 1     & 1     & 1     & 1 \\
+    \bottomrule
+    \end{tabular}%
+   \caption{$Y$'s 16 causal types---values of $Q^Y$---given binary $X$ and $M$ as parents of $Y$}
+  \label{typespaths}%
+\end{table}% -->
+
+Under these and only these two values of $\theta^Y$---$\theta_{00}^{01}$ and $\theta_{00}^{11}$---we will see a positive effect of $X$ on $Y$ for which the $M$-mediated path is causally necessary as long as $X$ also has a positive effect on $M$. These two $\theta^Y$ values are also different from one another in an interesting way. For type $\theta_{00}^{11}$, $X$'s effect on $Y$ runs strictly through $M$: if $M$ were to change from $0$ to $1$ *without* $X$ changing, $Y$ would still change from $0$ to $1$. $X$ is causally important for $Y$ _only_ insofar as it affects $M$. In a case of type $\theta_{00}^{11}$, then, anything else that similarly affects $M$ would generate the same effect on $Y$ as $X$ does. In type $\theta_{00}^{01}$, however, both $X$'s change to $1$ *and* the resulting change in $M$ are necessary to generate $Y$'s change to $1$; $X$'s causal effect thus requires both the mediated and the unmediated pathway. Andhere  $X$ itself matters in the counterfactual sense; for a case of type $\theta_{00}^{01}$, some other cause of $M$ would *not* generate the same effect on $Y$. 
+
+<!-- The structural equation for $M$ will include $X$ and $Q_M$ as arguments. Thus, knowing the value of $M$ for any given value of $X$, conditional on a given structural equation for $M$, requires knowing $U_M$. The same logic operates for $U_Y$'s role in determining how $Y$ responds to a given change in $M$, conditional on $Y$'s structural equation.  -->
+
+<!-- Note that, as we saw with causal effects, it is also possible to imagine related estimands of the form "does $X$ cause $Y$ in this case through $M$?", "did $X$ cause $Y$ in this case through $M$?" (which requires knowledge of $X$), and "how often does $X$ cause $Y$ though $M$ in a larger population?" (which requires knowledge of the parameters that give rise to $U_Y$ and $U_M$).   -->
+
+We can undertake the same exercise for sequence (2), in which $X$ first has a negative effect on $M$, or $\theta^M=\theta^M_{10}$. Here we adjust the three queries for $\theta^Y$ to take account of this negative effect. Thus, we adjust query 1a so that we are looking for $Y=0$ when $X=0$ and $M=1$. In query 1b, we look for $Y=1$ when $X=1$ and $M=0$. And for query 2, we want types in which $Y$ fails to shift to $1$ when $X$ shifts to $1$ but $M$ stays at $1$. Types $\theta_{01}^{00}$ and $\theta_{11}^{00}$ pass these three tests. 
+
+In sum, we can define a query about causal paths as a query about the value of $\theta$ terms on the causal graph. For the graph in Figure \ref{fig:DAGpaths}, asking whether $X$'s effect runs via the $M$-mediated path is asking whether one of four combinations of $\theta^M$ and $\theta^Y$ hold in case:
+
+* $\theta^M=\theta^M_{01}$ and ($\theta^Y=\theta_{00}^{01}$ or $\theta_{00}^{11}$)
+* $\theta^M=\theta^M_{01}$ and ($\theta^Y=\theta_{01}^{00}$ or $\theta_{11}^{00}$) 
+
+It is worth noting how different this formulation of the task of identifying causal pathways is from widespread understandings of process tracing. Scholars commonly characterize process tracing as a method in which we determine whether a mechanism was operating by establishing whether the events lying along that path occurred. As a causal-model framework makes clear, finding out that $M=1$ (or $M=0$, for that matter) does not establish what was going on causally. Observing this intervening step does not by itself tell us what value $M$ *would* have taken on if $X$ had taken on a different value, or whether this would have changed $Y$'s value. We need instead to conceive of the problem of identifying pathways as one of figuring out the _counterfactual_ response patterns of the variables along the causal chain. As we will demonstrate later in the book, explicitly characterizing those response patterns as nodes in a causal model helps us think systematically about empirical strategies for drawing the relevant inferences.
+
+<!-- Such a  focus on causal paths does not restrict attention to questions of the form "how did $X$ cause $Y$" but more generally, "what paths generated $Y$?" Such questions may have answers of the form "$Y=1$ occurred because $X=0$ led to $M=0$, which, when $Z=1$, gives rise to $Y=1$ and not because $X=1$  led to $M=1$, which, when $Z=0$ gives rise to $Y=1$." Such inquiries can focus on distinct sets of conditions that give rise to an outcome ("equifinality"), as in Qualitative Comparative Analysis (QCA). While QCA analysts sometimes refer to sets of conditions as "paths",  QCA does not generally involve explicit assessment of the causal steps linking conditions to outcomes. When examining paths in a causal-model framework, the analyst can address queries that involve drawing inferences about an entire chain linking $X$ to $Y$ or even an entire causal network. An understanding of a full causal network would, in turn, allow for any more specific estimand to be estimated. -->
+
+
+
+
+## Illustration with the Running Example
+
+We can more fully illustrate the definition of causal queries in terms of exogenous nodes on a graph by thinking through their application to the simple causal model described in Chapter 2. 
+
+We illustrate the model again in figure \@ref(fig:running2).
+
+
+```{r, echo = FALSE}
+names = c("S", "X", "C", "R", "Y")
+M <- matrix(0, 5, 5)
+M[1, c(3)] <-1
+M[2, c(3,4)] <-1
+M[3, c(4,5)] <-1
+M[4, 5] <-1
+f_C <- function(V) 1- V[1]*V[2]
+f_R <- function(V) V[2]*V[3]
+f_Y <- function(V) V[3]*V[4]
+# Histories and effects:
+
+H <- function(do = c(0,0,NA,NA,NA)) {
+  do[3] <- ifelse(is.na(do[3]), f_C(do), do[3])
+  do[4] <- ifelse(is.na(do[4]), f_R(do), do[4])
+  do[5] <- ifelse(is.na(do[5]), f_Y(do), do[5])
+  do
+  }
+
+edges <- function(S,X) {
+  do0 <- c(S,X,NA, NA, NA)
+  H1   <- H(do0)
+  out <- sapply(1:5, function(i) {
+    do1 <- do0
+    do1[i] <- 1-H1[i]  # change value for i and put into do
+    1*(H1 != H(do1))
+  })
+  diag(out) <- 0
+  out}
+
+```
+
+
+```{r running2, echo = FALSE, fig.width = 11, fig.height = 11.5, fig.align="center", out.width='\\textwidth', fig.cap = "The main panel shows a simple causal model. $S$ and $X$ are stochastic, other variables determined by their parents, as shown in bottom right panel. Other panels show four possible histories that can arise depending on values taken by $S$ and $X$, along with causal relations in each case. The equations for $S$ and $X$ are written with indicator variables, which take a value of 1 whenever the $u$ value is less than the $\\lambda$ value.", fig.align="center", warning = FALSE}
+
+layout(matrix(c(1,1,2,
+                1,1,3,
+                4, 5,6), 3, 3, byrow = TRUE))
+par(mar=c(1,1,3.5,1))
+
+x = c(0,0, 1, 1, 2)
+y = c(2,0, 2, 0, 1)
+
+names = c("S:\nSensitive\ngovernment\n\n", "\nX:\nFree Press", "C:\n Corruption", "R:\n Media report", "Y:\nGovernment\nreplaced")
+
+hj_dag(x =  c(x, 0, 0),
+       y = c(y, 0.25, 1.75),
+       names = c(names, " ", " "),
+       arcs = cbind( c(1,2,2, 3, 4, 3, 6, 7),
+                     c(3,3,4, 5, 5, 4, 2, 1)),
+       title = "Free Press and Government Survival",
+       add_functions = 0, 
+       contraction = .15,
+       add_functions_text = "Structural Equations: Y = CR, R = CX, C = 1-XS",
+       padding = .2)
+
+text(c(0,0), c(.25, 1.75), c(expression(paste(U[X])), expression(paste(U[S]))))
+
+names = c("S", "X", "C", "R", "Y")
+
+myarcs <- list(
+       which(t(edges(0,0))==1, arr.ind = TRUE),
+       which(t(edges(1,0))==1, arr.ind = TRUE),
+       which(t(edges(0,1))==1, arr.ind = TRUE),
+       which(t(edges(1,1))==1, arr.ind = TRUE))
+
+mysolids <- list(H(c(0,0,NA,NA,NA)), 
+                 H(c(1,0,NA,NA,NA)), 
+                 H(c(0,1,NA,NA,NA)), 
+                 H(c(1,1,NA,NA,NA)))
+
+names = c("S", "X", "C", "R", "Y")
+
+
+titles = c("A: No free press causes Y = 0", 
+           "B: No free press is the actual cause\nBut neither S nor X counterfactually cause Y=0",
+           "C: Both S = 0 and X = 1 cause Y = 1.\n X = 1 is the notable cause.", 
+           "D: Government sensitivity\ncauses Y = 0")
+for(j in 1:4){
+
+    hj_dag(
+       x = x,
+       y = y,
+       names = names,
+       arcs = myarcs[[j]],
+       title = titles[[j]],
+       add_points = TRUE,
+       solids = c(mysolids[[j]]),
+       contraction = .15
+       )
+}
+
+frame(); box();
+text(.1,seq(.95, .05, -.1), 
+          c("Structural Equations:",
+            "  Y = CR",
+            "  C = 1 - XS",
+            "  R = CX", 
+            expression(paste("  S = 1(", u[S]<lambda^S[1],")")),
+            expression(paste("  X = 1(", u[X]<lambda^X[1],")")), "  ",
+            "P(U):",
+            expression(paste("  ", U[S], "~Unif[01]")), 
+            expression(paste("  ", U[X], "~Unif[01]")) 
+            ), cex = 1.5, adj = 0)
+title("Structural model")
+```
+
+
+THe main panel here is the same as in Chapter 2 but but now we add in a set of another four panels. In these panels we leave the $\lambda$ and $U$ terms implicit as they will not come into play in our analysis of these graphs. In these four panels, we show all possible ''realizations'' of the graph given the four possible contexts defined by the exogenous nodes, $S$ and $X$. We build each of the four possible by assessing outcomes and counterfactual relationships for each possible combination of $S$ and $X$ values. A hollow circle at a node indicates that the variable takes on a value of $0$ while a shaded circle indicates a value of $1$. The arrows indicate causal effects. More specifically, an arrow pointing from one variable to another indicates that a manipulation of the first variable would cause a change in the second variable, *given the values realized by all other variables that are not the first variable's descendants*. Unlike in a conventional DAG, we represent here both the direct effect of each variable on its child and each variable's indirect (mediated) causal effects on its descendants. As we can see from the various arrows in the panels, we can use a single, simple causal model to think through a wide range of causal relationships that might be of interest.^[Though similar, these graphs are not DAGS or natural beams (or submodels). The panels reflect outcomes conditional on the values of $S$ and $X$, but they are not themselves DAGs because they indicate the values taken by nodes and include arrows between two nodes when and only when one causes the other, directly or indirectly. To construct "natural beams" [@pearl2009causality 10.3], we fix a realization of root variables, $U$,  (here, $\mathcal U = (S, X)$); then for each variable, $V_i$ we  partition $pa(V_i)$ into a set of "engaged parents," $S$, and "disengaged parents," with the property that (a) $f_i(S(u), \overline{s}, u) = V_i(u)$ for *all* values of $\overline{s}$ and (b) $f_i(s', \overline{S}(u), u) \neq V_i(u)$ for *some*  $s'$. Thus a natural beam  would connect a parent to a child if, given the particular history, the parent mattered for the child's outcome.] Since the values of all variables in a model are determined by the values of the exogenous nodes, this is equivalent to saying that the arrows show the causal effects that are operating each *context.*
+
+One important feature of DAGs is immediately evident from a comparison of the DAG with subgraphs $A, B, C$, and $D$ in the figure. Consistent with the rules of DAG-construction, the DAG includes arrows between all variables that are under any circumstances directly causally related; but the inclusion of an arrow does not mean that two variables are *always* causally related. For instance, while the DAG (large graph) has an arrow running from $X$ to $R$, we can see from the subgraphs (where we deviate from the standard grammar of DAGs) that the causal effect is contingent on context: it is present only when $S=0$ (panels $A$ and $C$) but not when $S=1$. The arrows in a DAG represent dependencies that exist under *some*, but not necessarily under all, values of the exogenous variables.
+
+These five graphs allow us to define all causal claims of interest. The graphs illustrate, in other words, how causal queries can be represented as the value of the exogenous nodes in a causal diagram. Let us consider each causal query in turn.
+
+**Case-level causal effect.** Working with the four subgraphs, we can show that the query, "What is the effect of one variable on another in this case?" is equivalent to asking about the values of the model's exogenous variables, $X$ and $S$. Consider, for instance, the query: Do media reports of corruption, $R$, have a causal effect on government removal from office, $Y$, in this case? Turning to the subgraphs, we can simply ask in which of these four graphs---in which context---$R$ has a causal effect on $Y$: where is there an arrow running from $R$ to $Y$?^[The subgraphs are derived from application of Equation EQUATION REFERENCE. We can work through the $R \rightarrow Y$ relationship to demonstrate how this is done. Consider the effect of $R$ on $Y$ given $S=0, X=0$. This is the arrow between  $R$ and $Y$ in panel $A$. Removing the arrows pointing to $R$, the distribution over nodes when $R=r'$ is: $P(c,y | \hat{r}=r', s =0, x=0)$. We are interested in $P(y=1| \hat{r}=1,  s =0, x=0) - P(y=1 | \hat{r}= 0,  s =0, x=0)$. The second term is easy as for all cases in which $r=0$, $y=0$; and so  $P(y=1|| \hat{r}= 0)=0$. We focus then on  $P(y=1| \hat{r}=1, s= 0, x= 0)$. Taking the marginal distribution, this can be written $\sum_{c=0}^1P(y=1|r=1, c)P(c|s=0,x=0)$. From the structural equations, we know that $P(c=1|s=0,x=0)=1$ and that $P(y=1|r=1, c=1)=1$. So the marginal distribution is $P(y=1| \hat{r}=1, s= 0, x= 0) = 1$; and the treatment effect of $R$ on $Y$, conditional on the characteristics of this case, is then 1. This positive effect is represented with the arrow from the $R=0$ node to the $Y=0$ node in panel $A$.] We can readily see that $R$ has an effect---a positive effect---on $Y$ in all configurations of exogenous node values (i.e., in all subgraphs) except when $X=1$ and $S=1$ (panel $D$); the absence of an arrow in panel $D$ indicates that $R$'s effect on $Y$ is 0 in that context. Thus, given our model, asking whether there is a case-level causal effect of $X$ on $Y$ is equivalent to asking whether either $S$ or $X$ or both are equal to $0$ in the case.
+
+Another way to put the point is that $S$ and $X$ jointly determine a case's causal type when it comes to the effect of $R$ on $Y$. Returning to our four causal types, the graphs tell us that a case is a $b$ type (positive effect) with respect to the $R \rightarrow Y$ relationship whenever at least one of $S$ or $X$ is $0$. If $S=X=1$, then a case is a $c$ type (no effect, with the outcome fixed at $Y=0$). 
+
+We can work through other relationships in the model similarly. For instance, does a free press have an effect on government removal in a case? See an $X$-to-$Y$ arrow only in panels $A$ and $C$, we can thus conclude that $X$ has a causal effect on $Y$ in (and only in) cases in which $S=0$. 
+
+For now, we are simply using the models to *define* a query about a case-level causal effect. This definition sets the stage for our discussion of research design---how one might go about empirically addressing this query---later in the book. We can point the way toward that discussion by noting making two broad points. If the presence of a free press and government's sensitivity to public opinion are observable, then estimating case-level causal effects will simply be a matter of measuring these two exogenous nodes (or, for some queries, just one of them). However, we will often be in a situation in which the nodes defining our causal query are not observable. Our models of the world often include concepts that are theoretically central to a causal logic but cannot be directly measured. Consider, for instance, government sensitivity to public opinion. When a model's exogenous variables are unobservable, then our research design may require using information from other, *observable* nodes to draw inferences about context. This is a key strategy of process tracing that we develop in later chapters.
+
+
+<!-- We need to resolve the contradiction between the above footnote and the previous one: one says they're not submodels, the other says they are. -->
+
+ 
+
+
+<!-- In this causal beam with binary variables,  whenever a unique path connects one node to another then the ancestor's node's condition is a cause of the descendant's condition. These case level causal relations cannot be read directly from the graph however if there are multiple paths or non dichotomous variables. To see why multiple paths prevent this inference, return to the boulder example of non transitivity described above; to see why inferences cannot be made along paths with non binary outcomes notice that $A$ and $B$ may be connected because some change in $A$ produces a change in $B$, though not necessarily *all* changes in $A$.    -->
+
+**Average causal effects.** Average causal effects are simply averages of case-level causal effects for the population. Since case-level causal effects are determined by the values of the exogenous nodes in cases, we need to average over the distribution of case-level contexts in the population. Put differently, the average causal effect of any variable on another will depends on how commonly the relevant case-level conditions---those in which the causal effect is and is not present---occur. In our current example, we have seen that the free press makes a difference to government survival if and only if the government is *non-sensitive* (panels $A$ and $C$): the non-sensitive government gets exposed as corrupt if and only if there is a free press while the sensitive government never gets replaced because it adjusts to the presence of a free press by eliminating corruption. Similarly, the sensitivity of the government (and the resulting level of corruption) matters only if there *is* a free press (panels $C$ and $D$). Without a free press, non-sensitive and, thus, corrupt governments do not get exposed and so stay on; with a free press, non-sensitive (and, thus, corrupt) governments get replaced. 
+
+Thus, the *average* effect of each of these initial causes on the outcome will depend on the probability with which the other cause is absent or present. To define a query about average causal effects, we need to examine the full probabilistic causal model as graphed in the large panel in Figure \@ref(fig:running2). What is the average causal effect of a free press ($X$) on government removal ($Y$)? As we have learned from the subgraphs, this effect is fully defined by the value of $S$. In particular, the effect of $X$ on $Y$ is equal to $1$ when $S=0$, and is equal to $0$ when $S=1$. As we've noted, we calculate the average causal effect by averaging causal effects over the distribution of the relevant exogenous variables -- which, here, is only $S$. In the probabilistic model, $S$ is a function of $\lambda^S$ and $U_S$. In particular, $S=1$ whenever $u_S < \lambda^S$. Since $U_S$ has a uniform distribution, this simply means that $S=1$ with probability $\lambda_1^S$; likewise, $S=0$ with probability $1-\lambda_1^S$.  Thus, we calculate $X$'s average causal effect on $Y$ by multiplying each causal effect by the probability of $S$'s taking on the value that generates that effect: $1 \times (1-\lambda_1^S) + 0 \times \lambda_1^S = 1-\lambda_1^S$. Put differently, the causal effect of a free press on government removal is equal to the commonness of insensitive governments in the relevant population of cases. 
+
+We have thus defined our causal query in terms of an exogenous variable, $\lambda_1^S$, in the probabilistic causal model. Note that, just as $S$ acts as a causal-type variable for $X$'s effect on $Y$, querying $\lambda_1^S$ is equivalent to asking about the distribution of causal types in the population. In our four-type framework, cases with $S=0$ are $b$ (positive effect) types with respect to the $X \rightarrow Y$ relationship; cases with $S=1$ are $c$ types (no effect, $Y=0$). (There are, here, no $a$ or $d$ types.) Thus, $\lambda_1^S$ represents the share of $c$ types and $1-\lambda_1^S$ the share of $b$ types in the population, vis-a-vis $X$'s effect on $Y$. 
+
+We can follow the same procedure for all causal relationships in the model. Returning, for instance, to the effect of $R$ on $Y$, we learned from the subgraphs that $R$ has a causal effect of $1$ in panels $A,B$ and $C$---that is, whenever it is not the case that $X=1$ and $S=1$---and otherwise of $0$. Thus, the $R$'s average causal effect is the weighted average $1 \times (1-\lambda_1^S \times \lambda_1^X) + 0 \times \lambda_1^S \times \lambda_1^X$ = $1-\lambda_1^S \times \lambda_1^X$. This is simply the probability of not having both $X=1$ and $S=1$. Here, then, we have defined the causal query in terms of two exogenous nodes in the probabilistic model, $\lambda_1^S$ and $\lambda_1^X$. ^[Likewise, the average causal effect of $R$ conditional on $S=1$ is $1-\lambda_1^X$ (the probability of ending up in panel B, rather than D); and the average causal effect of $R$ given $S=0$ is 1 (since it has an effect in both panels A and C).]
+
+**TO BECOME A LONG FOOTNOTE...**
+These quantities can be calculated from the distributions in the same way as we calculated the case-level effects. Removing the arrows pointing to $R$, the distribution over nodes when $R=r'$---but this time not fixing $S$ and $X$---is $P(s,x,c,y | \hat{r}=r')$. Again the key part is $P(y=1| \hat{r}=1)$, which can be written $\sum_x\sum_s\sum_c P(x)P(s)P(c|x,s)P(y|c, r= 1)$. Using the structural equations, this simplifies to $\sum_x\sum_s P(x)P(s)P(c=1|x,s) = P(x=0)P(s=0) + P(x=0)P(s=1) + P(x=1)P(s=0)$, or, $1-\lambda_1^S\lambda_1^X$.
+
+In the same way, we can construct the average treatment effect for each of the exogenous variables:
+
+* $\tau_X = E_S(Y(X=1|S)-Y(X=0|S)) = -(1-\lambda_1^S)$
+* $\tau_S = E_X(Y(S=1|X)-Y(S=0|X)) = \lambda_1^X$]
+**LONG FOOTNOTE ENDING HERE**
+
+In general, then, we can define queries about average causal effects as queries about the exogenous nodes that represent a causal model's probabilistic components. In the present example, probabilistic components enter only as determinants of the initial substantive causal variables. In other models, variables further downstream might also have stochastic components, a query about average causal effects might include thus further exogenous terms representing population-level distributions. Estimating average causal effects thus amounts drawing inferences about these nodes.^[Given the model, data will be useful for estimating average effects only if one is uncertain about the distributions of $S$ and $X$, which are a function of $U_S$ and $\lambda_1^S$ and $U_X$ and $\lambda_1^X$, respectively. In this example $\lambda_1^S$ and $\lambda_1^X$ are fixed in the model and so we do not learn anything about them from data. If however $\lambda_1^S$ and $\lambda_1^X$ are represented as nodes that are themselves produced by some other distribution -- such as a Beta distribution --- then the question of understanding average effects is the question of making inferences about these nodes.]
+
+<!-- I find the previous paragraph quite confusing in terms of what all of this says about learning about nodes. I would think we would want to set up the example so that we *can* use data to learn about the ATE and so that this runs through learning about root nodes.  -->
+
+**Actual cause.** Returning to a case-level query, the concept of an actual cause becomes useful when outcomes are overdetermined. Suppose there is a case with a sensitive government ($S=1$) and no free press ($X=0$), as in panel B. Then the *survival* of the government is over-determined: neither government sensitivity nor the free press is a counterfactual cause. (A lack of a free press is enough for even a corrupt government to survive; and sensitivity ensures non-corruption and, thus, survival even in the presence of a free press.) 
+
+Nevertheless, we can distinguish between the causes in terms of which one was an actual cause. Conditioning on there being corruption, which there actually was, the lack of a free press *is* a counterfactual cause of government survival: if there had been a free press, holding corruption constant, then the government would have been removed. This makes the lack of a free press an actual cause---that is, a counterfactual cause when some (or no) feature of what actually happened is kept fixed. However, there is no set of realized variable values that we can condition on to make the presence of a sensitive government a counterfactual cause; thus, it is not an actual cause.
+
+The context---the values of the exogenous nodes in the subgraphs, $S$ and $X$---determines which variables will be actual causes through setting the realized values of all endogenous variables in the model and thus restricting the values on which conditioning is permitted for the determination of actual causes. Since corruption *is* present whenever $S=1$ and $X=0$, we are permitted in this context to condition on its presence, and the free press is an actual cause of government retention. In contrast, the sensitivity of the government is not an actual cause in this same context. Given no free press, there will always be corruption but no reporting on corruption, which makes government removal impossible, regardless of government sensitivity; thus, there is no subset of actual events that, when kept fixed, would make a change to a non-sensitive government result in the government's fall. In sum, asking whether a variable in a model was the actual cause of an outcome can equivalently be understood as asking about the values of the model's exogenous nodes. Answering that question will consist either of directly observing those exogenous conditions or drawing inferences about them from other, observable nodes.
+
+<!-- This example has the odd feature that the question of whether S or X is an actual cause is itself already conditional on the values of S and X.   -->
+
+**Notable cause.** In the event that that there is a non-sensitive government ($S=0$) and a free press ($X=1$), as in panel $C$, the government gets replaced and *both* of the two causes matter counterfactually for government replacement. (Absent either one, the government would survive.) Again, however, we can distinguish between them, this time on the basis of notable causation. The question, for identifying a notable cause, is how commonly the causal variable in question takes on its realized, as opposed to a counterfactual, value. Thus, like average causal effects, notable causation depends on *population-level* distributions---in the present example, on the parameters $\lambda_1^S$ and $\lambda_1^X$. If, for instance, governments are more frequently sensitive (the counterfactual) than non-sensitive (the actual value)---i.e., $\lambda_1^S > 0.5$---then the non-sensitive government is a notable cause. However, if free presses are rarer than non-sensitive governments---i.e.  $\lambda_1^X < 1-\lambda_1^S$---then the free press is a *more* notable cause than the non-sensitive government.
+
+<!-- Again, would be more consistent with out queries-as-root-nodes to show the pi's as nodes. -->
+
+**Causal Paths.** Note finally that different causal paths can give rise to the same outcome, where the different paths can be distinguished based on values of root nodes $S$ and $X$. For example, the government may be retained ($Y=0$) because there is no free press ($X=0$) and so no negative reporting on the government, regardless of the value of $S$; or because, there is a free press ($X=1$) and a sensitive government ($S=1$) takes account of this and does not engage in corruption. **\color{red} To be improved to link more closely to our abstract discussion of paths as estimands.**
+
+
+
+<!-- What still bugs me a bit is that we don't have a way of showing, in this example, different causal paths for the same *causes* and outcomes. -->

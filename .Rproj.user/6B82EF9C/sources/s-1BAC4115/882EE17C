@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1569999067179.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "882EE17C",
+    "lastKnownWriteTime" : 1568279392,
+    "last_content_update" : 1569999067179,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "context" : "package:gbiqqtools:::fill_bucket"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 27,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_code_browser"
+}

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 Updating models with stan | Causal Models: Guide to CausalQueries</title>
+  <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="generator" content="bookdown 0.17 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 Updating models with stan | Causal Models: Guide to CausalQueries" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="github-repo" content="rstudio/causalmodels" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 Updating models with stan | Causal Models: Guide to CausalQueries" />
+  
+  <meta name="twitter:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  
+
+<meta name="author" content="Macartan Humphreys and Alan Jacobs" />
+
+
+<meta name="date" content="2020-06-10" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="defining-models.html"/>
+<link rel="next" href="querying-models.html"/>
+<script src="libs/jquery/jquery.min.js"></script>
+<link href="libs/gitbook/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="headers\style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Model based causal inference: A guide to gbiqq</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="part"><span><b>I Causal Models</b></span></li>
+<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a><ul>
+<li class="chapter" data-level="1.1" data-path="cm.html"><a href="cm.html#two-approaches-to-inference"><i class="fa fa-check"></i><b>1.1</b> Two approaches to inference</a></li>
+<li class="chapter" data-level="1.2" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-difference-in-means"><i class="fa fa-check"></i><b>1.2</b> Recovering the ATE with Difference in Means</a></li>
+<li class="chapter" data-level="1.3" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-a-causal-model"><i class="fa fa-check"></i><b>1.3</b> Recovering the ATE with a Causal Model</a></li>
+<li class="chapter" data-level="1.4" data-path="cm.html"><a href="cm.html#going-further"><i class="fa fa-check"></i><b>1.4</b> Going further</a></li>
+</ul></li>
+<li class="part"><span><b>II The Package</b></span></li>
+<li class="chapter" data-level="2" data-path="package.html"><a href="package.html"><i class="fa fa-check"></i><b>2</b> Installation</a></li>
+<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a><ul>
+<li class="chapter" data-level="3.1" data-path="defining-models.html"><a href="defining-models.html#getting-going"><i class="fa fa-check"></i><b>3.1</b> Getting going</a></li>
+<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="defining-models.html"><a href="defining-models.html#nodal-types"><i class="fa fa-check"></i><b>3.2.1</b> Nodal types</a></li>
+<li class="chapter" data-level="3.2.2" data-path="defining-models.html"><a href="defining-models.html#causal-types"><i class="fa fa-check"></i><b>3.2.2</b> Causal types</a></li>
+<li class="chapter" data-level="3.2.3" data-path="defining-models.html"><a href="defining-models.html#parameters-dataframe"><i class="fa fa-check"></i><b>3.2.3</b> Parameters dataframe</a></li>
+<li class="chapter" data-level="3.2.4" data-path="defining-models.html"><a href="defining-models.html#parameter-matrix"><i class="fa fa-check"></i><b>3.2.4</b> Parameter matrix</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="defining-models.html"><a href="defining-models.html#restrictions"><i class="fa fa-check"></i><b>3.3</b> Setting restrictions</a></li>
+<li class="chapter" data-level="3.4" data-path="defining-models.html"><a href="defining-models.html#confounding"><i class="fa fa-check"></i><b>3.4</b> Allowing confounding</a></li>
+<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="defining-models.html"><a href="defining-models.html#custom-priors"><i class="fa fa-check"></i><b>3.5.1</b> Custom priors</a></li>
+<li class="chapter" data-level="3.5.2" data-path="defining-models.html"><a href="defining-models.html#prior-warnings"><i class="fa fa-check"></i><b>3.5.2</b> Prior warnings</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="defining-models.html"><a href="defining-models.html#parameters"><i class="fa fa-check"></i><b>3.6</b> Setting Parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a><ul>
+<li class="chapter" data-level="4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#data-for-stan"><i class="fa fa-check"></i><b>4.1</b> Data for <code>stan</code></a></li>
+<li class="chapter" data-level="4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#stan-code"><i class="fa fa-check"></i><b>4.2</b> <code>stan</code> code</a></li>
+<li class="chapter" data-level="4.3" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a></li>
+<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#arbitrary-parameters"><i class="fa fa-check"></i><b>4.4.1</b> Arbitrary parameters</a></li>
+<li class="chapter" data-level="4.4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#non-binary-data"><i class="fa fa-check"></i><b>4.4.2</b> Non binary data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a><ul>
+<li class="chapter" data-level="5.1" data-path="querying-models.html"><a href="querying-models.html#case-level-queries"><i class="fa fa-check"></i><b>5.1</b> Case level queries</a></li>
+<li class="chapter" data-level="5.2" data-path="querying-models.html"><a href="querying-models.html#posterior-queries"><i class="fa fa-check"></i><b>5.2</b> Posterior queries</a></li>
+<li class="chapter" data-level="5.3" data-path="querying-models.html"><a href="querying-models.html#query-distribution"><i class="fa fa-check"></i><b>5.3</b> Query distribution</a></li>
+<li class="chapter" data-level="5.4" data-path="querying-models.html"><a href="querying-models.html#token-and-general-causation"><i class="fa fa-check"></i><b>5.4</b> Token and general causation</a></li>
+<li class="chapter" data-level="5.5" data-path="querying-models.html"><a href="querying-models.html#complex-queries"><i class="fa fa-check"></i><b>5.5</b> Complex queries</a></li>
+</ul></li>
+<li class="part"><span><b>III Applications</b></span></li>
+<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a><ul>
+<li class="chapter" data-level="6.1" data-path="applications.html"><a href="applications.html#the-ladder-of-causation-in-an-x-rightarrow-y-model"><i class="fa fa-check"></i><b>6.1</b> The ladder of causation in an <span class="math inline">\(X \rightarrow Y\)</span> model</a></li>
+<li class="chapter" data-level="6.2" data-path="applications.html"><a href="applications.html#x-causes-y-with-unmodelled-confounding"><i class="fa fa-check"></i><b>6.2</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with unmodelled confounding</a></li>
+<li class="chapter" data-level="6.3" data-path="applications.html"><a href="applications.html#x-causes-y-with-confounding-modeled"><i class="fa fa-check"></i><b>6.3</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with confounding modeled</a></li>
+<li class="chapter" data-level="6.4" data-path="applications.html"><a href="applications.html#simple-mediation-model"><i class="fa fa-check"></i><b>6.4</b> Simple mediation model</a></li>
+<li class="chapter" data-level="6.5" data-path="applications.html"><a href="applications.html#simple-moderator-model"><i class="fa fa-check"></i><b>6.5</b> Simple moderator model</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a><ul>
+<li class="chapter" data-level="7.1" data-path="explanation.html"><a href="explanation.html#tightening-bounds-on-causes-of-effects-using-an-unobserved-covariate"><i class="fa fa-check"></i><b>7.1</b> Tightening bounds on causes of effects using an unobserved covariate</a></li>
+<li class="chapter" data-level="7.2" data-path="explanation.html"><a href="explanation.html#Billy"><i class="fa fa-check"></i><b>7.2</b> Actual Causation: Billy and Suzy’s moderator and mediation model</a></li>
+<li class="chapter" data-level="7.3" data-path="explanation.html"><a href="explanation.html#diagnosis-inferring-a-cause-from-symptoms"><i class="fa fa-check"></i><b>7.3</b> Diagnosis: Inferring a cause from symptoms</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a><ul>
+<li class="chapter" data-level="8.1" data-path="process-tracing.html"><a href="process-tracing.html#what-to-infer-from-what"><i class="fa fa-check"></i><b>8.1</b> What to infer from what</a></li>
+<li class="chapter" data-level="8.2" data-path="process-tracing.html"><a href="process-tracing.html#probative-value-and-d-separation"><i class="fa fa-check"></i><b>8.2</b> Probative value and <span class="math inline">\(d\)</span>-separation</a></li>
+<li class="chapter" data-level="8.3" data-path="process-tracing.html"><a href="process-tracing.html#foundations-for-van-everas-tests"><i class="fa fa-check"></i><b>8.3</b> Foundations for Van Evera’s tests</a></li>
+<li class="chapter" data-level="8.4" data-path="process-tracing.html"><a href="process-tracing.html#clue-selection-clues-at-the-center-of-chains-can-be-more-informative"><i class="fa fa-check"></i><b>8.4</b> Clue selection: clues at the center of chains can be more informative</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a><ul>
+<li class="chapter" data-level="9.1" data-path="identification.html"><a href="identification.html#illustration-of-the-backdoor-criterion"><i class="fa fa-check"></i><b>9.1</b> Illustration of the backdoor criterion</a></li>
+<li class="chapter" data-level="9.2" data-path="identification.html"><a href="identification.html#identification-instruments"><i class="fa fa-check"></i><b>9.2</b> Identification: Instruments</a></li>
+<li class="chapter" data-level="9.3" data-path="identification.html"><a href="identification.html#identification-through-the-frontdoor"><i class="fa fa-check"></i><b>9.3</b> Identification through the frontdoor</a></li>
+<li class="chapter" data-level="9.4" data-path="identification.html"><a href="identification.html#simple-sample-selection-bias"><i class="fa fa-check"></i><b>9.4</b> Simple sample selection bias</a></li>
+<li class="chapter" data-level="9.5" data-path="identification.html"><a href="identification.html#addressing-both-sample-selection-bias-and-confounding"><i class="fa fa-check"></i><b>9.5</b> Addressing both sample selection bias and confounding</a></li>
+<li class="chapter" data-level="9.6" data-path="identification.html"><a href="identification.html#learning-from-a-collider"><i class="fa fa-check"></i><b>9.6</b> Learning from a collider!</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a><ul>
+<li class="chapter" data-level="10.1" data-path="mixing-methods.html"><a href="mixing-methods.html#using-within-case-data-to-help-with-identification"><i class="fa fa-check"></i><b>10.1</b> Using within case data to help with identification</a></li>
+<li class="chapter" data-level="10.2" data-path="mixing-methods.html"><a href="mixing-methods.html#distinguishing-paths"><i class="fa fa-check"></i><b>10.2</b> Distinguishing paths</a></li>
+<li class="chapter" data-level="10.3" data-path="mixing-methods.html"><a href="mixing-methods.html#nothing-from-nothing"><i class="fa fa-check"></i><b>10.3</b> Nothing from nothing</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a><ul>
+<li class="chapter" data-level="11.1" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#transportation-of-findings-across-contexts"><i class="fa fa-check"></i><b>11.1</b> Transportation of findings across contexts</a></li>
+<li class="chapter" data-level="11.2" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#combining-observational-and-experimental-data"><i class="fa fa-check"></i><b>11.2</b> Combining observational and experimental data</a></li>
+<li class="chapter" data-level="11.3" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#a-jigsaw-puzzle-learning-across-populations"><i class="fa fa-check"></i><b>11.3</b> A jigsaw puzzle: Learning across populations</a></li>
+</ul></li>
+<li class="part"><span><b>IV Notation</b></span></li>
+<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a><ul>
+<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a><ul>
+<li class="chapter" data-level="12.1.1" data-path="notation.html"><a href="notation.html#parents"><i class="fa fa-check"></i><b>12.1.1</b> Parents, children, and all that</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2" data-path="notation.html"><a href="notation.html#syntax"><i class="fa fa-check"></i><b>12.2</b> Causal syntax</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/macartan/gbiqq/" target="blank">Uses gbiqq</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Causal Models: Guide to <code>CausalQueries</code></a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="updating-models-with-stan" class="section level1">
+<h1><span class="header-section-number">Chapter 4</span> Updating models with <code>stan</code></h1>
+<p>When we generate a model we often impose a lot of assumptions on nature of causal relations. This includes “structure” regarding what relates to what but also the nature of those relations—how strong the effect of a given variable is and how it interacts with others, for example. The latter features are captured by parameters whose values, fortunately, can be data based.</p>
+<p>The approach used by the <code>CausalQueries</code> package to updating parameter values given observed data uses <code>stan</code> and involves the following elements:</p>
+<ul>
+<li>Dirichlet priors over parameters, <span class="math inline">\(\lambda\)</span> (which, in cases without confounding, correspond to nodal types)</li>
+<li>A mapping from parameters to event probabilities, <span class="math inline">\(w\)</span></li>
+<li>A likelihood function that assumes events are distributed according to a multinomial distribution given event probabilities.</li>
+</ul>
+<p>We provide further details below.</p>
+<div id="data-for-stan" class="section level2">
+<h2><span class="header-section-number">4.1</span> Data for <code>stan</code></h2>
+<p>We use a generic <code>stan</code> model that works for all binary causal models. Rather than writing a new <code>stan</code> model for each causal model we send <code>stan</code> details of each particular causal model as data inputs.</p>
+<p>In particular we provide a set of matrices that <code>stan</code> tailor itself to particular models: the parameter matrix (<span class="math inline">\(P\)</span> ) tells <code>stan</code> how many parameters there are, and how they map into causal types; an ambiguity matrix <span class="math inline">\(A\)</span> tells <code>stan</code> how causal types map into data types; and an event matrix <span class="math inline">\(E\)</span> relates data types into patterns of observed data (in cases where there are incomplete observations).</p>
+<p>The internal function <code>prep_stan_data</code> prepares data for <code>stan</code>. You generally don’t need to use this manually, but we show here a sample of what it produces as input for <code>stan</code>.</p>
+<p>We provide <code>prep_stan_data</code> with data in compact form (listing “data events”).</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>)</a>
+<a class="sourceLine" id="cb49-2" title="2"></a>
+<a class="sourceLine" id="cb49-3" title="3">data  &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">X =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="ot">NA</span>), <span class="dt">Y =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)) </a>
+<a class="sourceLine" id="cb49-4" title="4"></a>
+<a class="sourceLine" id="cb49-5" title="5">compact_data &lt;-<span class="st">  </span><span class="kw">collapse_data</span>(data, model) </a>
+<a class="sourceLine" id="cb49-6" title="6"></a>
+<a class="sourceLine" id="cb49-7" title="7"><span class="kw">kable</span>(compact_data)</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">event</th>
+<th align="left">strategy</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">X0Y0</td>
+<td align="left">XY</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">X1Y0</td>
+<td align="left">XY</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">X0Y1</td>
+<td align="left">XY</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">X1Y1</td>
+<td align="left">XY</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Y0</td>
+<td align="left">Y</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Y1</td>
+<td align="left">Y</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>Note that NAs are interpreted as data not having been sought. So in this case the interpretation is that there are two data strategies: data on <span class="math inline">\(Y\)</span> and <span class="math inline">\(X\)</span> was sought in three cases; data on <span class="math inline">\(Y\)</span> only was sought in just one case.</p>
+<p><code>prep_stan_data</code> then returns a list of objects that <code>stan</code> expects to receive. These include indicators to figure out where a parameter set starts (<code>l_starts</code>, <code>l_ends</code>) and ends and where a data strategy starts and ends (<code>strategy_starts</code>, <code>strategy_ends</code>), as well as the matrices described above.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" title="1">CausalQueries<span class="op">:::</span><span class="kw">prep_stan_data</span>(model, compact_data)</a></code></pre></div>
+<pre><code>$n_params
+[1] 6
+
+$n_param_sets
+[1] 2
+
+$n_param_each
+X Y 
+2 4 
+
+$l_starts
+X Y 
+1 3 
+
+$l_ends
+X Y 
+2 6 
+
+$lambdas_prior
+ X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+   1    1    1    1    1    1 
+
+$n_types
+[1] 8
+
+$n_data
+[1] 4
+
+$n_events
+[1] 6
+
+$n_strategies
+[1] 2
+
+$strategy_starts
+[1] 1 5
+
+$strategy_ends
+[1] 4 6
+
+$P
+
+Rows are parameters, grouped in parameter sets
+
+Columns are causal types
+
+Cell entries indicate whether a parameter probability is used
+in the calculation of causal type probability
+
+     X0.Y00 X1.Y00 X0.Y10 X1.Y10 X0.Y01 X1.Y01 X0.Y11
+X.0       1      0      1      0      1      0      1
+X.1       0      1      0      1      0      1      0
+Y.00      1      1      0      0      0      0      0
+Y.10      0      0      1      1      0      0      0
+Y.01      0      0      0      0      1      1      0
+Y.11      0      0      0      0      0      0      1
+     X1.Y11
+X.0       0
+X.1       1
+Y.00      0
+Y.10      0
+Y.01      0
+Y.11      1
+
+ 
+ param_set  (P)
+ 
+$not_P
+     X0.Y00 X1.Y00 X0.Y10 X1.Y10 X0.Y01 X1.Y01 X0.Y11
+X.0       0      1      0      1      0      1      0
+X.1       1      0      1      0      1      0      1
+Y.00      0      0      1      1      1      1      1
+Y.10      1      1      0      0      1      1      1
+Y.01      1      1      1      1      0      0      1
+Y.11      1      1      1      1      1      1      0
+     X1.Y11
+X.0       1
+X.1       0
+Y.00      1
+Y.10      1
+Y.01      1
+Y.11      0
+
+$A
+      X0Y0 X1Y0 X0Y1 X1Y1
+X0Y00    1    0    0    0
+X1Y00    0    1    0    0
+X0Y10    0    0    1    0
+X1Y10    0    1    0    0
+X0Y01    1    0    0    0
+X1Y01    0    0    0    1
+X0Y11    0    0    1    0
+X1Y11    0    0    0    1
+
+$E
+     X0Y0 X1Y0 X0Y1 X1Y1
+X0Y0    1    0    0    0
+X1Y0    0    1    0    0
+X0Y1    0    0    1    0
+X1Y1    0    0    0    1
+Y0      1    1    0    0
+Y1      0    0    1    1
+
+$Y
+[1] 1 1 0 1 0 1</code></pre>
+</div>
+<div id="stan-code" class="section level2">
+<h2><span class="header-section-number">4.2</span> <code>stan</code> code</h2>
+<p>Below we show the <code>stan</code> code. This starts off with a block saying what input data is to be expected. Then there is a characterization of parameters and the transformed parameters. Then the likelihoods and priors are provided. <code>stan</code> takes it from there and generates a posterior distribution.</p>
+<pre><code>data {
+
+int&lt;lower=1&gt; n_params;
+int&lt;lower=1&gt; n_types;
+int&lt;lower=1&gt; n_param_sets;
+int&lt;lower=1&gt; n_param_each[n_param_sets];
+int&lt;lower=1&gt; n_data;
+int&lt;lower=1&gt; n_events;
+int&lt;lower=1&gt; n_strategies;
+
+vector&lt;lower=0&gt;[n_params] lambdas_prior;
+int&lt;lower=1&gt; l_starts[n_param_sets];
+int&lt;lower=1&gt; l_ends[n_param_sets];
+int&lt;lower=1&gt; strategy_starts[n_strategies];
+int&lt;lower=1&gt; strategy_ends[n_strategies];
+
+vector[n_types] P[n_params] ;
+vector[n_types] not_P[n_params] ;
+matrix&lt;lower=0,upper=1&gt;[n_types, n_data] A;
+matrix&lt;lower=0,upper=1&gt;[n_events,n_data] E;
+int&lt;lower=0&gt; Y[n_events];
+
+}
+
+parameters {
+vector&lt;lower=0&gt;[n_params - n_param_sets] gamma;
+}
+
+transformed parameters {
+vector&lt;lower=0&gt;[n_params] lambdas;
+vector&lt;lower=1&gt;[n_param_sets] sum_gammas;
+for (i in 1:n_param_sets) {
+
+sum_gammas[i] =
+1 + sum(gamma[(l_starts[i] - (i-1)):(l_ends[i] - i)]);
+
+lambdas[l_starts[i]:l_ends[i]] =
+append_row(1, gamma[(l_starts[i] - (i-1)):(l_ends[i] - i)]) / sum_gammas[i];
+
+}
+}
+
+model {
+vector[n_data] w;
+vector[n_events] w_full;
+vector[n_types] prob_of_types;
+vector[n_params] P_lambdas[n_types];
+
+for (i in 1:n_types) {
+  for (j in 1:n_params) {
+    P_lambdas[i, j] = P[j, i] .* lambdas[j] + not_P[j, i];
+  }
+  prob_of_types[i] = prod(P_lambdas[i]);
+}
+
+w = A&#39; * prob_of_types;
+w_full = E * w;
+
+target += gamma_lpdf(lambdas  | lambdas_prior, 1);
+
+for (i in 1:n_param_sets) {
+  target += -n_param_each[i] * log(sum_gammas[i]);
+ }
+
+for (i in 1:n_strategies) {
+  target += multinomial_lpmf(
+  Y[strategy_starts[i]:strategy_ends[i]] | w_full[strategy_starts[i]:strategy_ends[i]]);
+ }
+
+}</code></pre>
+<p>The <code>stan</code> model works as follows (technical!):</p>
+<ul>
+<li><p>We are interested in “sets” of parameters. For example in the <span class="math inline">\(X \rightarrow Y\)</span> model we have two parameter sets (<code>param_sets</code>). The first is <span class="math inline">\(\lambda^X \in \{\lambda^X_0, \lambda^X_1\}\)</span> whose elements give the probability that <span class="math inline">\(X\)</span> is 0 or 1. These two probabilities sum to one. The second parameter set is <span class="math inline">\(\lambda^Y \in \{\lambda^Y_{00}, \lambda^Y_{10}, \lambda^Y_{01} \lambda^Y_{11}\}\)</span>. These are also probabilities and their values sum to one. Note in all that we have 6 parameters but just 1 + 3 = 4 degrees of freedom.</p></li>
+<li><p>We would like to express priors over these parameters using multiple Dirichlet distributions (two in this case). In practice because we are dealing with multiple simplices of varying length, it is easier to express priors over gamma distributions with a unit scale parameter and shape parameter corresponding to the Dirichlet priors, <span class="math inline">\(\alpha\)</span>. We make use of the fact that <span class="math inline">\(\lambda^X_0 \sim Gamma(\alpha^X_0,1)\)</span> and <span class="math inline">\(\lambda^X_1 \sim Gamma(\alpha^X_1,1)\)</span> then <span class="math inline">\(\frac{1}{\lambda^X_0 +\lambda^X_1}(\lambda^X_0, \lambda^X_1) \sim Dirichlet(\alpha^X_0, \alpha^X_1)\)</span>. For a discussion of implementation of this approach in <code>stan</code> see <a href="https://discourse.mc-stan.org/t/ragged-array-of-simplexes/1382" class="uri">https://discourse.mc-stan.org/t/ragged-array-of-simplexes/1382</a>.</p></li>
+<li><p>For any candidate parameter vector <span class="math inline">\(\lambda\)</span> we calculate the probability of <em>causal</em> types (<code>prob_of_types</code>) by taking, for each type <span class="math inline">\(i\)</span>, the product of the probabilities of all parameters (<span class="math inline">\(\lambda_j\)</span>) that appear in column <span class="math inline">\(i\)</span> of the parameter matrix <span class="math inline">\(P\)</span>. Thus the probability of a <span class="math inline">\((X_0,Y_{00})\)</span> case is just <span class="math inline">\(\lambda^X_0 \times \lambda^Y_{00}\)</span>. The implementations in <code>stan</code> uses <code>prob_of_types_[i]</code> <span class="math inline">\(= \prod_j \left(P_{j,i} \lambda_j + (1-P_{j,i})\right)\)</span>: this multiplies the probability of all parameters involved in the causal type (and substitutes 1s for parameters that are not). (<code>P</code> and <code>not_P</code> (1-<span class="math inline">\(P\)</span>) are provided as data to <code>stan</code>).</p></li>
+<li><p>The probability of data types, <code>w</code>, is given by summing up the probabilities of all causal types that produce a given data type. For example, the probability of a <span class="math inline">\(X=0,Y=0\)</span> case, <span class="math inline">\(w_{00}\)</span> is <span class="math inline">\(\lambda^X_0\times \lambda^Y_{00} + \lambda^X_0\times \lambda^Y_{01}\)</span>. The ambiguity matrix <span class="math inline">\(A\)</span> is provided to <code>stan</code> to indicate which probabilities need to be summed.</p></li>
+<li><p>In the case of incomplete data we first identify the set of “data strategies”, where a collection of a data strategy might be of the form "gather data on <span class="math inline">\(X\)</span> and <span class="math inline">\(M\)</span>, but not <span class="math inline">\(Y\)</span>, for <span class="math inline">\(n_1\)</span> cases and gather data on <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, but not <span class="math inline">\(M\)</span>, for <span class="math inline">\(n_2\)</span> cases. The probability of an observed event, within a data strategy, is given by summing the probabilities of the types that could give rise to the incomplete data. For example <span class="math inline">\(X\)</span> is observed, but <span class="math inline">\(Y\)</span> is not, then the probability of <span class="math inline">\(X=0, Y = \text{NA}\)</span> is <span class="math inline">\(w_{00} +w_{01}\)</span>. The matrix <span class="math inline">\(E\)</span> is passed to <code>stan</code> to figure out which event probabilities need to be combined for events with missing data.</p></li>
+<li><p>The probability of a dataset is then given by a multinomial distribution with these event probabilities (or, in the case of incomplete data, the product of multinomials, one for each data strategy). Justification for this approach relies on the likelihood principle and is discussed in Chapter 6.</p></li>
+</ul>
+</div>
+<div id="implementation" class="section level2">
+<h2><span class="header-section-number">4.3</span> Implementation</h2>
+<p>To update a CausalQueries model with data use:</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" title="1"><span class="kw">update_model</span>(model, data)</a></code></pre></div>
+<p>where the data argument is a dataset containing some or all of the nodes in the model.</p>
+<p>Other <code>stan</code> arguments can be passed to <code>update_data</code>, in particular:</p>
+<ul>
+<li><code>iter</code> sets the number of iterations and ultimately the number of draws in the posterior</li>
+<li><code>chains</code> sets the number of chains; doing multiple chains in parallel speeds things up</li>
+<li>lots of other options via <code>?rstan::stan</code></li>
+</ul>
+<p>If you have multiple cores you can do parallel processing by including this line before running <code>CausalQueries</code>:</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" title="1"><span class="kw">options</span>(<span class="dt">mc.cores =</span> parallel<span class="op">::</span><span class="kw">detectCores</span>())<span class="st">`</span></a></code></pre></div>
+<p>The <code>stan</code> output from a simple model looks like this:</p>
+<pre><code>Inference for Stan model: simplexes.
+4 chains, each with iter=2000; warmup=1000; thin=1; 
+post-warmup draws per chain=1000, total post-warmup draws=4000.
+
+                mean se_mean       sd   2.5%    25%
+gamma[1]       12.02    3.56   185.37   0.02   0.33
+gamma[2]      181.81  174.23 10981.95   0.02   0.33
+gamma[3]      245.07  238.27 15024.53   0.03   0.33
+gamma[4]       46.57   38.52  2425.17   0.02   0.32
+lambdas[1]      0.50    0.01     0.29   0.02   0.26
+lambdas[2]      0.50    0.01     0.29   0.02   0.25
+lambdas[3]      0.25    0.00     0.19   0.01   0.09
+lambdas[4]      0.25    0.00     0.20   0.01   0.09
+lambdas[5]      0.25    0.00     0.19   0.01   0.09
+lambdas[6]      0.25    0.00     0.20   0.01   0.09
+sum_gammas[1]  13.02    3.56   185.37   1.02   1.33
+sum_gammas[2] 474.45  450.99 28430.14   1.43   2.70
+lp__          -11.35    0.05     1.68 -15.63 -12.22
+                 50%    75%  97.5% n_eff Rhat
+gamma[1]        0.99   2.85  41.68  2716    1
+gamma[2]        0.95   2.92  36.86  3973    1
+gamma[3]        0.95   2.71  37.11  3976    1
+gamma[4]        0.95   2.89  37.65  3963    1
+lambdas[1]      0.50   0.75   0.98  3196    1
+lambdas[2]      0.50   0.74   0.98  3196    1
+lambdas[3]      0.21   0.37   0.70  2054    1
+lambdas[4]      0.21   0.38   0.70  4451    1
+lambdas[5]      0.20   0.37   0.70  4022    1
+lambdas[6]      0.20   0.36   0.73  4648    1
+sum_gammas[1]   1.99   3.85  42.68  2716    1
+sum_gammas[2]   4.72  10.60 116.75  3974    1
+lp__          -10.96 -10.12  -9.21  1324    1
+
+Samples were drawn using NUTS(diag_e) at Wed May 13 15:42:24 2020.
+For each parameter, n_eff is a crude measure of effective sample size,
+and Rhat is the potential scale reduction factor on split chains (at 
+convergence, Rhat=1).</code></pre>
+<p>Note the parameters include the gamma parameters plus transformed parameters, <span class="math inline">\(\lambda\)</span>, which are our parameters of interest and which <code>CausalQueries</code> then interprets as possible row probabilities for the <span class="math inline">\(P\)</span> matrix.</p>
+</div>
+<div id="extensions" class="section level2">
+<h2><span class="header-section-number">4.4</span> Extensions</h2>
+<div id="arbitrary-parameters" class="section level3">
+<h3><span class="header-section-number">4.4.1</span> Arbitrary parameters</h3>
+<p>Although the package provides helpers to generate mappings from parameters to causal types via nodal types, it is possible to dispense with the nodal types altogether and provide a direct mapping from parameters to causal types.</p>
+<p>For this you need to manually provide a <code>P</code> matrix and a corresponding <code>parameters_df</code>. As an example here is a model with complete confounding and parameters that correspond to causal types directly.</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>)</a>
+<a class="sourceLine" id="cb56-2" title="2"></a>
+<a class="sourceLine" id="cb56-3" title="3">model<span class="op">$</span>P &lt;-<span class="st"> </span><span class="kw">diag</span>(<span class="dv">8</span>)</a>
+<a class="sourceLine" id="cb56-4" title="4"><span class="kw">colnames</span>(model<span class="op">$</span>P) &lt;-<span class="st"> </span><span class="kw">rownames</span>(model<span class="op">$</span>causal_types)</a>
+<a class="sourceLine" id="cb56-5" title="5"></a>
+<a class="sourceLine" id="cb56-6" title="6">model<span class="op">$</span>parameters_df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb56-7" title="7">  <span class="dt">param_names =</span> <span class="kw">paste0</span>(<span class="st">&quot;x&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">8</span>), </a>
+<a class="sourceLine" id="cb56-8" title="8">  <span class="dt">param_set =</span> <span class="dv">1</span>, </a>
+<a class="sourceLine" id="cb56-9" title="9">  <span class="dt">priors =</span> <span class="dv">1</span>, </a>
+<a class="sourceLine" id="cb56-10" title="10">  <span class="dt">parameters =</span> <span class="dv">1</span><span class="op">/</span><span class="dv">8</span>)</a>
+<a class="sourceLine" id="cb56-11" title="11"></a>
+<a class="sourceLine" id="cb56-12" title="12"><span class="co"># Update fully confounded model on strongly correlated data</span></a>
+<a class="sourceLine" id="cb56-13" title="13"></a>
+<a class="sourceLine" id="cb56-14" title="14">data &lt;-<span class="st"> </span><span class="kw">make_data</span>(<span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>), <span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">parameters =</span> <span class="kw">c</span>(.<span class="dv">5</span>, <span class="fl">.5</span>, <span class="fl">.1</span>,.<span class="dv">1</span>,.<span class="dv">7</span>,.<span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb56-15" title="15"></a>
+<a class="sourceLine" id="cb56-16" title="16">fully_confounded &lt;-<span class="st"> </span><span class="kw">update_model</span>(model, data)</a></code></pre></div>
+</div>
+<div id="non-binary-data" class="section level3">
+<h3><span class="header-section-number">4.4.2</span> Non binary data</h3>
+<p>In principle the <code>stan</code> model could be extended to handle non binary data. Though a limitation of the current package there is no structural reason why nodes should be constrained to be dichotomous. The set of nodal and causal types however expands even more rapidly in the case of non binary data. .</p>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="defining-models.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="querying-models.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook/js/app.min.js"></script>
+<script src="libs/gitbook/js/lunr.js"></script>
+<script src="libs/gitbook/js/clipboard.min.js"></script>
+<script src="libs/gitbook/js/plugin-search.js"></script>
+<script src="libs/gitbook/js/plugin-sharing.js"></script>
+<script src="libs/gitbook/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook/js/jquery.highlight.js"></script>
+<script src="libs/gitbook/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": false,
+"twitter": false,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": false,
+"google": false,
+"instapper": false
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["causalmodels.pdf"],
+"toc": {
+"collapse": "section"
+},
+"toolbar": {
+"position": "static"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "# Illustrations\n\n\n\nIn this chapter, we demonstrate how causal-model-based process-tracing works using real data. We undertake this illustation on a substantive issue that has been of central interest to students of comparative politics for decades: the causes of democratization. As the literature and range of arguments about democratization are vast, we focus on just a piece of the debate---specifically on causal claims about the relationship between economic inequality and democratization, with particular attention to the work of @boix2003democracy, @acemoglu2005economic, and @haggard2012inequality. In this chapter, we demonstrate process tracing with causal models, while in a later chapter we demonstrate the integration of process-tracing with correlational analysis.\n\n\n##Inequality and Democratization: The Debate\n\nGenerations of sociologists, economists, and political scientists have theorized about and empirically examined the relationship between inequality and democracy (e.g., @dahl1973polyarchy, @bollen1985political, @acemoglu2005economic, @boix2003democracy, @ansell2014inequality). In recent years, the work of @boix2003democracy,  @acemoglu2005economic, and @ansell2014inequality represent major theoretical advances in specifying when and how inequality might generate transitions to democracy (as well as its persistence, which we bracket here). The first and third of these books also provide large-n cross-national and historical tests of their theories' key correlational predictions. @haggard2012inequality, moreoever, derive causal process observations from a large number of \"Third Wave\" cases of democratization in order to examine these theories' claims about the centrality of distributional issues to regime change. We provide a very condensed summary of the core logic of @boix2003democracy and @acemoglu2005economic before seeking to translate that logic into a causal model for the purposes of process tracing, using a transformed version of Haggard and Kaufman's causal-process data.\n\nWe briefly and simply summarize the core logics of these three sets of arguments here. Both Boix's and Acemoglu and Robinson's theories operate within a Meltzer-Richard (@meltzer1981rational) framework in which, in a democracy, the median voter sets the level of taxation-and-transfer and, since mean income is higher than median income, benefit from and vote for a positive tax rate, implying redistribution from rich to poor. The poorer the median voter, the more redistribution she will prefer. Democracy, with its poorer median voter, thus implies greater redistribution than (rightwing) authoritarianism---a better material position from the poor at the expense of the rich elite. Thus, in each of these approaches, struggles over political regimes are conflicts over the distribution of material resources.\n\nIn Boix's model, the poor generally prefer democracy for its material benefits. When they mobilize to demand regime change, the rich face a choice as to whether to repress or concede, and they are more likely to repress as inequality is higher since, all else equal, they have more to lose from democracy.^[We bracket here other moving parts in the model such as the conditioning role of asset specificity.]\n\n## Inequality and Democratization: A Causal Model\n\nOur first step is to specify a causal model of \n",
+    "created" : 1491832225535.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1635207429",
+    "id" : "6A22396E",
+    "lastKnownWriteTime" : 1491849945,
+    "last_content_update" : 1491849945403,
+    "path" : "~/Dropbox/ProcessTracing/8 Book/ii/06-illustrations.Rmd",
+    "project_path" : "06-illustrations.Rmd",
+    "properties" : {
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

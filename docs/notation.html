@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 12 Notation and syntax | Causal Models: Guide to CausalQueries</title>
+  <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="generator" content="bookdown 0.17 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 12 Notation and syntax | Causal Models: Guide to CausalQueries" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="github-repo" content="rstudio/causalmodels" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 12 Notation and syntax | Causal Models: Guide to CausalQueries" />
+  
+  <meta name="twitter:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  
+
+<meta name="author" content="Macartan Humphreys and Alan Jacobs" />
+
+
+<meta name="date" content="2020-06-10" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="external-validity-and-inference-aggregation.html"/>
+<link rel="next" href="references.html"/>
+<script src="libs/jquery/jquery.min.js"></script>
+<link href="libs/gitbook/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="headers\style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Model based causal inference: A guide to gbiqq</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="part"><span><b>I Causal Models</b></span></li>
+<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a><ul>
+<li class="chapter" data-level="1.1" data-path="cm.html"><a href="cm.html#two-approaches-to-inference"><i class="fa fa-check"></i><b>1.1</b> Two approaches to inference</a></li>
+<li class="chapter" data-level="1.2" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-difference-in-means"><i class="fa fa-check"></i><b>1.2</b> Recovering the ATE with Difference in Means</a></li>
+<li class="chapter" data-level="1.3" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-a-causal-model"><i class="fa fa-check"></i><b>1.3</b> Recovering the ATE with a Causal Model</a></li>
+<li class="chapter" data-level="1.4" data-path="cm.html"><a href="cm.html#going-further"><i class="fa fa-check"></i><b>1.4</b> Going further</a></li>
+</ul></li>
+<li class="part"><span><b>II The Package</b></span></li>
+<li class="chapter" data-level="2" data-path="package.html"><a href="package.html"><i class="fa fa-check"></i><b>2</b> Installation</a></li>
+<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a><ul>
+<li class="chapter" data-level="3.1" data-path="defining-models.html"><a href="defining-models.html#getting-going"><i class="fa fa-check"></i><b>3.1</b> Getting going</a></li>
+<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="defining-models.html"><a href="defining-models.html#nodal-types"><i class="fa fa-check"></i><b>3.2.1</b> Nodal types</a></li>
+<li class="chapter" data-level="3.2.2" data-path="defining-models.html"><a href="defining-models.html#causal-types"><i class="fa fa-check"></i><b>3.2.2</b> Causal types</a></li>
+<li class="chapter" data-level="3.2.3" data-path="defining-models.html"><a href="defining-models.html#parameters-dataframe"><i class="fa fa-check"></i><b>3.2.3</b> Parameters dataframe</a></li>
+<li class="chapter" data-level="3.2.4" data-path="defining-models.html"><a href="defining-models.html#parameter-matrix"><i class="fa fa-check"></i><b>3.2.4</b> Parameter matrix</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="defining-models.html"><a href="defining-models.html#restrictions"><i class="fa fa-check"></i><b>3.3</b> Setting restrictions</a></li>
+<li class="chapter" data-level="3.4" data-path="defining-models.html"><a href="defining-models.html#confounding"><i class="fa fa-check"></i><b>3.4</b> Allowing confounding</a></li>
+<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="defining-models.html"><a href="defining-models.html#custom-priors"><i class="fa fa-check"></i><b>3.5.1</b> Custom priors</a></li>
+<li class="chapter" data-level="3.5.2" data-path="defining-models.html"><a href="defining-models.html#prior-warnings"><i class="fa fa-check"></i><b>3.5.2</b> Prior warnings</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="defining-models.html"><a href="defining-models.html#parameters"><i class="fa fa-check"></i><b>3.6</b> Setting Parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a><ul>
+<li class="chapter" data-level="4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#data-for-stan"><i class="fa fa-check"></i><b>4.1</b> Data for <code>stan</code></a></li>
+<li class="chapter" data-level="4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#stan-code"><i class="fa fa-check"></i><b>4.2</b> <code>stan</code> code</a></li>
+<li class="chapter" data-level="4.3" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a></li>
+<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#arbitrary-parameters"><i class="fa fa-check"></i><b>4.4.1</b> Arbitrary parameters</a></li>
+<li class="chapter" data-level="4.4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#non-binary-data"><i class="fa fa-check"></i><b>4.4.2</b> Non binary data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a><ul>
+<li class="chapter" data-level="5.1" data-path="querying-models.html"><a href="querying-models.html#case-level-queries"><i class="fa fa-check"></i><b>5.1</b> Case level queries</a></li>
+<li class="chapter" data-level="5.2" data-path="querying-models.html"><a href="querying-models.html#posterior-queries"><i class="fa fa-check"></i><b>5.2</b> Posterior queries</a></li>
+<li class="chapter" data-level="5.3" data-path="querying-models.html"><a href="querying-models.html#query-distribution"><i class="fa fa-check"></i><b>5.3</b> Query distribution</a></li>
+<li class="chapter" data-level="5.4" data-path="querying-models.html"><a href="querying-models.html#token-and-general-causation"><i class="fa fa-check"></i><b>5.4</b> Token and general causation</a></li>
+<li class="chapter" data-level="5.5" data-path="querying-models.html"><a href="querying-models.html#complex-queries"><i class="fa fa-check"></i><b>5.5</b> Complex queries</a></li>
+</ul></li>
+<li class="part"><span><b>III Applications</b></span></li>
+<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a><ul>
+<li class="chapter" data-level="6.1" data-path="applications.html"><a href="applications.html#the-ladder-of-causation-in-an-x-rightarrow-y-model"><i class="fa fa-check"></i><b>6.1</b> The ladder of causation in an <span class="math inline">\(X \rightarrow Y\)</span> model</a></li>
+<li class="chapter" data-level="6.2" data-path="applications.html"><a href="applications.html#x-causes-y-with-unmodelled-confounding"><i class="fa fa-check"></i><b>6.2</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with unmodelled confounding</a></li>
+<li class="chapter" data-level="6.3" data-path="applications.html"><a href="applications.html#x-causes-y-with-confounding-modeled"><i class="fa fa-check"></i><b>6.3</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with confounding modeled</a></li>
+<li class="chapter" data-level="6.4" data-path="applications.html"><a href="applications.html#simple-mediation-model"><i class="fa fa-check"></i><b>6.4</b> Simple mediation model</a></li>
+<li class="chapter" data-level="6.5" data-path="applications.html"><a href="applications.html#simple-moderator-model"><i class="fa fa-check"></i><b>6.5</b> Simple moderator model</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a><ul>
+<li class="chapter" data-level="7.1" data-path="explanation.html"><a href="explanation.html#tightening-bounds-on-causes-of-effects-using-an-unobserved-covariate"><i class="fa fa-check"></i><b>7.1</b> Tightening bounds on causes of effects using an unobserved covariate</a></li>
+<li class="chapter" data-level="7.2" data-path="explanation.html"><a href="explanation.html#Billy"><i class="fa fa-check"></i><b>7.2</b> Actual Causation: Billy and Suzy’s moderator and mediation model</a></li>
+<li class="chapter" data-level="7.3" data-path="explanation.html"><a href="explanation.html#diagnosis-inferring-a-cause-from-symptoms"><i class="fa fa-check"></i><b>7.3</b> Diagnosis: Inferring a cause from symptoms</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a><ul>
+<li class="chapter" data-level="8.1" data-path="process-tracing.html"><a href="process-tracing.html#what-to-infer-from-what"><i class="fa fa-check"></i><b>8.1</b> What to infer from what</a></li>
+<li class="chapter" data-level="8.2" data-path="process-tracing.html"><a href="process-tracing.html#probative-value-and-d-separation"><i class="fa fa-check"></i><b>8.2</b> Probative value and <span class="math inline">\(d\)</span>-separation</a></li>
+<li class="chapter" data-level="8.3" data-path="process-tracing.html"><a href="process-tracing.html#foundations-for-van-everas-tests"><i class="fa fa-check"></i><b>8.3</b> Foundations for Van Evera’s tests</a></li>
+<li class="chapter" data-level="8.4" data-path="process-tracing.html"><a href="process-tracing.html#clue-selection-clues-at-the-center-of-chains-can-be-more-informative"><i class="fa fa-check"></i><b>8.4</b> Clue selection: clues at the center of chains can be more informative</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a><ul>
+<li class="chapter" data-level="9.1" data-path="identification.html"><a href="identification.html#illustration-of-the-backdoor-criterion"><i class="fa fa-check"></i><b>9.1</b> Illustration of the backdoor criterion</a></li>
+<li class="chapter" data-level="9.2" data-path="identification.html"><a href="identification.html#identification-instruments"><i class="fa fa-check"></i><b>9.2</b> Identification: Instruments</a></li>
+<li class="chapter" data-level="9.3" data-path="identification.html"><a href="identification.html#identification-through-the-frontdoor"><i class="fa fa-check"></i><b>9.3</b> Identification through the frontdoor</a></li>
+<li class="chapter" data-level="9.4" data-path="identification.html"><a href="identification.html#simple-sample-selection-bias"><i class="fa fa-check"></i><b>9.4</b> Simple sample selection bias</a></li>
+<li class="chapter" data-level="9.5" data-path="identification.html"><a href="identification.html#addressing-both-sample-selection-bias-and-confounding"><i class="fa fa-check"></i><b>9.5</b> Addressing both sample selection bias and confounding</a></li>
+<li class="chapter" data-level="9.6" data-path="identification.html"><a href="identification.html#learning-from-a-collider"><i class="fa fa-check"></i><b>9.6</b> Learning from a collider!</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a><ul>
+<li class="chapter" data-level="10.1" data-path="mixing-methods.html"><a href="mixing-methods.html#using-within-case-data-to-help-with-identification"><i class="fa fa-check"></i><b>10.1</b> Using within case data to help with identification</a></li>
+<li class="chapter" data-level="10.2" data-path="mixing-methods.html"><a href="mixing-methods.html#distinguishing-paths"><i class="fa fa-check"></i><b>10.2</b> Distinguishing paths</a></li>
+<li class="chapter" data-level="10.3" data-path="mixing-methods.html"><a href="mixing-methods.html#nothing-from-nothing"><i class="fa fa-check"></i><b>10.3</b> Nothing from nothing</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a><ul>
+<li class="chapter" data-level="11.1" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#transportation-of-findings-across-contexts"><i class="fa fa-check"></i><b>11.1</b> Transportation of findings across contexts</a></li>
+<li class="chapter" data-level="11.2" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#combining-observational-and-experimental-data"><i class="fa fa-check"></i><b>11.2</b> Combining observational and experimental data</a></li>
+<li class="chapter" data-level="11.3" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#a-jigsaw-puzzle-learning-across-populations"><i class="fa fa-check"></i><b>11.3</b> A jigsaw puzzle: Learning across populations</a></li>
+</ul></li>
+<li class="part"><span><b>IV Notation</b></span></li>
+<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a><ul>
+<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a><ul>
+<li class="chapter" data-level="12.1.1" data-path="notation.html"><a href="notation.html#parents"><i class="fa fa-check"></i><b>12.1.1</b> Parents, children, and all that</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2" data-path="notation.html"><a href="notation.html#syntax"><i class="fa fa-check"></i><b>12.2</b> Causal syntax</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/macartan/gbiqq/" target="blank">Uses gbiqq</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Causal Models: Guide to <code>CausalQueries</code></a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="notation" class="section level1">
+<h1><span class="header-section-number">Chapter 12</span> Notation and syntax</h1>
+<div id="notation-1" class="section level2">
+<h2><span class="header-section-number">12.1</span> Notation</h2>
+<p>A guide to key notation used in the <code>CausalQueries</code> package:</p>
+<table>
+<colgroup>
+<col width="21%" />
+<col width="15%" />
+<col width="62%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"><strong>term</strong></th>
+<th align="center"><strong>symbol</strong></th>
+<th align="center"><strong>meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">nodal type</td>
+<td align="center"><span class="math inline">\(\theta^X\)</span></td>
+<td align="center">The way that a node responds to the values of its parents. Example: <span class="math inline">\(\theta^Y_{10}\)</span>, written <code>Y10</code>: <span class="math inline">\(Y\)</span> takes the value 1 if <span class="math inline">\(X=0\)</span> and 0 if <span class="math inline">\(X=1\)</span>. For interpretation of syntax, see <code>make_model("X-&gt;Y") %&gt;% get_nodal_types</code></td>
+</tr>
+<tr class="even">
+<td align="center">causal type</td>
+<td align="center"><span class="math inline">\(\theta\)</span></td>
+<td align="center">A causal type is a concatenation of nodal types, one for each node. Example: <span class="math inline">\((\theta^X_0, \theta^Y_{00})\)</span>, written <code>X0.Y00</code>, is a type that has <span class="math inline">\(X=0\)</span> and <span class="math inline">\(Y=0\)</span> no matter what the value of <span class="math inline">\(X\)</span>. See: <code>make_model("X-&gt;Y") %&gt;% get_causal_types</code></td>
+</tr>
+<tr class="odd">
+<td align="center">parameter</td>
+<td align="center"><span class="math inline">\(\lambda\)</span></td>
+<td align="center">An unknown quantity of interest that generates the probability of causal types. In models without confounding parameters are the probabilities of nodal types. In models with confounding, parameters are the conditional probabilities of causal types. Example: <code>X.0</code><span class="math inline">\(=\lambda^X_0 = \Pr(\theta^X = \theta^X_0)\)</span> See <code>make_model("X-&gt;Y") %&gt;% get_parameters</code></td>
+</tr>
+<tr class="even">
+<td align="center">data event type</td>
+<td align="center"></td>
+<td align="center">A possible set of values on all nodes (including, possibly, NAs). Example: <code>X0Y1</code> <span class="math inline">\(= (X=0, Y = 1)\)</span></td>
+</tr>
+<tr class="odd">
+<td align="center">event probability</td>
+<td align="center"><span class="math inline">\(w\)</span></td>
+<td align="center">The probability of a data event type. Example: <span class="math inline">\(w_{00}=\Pr(X=0, Y=1)\)</span></td>
+</tr>
+<tr class="even">
+<td align="center">Dirichlet priors</td>
+<td align="center">alpha, <span class="math inline">\(\alpha\)</span></td>
+<td align="center">Non negative numbers used to characterize a prior distribution over a simplex. The implied mean is the normalized vector <span class="math inline">\(\mu= \alpha/\sum(\alpha)\)</span> and the variance is <span class="math inline">\(\mu(1-\mu)/(1+\sum\alpha)\)</span>.</td>
+</tr>
+<tr class="odd">
+<td align="center">parameter matrix</td>
+<td align="center"><span class="math inline">\(P\)</span></td>
+<td align="center">A matrix of 0s and 1s that maps from parameters (rows) to causal types (columns). Example: see <code>make_model("X-&gt;Y") %&gt;% get_parameter_matrix</code></td>
+</tr>
+<tr class="even">
+<td align="center">ambiguities matrix</td>
+<td align="center"><span class="math inline">\(A\)</span></td>
+<td align="center">A matrix of 0s and 1s that maps from causal types (rows) to data types (columns). Example: see <code>make_model("X-&gt;Y") %&gt;%  get_ambiguities_matrix</code></td>
+</tr>
+<tr class="odd">
+<td align="center">families matrix</td>
+<td align="center"><span class="math inline">\(E\)</span></td>
+<td align="center">A matrix of 0s and 1s that maps from partial data events to complete data events. Example: see <code>make_model("X-&gt;Y") %&gt;% get_data_families</code></td>
+</tr>
+<tr class="even">
+<td align="center">data strategy</td>
+<td align="center"><span class="math inline">\(S\)</span></td>
+<td align="center">A plan indicating for how many nodes different types of data will be gathered. See <code>? make_data</code></td>
+</tr>
+</tbody>
+</table>
+<div id="parents" class="section level3">
+<h3><span class="header-section-number">12.1.1</span> Parents, children, and all that</h3>
+<p>The causal models analyzed by <code>CausalQueries</code> all involve <em>directed</em> edges between nodes, with cycles over nodes precluded. In turn this implies a partial ordering over nodes which motivates some useful terminology:</p>
+<ul>
+<li><span class="math inline">\(X\)</span> is a <em>parent</em> of <span class="math inline">\(Y\)</span> if a change in <span class="math inline">\(X\)</span> sometimes induces a change in <span class="math inline">\(Y\)</span> even when all other nodes are fixed. On the graph, there’s an arrow from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span>.</li>
+<li><span class="math inline">\(Y\)</span> is a <em>child</em> of <span class="math inline">\(X\)</span> if a change in <span class="math inline">\(X\)</span> sometimes induces a change in <span class="math inline">\(Y\)</span> even when all other nodes are fixed. On the graph, there’s an arrow from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span>.</li>
+<li><span class="math inline">\(A\)</span> is an <em>ancestor</em> of <span class="math inline">\(B\)</span> by analogy: a parent is an ancestor and any parent of an ancestor is an ancestor. On the graph there is a chain of arrows pointing in one direction going from <span class="math inline">\(A\)</span> to <span class="math inline">\(B\)</span>. Similarly for <em>descendant</em>.</li>
+</ul>
+<p>You should find that the package complains if you try to specify a cyclical graph.</p>
+</div>
+</div>
+<div id="syntax" class="section level2">
+<h2><span class="header-section-number">12.2</span> Causal syntax</h2>
+<p>Both model definition and model querying requires a simple way to make arbitrary causal statements.</p>
+<ul>
+<li>You can query <strong>observational quantities</strong>. For instance:
+<ul>
+<li><code>make_model("X-&gt;Y") %&gt;% get_query_types("Y==1")</code> Figures out the types that produce <span class="math inline">\(Y=1\)</span> absent any interventions.</li>
+</ul></li>
+<li>You can query <strong>experimental quantities</strong>. For instance:
+<ul>
+<li><code>make_model("X-&gt;Y") %&gt;% get_query_types("Y[X=1]==1")</code> figures out the types that produce <span class="math inline">\(Y=1\)</span> when <span class="math inline">\(X\)</span> is set to 1.</li>
+<li><code>make_model("X-&gt;M-&gt;Y") %&gt;% get_query_types("Y[X=1]&gt;Y[X=0]")</code> figures out the types that have a positive causal effect.</li>
+</ul></li>
+<li>You can make queries with <strong>complex counterfactuals</strong>. For instance:
+<ul>
+<li><code>make_model("X-&gt;M-&gt;Y") %&gt;% get_query_types("Y[M=M[X=0], X=1]==1")</code> looks for the types for which <span class="math inline">\(Y=1\)</span> when <span class="math inline">\(X=1\)</span> and <span class="math inline">\(M\)</span> is held constant at the value it would take if <span class="math inline">\(X\)</span> were 0.</li>
+</ul></li>
+<li>You can use <strong>wild cards</strong> and AND or OR operators. For instance:
+<ul>
+<li><code>make_model("X-&gt;Y") %&gt;% get_query_types("(Y[X = .]==1)", join_by = "|")</code> figures out the causal types for which <span class="math inline">\(Y=1\)</span> for some value of <span class="math inline">\(X\)</span>.</li>
+<li><code>make_model("X-&gt;Y") %&gt;% get_query_types("(Y[X = .]==1)", join_by = "&amp;")</code> figures out the causal types for which <span class="math inline">\(Y=1\)</span> for <em>all</em> values of <span class="math inline">\(X\)</span>.</li>
+<li>Note that the use of “.” as a wild card also requires placing the causal statement in parentheses, as in these examples.</li>
+</ul></li>
+<li>You can make <strong>conditional queries</strong>. For instance, conditioning on observational or counterfactual quantities:
+<ul>
+<li><code>make_model("X-&gt;Y") %&gt;% query_model("Y[X = 1] &gt; Y[X = 0]", subset = "X==1 &amp; Y==1")</code>
+asks what is the probability that <span class="math inline">\(X\)</span> has a positive effect on <span class="math inline">\(Y\)</span> given <span class="math inline">\(X=Y=1\)</span>.</li>
+<li><code>make_model("X-&gt;M-&gt;Y") %&gt;% query_model("Y[X = 1] != Y[X = 0]", subsets = "M[X=1]==M[X=0]")</code>
+asks what is the probability that <span class="math inline">\(X\)</span> matters for <span class="math inline">\(Y\)</span> given <span class="math inline">\(X\)</span> doesn’t matter for <span class="math inline">\(M\)</span>.</li>
+</ul></li>
+</ul>
+<p>We provide a few helpers for common causal statements:</p>
+<ul>
+<li><code>increasing("A", "B")</code> produces the statement <code>"B[A=1] &gt; B[A=0]"</code></li>
+<li><code>decreasing("A", "B")</code> produces the statement <code>"B[A=1] &lt; B[A=0]"</code></li>
+<li><code>interacts("A", "B", "C")</code> produces the statement <code>"((C[A =1, B = 1]) - (C[A = 0, B = 1])) != ((C[A =1, B = 0]) - (C[A = 0, B = 0]))"</code></li>
+<li><code>complements("A", "B", "C")</code> produces the statement <code>"((C[A =1, B = 1]) - (C[A = 0, B = 1])) &gt; ((C[A =1, B = 0]) - (C[A = 0, B = 0]))"</code></li>
+<li><code>substitutes("A", "B", "C")</code> produces the statement <code>"((C[A =1, B = 1]) - (C[A = 0, B = 1])) &lt; ((C[A =1, B = 0]) - (C[A = 0, B = 0]))"</code></li>
+</ul>
+<p>These helpers can be used for setting restrictions, setting confounds, defining priors or parameter values, or querying models.</p>
+<p>For instance:</p>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb129-1" title="1"><span class="kw">get_query_types</span>(<span class="dt">model =</span> <span class="kw">make_model</span>(<span class="st">&quot;A -&gt; B &lt;- C&quot;</span>),</a>
+<a class="sourceLine" id="cb129-2" title="2">         <span class="dt">query =</span> <span class="kw">substitutes</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;B&quot;</span>))</a></code></pre></div>
+<pre><code>
+Causal types satisfying query&#39;s condition(s)  
+
+ query =  ((B[A = 1, C = 1]) - (B[A = 0, C = 1])) &lt; ((B[A = 1, C = 0]) - (B[A = 0, C = 0])) 
+
+A0.C0.B0100  A1.C0.B0100
+A0.C1.B0100  A1.C1.B0100
+A0.C0.B0010  A1.C0.B0010
+A0.C1.B0010  A1.C1.B0010
+A0.C0.B0110  A1.C0.B0110
+A0.C1.B0110  A1.C1.B0110
+A0.C0.B1110  A1.C0.B1110
+A0.C1.B1110  A1.C1.B1110
+A0.C0.B0111  A1.C0.B0111
+A0.C1.B0111  A1.C1.B0111
+
+
+ Number of causal types that meet condition(s) =  20
+ Total number of causal types in model =  64</code></pre>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="external-validity-and-inference-aggregation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook/js/app.min.js"></script>
+<script src="libs/gitbook/js/lunr.js"></script>
+<script src="libs/gitbook/js/clipboard.min.js"></script>
+<script src="libs/gitbook/js/plugin-search.js"></script>
+<script src="libs/gitbook/js/plugin-sharing.js"></script>
+<script src="libs/gitbook/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook/js/jquery.highlight.js"></script>
+<script src="libs/gitbook/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": false,
+"twitter": false,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": false,
+"google": false,
+"instapper": false
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["causalmodels.pdf"],
+"toc": {
+"collapse": "section"
+},
+"toolbar": {
+"position": "static"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

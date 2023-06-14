@@ -1,0 +1,664 @@
+---
+title: "Causes and causal models"
+author: "Macartan Humphreys and Alan Jacobs"
+output:
+  beamer_presentation:
+    toc: true
+    slide_level: 2
+    incremental: true
+header-includes:
+  - \usepackage{multirow}
+  - \usepackage{graphicx}
+  - \newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
+  - \usepackage{bbold, mathabx}
+bibliography: bib.bib
+---
+
+```{r, include=FALSE}
+set.seed(1)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+source("../6 Book/ii/hj_dag.R")
+```
+
+# Causality in a causal-model framework
+
+
+## Motivation \label{po}
+
+An \textit{intervention} based motivation for understanding causal effects:
+\begin{itemize}
+	\item  We want to know if a particular  intervention (like aid) caused a particular outcome (like reduced corruption). 
+	\item  We need to know:
+\begin{enumerate}
+	\item What happened?
+	\item What would the outcome have been if there were no intervention?
+\end{enumerate}
+
+	\item  The problem
+\begin{enumerate}
+	\item \dots this is hard
+	\item \dots this is impossible
+\end{enumerate}
+
+The problem in 2 is that you need to know what would have happened if things were different. You need information on a \textbf{counterfactual}
+\end{itemize}
+
+
+## The Potential Outcomes Framework
+
+\begin{itemize}
+	\item For each unit we assume that there are two \textbf{post-treatment} outcomes: $Y_i(1)$ and $Y_i(0)$. 
+	\item eg $Y(1)$ is the outcome that \textbf{would} obtain \textit{if} the unit received the treatment. 
+	\item  The \textbf{causal effect }of Treatment (relative to Control) is:
+	$$ \tau_i = Y_i(1) - Y_i(0)$$
+	\item Note: 
+	
+\begin{itemize}
+	\item the causal effect is defined at the \textit{individual level}. 
+	\item there is no ``data generating process'' or functional form 
+	\item the causal effect is defined relative to something else and so a counterfactual must be conceivable (NOT: "Did Germany cause the second world war?")
+	\item are there any substantive assumptions made here so far?
+\end{itemize}
+\end{itemize}
+
+
+## Potential Outcomes
+
+\color{red} \textbf{Idea}: A causal claim is (in part) a claim about something that did not happen. This makes it metaphysical. 
+
+
+
+
+## Illustration: Causal types in a binary world
+
+Consider a simple potential-outcomes setup.
+
+The sick patient either gets or doesn't get treatment, and then either becomes healthy or remains sick.
+
+\begingroup \scriptsize
+
+\begin{table}[h!]
+\begin{tabular}{l|cccc} \small
+
+& Type a & Type b & Type c & Type d \\
+
+& \textbf{a}dverse effects & \textbf{b}eneficial Effects & \textbf{c}hronic cases & \textbf{d}estined cases \\
+\hline
+Not treated &    Healthy &       Sick &       Sick &    Healthy \\
+Treated &       Sick &    Healthy &       Sick &    Healthy \\
+\end{tabular}  
+\caption{Potential Outcomes: What would happen to each of four possible types of case if they were or were not treated.}
+\label{tabPO}
+\end{table}
+
+\endgroup
+
+
+<!-- ## Potential Outcomes -->
+
+<!-- Now that we have a concept of causal effects available, let's answer two **questions**: -->
+
+<!-- \begin{itemize} -->
+<!-- \item TRANSITIVITY: If for a given unit $A$ causes $B$ and $B$ causes $C$, does that mean that $A$ causes $C$? -->
+
+<!-- 		\color{white}\small A boulder is flying down a mountain. You duck. This saves your life. -->
+
+<!-- 			So the boulder caused the ducking and the ducking caused you to survive. So: \textit{did the boulder cause you to survive?} -->
+<!-- 		\color{black} -->
+<!-- \item CONNECTEDNESS: Say $A$ causes $B$ --- does that mean that there is a spatiotemporally continuous sequence of causal intermediates? -->
+
+<!-- 		\color{white}\small Person A is planning some action Y; Person B sets out to stop them; person X intervenes and prevents person B from stopping person A. In this case Person A may complete their action, producing Y, without any knowledge that B and X even exist; in particular B and X need not be anywhere close to the action. So: \textit{ did X cause Y}? -->
+<!-- \end{itemize} -->
+
+<!-- ## Potential Outcomes -->
+
+<!-- Now that we have a concept of causal effects available, let's answer two **questions**: -->
+
+<!-- \begin{itemize} -->
+<!-- \item TRANSITIVITY:  If for a given unit $A$ causes $B$ and $B$ causes $C$, does that mean that $A$ causes $C$? -->
+
+<!-- 		\color{red}\small A boulder is flying down a mountain. You duck. This saves your life. -->
+
+<!-- 			So the boulder caused the ducking and the ducking caused you to survive. So: \textit{did the boulder cause you to survive?} -->
+<!-- 		\color{black} -->
+<!-- \item CONNECTEDNESS:  Say $A$ causes $B$ --- does that mean that there is a spatiotemporally continuous sequence of causal intermediates? -->
+
+<!-- 		\color{red}\small Person $A$ is planning some action $Y$; Person $B$ sets out to stop them; person $X$ intervenes and prevents person $B$ from stopping person $A$. In this case Person $A$ may complete their action, producing $Y$, without any knowledge that $B$ and $X$ even exist; in particular $B$ and $X$ need not be anywhere close to the action. So: \textit{ did $X$ cause $Y$}? -->
+<!-- \end{itemize} -->
+
+
+
+## Causal claims: Contribution or attribution?
+The counterfactual model is all about contribution, not attribution, except in a very conditional sense.
+
+* Focus is on  non-rival contributions
+* Not: what caused $Y$ but what is the effect of $X$ on $Y$?
+* Only a conditional account of the causes of $Y$
+
+Consider an outcome $Y$ that might depend on two causes $X_1$ and $X_2$:
+$$Y(0,0) = 0$$
+$$Y(1,0) = 0$$
+$$Y(0,1) = 0$$
+$$Y(1,1) = 1$$
+
+What caused $Y$? Which cause was most important?
+
+
+## Causal claims: Contribution or attribution?
+The counterfactual model is all about contribution, not attribution, except in a very conditional sense.
+
+* Focus is on  non-rival contributions
+* Not: what caused $Y$, but what is the effect of $X$?
+* Only a conditional account of the causes of $Y$
+
+<!-- * This is problem for research programs that define "explanation" in terms of figuring out the things that cause $Y$ -->
+* Real difficulties conceptualizing what it means to say one cause is more important than another cause. What does that mean?
+
+## Causal claims: Contribution or attribution?
+The counterfactual model is all about contribution, not attribution, except in a very conditional sense.
+
+* Focus is on  non-rival contributions
+* Not: what caused $Y$ but what is the effect of $X$?
+* Only a conditional account of the causes of $Y$
+
+* *Erdogan's increasing authoritarianism was the most important reason for the attempted coup*
+    * More important than Turkey's history of coups?
+    * What does that mean?
+
+<!-- ## Causal claims: Actual causes -->
+
+<!-- Under this definition the most obvious cause might not be a counterfactual cause. -->
+
+<!-- **A classic example (Hall and others)**: $A$ and $B$ are great shots. They both throw a rock at a bottle. $A$'s rock  is faster: it hits the bottle and the bottle breaks. $B$'s goes whizzing past where the bottle used to be. Did $A$ cause the bottle to break? Did $B$? -->
+
+<!-- * Well worth thinking about why we think it obvious that $A$ was the cause, even though had $A$ not thrown the botte would still have broken. (For more see Halpern on "Actual causes"). -->
+
+## Causal claims: No causation without manipulation
+
+* Some seemingly causal claims not admissible.
+* To get the definition off the ground, manipulation **must be imaginable** (whether practical or not)
+* What does it mean to say that Aunt Pat voted for Brexit because she is old?
+* **Compare**: What does it mean to say that Southern UK counties voted for Brexit because they have many old people?
+
+
+<!-- ## Causal claims: Causal claims are everywhere -->
+
+<!-- * Jack exploited Jill -->
+<!-- * It's Jill's fault that bucket fell -->
+<!-- * Jack is the most obstructionist member of Congress -->
+<!-- * Melania Trump stole from Michelle Obama's speech -->
+
+<!-- * Activists need causal claims -->
+
+
+
+<!-- ## Causal claims: What is actually seen? -->
+
+<!-- \begin{itemize} -->
+<!-- 	\item We have talked about what's potential, now what {do} we \textit{observe}? -->
+<!-- 	\item Say $Z_i$ indicates whether the unit $i$ is assigned to treatment $(Z_i=1)$ or not $(Z_i=0)$. It describes the treatment process. Then what we observe is: -->
+<!-- 	$$ Y_i = Z_iY_i(1) + (1-Z_i)Y_i(0) $$ -->
+
+<!-- \item Say $Z$ is a random variable, then this is a sort of data generating process. BUT the key things to note is -->
+<!-- \begin{itemize} -->
+<!-- 	\item 	$Y_i$ is random but the randomness comes from $Z_i$ --- the potential outcomes, $Y_i(1)$, $Y_i(0)$ are fixed -->
+<!-- 	\item Compare this to a regression approach in which $Y$ is random but the $X$'s are fixed. eg: -->
+<!-- 	$$ Y \sim N(\beta X, \sigma^2) \text{ or }  Y=\alpha+\beta X+\epsilon, \epsilon\sim N(0, \sigma^2) $$ -->
+<!-- \end{itemize} -->
+<!-- \end{itemize} -->
+
+
+
+
+<!-- ## Causal claims: The rub and the solution -->
+<!-- * So we want to estimate $E(Y(1))$ and $E(Y(0))$. -->
+<!-- * We know that we can estimate averages of a quantity by taking the average value from a random sample of units -->
+<!-- * To do this here we need to select a random sample of the $Y(1)$ values and a random sample of the $Y(0)$ values, in other words, we \textbf{randomly assign} subjects to treatment and control conditions. -->
+
+
+<!-- ## Causal claims: The rub and the solution -->
+
+<!-- * When we do that we can *calculate*: -->
+<!-- 	$$ E_N(Y_i(1) | Z_i = 1) - E_N(Y_i(0) | Z_i = 0)$$ -->
+<!-- 	which in expectation equals: -->
+<!-- 	$$ E(Y_i(1) | Z_i = 1 \text{ or } Z_i = 0) - E(Y_i(0) | Z_i = 1 \text{ or } Z_i = 0)$$ -->
+<!-- *	This highlights a deep connection between **random assignment** and **random sampling**: when we do random assignment \textit{we are in fact randomly sampling from different possible worlds}. -->
+
+
+
+<!-- ## Causal claims: The rub and the solution -->
+<!-- This provides a \textbf{positive argument }for causal inference from randomization, rather than simply saying with randomization ``everything else is controlled for'' -->
+
+<!-- \color{red} Let's discuss: \color{black} -->
+<!-- \begin{itemize} -->
+<!-- 	\item Does the fact that an estimate is unbiased mean that it is right? -->
+<!--     \item Can a randomization ``fail''? -->
+<!-- 	\item Where are the covariates? -->
+<!-- \end{itemize} -->
+
+<!-- \color{red} \textbf{Idea}: random assignment is random sampling from potential worlds: to understand anything you find, you need to know the sampling weights -->
+
+
+
+<!-- ```{r,eval=TRUE, echo = FALSE} -->
+<!-- po.graph = function(N, Y0,Y1,u, Z, yl = "Y(0) & Y(1)"){ -->
+<!-- par(mfrow=c(2,2)) -->
+<!-- plot(u, Y0, ylim=c(-3, 4), xlim=c(1,N), xlab="u", ylab=yl) -->
+<!--   lines(u, Y1, type = "p", col="red") -->
+<!--   title("Y(1) and Y(0) for all units ") -->
+<!-- plot(u, Y1-Y0, type = "h", ylim=c(-3, 4), xlim=c(1,N),main = "Y(1) - Y(0)", xlab="u", ylab=yl) -->
+<!--   abline(h=0, col="red"); abline(h=mean(Y1-Y0), col="red") -->
+<!-- plot(u[Z==0], Y0[Z==0], ylim=c(-3, 4), xlim=c(1,N), main = "Y(1| Z=1) and Y(0| Z=0)", xlab="u", ylab=yl) -->
+<!--   abline(h=mean(Y0[Z==0])) -->
+<!--   lines(u[Z==1], Y1[Z==1], type = "p", col="red") -->
+<!--   abline(h=mean(Y1[Z==1]), col="red") -->
+<!-- plot(u[Z==0&u<=N/2], Y0[Z==0&u<=N/2], ylim=c(-3, 4), xlim=c(1,N), -->
+<!--      main = "Subgroup ATEs", xlab="u", ylab = yl) -->
+<!--   segments(0, mean(Y0[Z==0 & u<=N/2]), N/2, mean(Y0[Z==0 & u<=N/2]), lwd =  1.3) -->
+<!--   lines(u[Z==1 & u<=N/2], Y1[Z==1 & u<=N/2], type="p",ylim=c(-3, 4), col="red") -->
+<!--   segments(0, mean(Y1[Z==1 & u<=N/2]), N/2, mean(Y1[Z==1 & u<=N/2]), lwd =  1.3, col="red") -->
+<!--   lines(u[Z==0 & u>N/2], Y0[Z==0 & u>N/2], type = "p", ylim=c(-3, 4), xlim=c(1,N)) -->
+<!--   segments(1+N/2, mean(Y0[Z==0 & u>N/2]), N, mean(Y0[Z==0 & u>N/2]), lwd =  1.3) -->
+<!--   points(u[Z==1 & u>N/2], Y1[Z==1 & u>N/2], type="p", ylim=c(-3, 4), col="red") -->
+<!--   segments(1+N/2, mean(Y1[Z==1 & u>N/2]), N, mean(Y1[Z==1 & u>N/2]), lwd =  1.3, col="red") -->
+<!-- 	} -->
+
+<!-- N  <- 100 -->
+<!-- u  <- seq(1:N) -->
+<!-- Y0 <- rnorm(N) -->
+<!-- Y1 <- rnorm(N) + 1 -->
+<!-- Z  <- 1:N %in% sample(N, N/2) -->
+<!-- ``` -->
+
+
+<!-- ## Reflection -->
+
+
+<!-- \color{red} \textbf{Idea}: We now have a *positive* argument for claiming unbiased estimation of the average treatment effect following random assignment -->
+
+<!-- But is the average treatment effect a quantity of *social scientific* interest? -->
+
+
+<!-- ## Potential outcomes: why randomization works -->
+<!-- The average of the differences $\approx$ difference of averages -->
+<!-- ```{r,eval=TRUE, echo = TRUE, fig.width = 14, fig.height= 7} -->
+<!-- po.graph(N, Y0, Y1, u, Z) -->
+<!-- ``` -->
+
+
+<!-- ## Potential outcomes: heterogeneous effects -->
+<!-- The average of the differences $\approx$ difference of averages -->
+<!-- ```{r,eval=TRUE, echo = TRUE, fig.width = 14, fig.height= 7} -->
+<!-- po.graph(N, Y0 - u/50, Y1+u/50, u,Z) -->
+<!-- ``` -->
+
+<!-- ## Potential outcomes: heterogeneous effects -->
+<!-- **Question**: $\approx$ or $=$? -->
+
+
+
+
+
+
+
+<!-- ## Limitations of the design based solution -->
+
+<!-- * Wrong estimand -->
+<!-- * Thin explanation -->
+<!-- * Unknown transportability -->
+
+
+
+## A causal model
+
+* A representation of beliefs about causal dependencies in a given domain
+
+    * How do we believe variables relating to democratization (economic conditions, external threat, inequality, regime type, etc.) relate to one another causally?
+    
+    * How do we believe variables relating to the choice of an electoral system (party system, relative party strength, normative beliefs, electoral rules) are related to one another causally?
+    
+* Probabilistic causal model comprised of: 
+
+    * Functional equations encoding beliefs about relations among variables
+    
+    * Probability distributions (priors) over exogenous conditions
+    
+* Can be partly summarized graphically
+
+
+<!-- ## Again: Causal types in a binary world -->
+
+<!-- \begingroup \scriptsize -->
+
+<!-- \begin{table}[h!] -->
+<!-- \begin{tabular}{l|cccc} \small -->
+
+<!-- & Type a & Type b & Type c & Type d \\ -->
+
+<!-- & \textbf{a}dverse effects & \textbf{b}eneficial Effects & \textbf{c}hronic cases & \textbf{d}estined cases \\ -->
+<!-- \hline -->
+<!-- Not treated &    Healthy &       Sick &       Sick &    Healthy \\ -->
+<!-- Treated &       Sick &    Healthy &       Sick &    Healthy \\ -->
+<!-- \end{tabular} -->
+<!-- \label{tabPO} -->
+<!-- \end{table} -->
+
+<!-- \endgroup -->
+
+<!-- **Case-level:** -->
+
+<!-- * $a$: negative effect -->
+<!-- * $b$: positive effect -->
+<!-- * $c$: 0 effect, $Y=0$ -->
+<!-- * $d$: 0 effect, $Y=1$ -->
+
+
+<!-- ## Causal types: case-level -->
+
+<!-- Let $t_{ij}$ refer to a causal type in which -->
+
+<!-- * $y=i|x=0$ -->
+<!-- * $y=j|x=1$ -->
+
+<!-- Then we have: -->
+
+<!-- * $a$: negative effect $\Rightarrow$ $\theta_{10}$ -->
+<!-- * $b$: positive effect $\Rightarrow$ $\theta_{01}$ -->
+<!-- * $c$: 0 effect, $Y=0$ $\Rightarrow$ $\theta_{00}$ -->
+<!-- * $d$: 0 effect, $Y=1$ $\Rightarrow$ $\theta_{11}$ -->
+
+
+<!-- ## Causal types: case-level -->
+
+<!-- * $a$: negative effect $\Rightarrow$ $\theta_{10}$ -->
+<!-- * $b$: positive effect $\Rightarrow$ $\theta_{01}$ -->
+<!-- * $c$: 0 effect, $Y=0$ $\Rightarrow$ $\theta_{00}$ -->
+<!-- * $d$: 0 effect, $Y=1$ $\Rightarrow$ $\theta_{11}$ -->
+
+<!-- We can start to think about this *graphically*: -->
+
+<!-- $$X \rightarrow Y \leftarrow \theta$$ -->
+<!-- where $\theta$ is a variable that takes on different values: e.g., $\theta=\theta_{01}$ -->
+
+<!-- (What's assumed?) -->
+
+<!-- ## Causal types -->
+
+<!-- \begingroup \scriptsize -->
+
+<!-- \begin{table}[h!] -->
+<!-- \begin{tabular}{l|cccc} \small -->
+
+<!-- & Type a & Type b & Type c & Type d \\ -->
+
+<!-- & \textbf{a}dverse effects & \textbf{b}eneficial Effects & \textbf{c}hronic cases & \textbf{d}estined cases \\ -->
+<!-- \hline -->
+<!-- Not treated &    Healthy &       Sick &       Sick &    Healthy \\ -->
+<!-- Treated &       Sick &    Healthy &       Sick &    Healthy \\ -->
+<!-- \end{tabular} -->
+<!-- \label{tabPO} -->
+<!-- \end{table} -->
+
+<!-- \endgroup -->
+
+<!-- **Population-level:** -->
+
+<!-- * $\lambda_a, \lambda_b, \lambda_c, \lambda_d$: type shares in population -->
+<!-- * ATE = $\lambda_b - \lambda_a$ -->
+
+<!-- **Graph:** -->
+
+<!-- $$X \rightarrow Y \leftarrow T \leftarrow \lambda$$ -->
+
+
+## A causal model in graphical form
+
+Suppose we believe that a free press ($X$) can topple governments ($Y$) by reporting on corruption ($R$).
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.9\\textwidth'}
+par(mar=c(1,1,1,1))
+hj_dag(x = c(0, 0, 1, 1, 2, 2),
+       y = c(2, 3, 2, 3, 2, 3),
+       names = c(
+         "X", 
+         expression(paste(U[X])),
+         "R",
+         expression(paste(U[R])), 
+         "Y", 
+         expression(paste(U[Y])) 
+         ),
+       arcs = cbind( c(2, 4, 6, 1, 1, 3),
+                     c(1, 3, 5, 7, 3, 5)),
+       # title = "A Simple DAG",
+       padding = .4, contraction = .15) 
+
+```
+
+
+## Elements of a Directed Acyclic Graph (DAG)
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.8\\textwidth'}
+par(mar=c(1,1,1,1))
+hj_dag(x = c(0, 0, 1, 1, 2, 2),
+       y = c(2, 3, 2, 3, 2, 3),
+       names = c(
+         "X", 
+         expression(paste(U[X])),
+         "R",
+         expression(paste(U[R])), 
+         "Y", 
+         expression(paste(U[Y])) 
+         ),
+       arcs = cbind( c(2, 4, 6, 1, 1, 3),
+                     c(1, 3, 5, 7, 3, 5)),
+       padding = .4, contraction = .15) 
+
+```
+
+* Exogenous variables: affect variables in the model, but are not affected by anything in model
+
+    * $U_X$, $U_R$, $U_Y$
+    * Think: unexplained prior conditions or random disturbances
+
+* Endogenous variables: affect and are affected by variables in model
+
+
+## DAG grammar
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.8\\textwidth'}
+par(mar=c(1,1,1,1))
+hj_dag(x = c(0, 0, 1, 1, 2, 2),
+       y = c(2, 3, 2, 3, 2, 3),
+       names = c(
+         "X", 
+         expression(paste(U[X])),
+         "R",
+         expression(paste(U[R])), 
+         "Y", 
+         expression(paste(U[Y])) 
+         ),
+       arcs = cbind( c(2, 4, 6, 1, 1, 3),
+                     c(1, 3, 5, 7, 3, 5)),
+       padding = .4, contraction = .15) 
+
+```
+
+* Node: a variable with a specified range
+
+* Edge: an arrow connecting two nodes
+
+    * Implies *possible* causal dependency
+    
+    * Only *direct* dependencies are connected
+    
+    * **No edge** $\Rightarrow$ **no causal dependency**
+
+
+## DAG grammar
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.8\\textwidth'}
+par(mar=c(1,1,1,1))
+hj_dag(x = c(0, 0, 1, 1, 2, 2),
+       y = c(2, 3, 2, 3, 2, 3),
+       names = c(
+         "X", 
+         expression(paste(U[X])),
+         "R",
+         expression(paste(U[R])), 
+         "Y", 
+         expression(paste(U[Y])) 
+         ),
+       arcs = cbind( c(2, 4, 6, 1, 1, 3),
+                     c(1, 3, 5, 7, 3, 5)),
+       padding = .4, contraction = .15) 
+
+```
+
+*Not* represented on the DAG:
+
+* Ranges of variables
+
+* Functional relationships
+
+    * E.g., do $X$ and $U_R$ operate additively on $R$? Multiplicatively?
+    
+* Beliefs about the distributions of the exogenous variables
+
+
+## Ranges
+
+We specify possible values variable can take on, e.g.:
+
+* $X \in \{0,1\}$ ($X$ is binary)
+
+* $X \in (\,0,1)\,$ ($X$ ranges from 0 to 1)
+
+
+## Functional equations
+
+A function:
+
+* Specifies how one variable's value is determined by the values of its immediate "ancestors" ("parents")
+
+* Can take a vast variety of forms
+
+    * $B=A$
+    
+    * $B=AC$
+    
+    * $B=\beta A$ (where $\beta$ may be unknown at the outset)
+    
+    * $B=\beta A+U_B$ (expressing uncertainty about forces external to the linear relationship)
+    
+    * $B=AU_B$ (expressing uncertainty about whether or in what direction $A$ affects $B$)
+
+
+## Rules for functional equations
+
+* Functions can be very specific or very general, with lots of uncertainty
+
+* Functions can be fully non-parametric, e.g.:
+
+    * $Y=X$ if $U_Y=1$
+    * $Y=1-X$ if $U_Y=2$
+    * $Y=0 \times X$ if $U_Y=3$
+    * $Y=1 + 0 \times X$ if $U_Y=4$
+
+* Each endogenous variable needs a function
+
+* A function for $X$ includes no variables other than $X$'s parents
+
+
+## Functional equations in an example
+
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.9\\textwidth'}
+par(mar=c(1,1,1,1))
+hj_dag(x = c(0, 0, 0, 0, 2, 2, 3),
+       y = c(4, 3, 0, 1, 4, 0, 2),
+       names = c(
+         "S: Sensitivity", 
+         expression(paste(U[S])),
+         "X: Free press",
+         expression(paste(U[X])),
+         "C: Corruption",
+         "R: Reports",
+         "Y: Govt removal"
+         ),
+       arcs = cbind( c(2, 4, 1, 3, 3, 5, 5, 6),
+                     c(1, 3, 5, 6, 5, 7, 6, 7)),
+       padding = .4, contraction = .15) 
+
+```
+
+
+## Functional equations in corruption example: exercise
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.6\\textwidth'}
+par(mar=c(1,1,1,1))
+hj_dag(x = c(0, 0, 0, 0, 1, 1, 3),
+       y = c(4, 3, 0, 1, 4, 0, 2),
+       names = c(
+         "S", 
+         expression(paste(U[S])),
+         "X",
+         expression(paste(U[X])),
+         "C",
+         "R",
+         "Y"
+         ),
+       arcs = cbind( c(2, 4, 1, 3, 3, 5, 5, 6),
+                     c(1, 3, 5, 6, 5, 7, 6, 7)),
+       padding = .4, contraction = .15) 
+
+```
+
+
+What functional equations would express the following 3 causal beliefs?
+
+\begin{enumerate}
+	\item Govt removal ($Y=1$) occurs if and only if there are both reports of corruption and actual corruption
+  \item Corruption occurs if and only if the government is NOT sensitive OR there is NOT a free press
+  \item Reports of corruption occur if and only if there is a free press and there is corruption
+\end{enumerate}
+
+
+
+## Functional equations in running example
+
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.6\\textwidth'}
+par(mar=c(1,1,1,1))
+hj_dag(x = c(0, 0, 0, 0, 1, 1, 3),
+       y = c(4, 3, 0, 1, 4, 0, 2),
+       names = c(
+         "S", 
+         expression(paste(U[S])),
+         "X",
+         expression(paste(U[X])),
+         "C",
+         "R",
+         "Y"
+         ),
+       arcs = cbind( c(2, 4, 1, 3, 3, 5, 5, 6),
+                     c(1, 3, 5, 6, 5, 7, 6, 7)),
+       padding = .4, contraction = .15) 
+
+```
+
+
+
+Equations:
+
+* $Y = CR$
+
+* $C = 1 - XS$
+
+* $R = CX$
+
+* $S = 1$ if $u_S < \pi^S$, 0 otherwise  
+
+* $S = 1$ if $u_X < \pi^X$, 0 otherwise
+
+(where the $\pi$'s are fixed parameters not represented on graph) 

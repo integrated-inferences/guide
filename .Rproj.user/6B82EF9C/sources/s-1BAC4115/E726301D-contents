@@ -1,0 +1,40 @@
+function(model, query, parameters=NULL,  given = NULL){
+  
+  if(is.null(parameters)) {
+    if(is.null(model$parameters)) stop("parameters not provided")
+    parameters <- model$parameters }
+  
+  vars <- model$variables
+  
+  # Possible data
+  vals <- data.frame(gbiqqtools::perm(rep(2,length(model$variables)))) - 1
+  vals[vals ==-1] <- NA
+  names(vals) <- vars
+  if(!is.null(given)) vals <- dplyr::filter(vals, eval(parse(text = given)))
+  
+  # Conditions
+  conds <- t(apply(vals, 1, function(j) paste(vars, j, sep = "==")))
+  conds[is.na(vals)] <- NA
+  subsets <- apply(conds, 1, function(j) paste(j[!is.na(j)], collapse = " & "))
+  subsets <- as.list(subsets)
+  subsets[subsets==""] <- TRUE
+  estimands <- query_model(
+    model   = model,
+    parameters  = parameters,
+    using = "parameters",
+    queries = query,
+    subsets = subsets)$mean
+  
+  probs <- unlist(get_data_probs(model, vals))
+  
+  # hack to deal with fact that get_data_probs returns missing if all NAs
+  p <- allNAs <- apply(vals, 1, function(j) all(is.na(j)))
+  p[p] <- 1
+  p[!p] <- probs
+  
+  out <- data.frame(cbind(vals, estimands, p))
+  
+  names(out) <- c(vars, "posterior", "prob")
+  rownames(out) <- NULL
+  data.frame(out)
+}

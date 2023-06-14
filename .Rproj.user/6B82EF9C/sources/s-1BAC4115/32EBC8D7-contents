@@ -1,0 +1,867 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+# (PART) Model-Based Causal Inference {-}
+
+# Process Tracing with Causal Models {#pt}
+
+***
+
+We connect the literature on causal models to qualitative inference strategies used in process tracing. We provide a procedure for inference on case level queries from causal models. In addition we extract a set of implications for process tracing. We show how a key result from the causal models literature provides a condition for when clues may be (or certainly will not be) informative. 
+
+***
+
+FLAG: Change causal type to unit type throughout (though note I've introduced this already in the **"unit causal type"** paragraph.)
+
+```{r, include = FALSE}
+source("_packages_used.R")
+```
+
+
+## Process tracing and causal models
+
+This chapter demonstrates how we can use causal models to conduct confirmatory process tracing: that is, to draw causal inferences about a single case from case-level data.  
+
+### The intuition
+
+We first walk through the basic intuition and then provide a more formal account.
+
+When we undertake process tracing, we seek to answer a causal query about a given case.
+The key insight driving our approach is that **the inference about a causal estimand for a case is a claim about what causal types are both likely ex ante (given prior knowledge) and consistent with the data**.^[This differs from the task for mixed methods that  we will address in Chapter 8 as these concern claims about the distribution of causal types in populations.]
+
+The estimand of interest can be a statement about any number of case-level causal features, including a case-level causal effect, the pathway through which an effect operates, an actual cause, or causal attribution. We will use observations from the case itself to address this query. We do so via a procedure in which we first encode prior knowledge in the form of a causal model, use data to learn about features of the model, and then take what we have learned about the model and map it into our query.
+
+Given a causal model, we form posteriors over estimands as follows:
+
+1. **Specify all causal types**. A causal type, recall, specifies the values that a unit is expected to take, absent any interventions, but also the values it would take given some interventions on some variables. Examples of types might be:
+  * Type 1: ($X=1$) *and* ($Y=1$ if $X=1$, $Y=0$ if $X=0$).
+  * Type 2: ($X=0$) *and* ($Y=1$ if $X=1$, $Y=0$ if $X=0$).
+  * Type 3: ($X=1$) *and* ($Y=1$ if $X=1$, $Y=1$ if $X=0$).
+
+
+2. **Specify priors over causal types.** Report how likely you think it is that a given unit is of a particular causal type. In the simplest case one might place 0 weight on some causal types (that might be ruled out by theory, for example) and equal weight on the others. 
+
+3. **Specify the estimand in terms of causal types.** For instance the estimand "$Y$ responds positively to $X$" can be thought of as a collection of causal types: Q={Type 1, Type 2}.^[More generally an estimand might be a function of the distribution of causal types.]
+
+4. **Specify the set of causal types that are consistent with the data.** For instance if we observe $X=1, Y=1$ we might specify the data-consistent set as {Type 1, Type 3.}.
+
+5. **Update.** Updating is done then by adding up the prior probabilities on all causal types that are consistent with both the data and the estimand, and dividing this by the sum of prior probabilities on all causal types that are consistent with the data (whether or not they are consistent with the estimand).
+
+
+<!-- 1. **Draw a DAG.** We begin by constructing a causal model in graphical form, a DAG, expressing which variables in the domain of interest we think can have a direct effect on which other variables. As we have discussed, the causal model we start with may be derived from theory, from data on other cases, or some combination of the two. (We show, for instance, in Chapter \@ref(mixing) how data from a larger set of cases can inform the priors we bring to single-case process tracing.)  -->
+
+<!-- 2. **Identify causal types**. A DAG, in turn, defines a set of possible causal types: all of the different possible combinations of nodal types that any case might have.  -->
+
+<!-- 3. **Form priors**. We draw further on background knowledge, about the population to which the case belongs, to formulate prior beliefs about the probability that the case is of different causal types. We can generate these priors by ruling out certain nodal types as inconsistent with prior knowledge. Where our prior knowledge supports doing so, we can also place differential quantitative weights on those nodal types that we believe to be more or less common in the population. -->
+
+<!-- 4. **Observe data**. We observe data on some or all of the nodes in the graph. -->
+
+<!-- 5. **Eliminate causal types inconsistent with the data**. Check the consistency of each causal type with the data. Eliminate from contention any causal type that could not have generated the data pattern that we observe. -->
+
+<!-- 6. **Form posteriors**. We now scale up the probabilities on all remaining causal types, providing a posterior probability on each type. -->
+
+<!-- 7. **Map from causal types to query**. As any causal query can be formulated as a question about causal types (see Chapter \@ref(questions)), we can now map from our posteriors on causal types to a posterior probability on the estimand of interest: whether a causal effect, a causal pathway, causakl attribution, or some other case-level causal quantity. -->
+
+```{r, include = FALSE}
+library(plotrix)
+```
+
+```{r ptvenn, echo = FALSE, fig.width=6, fig.height=6, fig.cap = "Logic of simple updating on arbitrary estimands."}
+
+frame()
+draw.circle(.35,.35,.3,nv=100,border=NULL,col=NA,lty=1,density=NULL,
+						angle=45,lwd=1)
+draw.circle(.65,.35,.3,nv=100,border=NULL,col=NA,lty=1,density=NULL,
+						angle=45,lwd=1)
+draw.circle(.5,.65,.3,nv=100,border=NULL,col=NA,lty=1,density=NULL,
+						angle=45,lwd=1)
+text(.5, .8, "Consistent\nwith query")
+text(.2, .35, "Consistent\nwith priors")
+text(.8, .35, "Consistent\nwith data")
+text(.15, .95, "All\ncausal types")
+text(.5, .45, "A")
+text(.32, .55, "B")
+text(.5, .25, "C")
+
+
+box()
+```
+
+This process is represented graphically with Figure \@ref(fig:ptvenn), where we can think of probabilities as proportionate to areas. Our causal model defines the causal type space. We then proceed by a process of elimination. Only some of the causal types in the model are consistent with prior knowledge. Only some are consistent with the data that we observe. Finally, any query itself maps onto a subset of the possible causal types. The causal types that remain in contention once we have observed the evidence are those at the intersection of consistency with priors and consistency with the data. $A$ represents those types that are *also* consistent with a given answer to the query (say, $X$ has a positive effect on $Y$).
+
+Thus, our belief about the query before we have seen the data is the probability of all causal types consistent with our priors and with the query ($A + B$) as a proportion of all types consistent with our priors. Once we have seen the data, we have reduced the permissible types to $A + C$. Our posterior belief on the query is, then, the probabilities of those remaining types that are consistent with the query as a share of the probabilities of *all* remaining types, or $A/(A+C)$.
+
+What we are doing here is straightforward: assessing causal possibilities for their compatibility with both the evidence at hand and our prior knowledge of how the world works. The formalization that we will present ensures that prior knowledge and evidence are all recorded explicitly while forcing logical consistency on the inferences that emerge from them.
+
+
+### A formalization of the general approach
+
+More formally, the general approach to inference draws on the components we outlined in chapters 2 to 4: graphical causal models (DAGs), nodal and causal types, and priors. We now show how these elements formally interact with data to generate causal inferences. We continue to focus on a situation with binary variables, though suggest later in the chapter how this can be extended. Though we walk through the procedure for simple models, the approach outlined here can be applies to *any* causal model with binary variables and to any estimands defined over the model.
+
+The process tracing procedure operates as follows:
+
+**A DAG**. We begin with a DAG, or graphical causal model. As we know, a DAG identifies a set of variables and describes the parent-child relations between them, indicating for each variable which other variables are its direct (possible) causes. These relationship, in turn, tell us which (non-descendant) variables a given variable is *not* independent of given the other variables in the model. 
+
+**Nodal types**. Once we have specified a DAG, we have defined the full set of possible nodal types: the types defining the value that a variable will take on given the values of its parents, which we have denoted with $\theta$ values. At each node, the range and number of nodal types is defined by the number of parents that that node has and the number of values the variables can take on. For instance, assuming all variables to be binary, if $Y$ has parents $X$ and $W$ (so $k=2$), then there are $2^{\left(2^2\right)}=16$) possible causal types for the $Y$ node. There are $2^2$ possible combinations of values that two binary causal variables can take on----$(X=0,W=0), (X=0,W=1), (X=1,W=0), (X=1,W=1)$---which implies four possible causal conditions over which $Y$'s possible responses must be defined. For instance, as we have seen, with two causal variables, we can have $\theta^Y_{0000}$, where $Y$ is always 0; $\theta^Y_{0001}$, where $Y$ is 0 unless both $X$ and $W$ are 1; and so on.^[These nodal types can require many indices--$2^k$ for a node with $k$ parents---and the rule we follow is that the $i$th subscript indicates the value the node takes when parent $j \in {1, 2, ..., k}$ take values $\mod(floor((i-1)/(2^{j-1})), 2)$ For instance for `Y0111` the first index means that Y takes the value 0 where both parents are 0,  in all other cases it takes value 1.] To get the total number of nodal types, we simply raise $2$ (since $Y$ is binary) to the number of causal conditions (4), giving the number of possible patterns of $Y$ values that could be generated across these four conditions (16). (The full set of nodal types for two causal variables in a binary setup is given in \@ref(tab:PO16).)^[More generally, let us say that any node $j$ can take on $r_j$ possible values and has parents belonging to set $PA_j$ and that each parent, $i \in PA_j$, can take on $r_i$ values. Then the number of nodal types for node $j$ is equal to $r_j^{\prod_{i \in PA_j}r_i}$. Informally, the exponent in this expression simply multiplies by one another the number of values that each of $j$'s parents can take on. This product tells us the number of causal conditions across which $j$'s responses must be defined. We then raise the number of values that $j$ can take on to the power of the number of causal conditions. With all variables binary, this expression translates to $2^{\left(2^k\right)}$ nodal types for a node with $k$ parents.]
+
+All variables in a model have nodal types defining the value they take on given the value of their parents, including those variables without substantive parents. Suppose that $X$ and $W$, in this model, have no substantively defined parents. We nonetheless define a nodal type for each of them, which simply captures their exogenous assignment to some value. With $X$ binary, for instance, there are two nodal types, $\theta^X_{0}$, where $X$ is set to $0$, and $\theta^X_{1}$, where $X$ is set to $1$.
+
+**Unit causal types**. We will want to be able to conceive not just of types for individual nodes but of the full collection of nodal types across all nodes in a model. We refer to a unit's full set of nodal types as its *unit causal type* --- or, more simply, unit type --- which we represent as $\theta$.  A unit type is simply a listing that contains one nodal type for each node in the model. For instance, with a model with variable $X$, $W$, and $Y$, each unit has a *causal* type composed of its *nodal* types on each of the three nodes.^[A model in which each node $j$ has $k_j$ parents has $\prod_j2^{\left(2^{k_j}\right)}$ causal types that uniquely determine what data will be observed for a type under all possible interventions on its exogenous nodes.]  Thus, one causal type in this model could be $\theta = (\theta^X = \theta^X_1, \theta^W = \theta^W_1, \theta^Y = \theta^Y_{1101})$. Another could be $\theta = (\theta^X = \theta^X_0, \theta^W = \theta^W_1, \theta^Y = \theta^Y_{0001})$. And so on.
+
+We show the mapping between nodal and causal types, for a simply $X \rightarrow Y$ model, in Table \@ref(tab:nodalcausalmatrix). The column headings represent the $8$ permissible causal types, each expressed simply as a concatenated strings of nodal types. The row headings represent the nodal types. In each interior cell, a $1$ or $0$ indicates whether or not a given nodal type is a component of a given causal type. As can be seen, each causal type has two nodal types that are its components since there are two nodes in this model. Each $X$-nodal type is part of four causal types since it can be combined with four different $Y$-nodal types, while each $Y$-nodal type is part of two causal types since it can be combined with two $X$-nodal types.
+
+|             **Causal Types $\rightarrow$** | $\theta^X_0$.$\theta^Y_{00}$ | $\theta^X_1$.$\theta^Y_{00}$ | $\theta^X_0$.$\theta^Y_{10}$ | $\theta^X_1$.$\theta^Y_{10}$ | $\theta^X_0$.$\theta^Y_{01}$ | $\theta^X_1$.$\theta^Y_{01}$ | $\theta^X_0$.$\theta^Y_{11}$ | $\theta^X_1$.$\theta^Y_{11}$ |
+|-------------------------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|
+|         **Nodal types $\downarrow$**        |                              |                              |                              |                              |                              |                              |                              |                              |
+|  $\theta^X_0$ |               1              |               0              |               1              |               0              |               1              |               0              |               1              |               0              |
+| $\theta^X_1$ |               0              |               1              |               0              |               1              |               0              |               1              |               0              |               1              |
+|               $\theta^Y_{00}$              |               1              |               1              |               0              |               0              |               0              |               0              |               0              |               0              |
+|               $\theta^Y_{10}$              |               0              |               0              |               1              |               1              |               0              |               0              |               0              |               0              |
+|               $\theta^Y_{01}$              |               0              |               0              |               0              |               0              |               1              |               1              |               0              |               0              |
+|               $\theta^Y_{11}$              |               0              |               0              |               0              |               0              |               0              |               0              |               1              |               1              |
+Table: (\#tab:nodalcausalmatrix). A mapping between nodal types and causal types for a simple $X \rightarrow Y$ model.
+
+
+
+
+
+
+<!-- |                                    **Causal Types $\rightarrow$** | $\theta^X_0$.$\theta^Y_{00}$ | $\theta^X_1$.$\theta^Y_{00}$ | $\theta^X_0$.$\theta^Y_{10}$ | $\theta^X_1$.$\theta^Y_{10}$ | $\theta^X_0$.$\theta^Y_{01}$ | $\theta^X_1$.$\theta^Y_{01}$ | $\theta^X_0$.$\theta^Y_{11}$ | $\theta^X_1$.$\theta^Y_{11}$ | -->
+<!-- |------------------------------------------------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:| -->
+<!-- |                    **Parameters $\downarrow$**                    |                              |                              |                              |                              |                              |                              |                              |                              | -->
+<!-- |               $\theta^X_0 | \theta^Y= \theta^Y_{01}$              |               0              |               0              |               0              |               0              |               1              |               0              |               0              |               0              | -->
+<!-- | $\theta^X_1 | \theta^Y_{01}$$\theta^X_1 | \theta^Y= \theta^Y_{01}$ |               0              |               0              |               0              |               0              |               0              |               1              |               0              |               0              | -->
+<!-- |             $\theta^X_0| \theta^Y \neq \theta^Y_{01}$             |               1              |               0              |               1              |               0              |               0              |               0              |               1              |               0              | -->
+<!-- |             $\theta^X_1 | \theta^Y \neq \theta^Y_{01}$            |               0              |               1              |               0              |               1              |               0              |               0              |               0              |               1              | -->
+<!-- |                          $\theta^Y_{00}$                          |               1              |               1              |               0              |               0              |               0              |               0              |               0              |               0              | -->
+<!-- |                          $\theta^Y_{10}$                          |               0              |               0              |               1              |               1              |               0              |               0              |               0              |               0              | -->
+<!-- |                          $\theta^Y_{01}$                          |               0              |               0              |               0              |               0              |               1              |               1              |               0              |               0              | -->
+<!-- |                          $\theta^Y_{11}$                          |               0              |               0              |               0              |               0              |               0              |               0              |               1              |               1              | -->
+
+
+
+
+
+<!-- |                            | $\theta^X_0$.$\theta^Y_{00}$ | $\theta^X_1$.$\theta^Y_{00}$ | $\theta^X_0$.$\theta^Y_{10}$ | $\theta^X_1$.$\theta^Y_{10}$ | $\theta^X_0$.$\theta^Y_{01}$ | $\theta^X_1$.$\theta^Y_{01}$ | $\theta^X_0$.$\theta^Y_{11}$ | $\theta^X_1$.$\theta^Y_{11}$ | -->
+<!-- |-----------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------| -->
+<!-- | $\theta^X_0 | \theta^Y= \theta^Y_{01}$ | 0                            | 0                            | 0                            | 0                            | 1                            | 0                            | 0                            | 0                            | -->
+<!-- | $\theta^X_1 | \theta^Y= \theta^Y_{01}$ | 0                            | 0                            | 0                            | 0                            | 0                            | 1                            | 0                            | 0                            | -->
+<!-- | $\theta^X_0| \theta^Y \neq \theta^Y_{01}$                | 1                            | 0                            | 1                            | 0                            | 0                            | 0                            | 1                            | 0                            | -->
+<!-- | $\theta^X_1 | \theta^Y \neq \theta^Y_{01}$                | 0                            | 1                            | 0                            | 1                            | 0                            | 0                            | 0                            | 1                            | -->
+<!-- | $\theta^Y_{00}$             | 1                            | 1                            | 0                            | 0                            | 0                            | 0                            | 0                            | 0                            | -->
+<!-- | $\theta^Y_{10}$             | 0                            | 0                            | 1                            | 1                            | 0                            | 0                            | 0                            | 0                            | -->
+<!-- | $\theta^Y_{01}$             | 0                            | 0                            | 0                            | 0                            | 1                            | 1                            | 0                            | 0                            | -->
+<!-- | $\theta^Y_{11}$             | 0                            | 0                            | 0                            | 0                            | 0                            | 0                            | 1                            | 1                            | -->
+
+**Priors**: Our background beliefs about a causal domain will usually consist of more than just beliefs about which variables have causal connections; they will also typically contain beliefs about what *kinds* of effects operate between variables. That is, they will contain beliefs about which types are possible or, more generally, are more or less common in the world. We express these beliefs over causal effects as either restrictions on nodal types or as probability distributions over the nodal types. 
+
+In general, when doing process tracing in this framework, we think of a given case of interest -- the one we are studying and seek to learn about -- as being drawn at random from a population. Thus, our prior beliefs about a *single* case -- before we do the process tracing -- are really beliefs about that population. So, for instance, our prior belief about the probability that inequality has a positive effect on democratization in Mexico in 1999 is our belief about how commonly inequality has a positive effect on democratization in the population of cases that are "like" Mexico in 1999.^[The reference population for a case is defined based on whatever we already know about the case. Thus, for instance, if we already know that the case has $Y=1$ before we begin process tracing, then the relevant population for the formation of prior beliefs is all cases in which $Y=1$.] 
+
+We let $\lambda^j$ denote our belief about the population distribution of nodal types at node $j$. A $\lambda^j$ is simply a vector of proportions, one for each possible nodal type, with the proportions adding up to $1$. So, for instance, $\lambda^Y$ for our current example would be a vector with four values, each of which expresses a proportion for one of the four nodal types at $Y$. So we might have $\lambda^Y_{01}=0.1$, $\lambda^Y_{11}=0.05$, and so on -- with the $\lambda^Y$ values summing to $1$ because these values are defined over the full set of possible nodal types for $Y$. 
+
+We can, in turn, use these population parameters -- these beliefs about nodal-type proportions in the population -- to create prior probabilities over the *causal* type for the case at hand. Since causal types are merely combinations of nodal types, and our case has been drawn at random from the population, we can take a set of posited proprtions of nodal types in the population and readily calculate the probability that our case is of any given causal type. To do so, we need to join together $\lambda$'s across the nodes in a model. 
+
+Let us first see how this works in a situation in which we assume that the nodal types are independent of one another. We can think of this as a situation in which there is no confounding that is not captured in the graph -- no variable missing from the model that is a common ancestor of multiple nodes in the model. Here, our beliefs over causal types are simply the product of our beliefs over the component nodal types (since the joint probability of independent events is simply the product of their individual probabilities). For instance, one causal type might be "a unit in which $X=1$ and in which $Y=1$ no matter what value $X$ takes." In this case the probability that a case is of this causal type might be written $\Pr(\theta^X = \theta^X_1)\Pr(\theta^Y = \theta^Y_{11}) = \lambda^X_1\lambda^Y_{11}$.
+
+The simplest way in which we can express beliefs about the differential probabilities of different causal possibilities is by *eliminating* nodal types that we do not believe to be possible---setting their parameter values to $0$. Suppose, for instance, that we are examining the effect of ethnic diversity on civil war in a case. We might not know whether ethnic diversity causes civil war in this case, but we might have sufficient background knowledge to believe that ethnic diversity never has a *negative* effect on civil war: it never prevents a civil war from happening that would have happened in the absence of ethnic diversity. We would thus want to set the parameter value for a negative causal effect to $0$. If we then know nothing about the relative frequencies of the three remaining nodal types for $Y$, we may (following the  principle of indifference),  frequency of positive effects, null effects with civil war destined to happen, and null effects with civil war never going to happen, assigning a weight of $\frac{1}{3}$ to each of them. 
+
+In a situation of unobserved confounding, our beliefs over causal types are still well defined, though they are no longer the simple product of beliefs over nodal types. Let us imagine for instance, in a simple $X \rightarrow Y$ model, that we believe that some unobserved factor both makes cases more likely to have $X = 1$ and makes it more likely that $X$ has a positive effect on $Y$. This is the same as saying that the probability that $\theta^X = \theta^X_1$ is positively correlated with the probability that $\theta^Y = \theta^Y_{01}$. Now, our probability that *both* $X=1$ and $X$ has a positive effect must be calculated using the joint probability formula, $\Pr(A, B) = \Pr(A)\Pr(B|A)$.^[In words, the probability of $A$ and $B$ occurring is equal to the probability of $A$ occurring times the probability of $B$ occurring *given* that $A$ occurs.] Thus, $\Pr(\theta^Y = \theta^Y_{01}, \theta^X = \theta^X_1) = \Pr(\theta^Y = \theta^Y_{01})\Pr(\theta^X = \theta^X_1 | \theta^Y = \theta^Y_{01})$. To form priors over causal types in this situation, we need to posit beliefs about a set of more complex, conditional proportions for $X$'s type. Specifically, we need to posit, *for those cases* with a positive effect of $X$ on $Y$, what proportion are "assigned" to $X=1$; and, separately, what proportion are assigned to $X=1$ among those cases *without* a positive effect of $X$ on $Y$.
+
+These conditional proportions may, of course, be difficult for the researcher to form beliefs about. Forming a belief about them amounts to saying that we do not know what generates confounding, but we know the correlations it generates in the data. We may wonder how often we will be in that epistemological position. An alternative way to parse the problem, then, is to *model* the confounding by including the confounder (say, $Z$) as a new node in the graph. In the above example, $Z$ would point into both $X$ and $Y$. We would then posit population proportions for a set of nodal types for $X$ -- representing $X$'s possible responses to $Z$ -- and for $Y$ -- representing $Y$'s possible responses to both $X$ and $Z$. We may find it easier to reason and form beliefs about these more complex nodal types than about the conditional proportions involved in unobserved confounding. The two approaches work out to be analytically equivalent given equivalent underlying beliefs, so the choice between them will be a matter of researcher preference.^[As we will see later in the book, another approach is to gather data on additional cases. When analyzing multiple cases, we can set up our priors to allow for the possibility of unobserved confounding and then, potentially, learn about that confounding from the data. This is not possible under our procedure for single-case process tracing, where we treat the population parameters as given and fixed.]
+
+Importantly, in process tracing, we are focused on drawing case-level inferences and, as such, we treat the population-level parameters as given and fixed. In general, these parameters derive from our beliefs about how the world works, and those beliefs will typically be uncertain.  The key point, however, is that in process tracing, the population parameters serve as an *input* into the analysis, conditioning our inferences from the evidence; but we do not *update* on these population-level beliefs once we see the data from a single case. Importantly, as we show later in the book, we *do* update on population-level inferences in the more general setup that we introduce in Chapter \@ref(mixing) for analyzing mixed data in multiple cases. We also show in Chapter \@ref(evaluation) how we can test the sensitivity of conclusions to the values at which we set population parameters. Interestingly, as we also show, process-tracing inferences, including uncertainty about conclusions, are unaffected by the level of uncertainty we might have about population parameters; we thus do not specify this uncertainty for the purposes of process tracing.
+
+The relationship between causal types, nodal types, and the correlation among nodal types is captured in what we call a *parameter matrix.* We show a parameter matrix for a simple $X \rightarrow Y$ model with no unobserved confounding in Table \@ref(tab:parammatrix). Here each column label (except the last) represents the probability that a case is of a given causal type. Each row label represents a population-level parameter: a belief about the proportions of different nodal types in the population. We indicate a set of possible parameter values in the final column. 
+
+|     **Causal types** $\rightarrow$     | $\theta^X_0,\theta^Y_{00}$ | $\theta^X_1,\theta^Y_{00}$ | $\theta^X_0,\theta^Y_{10}$ | $\theta^X_1,\theta^Y_{10}$ | $\theta^X_0,\theta^Y_{01}$ | $\theta^X_1,\theta^Y_{01}$ | $\theta^X_0,\theta^Y_{11}$ | $\theta^X_1,\theta^Y_{11}$ | Parameter values (population proportions) |
+|:--------------------------------------:|:--------------------------:|:--------------------------:|:--------------------------:|:--------------------------:|:--------------------------:|:--------------------------:|:--------------------------:|:--------------------------:|:-----------------------------------------:|
+| **Population parameters** $\downarrow$ |                            |                            |                            |                            |                            |                            |                            |                            |                                           |
+|              $\lambda^X_1$             |              0             |              1             |              0             |              1             |              0             |              1             |              0             |              1             |                    0.5                    |
+|              $\lambda^X_0$             |              1             |              0             |              1             |              0             |              1             |              0             |              1             |              0             |                    0.5                    |
+|            $\lambda^Y_{00}$            |              1             |              1             |              0             |              0             |              0             |              0             |              0             |              0             |                    0.2                    |
+|            $\lambda^Y_{10}$            |              0             |              0             |              1             |              1             |              0             |              0             |              0             |              0             |                    0.2                    |
+|            $\lambda^Y_{01}$            |              0             |              0             |              0             |              0             |              1             |              1             |              0             |              0             |                    0.4                    |
+|            $\lambda^Y_{11}$            |              0             |              0             |              0             |              0             |              0             |              0             |              1             |              1             |                    0.2                    |                                           |
+Table: (\#tab:parammmatrix). A mapping between nodal types and causal types for a simple $X \rightarrow Y$ model (with no unobserved confounding).
+
+To start with the first two rows, these represent the population proportions of each of $X$'s nodal types. For instance, $\lambda^X_{0}$ is our belief about the proportion of cases in the population that are of nodal type $\theta^X_{0}$. The first row, $\lambda^X_{1}$, represents our belief about the inverse: the proportion of cases in the population of type $\theta^X_{1}$. We posit beliefs about these parameters in the final column, indicating that we think that half of cases in the population are "assigned" to $X=0$ and half to $X=1$. Note that, since there are only two possible nodal types for $X$, and their proportions must sum to 1, there is actually just one degree of freedom here: once we've specified one of these parameter values, the other is defined as well.
+
+The last four rows represent the proportion of cases in the population with different $Y$-nodal types: in order, the proportion in which $X$ has  no effect on $Y$, with $Y$ fixed at $0$; the proportion in which $X$ has a negative effect; the proportion in which $X$ has a positive effect; and the proportion in which $X$ has no effect, with $Y$ fixed at $1$. Again, in the last column, we provide possible values for these proportions, the four of which must also sum to $1$. Here we are stating that positive $X \rightarrow Y$ effects are twice as common in the population as the other three nodal types, which we set at equal prevalence.
+
+The interior cells indicate whether a given population parameter enters into the prior probability of a given causal type. Thus, for instance, to calculate the prior probability of the causal type $\theta^X_1, \theta^Y_{10}$, we need to multiply the two parameters values corresponding to the $1$'s in this causal type's column: $\lambda^X_1$ by $\lambda^Y_{10}$. Given the parameter values we have assigned for this example, then, the prior on this causal type is simply $0.5 \times 0.2 = 0.1$. 
+
+The prior probability that a case is of a given causal type thus comes directly from our beliefs about how nodal types are distributed in the population. All we know before we study a case is whatever we know about cases "like" it in general. It is then these causal-type probabilities -- which represent probabilities that a *given case* is of a particular causal type -- that we will update on once we see the data for this case.
+
+We show the somewhat more complex situation of unobserved confounding in Table \@ref(tab:parammatrixconf). It is the first four rows that allow for unobserved confounding---the correlations across types. In a potential outcomes framework, we could think of these rows as capturing differential "assignment propensities" for $X$. Here, we allow for different probabilities of $X$'s type being $\theta^X_1$ depending on what $Y$'s type is. Thus, $\lambda^X_0 | \theta^Y= \theta^Y_{01}$ is the proportion of $\theta^X_0$ types among cases with $\theta^Y_{01}$ type: put differently, it is the probability of $X$ being assigned to $0$ when $X$ has a positive effect on $Y$. The second row represents the inverse proportion: the proportion of a $\theta^X_1$ types among $\theta^Y_{01}$ types. The next two rows then capture the proportions of the $X$-types among all *other* $Y$-types (i.e., among those cases for which $X$ does *not* have a positive effect on $Y$).
+
+Unobserved confounding in this setup takes the form of a difference in the proportions of a given $X$ type among different $Y$ types. Thus, if $\lambda^X_1, | \theta^Y_{01}$ is not the same as $\lambda^X_1 | \theta^Y \neq \theta^Y_{01}$, we have unobserved confounding. Imagine, for instance, if we are studying the effect of faster economic growth ($X$) on democratization ($Y$), and we believe that there is some unobserved factor that both makes some countries' economies grow more quickly and also makes economic growth more likely to have a positive effect on democratization. This belief amounts to a belief that the probability of a case being assigned to $X=1$ is higher if $Y$'s nodal type is $\theta^Y_{01}$ than if it is not. In other words, in terms of the rows in Table \@ref(tab:parammatrix), we believe here that $\lambda^X_1 | \theta^Y=\theta^Y_{01}$ is greater than $\lambda^X_1 | \theta^Y \neq \theta^Y_{01}$. To illustrate, we provide parameter values along these lines in the final column.
+
+Again, however, a researcher might prefer to specify the confounder (say, $Z$) as a node in the model. The rows in the parameter matrix would then be a set of population parameters defined as proportions of *un*conditional nodal types, with four $X$-types representing possible responses to $Z$, and 16 $Y$ types, representing $Y$'s possible responses to $X$ and $Z$.
+
+| **Causal Types $\rightarrow$** | $\theta^X_0,\theta^Y_{00}$ | $\theta^X_1,\theta^Y_{00}$ | $\theta^X_0,\theta^Y_{10}$ | $\theta^X_1,\theta^Y_{10}$ | $\theta^X_0,\theta^Y_{01}$ | $\theta^X_1,\theta^Y_{01}$ | $\theta^X_0,\theta^Y_{11}$ | $\theta^X_1,\theta^Y_{11}$ | Parameter values (population proportions) |
+|------------------------------------------------:|:------------------------------:|:------------------------------:|:------------------------------:|:-----------------------------:|:------------------------------:|:------------------------------:|:------------------------------:|:------------------------------:|
+|           **Population parameters $\downarrow$**           |                                |                                |                                |                               |                                |                                |                                |                                |                                           |
+|     $\lambda^X_0 | \theta^Y= \theta^Y_{01}$     |                0               |                0               |                0               |               0               |                1               |                0               |                0               |                0               |                    0.3                    |
+|          $\lambda^X_1 | \theta^Y=\theta^Y_{01}$         |                0               |                0               |                0               |               0               |                0               |                1               |                0               |                0               |                    0.7                    |
+|    $\lambda^X_0| \theta^Y \neq \theta^Y_{01}$   |                1               |                0               |                1               |               0               |                0               |                0               |                1               |                0               |                    0.5                    |
+|   $\lambda^X_1 | \theta^Y \neq \theta^Y_{01}$   |                0               |                1               |                0               |               1               |                0               |                0               |                0               |                1               |                    0.5                    |
+|                 $\lambda^Y_{00}$                |                1               |                1               |                0               |               0               |                0               |                0               |                0               |                0               |                    0.2                    |
+|                 $\lambda^Y_{10}$                |                0               |                0               |                1               |               1               |                0               |                0               |                0               |                0               |                    0.2                    |
+|                 $\lambda^Y_{01}$                |                0               |                0               |                0               |               0               |                1               |                1               |                0               |                0               |                    0.4                    |
+|                 $\lambda^Y_{11}$                |                0               |                0               |                0               |               0               |                0               |                0               |                1               |                1               |                    0.2                    |
+Table: (\#tab:parammmatrixconf). A mapping between nodal types and causal types for a simple $X \rightarrow Y$ model *with* unobserved confounding.
+
+<!-- In this case the number of parameters may exceed the number of nodal types, with, for instance parameters $\hat{\lambda}^Y_{11}$ representing $\Pr(\theta^Y = \theta^Y_{11}|\theta^X = \theta^X_1)$  and $\tilde{\lambda}^Y_{11}$ representing $\Pr(\theta^Y = \theta^Y_{11}|\theta^X = \theta^X_0)$.   -->
+
+One special kind of prior that we might wish to set is to disallow a particular (conditional) type altogether. For instance, if studying the effect of we may believe that 
+
+**Possible data types.** A *data type* is a particular pattern of data that we could potentially observe for a given case. More specifically, a data type is a set of values, one for each node in a model. For instance, in our $X, W, Y$ setup, $X=1, W=0, Y=0$ would be one data type. 
+
+Importantly, each possible causal type *maps into a single data type.* One intuitive way to think about why this is the case is that a causal type tells us (a) the values to which all exogenous variables in a model are assigned and (b) how all endogenous variables respond to their parents. Given these two components, only one set of node values is possible. For example, causal type $\theta = (\theta^X = \theta^X_1, \theta^W = \theta^W_0, \theta^Y = \theta^Y_{0100})$ imples data $X=1, W=0, Y=1$. There is no other set of data that can be generated by this causal type. 
+
+Equally importantly, however, *the mapping from causal types to data types is not one-to-one.* More than one causal type can generate the same case-level data pattern. For instance, the causal type $\theta = (\theta^X = \theta^X_1, \theta^W = \theta^W_0, \theta^Y = \theta^Y_{1101})$ will *also* generate the  data type, $X=1, W=0, Y=1$. Thus, observing this data type leaves us with ambiguity about the causal type by which it was generated.
+
+A full mapping between causal types and data types can be summarized by an "ambiguity matrix." In Table \@ref(tab:ambigmatrix), we provide an example of such a matrix, derived directly from the parameter matrix in Table \@ref(tab:parammatrix). Here, the rows represent causal types and the columns (except for the last) represent data types. The notation for data types is straightforward, with for instance $X0Y0$ meaning that $X=0, Y=0$ has been observed. In the interior cells, the $1$'s and $0$'s indicate whether or not a given data type could arise from a given causal type. We can readily see here that each causal type can generate only one data type. 
+
+We can also see the ambiguity of the data, however, since each data type can be generated by two causal types. For instance, if we observe $X=1, Y=1$, we know that the case is either of causal type $\theta^X_1,\theta^Y_{01}$ or of causal type $\theta^X_1,\theta^Y_{11}$ -- but do not know which.
+
+|  **Data types** $\rightarrow$ | X0Y0 | X1Y0 | X0Y1 | X1Y1 | Priors on causal types |
+|:-----------------------------:|:----:|:----:|:----:|:----:|:----------------------:|
+| **Causal types** $\downarrow$ |      |      |      |      |                        |
+|   $\theta^X_0,\theta^Y_{00}$  |   1  |   0  |   0  |   0  |           0.1          |
+|   $\theta^X_1,\theta^Y_{00}$  |   0  |   1  |   0  |   0  |           0.1          |
+|   $\theta^X_0,\theta^Y_{10}$  |   0  |   0  |   1  |   0  |           0.1          |
+|   $\theta^X_1,\theta^Y_{10}$  |   0  |   1  |   0  |   0  |           0.1          |
+|   $\theta^X_0,\theta^Y_{01}$  |   1  |   0  |   0  |   0  |           0.2          |
+|   $\theta^X_1,\theta^Y_{01}$  |   0  |   0  |   0  |   1  |           0.2          |
+|   $\theta^X_0,\theta^Y_{11}$  |   0  |   0  |   1  |   0  |           0.1          |
+|   $\theta^X_1,\theta^Y_{11}$  |   0  |   0  |   0  |   1  |           0.1          |
+Table: (\#tab:ambigmatrix). An ambiguity matrix, mapping from data types to causal types for a simple $X \rightarrow Y$ model.
+
+In the last column, we provide prior probabilities for each of the causal types. These have been calculated directly from the parameter matrix (Table \@ref(tab:parammatrix)). To see how the calculation works, start with a causal type in the parameter matrix -- say, $\theta^X_0,\theta^Y_{01}$. We go down that causal type's column and select the rows with $1$'s, representing the parameters for the included nodal types, $\lambda^X_0$ and $\lambda^Y_{01}$. As we want the joint probability of these two nodal types (and a parameter matrix is constructed such that the rows represent independent events),^[That is, when there is unobserved confounding, we express conditional proportions, making all of the proportions conditionally independent of one another.] we simply multiply together the values for these included parameters: $0.5 \times 0.4 = 0.2$. As noted, our prior belief about whether the case at hand is of a given causal type is a straightforward function of our beliefs about how prevalent each of the component nodal types is in the population. 
+
+As models get more complex, the numbers of causal and data types simply multiply. In Table \@ref(tab:ambigmatrixmed), we show the ambiguity matrix for a simple mediation model ($X \rightarrow M \rightarrow Y$). Here, the causal types are combinations of three nodal types, one for each variable in the model. Similarly, the data types have three elements, one for each variable. We now have 8 data types and 32 causal types. 
+
+|       **Data types** $\rightarrow$      | X0M0Y0 | X1M0Y0 | X0M1Y0 | X1M1Y0 | X0M0Y1 | X1M0Y1 | X0M1Y1 | X1M1Y1 | Priors on causal types |
+|:---------------------------------------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:----------------------:|
+|      **Causal types** $\downarrow$      |        |        |        |        |        |        |        |        |                        |
+| $\theta^X_0,\theta^M_{00},\theta^Y_{00}$ |    1   |    0   |    0   |    0   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{00}$ |    0   |    1   |    0   |    0   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_0,\theta^M_{10},\theta^Y_{00}$ |    0   |    0   |    1   |    0   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{00}$ |    0   |    1   |    0   |    0   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_0,\theta^M_{01},\theta^Y_{00}$ |    1   |    0   |    0   |    0   |    0   |    0   |    0   |    0   |          0.04          |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{00}$ |    0   |    0   |    0   |    1   |    0   |    0   |    0   |    0   |          0.04          |
+| $\theta^X_0,\theta^M_{11},\theta^Y_{00}$ |    0   |    0   |    1   |    0   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{00}$ |    0   |    0   |    0   |    1   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_0,\theta^M_{00},\theta^Y_{10}$ |    0   |    0   |    0   |    0   |    1   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{10}$ |    0   |    0   |    0   |    0   |    0   |    1   |    0   |    0   |          0.02          |
+| $\theta^X_0,\theta^M_{10},\theta^Y_{10}$ |    0   |    0   |    1   |    0   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{10}$ |    0   |    0   |    0   |    0   |    0   |    1   |    0   |    0   |          0.02          |
+| $\theta^X_0,\theta^M_{01},\theta^Y_{10}$ |    0   |    0   |    0   |    0   |    1   |    0   |    0   |    0   |          0.04          |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{10}$ |    0   |    0   |    0   |    1   |    0   |    0   |    0   |    0   |          0.04          |
+| $\theta^X_0,\theta^M_{11},\theta^Y_{10}$ |    0   |    0   |    1   |    0   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{10}$ |    0   |    0   |    0   |    1   |    0   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_0,\theta^M_{00},\theta^Y_{01}$ |    1   |    0   |    0   |    0   |    0   |    0   |    0   |    0   |          0.04          |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{01}$ |    0   |    1   |    0   |    0   |    0   |    0   |    0   |    0   |          0.04          |
+| $\theta^X_0,\theta^M_{10},\theta^Y_{01}$ |    0   |    0   |    0   |    0   |    0   |    0   |    1   |    0   |          0.04          |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{00}$ |    0   |    1   |    0   |    0   |    0   |    0   |    0   |    0   |          0.04          |
+| $\theta^X_0,\theta^M_{01},\theta^Y_{01}$ |    1   |    0   |    0   |    0   |    0   |    0   |    0   |    0   |          0.08          |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{01}$ |    0   |    0   |    0   |    0   |    0   |    0   |    0   |    1   |          0.08          |
+| $\theta^X_0,\theta^M_{11},\theta^Y_{01}$ |    0   |    0   |    0   |    0   |    0   |    0   |    1   |    0   |          0.04          |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{01}$ |    0   |    0   |    0   |    0   |    0   |    0   |    0   |    1   |          0.04          |
+| $\theta^X_0,\theta^M_{00},\theta^Y_{11}$ |    0   |    0   |    0   |    0   |    1   |    0   |    0   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{11}$ |    0   |    0   |    0   |    0   |    0   |    1   |    0   |    0   |          0.02          |
+| $\theta^X_0,\theta^M_{10},\theta^Y_{11}$ |    0   |    0   |    0   |    0   |    0   |    0   |    1   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{11}$ |    0   |    0   |    0   |    0   |    0   |    1   |    0   |    0   |          0.02          |
+| $\theta^X_0,\theta^M_{01},\theta^Y_{11}$ |    0   |    0   |    0   |    0   |    1   |    0   |    0   |    0   |          0.04          |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{11}$ |    0   |    0   |    0   |    0   |    0   |    0   |    0   |    1   |          0.04          |
+| $\theta^X_0,\theta^M_{11},\theta^Y_{11}$ |    0   |    0   |    0   |    0   |    0   |    0   |    1   |    0   |          0.02          |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{11}$ |    0   |    0   |    0   |    0   |    0   |    0   |    0   |    1   |          0.02          |
+Table: (\#tab:ambigmatrixmed). An ambiguity matrix, mapping from data types to causal types for a simpe mediation model, $X \rightarrow M \rightarrow Y$.
+
+Again, the ambiguities arising from data patterns are apparent. For instance, if we observe $X=1, M=0, Y=0$, we see that there are four causal types that could have generated this pattern. To unpack the situation a bit, these data tell us that $\theta^X = \theta^X_1$. But they do not tell us whether $M$'s type is such that $X$ has a negative effect on $M$ ($\theta^M_{10}$) or $X$ has no effect with $M$ fixed at $0$ ($\theta^M_{00}$). Similarly, we do not know whether $M$ has a positive effect on $Y$ ($\theta^Y_{01}$) or no effect with $Y$ fixed at $0$ ($\theta^Y_{00}$). This leaves four combinations of nodal types---four causal types---that are consistent with the data.
+
+Our priors here derive from a set of parameter values, much like in the previous example, in which the $X$ types are equally common (0.5 each); a positive effect of $X$ on $M$ is twice as common (0.4) as the other $M$ types (all set to 0.2); and a positive effect of $M$ on $Y$ is twice as common (0.4) as all other $Y$ types (all at 0.2). We can then easily see why we thus get priors on some causal types are higher than those on others: for instance, the two causal types with priors of 0.08 both have two positive effects (at the $X \rightarrow Y$ and $M \rightarrow Y$ stages) while the causal types with priors of 0.02 include no positive effects at either stage.
+
+
+```{r, echo = FALSE}
+XY <- make_model("X -> Y") %>% set_parameters(c(.5, .5, .2, .2, .4, .2))
+ambiguityXY  <- get_ambiguities_matrix(XY)
+
+
+XMY <- make_model("X -> M -> Y") %>% set_parameters(c(.5, .5, .2, .2, .4, .2, .2, .2, .4, .2))
+ambiguityXMY  <- get_ambiguities_matrix(XMY)
+```
+
+<!-- ```{r ambigmatrix, echo = FALSE} -->
+<!-- ambXY_with_priors <- data.frame(cbind(ambiguityXY, prior = draw_type_prob(XY, using = "parameters"))) -->
+<!-- kable(ambXY_with_priors), caption = "Ambiguity matrix for X -> Y model. Rows are causal types, columns are data types. Last column shows possible priors over rows.") -->
+<!-- ``` -->
+
+
+```{r, echo = FALSE}
+
+ambXY_with_priors <- data.frame(cbind(ambiguityXY, prior = get_type_prob(XY)))
+
+```
+<!-- For an $X \rightarrow Y$ model: -->
+
+```{r, echo = FALSE}
+
+ambXMY_with_priors <- data.frame(cbind(ambiguityXMY, prior = get_type_prob(XMY)))
+
+kable(ambXMY_with_priors, caption = "Ambiguity matrix for X -> M -> Y model. Rows are causal types, columns are data types. Last column shows possible priors over rows.")
+
+# View(x)
+```
+
+**Updating on types given the data.** Once we observe actual data in a case, we can then update on the probabilities assigned to each causal type. The logic is simple. When we observe a set of data from a case, we place $0$ probability on all causal types that could not have produced these data; we then scale up the probabilities on all causal types that could have. 
+
+We can see how this works within an ambiguity matrix. Let's return to the ambiguity matrix in Table \@ref(tab:ambigmatrix). We start out with a set of probability weights on all rows (causal types). Now, suppose that we observe the data $X=1, Y=1$, i.e., data type $X1Y1$. We then look down the $X1Y1$ column, and we know that all rows with a $0$ in them represent causal types that *could not have* generated these data. These causal types are thus excluded. What is left are two rows: $\theta^X_1, \theta^Y_{01}$ and $\theta^X_1, \theta^Y_{11}$. Returning now to the probabilities, we put 0 weight on all of the excluded rows; and then we scale up the remaining probabilities so that they sum to 1 (preserving the ratio between them).  The priors of 0.2 and 0.1 in the retained rows scale up to $\frac{2}{3}$ and $\frac{1}{3}$, which become our *posterior* probabilities on the causal types. We display an updated ambiguity matrix, with excluded data types and causal types removed, in Table \@ref(tab:ambigupdate). 
+
+Before we see any data on the case at hand, then, we believe (based on our beliefs about the population to which the case belongs) that there is a 0.2 probability that the case is one in which $X$ is assigned to $1$ and has a positive effect on $Y$; and 0.1 probability that it's a case in which $X$ gets assigned to $1$ and has no effect on $Y$ with $Y$ fixed at $1$. Seeing the $X=1, Y=1$ data, we now believe that there is a 0.667 probability that the case is of the former type, and a 0.333 probability that it is of the latter type.
+
+|  **Data types** $\rightarrow$ | X1Y1 | Priors on causal types | Posteriors on causal types |
+|:-----------------------------:|:----:|:----------------------:|----------------------------|
+| **Causal types** $\downarrow$ |      |                        |                            |
+|   $\theta^X_1,\theta^Y_{01}$  |   1  |           0.2          |          0.6667            |
+|   $\theta^X_1,\theta^Y_{11}$  |   1  |           0.1          |          0.3333            |
+Table: (\#tab:ambigupdate). An updated version of the ambiguity matrix in Table \@ref(tab:ambigmatrix), after observing $X=1, Y=1$ in a case.
+
+
+
+<!-- ```{r, echo = FALSE} -->
+<!-- ambXY_with_priors%>% -->
+<!--     mutate(type = rownames(ambXY_with_priors)) %>% -->
+<!--     select(type, X1Y1, prior) %>% -->
+<!--     filter(X1Y1 ==1)%>% -->
+<!--    mutate(posterior = prior/sum(prior)) %>% -->
+<!--    kable() -->
+<!-- ``` -->
+
+We can also see how this works for our $X \rightarrow M \rightarrow Y$ model, and the ambiguity matrix in Table \@ref(tab:ambigmatrixmed). If we observe the data $X=1, M=0, Y=0$, for instance, this exercise would yield the updated ambiguity matrix in Table \ref@(tab:ambigmedupdate). Here we have eliminated all rows (causal types) with a $0$ in the relevant data-type column ($X1M0Y0$) and formed the posteriors by scaling up the priors in the retained rows. 
+
+
+|       **Data types** $\rightarrow$      | X1M0Y0 | Priors on causal types | Posteriors on causal types |
+|:---------------------------------------:|:------:|:----------------------:|:--------------------------:|
+|      **Causal types** $\downarrow$      |        |                        |                            |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{00}$ |    1   |          0.02          |          0.1667            |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{00}$ |    1   |          0.02          |          0.1667            |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{01}$ |    1   |          0.04          |          0.3333            |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{01}$ |    1   |          0.04          |          0.3333            |
+Table: (\#tab:ambigmedupdate). An updated version of the ambiguity matrix in Table \@ref(tab:ambigmatrixmed), after observing $X=1, M=0, Y=0$ in a case.
+
+A notable feature of the logic of single-case process tracing is that the relative probabilities on the retained causal types never change. If we start out believing that causal type $A$ is twice as likely as causal type $B$, and both $A$ and $B$ are retained once we see the data, then $A$ will be twice as likely as $B$ in our posteriors. All updating occurs by *eliminating* causal types from consideration and zeroing in on those that remain.
+
+```{r, echo = FALSE}
+ambXMY_with_priors%>%
+    mutate(type = rownames(ambXMY_with_priors)) %>%
+    select(type, X1M0Y0, prior) %>%
+    filter(X1M0Y0 ==1)%>%
+   mutate(posterior = prior/sum(prior)) %>%
+   kable()
+```
+
+
+
+<!-- ```{r, echo = FALSE} -->
+<!-- data.frame(cbind(ambiguityXMY)) %>% -->
+<!--     mutate(type = rownames(ambiguityXMY), prior = draw_type_prob(XMY)) %>% -->
+<!--     select(type, X1M1Y1, prior) %>% -->
+<!--     filter(X1M1Y1 ==1)%>% -->
+<!--    mutate(posterior = prior/sum(prior)) %>% -->
+<!--    kable(digits = 2) -->
+<!-- ``` -->
+
+A similar logic applies if partial data are observed: that is, if we do not collect data for all nodes in the model. The one difference is that, now, rather than reducing to one column we entertain the possibility of any data *type* consistent with the *observed data*. In general, more than one data type will be consistent with partial data. For instance, suppose that we observe $X=1, Y=0$ but do not observe $M$'s value. These are data that are consistent with both the data type $X1M0Y0$ and the data type $X1M1Y0$ (since the unobserved $M$ could be either $0$ or $1$). We thus retain both of these data-type columns as well as all causal types consistent with *either* of these data types. This gives the updated ambiguity matrix in Table \@ref(tab:ambigmedupdatepartial). We note that, with these partial data, we are not able to update as strongly. For instance, for the causal type $\theta^X_1,\theta^M_{00},\theta^Y_{00}$, instead of updating to a posterior probability of 0.1667, we update to a posterior of only 0.0833 -- because there is a larger set of causal types with which these partial data are consistent.
+
+
+|       **Data types** $\rightarrow$      | X1M0Y0 | X1M1Y0 | Priors on causal types | Posteriors on causal types |
+|:---------------------------------------:|:------:|:------:|:----------------------:|:--------------------------:|
+|      **Causal types** $\downarrow$      |        |        |                        |                            |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{00}$ |    1   |    0   |          0.02          |           0.0833           |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{00}$ |    1   |    0   |          0.02          |           0.0833           |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{00}$ |    0   |    1   |          0.04          |           0.1667           |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{00}$ |    0   |    1   |          0.02          |           0.0833           |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{10}$ |    0   |    1   |          0.04          |           0.1667           |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{10}$ |    0   |    1   |          0.02          |           0.0833           |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{01}$ |    1   |    0   |          0.04          |           0.1667           |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{01}$ |    1   |    0   |          0.04          |           0.1667           |
+Table: (\#tab:ambigmedupdatepartial). An updated version of the ambiguity matrix in Table \@ref(tab:ambigmatrixmed), after observing partial data in case: $X=1, Y=0$, with $M$ unobserved.
+
+
+```{r, echo = FALSE}
+ambXMY_with_priors%>%
+    mutate(type = rownames(ambXMY_with_priors)) %>%
+    select(type, X1M0Y0, X1M1Y0, prior) %>%
+    filter(X1M0Y0 ==1 | X1M1Y0 ==1)%>%
+   mutate(posterior = prior/sum(prior)) %>%
+   kable()
+```
+
+
+<!-- ```{r, echo = FALSE} -->
+<!-- data.frame(cbind(ambiguityXMY)) %>% -->
+<!--     mutate(type = rownames(ambiguityXMY), prior = draw_type_prob(XMY)) %>% -->
+<!--     select(type, X1M0Y1, X1M1Y1, prior) %>%  -->
+<!--     filter(X1M1Y1 ==1 | X1M0Y1 ==1)%>% -->
+<!--    mutate(posterior = prior/sum(prior)) %>% -->
+<!--    kable(digits = 2) -->
+<!-- ``` -->
+
+**Updating on estimands.**  We now have a posterior probability for each causal type for the case at hand. The causal question we are interested in answering, our estimand, may not be about causal types *per se.* It is about an estimand that can be expressed as a *combination* of causal types. 
+
+For instance, suppose we are working with the model $X \rightarrow M \rightarrow Y$; and that our question is, "Did $X=1$ cause $Y=1$?". This question is asking both:
+
+1. Does $X=1$ in this case? 
+
+2. Does $X$ have a positive effect on $Y$ in this case?  
+
+The causal types that qualify are those, and only those, in which the answer to both is "yes."  
+
+Meeting condition (1) requires that $\theta^X=\theta^X_1$. 
+
+Meeting condition (2) requires that $\theta^M$ and $\theta^Y$ are such that $X$ has an effect on $M$ that yields a positive effect of $X$ on $Y$. This could occur via a positive $X \rightarrow M$ effect linked to a positive $M \rightarrow Y$ effect or via a negative $X \rightarrow M$ effect linked to a negative $M \rightarrow Y$ effect. 
+
+Thus, the qualifying causal types in this model are:
+
+* $\theta^X_1, \theta^M_{01}, \theta^Y_{01}$
+* $\theta^X_1, \theta^M_{10}, \theta^Y_{10}$
+
+Our *prior* on the estimand---what we believe before we collect data on the case at hand---is given simply by summing up the prior probabilities on each of the causal types that correspond to the estimand. Note that we must calculate the prior from the full ambiguity matrix, before excluding types for inconsistency with the data. Returning to the full ambiguity matrix in Table \@ref(tab:ambigmatrixmed), we see that the priors on these two types (given the population parameters assumed there) are 0.08 and 0.02, respectively, giving a prior for the estimand of 0.1. 
+
+The posterior on any estimand is, likewise, given by summing up the posterior probabilities on each of the causal types that correspond to the estimand, drawing of course from the updated ambiguity matrix. For instance, if we observe the data $X=1, M=1, Y=1$, we update to the ambiguity matrix in Table \@ref(tab:ambigmedupdate2).  Our posterior on the estimand, "Did $X=1$ cause $Y=1$?" is the sum of the posteriors on the above two causal types. Since $\theta^X_1, \theta^M_{10}, \theta^Y_{10}$ is excluded by the data, this just leaves the posterior on $\theta^X_1, \theta^M_{01}, \theta^Y_{01}$, 0.4444, which is the posterior belief on our estimand. 
+
+If we observe only the partial data, $X=1, Y=1$, then we update to the ambiguity matrix in Table \@ref(tab:ambigmedupdatepartial2). Now both corresponding causal types are included, and we sum their posteriors to get the posterior on the estimand: $0.0769 + 0.3077 = 0.3846$.
+
+
+FLAG: Briefly discuss other estimand(s) one could do, though don't show in detail here. Will do pathways in Chap. 7.
+
+
+```{r, echo = FALSE}
+ambXMY_with_priors%>%
+    mutate(type = rownames(ambXMY_with_priors)) %>%
+    select(type, X1M1Y1, prior) %>%
+    filter(X1M1Y1 ==1)%>%
+   mutate(posterior = prior/sum(prior)) %>%
+   kable()
+```
+
+
+|       **Data types** $\rightarrow$      | X1M1Y1 | Priors on causal types | Posteriors on causal types |
+|:---------------------------------------:|:------:|:----------------------:|:--------------------------:|
+|      **Causal types** $\downarrow$      |        |                        |                            |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{01}$ |    1   |          0.08          |          0.4444            |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{01}$ |    1   |          0.04          |          0.2222            |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{11}$ |    1   |          0.04          |          0.2222            |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{11}$ |    1   |          0.02          |          0.1111            |
+Table: (\#tab:ambigmedupdate2). An updated version of the ambiguity matrix in Table \@ref(tab:ambigmatrixmed), after observing $X=1, M=1, Y=1$ in a case.
+
+
+
+|       **Data types** $\rightarrow$      | X1M0Y0 | X1M1Y0 | Priors on causal types | Posteriors on causal types |
+|:---------------------------------------:|:------:|:------:|:----------------------:|:--------------------------:|
+|      **Causal types** $\downarrow$      |        |        |                        |                            |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{10}$ |    1   |    0   |          0.02          |           0.0769           |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{10}$ |    1   |    0   |          0.02          |           0.0769           |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{01}$ |    0   |    1   |          0.08          |           0.3077           |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{01}$ |    0   |    1   |          0.04          |           0.1538           |
+| $\theta^X_1,\theta^M_{00},\theta^Y_{11}$ |    0   |    1   |          0.02          |           0.0769           |
+| $\theta^X_1,\theta^M_{10},\theta^Y_{11}$ |    0   |    1   |          0.02          |           0.0769           |
+| $\theta^X_1,\theta^M_{01},\theta^Y_{11}$ |    1   |    0   |          0.04          |           0.1538           |
+| $\theta^X_1,\theta^M_{11},\theta^Y_{11}$ |    1   |    0   |          0.02          |           0.0769           |
+Table: (\#tab:ambigmedupdatepartial2). An updated version of the ambiguity matrix in Table \@ref(tab:ambigmatrixmed), after observing partial data in case: $X=1, Y=0$, with $M$ unobserved.
+
+
+
+<!-- ```{r, echo = FALSE} -->
+<!-- ambXMY_with_priors%>% -->
+<!--     mutate(type = rownames(ambXMY_with_priors)) %>% -->
+<!--     select(type, X1M0Y1, X1M1Y1, prior) %>% -->
+<!--     filter(X1M0Y1 ==1 | X1M1Y1 ==1)%>% -->
+<!--    mutate(posterior = prior/sum(prior)) %>% -->
+<!--    kable() -->
+<!-- ``` -->
+
+
+For more complex models and estimands, it can be more difficult to eyeball the corresponding causal types. In practice, therefore, we use a function in the `gbiqq` package to do this for us. 
+
+
+<!-- For example, supposer we want to know whether $X$ has some causal effect on $Y$ in our simple mediation model. The estimand, "$X$ haa a causal effect on $Y$" maps onto a relatively large, though still easily calculated, collection of types. Using `gbiqq`'s get_types function, we would define our query as a search for all causal types in which $Y$'s potential outcome when $X=1$ is different from $Y$'s potential outcome when $X=0$. The function then reports back all causal types meeting this condition: -->
+
+<!-- ```{r, eval = FALSE} -->
+<!-- get_types(XMY, "Y[X=1] != Y[X=0]") -->
+<!-- ``` -->
+
+
+```{r, echo = FALSE, comment = ""}
+types <- get_types(XMY, "Y[X=1] != Y[X=0]")
+cat(paste0(names(types$types[types$types]), collapse = ", "))
+```
+
+
+This completes the abstract representation of the process tracing procedure. We now build up the intuition by walking through the procedure for simple mediation and moderation models.
+
+
+
+
+
+
+### Illustration with code
+
+```{r, eval = FALSE}
+
+XMY <- make_model("X -> M -> Y") %>% 
+       set_parameters (c(.5, .5, .2, .2, .4, .2, .2, .2, .4, .2))
+
+query_model(model = XMY, 
+              queries = list(PC = "Y[X=1] > Y[X=0]"), 
+              given = list(TRUE, "X==1 & Y==1", "X==1 & Y==1 & M==0", "X==1 & Y==1 & M==1"),
+              using = "parameters")
+```
+
+```{r, echo = FALSE}
+make_model("X -> M -> Y") %>% 
+       set_parameters (c(.5, .5, .2, .2, .4, .2, .2, .2, .4, .2)) %>%
+       query_model(
+         query = list(PC = "Y[X=1] > Y[X=0]"), 
+         given = list(TRUE, "X==1 & Y==1", "X==1 & Y==1 & M==0", "X==1 & Y==1 & M==1"),
+         using = "parameters") %>%
+      kable()
+
+```
+
+## Five principles
+
+### Classic qualitative tests are special cases of updating on a model
+
+The approach we have described here updates on the model given data on all variables, and from the model makes inferences to estimands. 
+
+This procedure appears different to the approach described, for example, in  @collier2004sources and in Chapter 5, in which one seeks specific evidence that is directly informative about causal propositions: "clues" that are arise with different probabilities if one proposition or another is true. In fact however the approaches are deeply connected.  This  "probative value of clues" approach can indeed be *justified* by reference to more fully elaborated  models of the world. 
+
+To see this  we can write down the probability of observing $K=1$ conditional on causal type $X$, using the $\phi$ notation from @humphreys2015mixing and introduced in Chapter 5. Here $\phi_{jx}$ refers to the probability of observing a clue in a case of type $j$ when $X=x$. Starting with our prior distribution over the lower-level causal types (the $\lambda$'s), we can derive, for an $X=1$ case, the probability of seeing the clue if the case is of type $b$ (positive effect) or of type $d$ (no effect, $Y$ always $1$):
+
+\begin{equation}
+\begin{split}
+\phi_{b1} & = \frac{\lambda_{01}^{K}\lambda_{01}^{Y}}{\lambda_{01}^{K}\lambda_{01}^{Y}+\lambda_{10}^{K}\lambda_{10}^{Y}}\\ 
+\phi_{d1} & = \frac{\lambda_{11}^{Y}(\lambda_{01}^{K}+\lambda_{11}^{K})+\lambda_{11}^{K}\lambda_{01}^{Y}}{\lambda_{11}^{Y} + \lambda_{00}^{K}\lambda_{10}^{Y} + \lambda_{11}^{K}\lambda_{01}^{Y}}
+\end{split}
+\label{eqn:phisfromlambdas}
+\end{equation}
+
+
+These quantities allow for easy mapping between our prior beliefs about our causal query---as expressed in the lower level model---and the classic process-tracing tests in @Van-Evera:1997. Figure \@ref(fig:phis) illustrates. In each panel, we manipulate a prior for one or more of the lower-level causal effects, keeping all other priors flat, and we see how probative value changes. As the curves for $\phi_b$ and $\phi_d$ diverge, probative value is increasing since there is an increasing difference between the probability of seeing the clue if $X$ has a positive effect on $Y$ and the probability of seeing the clue if $X$ has no effect. 
+
+In the left panel, we see that as we place a lower prior probability on $K$'s being negatively affected by $X$,^[For a given value of $\lambda^K_{01}$, we hold the other $\lambda^K$ values equal by assigning a value of $(1-\lambda^K_{01})/3$ to each.] seeking $K=1$ increasingly takes on the quality of a hoop test for $X$'s having a positive effect on $Y$. The clue, that is, increasingly becomes something we must see if $X$ positively affects $Y$, with the clue remaining moderately probable if there is no effect. Why? The less likely we believe it is that $K=0$ was caused by $X=1$, the less consistent the observation of $K=0$ is with $X$ having a positive causal effect on $Y$ via $K$ (since, to have such an effect, if $X=1$ and $K=0$, would precisely have to mean that $X=1$ *caused* $K=0$). 
+
+In the second graph, we simultaneously change the prior probabilities of zero effects at both stages in the sequence: of $K$ and $Y$ being $1$ regardless of the values of $X$ and $K$, respectively.^[For a given value of $\lambda^K_{11}$, we hold the other $\lambda^K$'s equal by assigning a value of $(1-\lambda^K_{11})/3$ to each; likewise for $\lambda^Y_{11}$ and the other $\lambda^Y$ values.] We see here that, as the probabilities of zero effects jointly diminish, seeking $K=1$ increasingly becomes a smoking-gun test for a positive effect of $X$ on $Y$: the probability of seeing the clue if the case is a $d$ type diminishes. The reason is that, as zero effects at the lower level become less likely, it becomes increasingly unlikely that $K=1$ could have occurred without a positive effect of $X$ on $K$, and that $Y=1$ could have occurred (given that we have seen $K=1$) without a posiitve effect of $K$ on $Y$.
+
+<!-- This example also helps clarify the kind of theoretical knowledge required for drawing inferences from clues. As we have emphasized, the structural equations comprising a causal model can be fully non-parametric. As the example illustrates, $\theta_Y$ can be a type variable that determines different the equation for an endogenous variable in a causal model can  can take the form of beliefs about the proportions of  -->
+
+
+```{r phis, echo = FALSE,  fig.align="center", out.width='.85\\textwidth', fig.width = 9, fig.height = 4, fig.cap = "The probability of observing $K$ given causal type for different beliefs on lower-level causal effects. In the left figure, priors on all lower-level causal effects are flat except for the probability that $X$ has a negative effect on $K$. If we believe that it is unlikely that $X$ has a negative effect on $K$, $K$ becomes a `hoop' test for the proposition that a case is of type $b$. The righthand figure considers simultaneous changes in $\\lambda_{11}^K$ and  $\\lambda_{11}^Y$---the probabilities that $K=1$ regardless of $X$, and that $Y=1$  regardless of $K$, with flat distributions on all other lower-level effects. With $\\lambda_{11}^K$, $\\lambda_{11}^Y$ both close to 0, $K$ becomes a 'smoking gun' test for the proposition that $X$ has a positive effect on $Y$ ($b$ type).", errors = FALSE, warning = FALSE, message = FALSE, comment = FALSE}
+
+# sim_data <- function(sims=100, pX = 1, K_eventprobs = c(.25,.25,.25,.25), Y_eventprobs = c(.25,.25,.25,.25)){
+#   X <- rmultinom(sims, 1, c(1-pX, pX))
+#   X <- t(X) %*% (0:1)  
+#   uK <- rmultinom(sims, 1, K_eventprobs) 
+#   uK <- t(uK) %*% (1:4)  
+#   uY <- rmultinom(sims, 1, Y_eventprobs) 
+#   uY <- t(uY) %*% (1:4)  
+#   K <- (uK==1)*(X==0) +  (uK==2)*(X==1) +  (uK==4)
+#   Y <- (uY==1)*(K==0) +  (uY==2)*(K==1) +  (uY==4)
+#   
+#   a_higher <- (uK==2)*(uY==1) + (uK==1)*(uY==2)
+#   b_higher <- (uK==2)*(uY==2) + (uK==1)*(uY==1)
+#   c_higher <- (uY == 3) + (uK==3)*(uY==2) + (uK==4)*(uY==1)
+#   d_higher <- (uY == 4) + (uK==3)*(uY==1) + (uK==4)*(uY==2)
+#   
+#   data.frame(X, K, Y, a_higher, b_higher, c_higher, d_higher)
+#  }
+# 
+# 
+# pv <- function(sims=100, K_eventprobs = c(.25,.25,.25,.25), Y_eventprobs = c(.25,.25,.25,.25)){
+#   D <- sim_data(sims = sims, K_eventprobs = K_eventprobs, Y_eventprobs = Y_eventprobs)  
+#   c(mean(D$K[D$X==1 & D$Y==1 & D$b_higher ==1]), mean(D$K[D$X==1 & D$Y==1 & D$d_higher ==1]))
+# }
+
+pv_analytic_b <- function(K_eventprobs = c(.25,.25,.25,.25), Y_eventprobs = c(.25,.25,.25,.25))
+  {K_eventprobs[2]*Y_eventprobs[2]}/{K_eventprobs[2]*Y_eventprobs[2]+K_eventprobs[1]*Y_eventprobs[1]}
+
+pv_analytic_d <- function(K_eventprobs = c(.25,.25,.25,.25), Y_eventprobs = c(.25,.25,.25,.25))
+  {Y_eventprobs[4]*(K_eventprobs[2]+K_eventprobs[4])+K_eventprobs[4]*Y_eventprobs[2]}/{Y_eventprobs[4]+K_eventprobs[3]*Y_eventprobs[1]+K_eventprobs[4]*Y_eventprobs[2]}
+
+par(mfrow = c(1,2))
+
+plot(seq(0, .25, .01), sapply(seq(0, .25, .01), function(i) pv_analytic_b(K_eventprobs = c(i,(1-i)/3,(1-i)/3,(1-i)/3), Y_eventprobs = c(1/4,1/4,1/4,1/4))), type = "l", xlab = expression(paste(lambda[10]^{K})), ylab = "", main = "A Hoop Test", ylim = c(0,1))
+
+points(seq(0, .25, .01), sapply(seq(0, .25, .01), function(i) pv_analytic_d(K_eventprobs = c(i,(1-i)/3,(1-i)/3,(1-i)/3), Y_eventprobs = c(1/4,1/4,1/4,1/4))), type = "l", lty = 2)
+text(.1,.8, expression(phi[b]))
+text(.1,.5, expression(phi[d]))
+
+
+plot(seq(0, .25, .01), sapply(seq(0, .25, .01), function(i) pv_analytic_b(K_eventprobs = c((1-i)/3,(1-i)/3,(1-i)/3, i), Y_eventprobs = c((1-i)/3,(1-i)/3,(1-i)/3, i))), ylim = c(0,1), type = "l", xlab = expression(paste(lambda[11]^{K}," and ", lambda[11]^{Y})), ylab = "", main = "A Smoking Gun Test")
+
+points(seq(0, .25, .01), sapply(seq(0, .25, .01), function(i) pv_analytic_d(K_eventprobs = c((1-i)/3,(1-i)/3,(1-i)/3, i), Y_eventprobs = c((1-i)/3,(1-i)/3,(1-i)/3, i))),  type = "l", lty = 2)
+text(.1,.55, expression(phi[b]))
+text(.1,.25, expression(phi[d]))
+
+```
+
+
+
+### Conditional independence alone does not provide probative value 
+
+### Uncertainty does not alter inference for single case causal inference
+
+In the procedure described for process tracing in this chapter (and different to what we introduce in Chapter 8) we assume that $\lambda$ is known and we do not place uncertainty around it.
+
+This might appear somewhat heroic, but in fact for single case inference it is  without loss of generality. The expected inferences we would make for any estimand accounting for priors  is the same as the inferences we if we use the expectation only.  
+
+To see this, let $\pi_j$ denote the probability of observing causal type $j$ and $p(D)$ te probability of observing data realization $D$. Say that $j \in D$ if type $j$ produces data type $D$ and say $j \in E$ if casual type $j$ is an element of the estimand set of interest. For instance in an $X \rightarrow Y$ model, if we observe $X=Y=1$ then $D$ consists of causal types $D={(\theta^X_1, \theta^Y_{01}), (\theta^X_1, \theta^Y_{11})})$ and the estimand set for "$X$ has a positive effect on  $Y$" consists of  $E={(\theta^X_1, \theta^Y_{01}), (\theta^X_0, \theta^Y_{01})})$. 
+
+The posterior on an estimand $E$ given data $D$ given prior over $\pi$, $p(\pi)$ is:
+
+$$\Pr(E | D) = \int_\pi  \frac{\sum_{j \in E \cap D}\pi_j}{\sum_{j \in D}\pi_j} f(\pi)d\pi$$
+
+However, since for any $\pi$, $\sum_{j \in D}\pi_j = p(D)$ we have:
+
+$$\Pr(E | D) = \int_\pi  \sum_{j \in E \cap D}\pi_j f(\pi)d\pi/p(D) = \sum_{j \in  E \cap D} \overline{\pi}_j/p(D)$$
+
+### Probative value requires $d-$connection
+
+<!-- Rules for inferring information about one variable from another are th stuff of graphoids  [@pearl1985graphoids] see also [@geiger1987non] and [@pearl1987logic]...  -->
+
+As we have argued, causal estimands can be expressed as the values of exogenous nodes in a causal graph. Case-level causal effects and causal paths can be defined in terms of response-type nodes; average effects and notable causes in terms of population-level parameter nodes (e.g., $\pi$ or $\lambda$ terms); and questions about actual causes in terms of exogenous conditions that yield particular endogenous values (conditioning on which makes some variable a counterfactual cause). 
+
+We thus define causal inference more generally as *the assessment of the value of one or more unobserved (possibly unobservable) exogenous nodes on a causal graph, given observable data.*  To think through the steps in this process, it is useful to distinguish among three different features of the world, as represented in our causal model: there are the things we want to learn about; the things we have already observed; and the things we could observe. As notation going forward, let:
+
+* $\mathcal Q$ denote the exogenous variables that define our *query*; we generally assume that $\mathcal Q$ cannot be directly observed so that its values must be inferred
+* $\mathcal W$ denote a set of previously observed nodes in the causal model, and 
+* $\mathcal K$ denote a set of additional  variables---clues---that we have not yet observed but could observe.
+
+Now suppose that we seek to design a research project to investigate a causal question. How should the study be designed? Given that there are some features of the world that we have already observed, which additional clues should we seek to collect to shed new light on our question? In terms of the above notation, what we need to figure out is whether a given $\mathcal K$ might be informative about---might provide additional leverage on---$\mathcal Q$ given the prior observation of $\mathcal W$. 
+
+To ask whether one variable (or set of variables) is informative about another is to ask whether the two (sets of) variables are, on average, *correlated* with one another, given whatever we already know. Likewise, if two variables' distributions are fully *independent* of one another (conditional on what else we have observed), then knowing the value of one variable can provide no new information about the value of the other. 
+
+Thus, asking whether a set of clues, $\mathcal K$, is informative about $\mathcal Q$ given the prior observation of $\mathcal W$, is equivalent to asking whether $\mathcal K$ and $\mathcal Q$ are conditionally independent given $\mathcal W$. That is, $\mathcal K$ can be informative about $\mathcal Q$ given $\mathcal W$ only if $\mathcal K$ and $\mathcal Q$ are *not* conditionally independent of one another given $\mathcal W$. 
+
+As we have shown, as long as we have built $\mathcal Q$, $\mathcal K$, and $\mathcal W$ into our causal model of the phenomenon of interest, we can answer this kind of question by inspecting the structure of the model's DAG. In particular, what we need to go looking for are relationships of *$d$-separation*. The following proposition, with only the names of the variable sets altered, is from @pearl2009causality (Proposition 1.2.4): 
+
+**Proposition 1:**  If sets $\mathcal Q$ and $\mathcal K$ are $d$-separated by $\mathcal W$ in a DAG, $\mathcal G$, then $\mathcal Q$ is independent of $\mathcal K$ conditional on $\mathcal W$ in every distribution compatible with $\mathcal G$. Conversely, if $\mathcal Q$ and $\mathcal K$ are *not* $d$-separated by $\mathcal W$ in DAG $\mathcal W$, then $\mathcal Q$ and $\mathcal K$ are dependent conditional on $\mathcal W$ in at least one distribution compatible with $\mathcal G$.
+
+We begin with a causal graph and a set of nodes on the graph ($W$) that we have already observed. Given what we have already observed, *a collection of clue nodes, $\mathcal K$, will be uninformative about the query nodes, $\mathcal Q$, if $\mathcal K$ is  $d$-separated from $\mathcal Q$ by $\mathcal W$ on the graph.* When $\mathcal W$ $d$-separates $\mathcal K$ from $\mathcal Q$, this means that what we have already observed already captures all information that the clues might yield about our query. On the other hand, if $\mathcal K$ and $\mathcal Q$ are $d$-connected (i.e., not $d$-separated) by $W$, then $K$ is *possibly* informative about $Q$.$K$ is not  $d$-separated from $\mathcal Q$ by $\mathcal W$.^[This proposition is almost coextensive with the definition of a DAG. A DAG is a particular kind of dependency  model ("graphoid") that is a summary of a  collection of "independency statements", $(I)$, over distinct subsets of $\mathcal V$ (Pearl and Verma 1987), where $I(\mathcal Q,\mathcal W,\mathcal K)$ means  "we learn nothing about $\mathcal Q$ from $\mathcal K$ if we already know $\mathcal W$". More formally:
+$$I(\mathcal K, \mathcal W,\mathcal Q) \leftrightarrow P(\mathcal K,\mathcal Q|\mathcal W)=P(\mathcal K|\mathcal W)P(\mathcal Q|\mathcal W)$$
+A Directed Acyclic Graph Dependency model is one where the set of independencies correspond exactly to the relations that satisfy $d$-separation  (Pearl and Verma 1987, p376).  Thus on DAG $\mathcal G$, $I(\mathcal K,\mathcal W,\mathcal Q)_\mathcal G$ implies that $\mathcal K$ and $\mathcal Q$ are $d$-separated by $\mathcal W$.] Note, moreover, that under quite general conditions (referred to in the literature as the *faithfulness* of a  probability distribution) then there are at least *some* values of $\mathcal W$ for which $\mathcal K$ *will* be informative about $\mathcal Q$.^[Put differently, there will not be any conditional independencies that are *not* captured in the DAG.] 
+
+
+<!-- ^[In Pearl's terminonology, the graph may *represent* the probability distribution but not be *faithful* to it.] -->
+
+<!-- This can be put another way. An $I$-map of $M$ is a model with no extra independencies; a $D$-map is a model that contains all of $M$ with,  possibly aditional independencies; a *perfect* map is a model with the same set of dependencies. Given an independency model $M$, a DAG, $G$, may be an $I$-map of $M$ in the sense that whenever $D$ separates $K$ from $Q$ then $I(K,D,Q)_M$, yet there may still be indepenencies in $M$ not captured by $G$; that is, it may also be htat $I(K,D,Q)_M$ but not $I(K,D,Q)_G$. Pearl refers to such cases as instances of a violation of *stability*, though in simple graphs with discrete variables such violations may be plausible.  -->
+
+<!-- In the example given by Pearl with two matching pennies, $X_1$ and $X_2$ and $Y$ is 1 if the pennies match, $X_1$ adn $X_2$ are probabilisitcally independent of $Y$, yet $Y$ depends on both of them.  -->
+<!-- The problem is that $d$-separation satisfies composition, that is, if $I(X_1, D, Q)$ and $I(X_2, D, Q)$ then $I(X_1X_2, D, Q)$; but since we cannot have $I(X_1X_2, D, Q)$ then we cannot have   $I(X_1, D, Q)$ and $I(X_2, D, Q)$ either (see also [@bouckaert1994conditional]). -->
+
+<!-- Note that this example depends on infomration about the probability distribution over $V$, that is, the functional equations, and cannot be inferred from the structure of $S$ alone.   -->
+
+<!-- [Note for us: We seek a  related proposition holds however using $d-separation$ on partially discovered submodels.] -->
+
+Let us examine Proposition 1 in practice. We begin with the simplest case possible, and then move on to more complex models. 
+
+The very simplest probabilistic causal graph has $X$ influencing $Y$, with $X$ determined by a coin flip. Assuming that there is some causal heterogeneity---that is, it is unknown in any particular case whether $X$ causes $Y$---we also include a response-type variable, $Q$, pointing into $Y$, as shown in Figure \ref{fig:d-sepsimple}. Here, $Q^Y$ determines the value of $Y$ that will be generated by $X$. Asking about the causal effect of $X$ in a case thus means learning the value of $Q^Y$ in that case. As will be recalled, in a binary setup with one causal variable, a response-type variable can take on one of four values, $q^Y_{00}$, $q^Y_{10}$, $q^Y_{01}$ and $q^Y_{11}$,^[As a reminder, we read $q^Y_{ij}$ (when $X$ is binary) as meaning that $Y$ will take on value $i$ when $X=0$ and value $j$ when $X=1$.] corresponding to the four possible causal types in this setting.
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3,  fig.align="center", out.width='.5\\textwidth', fig.cap = "\\label{fig:d-sepsimple} A simple causal setup in which the effect of $X$ on $Y$ in a given case depends on the case's response type for $Y$."}
+par(mar=c(1,1,3,1))
+hj_dag(x = c(0, 1, 1),
+       y = c(1, 1, 2),
+       names = c("X", "Y", expression(paste(theta[Y]))),
+       arcs = cbind( c(1, 3),
+                     c(2, 2)),
+       title = "Simplest X, Y, graph",
+       padding = .4, contraction = .15) 
+
+```
+
+Let us assume that we have observed nothing yet in this case and then ask what clue(s) might be informative about $Q^Y$, the node of interest. The other two nodes in the graph are $X$ and $Y$: these are thus the possible clues that we might go looking for in our effort to learn about $Q^Y$ (i.e., they are the possible members of $\mathcal K$). 
+
+
+
+
+First, can we learn about $Q^Y$ by observing $X$? We can answer this question by asking whether $X$ is $d$-connected to $Q^Y$ on the graph given what we have already observed (which is nothing). We can see visually that there is no active path from $X$ to $Q^Y$: the only path between $X$ and $Q$ is blocked by colliding arrow heads. Thus, $X$ and $Q^Y$ are $d$-separated, meaning that $X$ will not be informative about $Q^Y$: observing the value that a causal variable takes on in a case---having seen nothing else in the case---tells us nothing whatsoever about that variable's effect on the outcome. If we want to know whether a case is of a type in which the presence of natural resources would cause civil war, observing only that the case has natural resources does not help answer the question.
+
+<!-- **LONG FOOTNOTE STARTING HERE....** -->
+<!-- In the case where we observe only $X$, the posterior on $Q^Y$ is: -->
+<!-- \begin{eqnarray*} -->
+<!-- P(Q^Y=q^Y | X=x) &=& \frac{\sum_{j=0}^1p(X=x)P(Q^Y=q^Y)P(Y=j|X=x, Q^Y=q^Y)}{\sum_{q^{Y'}}\sum_{j=0}^1p(X=x)P(Q^Y=q^{Y'})P(Y=j|X=x, Q^Y=q^{Y'})}\\ -->
+<!-- &=&\frac{P(Q^Y=q^Y)}{\sum_{q^{Y'}}P(Q^Y=q^{Y'})} -->
+<!-- \end{eqnarray*} -->
+<!-- which is simply the prior on $Q^Y$. Thus, nothing is learned about $Q^Y$ from observing $X$ only.]  -->
+<!-- <!-- &=& \frac{p(Q=q)\sum_{j=0}^1p(Y=j|X=x, Q=q)}{\sum_{q'}p(Q=q')\sum_{j=0}^1p(Y=j|X=x, Q=q')}\\ --> -->
+<!-- **...ENDING HERE** -->
+
+What, then, if we instead were to observe only $Y$? Is $Y$ $d$-connected to $Q$ given what we have already observed (which, again, is nothing)? It is: the arrow from $Q^Y$ to $Y$ is an active path. Observing only the *outcome* in a case does tell us something about causal effects. Returning to the natural resources and civil war example, observing only that a country has had a civil is informative about the case's causal type (the value of $Q^Y$). In particular, it rules out the possibility that this is a case in which nothing could cause a civil war: that is, it excludes $q^Y_{00}$ (i.e., $c$-type) as a possible value of $Q^Y$.
+
+<!-- **LONG FOOTNOTE STARTING HERE....** -->
+<!-- In the case where we observe $Y$ only we have: -->
+<!-- $$P(Q=q | Y=y) = \frac{\sum_{j=0}^1p(X=j)P(Q=q)P(Y=y|X=j, Q=q)}{\sum_{q'}\sum_{j=0}^1p(X=j)P(Q=q')P(Y=y|X=j, Q=q')}$$ -->
+<!-- Here terms involving $Y$ and $Q$ cannot be separated, so the same kind of reduction is not possible. This implies scope for learning about $Q$ from $Y$.  For instance, if  we have $P(Q=j) = 1/4$ for type $j \in \{a,b,c,d\}$  and $P(X=j) = \frac{1}{2}$, then we have $P(Q=a | Y=1)=P(Q=b | Y=1) =\frac{1}{4}$, $P(Q=c | Y=1)=0$ and $P(Q=d | Y=1)=1$. -->
+<!-- **...ENDING HERE** -->
+
+Suppose now, having observed $Y$, that we were to consider also observing $X$. Would we learn anything further about $Q^Y$ from doing so? We have already seen that observing $X$ alone yields no information about $Q^Y$ because the two nodes are unconditionally $d$-separated, the path between them blocked by the colliding arrowheads at $Y$. However, as we have seen, observing a collider variable (or one of its descendants) *unblocks* the flow of information, generating relations of conditional dependence across the colliding arrowheads. Here, $X$ and $Q^Y$ are $d$-connected by $Y$: thus, if we have *already* observed $Y$, then observing $X$ does confer additional information about $Q^Y$. Knowing only that a country has natural resources tells us nothing about those resources' effect on civil war in that country. But if we already know that the country has a civil war, then learning that the country has natural resources helps narrow down the case's possible response types. Having already used the observation of $Y=1$ to rule out the possibility that $Q^Y=q^Y_{00}$, observing $X=1$ *together with* $Y=1$ allows us to additionally rule out the possibility that natural resources *prevent* civil war, i.e., that $Q^Y=q^Y_{01}$.^[That is, we can rule out that the case is an $a$ type, or one with a negative causal effect.]
+
+<!-- **LONG FOOTNOTE STARTING HERE....** -->
+<!-- Where we observe both $Y$ and $X$,  we have: -->
+<!-- $$P(Q=q | Y=y, X=x) = \frac{P(X=x)P(Q=q)P(Y=y|X=x, Q=q)}{\sum_{q'}P(X=x)P(Q=q')P(Y=y|X=x, Q=q')}$$ -->
+<!-- which does not allow separation either of  $Q$ and $X$ or of $Q$ and $Y$. Thus, there is again learning from $Y$ and, given $Y$, there is *also* learning from $X$. Put differently, we have $P(Q|Y,X) \neq P(Q|Y)$.  -->
+
+<!-- **...ENDING HERE** -->
+
+Finally, what if we observe $X$ first and are considering whether to seek information about $Y$? Would doing so be informative? $X$ does not $d-$separate $Q^Y$ from $Y$; thus, observing $Y$ will be informative about $Q^Y$. In fact, observing $Y$ if we have already seen $X$ is *more* informative than observing $Y$ alone. The reasoning follows the logic of collision discussed just above. If we observe $Y$ having already seen $X$, not only do we reap the information about $Q^Y$ provided by $Y$'s correlation with $Q^Y$; we simultaneously open up the path between $X$ and $Q^Y$, learning additionally from the conditional dependence between $X$ and $Q^Y$ given $Y$. 
+
+
+```{r, echo = FALSE, include = FALSE, errors = FALSE}
+# Graphing all dags in some class, X,Y,K,Q
+
+
+
+# Append to list
+lappend <- function(L, obj) {
+  L[[length(L)+1]] <- obj
+  return(L)
+  }
+
+
+translate_matrix <- function(A, var_names = c("K", "X", "Y", "Q")){
+ paste(var_names[which(A==1, arr.ind = TRUE)[,1]], "causes", var_names[which(A==1, arr.ind = TRUE)[,2]])
+  }
+
+translate_dagitty <- function(A, var_names = c("K", "X", "Y", "Q")){
+  paste(var_names[which(A==1, arr.ind = TRUE)[,1]], "->", var_names[which(A==1, arr.ind = TRUE)[,2]])
+  }
+
+make_daggity     <- function(A) dagitty(paste("dag{", paste(translate_dagitty(A), collapse = ";"), "}"))
+
+kinformative2 <- function(A){
+   paste(c(
+       dseparated(make_daggity(A), "Q", "K", c()),
+       dseparated(make_daggity(A), "Q", "K", c("X")),
+       dseparated(make_daggity(A), "Q", "K", c("Y")),
+       dseparated(make_daggity(A), "Q", "K", c("X","Y"))
+       ), collapse = ",")
+   }
+
+kinformative <- function(A){
+  paste(c("\U2205", "X", "Y", "XY")[!c(
+    dseparated(make_daggity(A), "Q", "K", c()),
+    dseparated(make_daggity(A), "Q", "K", c("X")),
+    dseparated(make_daggity(A), "Q", "K", c("Y")),
+    dseparated(make_daggity(A), "Q", "K", c("X","Y"))
+  )], collapse =",")
+}
+
+
+# 34 graphs
+# All paths. All have Q --> Y. None have Y --> X
+#   KXYQ
+# K 0???
+# X ?0??
+# Y ?000
+# Q ??10
+var_names <- c("K", "X", "Y", "Q")
+
+check.A <- function(A, iterations = 4){
+  x <- 1
+  if( sum(sapply(1:iterations, function(j) sum(diag((A %^% j))))) > 0) x<- 0 # Cycles
+  if( sum(sapply(1:iterations, function(j) (A %^% j)[2,3])) == 0) x<- -1 # "No path from X to Y (2 to 3)"
+  if(min(rowSums(A) + colSums(A))==0) x<- -2 # "Unconnected element"
+  if(sum(A[,4])>0) x<- -3 # "No causes of Q allowed in graph"
+  x}
+
+.A <-  matrix(c( 0,NA,NA,NA, 
+                 NA, 0,NA,NA,
+                 NA, 0, 0, 0,
+                 NA,NA, 1, 0), 4, 4, byrow = TRUE)
+rownames(.A) <- var_names; colnames(.A) <- var_names
+
+possibilities <- perm_bb(rep(2,9))
+
+new_A <- function(j) {A <- .A; A[c(2:4, 5, 8:10, 13:14)] <- possibilities[j,]; A}
+
+accept <- list()
+for(i in 1:nrow(possibilities)) {
+  A <- new_A(i)
+  if(check.A(A)==1) accept <- lappend(accept, A)
+}
+
+```
+
+We put Proposition 1 to work in a slightly more complex set of models in Figure \ref{fig:34graphs}. Here we investigate the informativeness of a clue that is neither $X$ nor $Y$. Each graph in Figure \ref{fig:34graphs} has four variables: $X$; $Y$; a possible clue, $K$; and a response-type variable, $Q$. We draw all 34 possible graphs with variables $X$, $Y$, $K$, and $Q$ for causal models in which (a) all variables are connected to at least one other variable, (b) $X$ causes $Y$ either directly or indirectly, and (c) $Q$ is a direct cause of $Y$ but is not caused by any other variable in the model and is thus exogenous. The title of each panel reports $K$'s conditional informativeness using principles of $d$-separation: it tells us when $K$ is possibly informative about $Q$ depending on whether $X$, $Y$, both or none are observed.^[Note the "possibly" can be dropped under the assumption that the underlying probability model is "stable" (Pearl 2009, section 2.9.1) and with the interpretation that $K$ is informative about $Q$ for some, but not necessarily all, values of $W$.]
+
+<!-- Above footnote: do we want to say "faithful" rather than stable, as we do earlier? -->
+
+```{r, echo = FALSE, fig.width = 11, fig.height = 12, fig.cap = "\\label{fig:34graphs} All connected directed acyclic graphs over $X,Y,K,Q$, in which $Q$ is an exogenous variable that directly causes $Y$, and $X$ is a direct or indirect cause of $Y$. The title of each graph indicates the conditions under which $K$ can be informative about (i.e., is not $d$-separated from) $Q$, given the prior observation of $X$, $Y$, both, or neither (...).", errors = FALSE, warning = FALSE, message = FALSE, comment = FALSE}
+
+
+par(mfrow = c(6, 6) )
+  par(mar=c(1,1,3.5,1))
+  for(i in 1:length(accept)){
+    kinf <- kinformative(accept[[i]])
+    hj_dag(x = c(0,0,1,1), y = c(1,0,0,1), names = var_names, 
+           arcs = which(accept[[i]]==1, arr.ind = TRUE), 
+           title = title(ifelse(
+                         length(kinf)==0, 
+                         paste0(i, ". K never informative"),
+                         paste0(i, ". K possibly informative\n given: ", kinf))), 
+           padding = .15, cex = 1.2, length = .15) 
+    }
+
+```
+
+### Probative value 
+
+The results show us not just what kinds of variables can be informative about a case's response-type but also what combinations of observations yield leverage on case-level causal effects. A number of features the graphs are worth highlighting:
+
+* **Clues at many stages.** Process tracing has focused a great deal on observations that lie "along the path" between suspected causes and outcomes. What we see in Figure \ref{fig:34graphs}, however, is that observations at many different locations in a causal model can be informative about causal effects. We see here that $K$ can be informative when it is pre-treatment (causally prior to $X$---e.g. panel (3)), post-treatment but pre-outcome (that is, "between" $X$ and $Y$ as, e.g., in panel (20)), an auxiliary effect of $X$ that itself has no effect on $Y$ (e.g., in panel (19)), post-outcome (after $Y$---e.g., in panel (15)), or a joint effect of both the suspected cause and the outcome (e.g., panel (31)). 
+
+* **Mediator Clues**. While clues that lie in between $X$ and $Y$ may be informative, they can only be informative under certain conditions. For instance, when a clue serves *only* as a mediator in our model (i.e., its only linkages are being caused by $X$ and being affected by $Y$) and $Q$ only affects $Y$, as in panels (20) and (21), the clue is only informative about $Q$ if we have also observed the outcome, $Y$. Of course, this condition may commonly be met---qualitative researchers usually engage in retrospective research and learn the outcome of the cases they are studying early on---but it is nonetheless worth noting why it matters: in this setup, $K$ is unconditionally $d$-separated from $Q$ by the collision at $Y$; it is only by observing $Y$ (the collider) that the path between $K$ and $Q$ becomes unblocked. (As we saw above, the very same is true for observing $X$; it is only when we know $Y$ that $X$ is informative about $Q$.)
+
+In short, observations along causal paths are more helpful in identifying causal effects to the extent that we have measured the outcome. Importantly, this is not the same as saying that mediator clues are *only* informative about causal effects where we have observed the outcome. Observing $Y$ is necessary for the mediator to be informative about a $Q$ term that is connected only to $Y$. Observing a mediator without the outcome, however, could still be informative about the overall effect of $X$ on $Y$ by providing leverage on how the mediator responds to $X$, which is itself informative about $X$'s effect on $Y$ via the mediator.^[In other words, the clue would then be providing leverage on a response-type variable pointing into the mediator itself.] Moreover, observing the mediator could be informative without the observation of $Y$ if, for instance, $Q$ also points into $K$ itself or into a cause of $K$. As we discuss below, the clue then is informative as a "symptom" of the case's response type, generating learning that does not hinge on observing the outcome.
+
+* **Symptoms as clues.** Some clues may themselves be affected by $Q$: that is to say, they may be symptoms of the same conditions that determine causal effects in a case. For instance, in our illustrative model involving government survival, government sensitivity functions as a response-type variable for the effect of a free press ($X$) on government removal ($Y$): a free press only generates government removal when the government is non-sensitive to public opinion.  Sensitivity to public opinion thus represents our query variable, $Q$, if we seek to learn whether a free press causes government removal in a case. While it may not be possible to observe or otherwise measure the government's sensitivity, there may be *consequences* of government sensitivity that are observable: for instance, whether government officials regularly consult with civil-society actors on policy issues. While consultations would not be part of the causal chain generating the free press's effect, observing consultations (or the lack of them) would be informative about that effect because consultations are a symptom of the same conditions that enable the effect. 
+
+We see that $K$ is a child or descendant of $Q$ in several of the graphs in Figure \ref{fig:34graphs}: $Q$ directly causes $K$ in panels (7) through (14), (17), (18), (25)-(30), (33), and (34); $Q$ causes (K) only indirectly through $X$ in panels (22) through (24); $Q$ causes (K) only indirectly through $Y$ in panels (15), (16), and (31); and $Q$ causes $K$ only indirectly through $X$ and through $Y$ in panel (32). We can then use the principle of $d$-separation to figure out when the symptom clue is potentially informative, given what we have already observed. It is easy to see that $K$ is potentially informative, no matter what we have already observed, if $K$ is directly affected by $Q$; there is nothing we could observe that would block the $Q \rightarrow K$ path. Thus, $Q$'s "symptom" can, in this setup, contain information about type above and beyond that contained in the $X$ and $Y$ values. However, where $Q$ affects $K$ only through some other variable, observing that other variable renders $K$ uninformative by blocking the $Q$-to-$K$ path. For instance, where $Q$ affects $K$ indirectly through $X$, once we observe $X$, we already have all the information about $Q$ that would be contained in $K$. 
+
+* **Surrogates as clues.** Clues may be consequences of the outcome, as in graphs (15) and (16). If $K$ is a consequence *only* of $Y$, then it will contain no new information about $Q$ where $Y$ is already known. However, in situations where the outcome has not been observed, $K$ can act as a "surrogate" for the outcome and thus yield leverage on $Q$ (@frangakis2002principal). A researcher might, for instance, seek to understand causal effects on an outcome that is difficult to directly observe: consider, for instance, studies that seek to explain ideational change. Ideas themselves, the $Y$ in such studies, are not directly observable. However, their consequences---such as statements by actors or policy decisions---will be observable and can thus serve as informative surrogates for the outcome of interest.
+
+Clues may similarly serve as surrogates of a cause, as in graphs (19) and (22). Here $X$ causes $K$, but $K$ plays no role in the causal process generating $Y$. $K$ is of no help if we can directly measure $X$ since the latter $d$-separates $K$ from $Q$. But if an explanatory variable cannot be directly measured---consider, e.g., ideas or preferences as causes---then its consequences, including those that have no relationship to the outcome of interest, can provide leverage on the case-level causal effect.
+
+Clues can also be a consequence of both our suspected cause and the outcome of interest, thus serving as what we might call "double surrogates," as in panels (31) and (32). Here $X$ is a direct cause of $Y$, and $K$ is a joint product of $X$ and $Y$. A double surrogate can be informative as long as we have not already observed both $X$ and $Y$. Where data on either $X$ or $Y$ are missing, there is an open path between $K$ and $Q$. If we have already observed both, however, then there is nothing left to be learned from $K$.
+
+* **Instruments as clues.** Clues that are causally prior to an explanatory variable, and have no other effect on the outcome, can sometimes be informative. Consider, for instance, graph (3). Here $K$ is the only cause of $X$. It can thus serve as a proxy. If we have seen $X$, then $X$ blocks the path between $K$ and $Q$, and so $K$ is unhelpful. $K$ can be informative, though, if we have *not* observed $X$. Note that informativeness here still requires that we observe $Y$. Since $Y$ is a collider for $Q$ and the $K \rightarrow X \rightarrow$ chain, we need to observe $Y$ in order to $d$-connect $K$ to $Q$.
+
+A rather different setup appears in graph (5), where both $K$ and $Q$ cause $X$. Now the conditions for $K$'s informativeness are broader. Observing $X$ still makes $K$ uninformative as a proxy for $X$ itself. However, because $X$ is a collider for $K$ and $Q$, observing $X$ *opens up* a path from $K$ to $Q$, rendering a dependency between them. Still, we have to observe at least one of $X$ or $Y$ for the instrument to be informative here. This is because both of $K$'s paths to $Q$ run through a collision that we need to unblock by observing the collider. For one path, the collider is $X$; for the other path, the collider is $Y$.^[As a simple example one might imagine a system in which $X = K$ if  $q \in {a,b}$  and $X = 1-K$ if  $q \in {c,d}$. Then if we observe, say, $X=Y=K=1$, we can infer that $q = b$. Another way to think about what is happening in graph (5) is that $K$ is providing information about the *assignment process*. In this graph, the causal effect ($Y$'s potential outcomes, determined by $Q$) is also a partial determinant of the assignment of cases to values on $X$. In terms of cross-case correlational inference, then, we would think of this as a situation of confounding. Observing another cause of $X$, then, allows us to more fully characterize the process of assignment.] 
+
+<!-- Graph (5) is similar to one discussed in [@hausman1999independence] in which there is learning from a pretreatment clue because $X$ is a collider for $K$ and $Q$.  -->
+
+<!-- To return to our government-removal model, government sensitivity to public opinion is a response-type variable (a $Q$ term), with non-sensitivity a pre-condition for the positive effect of a free press on removal. Yet it is possible (though we did not include it in our original model) that government sensitivity also affects whether or not a government gets a free press: more sensitive governments may impose tighter media restrictions. In that case, when governments are not sensitive, we would expect to see a free press and government removal.   -->
+
+Other patterns involving instrumentation are also imaginable, though not graphed here. For example, we might have a causal structure that combines instrumentation and surrogacy. Suppose that $X$ is affected by $Q$ and by an unobservable variable $\theta_X$; and that $\theta_X$ has an observable consequence, $K$. Then $K$, though not a cause of $X$, is a "surrogate instrument" [@hernan2006instruments] as it is a descendant of an unobserved instrument, $U$, and thus allows us to extract inferences similar to those that we could draw from a true instrument.
+
+* **Confounders as clues.** In several of the graphs, $K$ is a confounder in that it is a direct cause of both $X$ and $Y$ (panels (4), (6), (12), and (14)). Let us focus on graph (4), which isolates $K$'s role as a confounder. Here $K$ can be informative via two possible paths. First, if $X$ is not observed but $Y$ is, then $K$ is $d$-connected to $Q$ along the path $K \rightarrow X \rightarrow Y \leftarrow Q$. $K$ is in this sense serving as a proxy for $X$, with its path to $Q$ opened up by the observation of the collider, $Y$. Second, with $Y$ observed, $K$ can provide information on $Q$ via the more direct collision, $K \rightarrow Y \leftarrow Q$. If $X$ *is* observed, then the first path is blocked, but the second still remains active. As with any pre-outcome variable, for a confounder clue to provide purchase on $Y$'s response type, $Y$ itself must be observed.
+
+In a sense, then, the role of confounders as clues in case-level inference is the mirror image of the role of confounders as covariates in cross-case correlational inference. In a correlational inferential framework, controlling for a variable in $K$'s position in graph (5) renders the $X, Y$ correlation (which we assume to be observed) informative about $X$'s average causal effect. When we use confounders as evidence in within-case inference, it is our observations of other variables that determine how informative the confounder *itself* will be about $X$'s causal effect.
+
+
+It is important to be precise about the kinds of claims that one can make from graphs like those in Figure \{fig:34graphs}. The graphs in this figure allow us to identify informativeness about an unobserved node $Q$ that is a parent of $Y$. This setup does not, however, capture all ways in which clues can be informative about the causal effect of $X$ on $Y$ or about other causal estimands of interest. For instance, as noted above, even if a clue is uninformative about a $Q$ node pointing into $Y$, it may still help establish whether $X$ causes $Y$: the statement that $X$ causes $Y$ will for some graphs be a statement about a *collection* of nodes that form the set of query variables $\mathcal Q$. This is the case, for instance, in any graph of the form $X \rightarrow M  \rightarrow Y$, where we are interested not just in $Y$'s response to $M$ (the mediator) but also in $M$'s response to $X$. Of interest, thus, are not just a $Q^Y$ response-type node pointing into $Y$ but also a $Q^M$ response-type node that is a parent of $M$. Observations that provide leverage on either $Q$ term will thus aid an inference about the overall causal effect. A clue $K$ that is $d-$separated from $Q^Y$ may nevertheless be informative about $X$'s effect on $Y$ if it is not $d-$separated from $Q^M$; this opens up a broader range of variables as informative clues. 
+
+Additionally, as our discussion in Chapter 2 makes clear, estimands other than the case-level causal effect---such as average causal effects, actual causes, and causal paths---involve particular features of context: particular sets of exogenous nodes as members of our query set, $\mathcal Q$. Thus, even for the same causal model, informativeness will be defined differently for each causal question that we seek to address. The broader point is that we can identify what kinds of observations may address our estimand if we can place that estimand on a causal graph and then assess the graph for relationships of $d$-separation and -connection.
+
+Further, we emphasize that a DAG can only tell us when a clue *may* be informative (conditional some prior observation): $d-$connectedness is necessary but not sufficient for informativeness. This fact derives directly from the rules for drawing a causal graph: the absence of an arrow between two variables implies that they are *not* directly causally related, while the presence of an arrow does not imply that they always are. As we saw in our analysis of the government-removal example in Chapter 2, whether variables connected to one another by arrows in the original DAG were in fact linked by a causal effect depended on the context. Likewise, whether a clue $K$ is in fact informative may depend on particular values of $\mathcal W$---the variables that have already been observed. As a simple example, let $q = k_1w + (1-w)k_2$, where $W$ is a variable that we have already observed and $K_1$ and $K_2$ are clues that we might choose to observe next. Here, if $w=1$ then learning $K_1$ will be informative about $Q$, and learning $K_2$ will not; but if $w=0$, then $K_1$ will be uninformative (and $K_2$ informative). 
+
+
+In general, then, graphical analysis alone can help us exclude unhelpful research designs, given our prior observations and a fairly minimal set of prior beliefs about causal linkages. This is no small feat. But identifying those empirical strategies that will yield the greatest leverage requires engaging more deeply with our causal model, as we explore next.
+
+
+

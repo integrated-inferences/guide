@@ -1,0 +1,141 @@
+# (PART) Causal Models {-}
+
+```{r part1, include = FALSE}
+source("_packages_used.R")
+library(DeclareDesign)
+#do_diagnosis <- FALSE
+```
+
+# What and why {#cm}
+
+The `CausalQueries` package is designed to make it easy to *build*, *update*, and *query* causal models  defined over binary variables.
+
+The causal models we use are of the form described by @pearl2009causality, with Bayesian updating on the causal models similar to that described by @cowell1999probabilistic. Though drawing heavily on the Pearlian framework, the approach specifies parameters using potential outcomes  (specifically, using principal stratificaton [@frangakis2002principal]) and uses the `stan` framework [@carpenter2017stan] to implement updating.  
+
+We will illustrate how to use these models for a number of inferential tasks that are sometimes difficult to implement: 
+
+* **Bayesian process tracing**: How to figure out what to believe about a case-level causal claim given one or more pieces of evidence about a case [@bennett2015process].
+* **Mixed methods**: How to combine within-case ("qualitative") evidence with cross-case ("quantitative") evidence to make causal claims about cases or groups [@humphreys2015mixing].
+* **Counterfactual reasoning**: How to estimate the probability that an outcome is due to a cause and other counterfactual queries (effects of causes, probability of sufficiency, explanation) [@tian2000probabilities].
+* **Inference in the absence of causal identification**: What inferences can you draw when causal quantities are not identified? How can you figure out *whether* a causal quantity is identified [@manski1995identification]?
+* **Extrapolation, data fusion**: How to draw inferences from mixtures of observational and experimental data? How to draw out-of-sample inferences given a theory of how one place differs from another [@bareinboim2016causal]?
+
+The functions in the package allow these different kinds of questions to be answered using the same three basic steps --- `make_model`, `update_model`, and `query_model` --- without recourse to specific estimators for specific estimands.
+
+The approach, however, requires thinking about causal inference differently from how many in the experimental tradition are used to.
+
+## Two approaches to inference
+
+We contrast the two approaches to causal inference using the simplest problem: the analysis of data from a two-arm experimental trial to determine the average effect of a treatment on an outcome.
+
+In the canonical experimental trial, a treatment, $X$, is randomly assigned and outcomes, $Y$, are measured in both treatment and control groups.  The usual interest is in understanding the average effect of $X$ on $Y$ (which we will assume are both binary). 
+
+The classic approach to answering this question is to take the difference between outcomes in treatment and control groups as an estimate of this average treatment effect. Estimates of uncertainty about this answer can also be generated using information on variation in the treatment and control groups. 
+
+It is also possible, however, to answer this question---along with a rich variety of other questions---using a *causal models* approach [@pearl2009causality]. 
+
+For intuition for how a causal model approach works, say instead of simply taking the differences between treatment and control one were to:
+
+1. construct a simple model in which (a) $X$ is randomly assigned, with 50% probability and (b) we specify some prior beliefs about how $Y$ responds to $X$, which could be positively, negatively, or not at all, and possibly different for each unit 
+
+2. update beliefs about how $Y$ responds to $X$ given the data on $X$ and $Y$
+
+Though very simple, this $X \rightarrow Y$ model adds a great deal of structure to the situation It is, in fact, more of a model than you need if all you want to do is estimate average treatment effects. But it is nevertheless enough of a model to let you estimate quantities---such as causal attribution---that you could not estimate without a model, even given random assignment. 
+
+## Recovering the ATE with Difference in Means
+
+To illustrate, imagine that *in actuality* (but unknown to us) $X$ shifts  $Y$ from 0 to 1 in 50% of cases while in the rest $Y$ is 0 or 1 regardless. 
+
+We imagine we have access to some data in which treatment, $X$, has been randomly assigned:
+
+```{r, echo = TRUE, warning = FALSE}
+
+# Fabricate data using fabricatr
+set.seed(17022020)
+data  <- fabricate(N = 1000, X = complete_ra(N), Y = 1*(runif(N, -1, 3)/2 < X))
+```
+
+The classic experimental approach to causal inference is to estimate the effect of $X$ on $Y$ using differences in means: taking the difference between the average outcome in treatment and the average outcome in control. Thanks to randomization, in expectation that difference is equal to the average of the differences in outcomes that units would exhibit if they were in treatment versus if they were in control---that is, the causal effect. 
+
+```{r, eval = FALSE}
+difference_in_means(Y~X, data = data)
+```
+
+```{r, echo  = FALSE, warning = FALSE}
+x <- difference_in_means(Y~X, data = data)
+kable(summary(x)[[1]], digits = 3, caption = "Inferences on the ATE from differences in means")
+```
+
+This approach gets us an accurate and precise answer, and it's simply done (here using a function from the `estimatr` package).
+
+## Recovering the ATE with a Causal Model
+
+The model-based approach takes a few more lines of code and is implemented in `CausalQueries` as follows. 
+
+First we define a model, like this:
+
+```{r, eval = FALSE, echo = TRUE}
+model <- make_model("X -> Y")
+```
+
+Implicit in the definition of the model is a set of parameters and priors over these parameters. We discuss these in much more detail later, but for now we will just say that priors are uniform over possible causal relations.
+
+Second, we update the model, like this:
+
+```{r, eval = FALSE, echo = TRUE}
+model <- update_model(model, data) 
+```
+
+Third, we  query the model like this:
+
+```{r, eval = FALSE}
+query_model(model, using  = "posteriors", query = "Y[X=1] - Y[X=0]") 
+```
+
+
+```{r, echo = FALSE}
+model <- make_model("X -> Y") 
+
+if(do_diagnosis){
+  write_rds(update_model(model, data, refresh = 0), "saved/XY.rds")
+  }
+model <- read_rds("saved/XY.rds")
+
+query_model(model, 
+            using   = "posteriors", 
+            queries = "Y[X=1]- Y[X=0]") %>% 
+kable(caption = "Inferences on the ATE from updated model")
+```
+
+We see that the answers we get from the differences-in-means approach and the causal-model approach are about the same, as one would hope.  
+
+## Going further
+
+In principle, however, the causal models approach can let you do more. The third section of this guide is full of examples, but for a simple one consider the following: say, instead of wanting to know the average effect of $X$ on $Y$ you wanted to know, "What is the probability that $X$ caused $Y$ in a case in which $X=Y=1$?" 
+
+This is a harder question. Differences-in-means is an estimation strategy tied to a particular estimand, and it does not provide a good answer to this question. However, with a causal model in hand, *we can ask whatever causal question we like*, and get an answer plus estimates of uncertainty around the answer.
+
+Here is the answer we get:
+
+
+```{r, eval = FALSE}
+query_model(model, 
+            using = "posteriors", 
+            query = "Y[X=0] == 0",
+            given = "X==1 & Y==1")  
+```
+
+```{r, echo = FALSE}
+query_model(model, 
+            using   = "posteriors", 
+            queries = "Y[X=0] == 0",
+            given = "X==1 & Y==1") %>% 
+  kable(caption = "Causes of effects estimand") 
+```
+
+In this case we are asking *for those cases in which $X=1$ and $Y=1$*, what are the chances that $Y$ would have been $0$ if $X$ were $0$? 
+
+Note, however, that while the model gave a precise answer to the ATE question, the answer for the causes-of-effects estimand is not precise. Moreover, more data won't reduce the uncertainty substantially.  The reason is that this estimand is not identified. 
+
+This then is a situation in which we can ask a question about a quantity that is not identified and still learn a lot. We will encounter numerous examples like this as we explore different causal models. 
+

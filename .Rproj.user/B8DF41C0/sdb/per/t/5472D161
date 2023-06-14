@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "\n\nstan_biqq_lower <- stan_model(file = \"C:/Dropbox/ProcessTracing/9 R package/m SANDBOX/version_2_from_prrimitives/stan_biqq_XY_XYK_from_primitives.stan\")\nsave(stan_biqq_lower, file = \"C:/Dropbox/github/biqq/data/stan_biqq_lower.rda\")\n\ndata_biqq_lower_init <- list(\n  XY          = c(  0,  0,  0, 0),\n  XYK         = c(  0,  0,\n                    0,  0,\n                    0,  0,\n                    0,  0),\n  XYK_data    = NULL, # option to provide XYK as data fram\n  Y_u_prior   = rep(1,  16),\n  K_u_prior   = rep(1,  4),\n  pi_alpha    = matrix(1, 16, 4),\n  pi_beta     = matrix(1, 16\n\nfit_biqq_lower  <-\n  init_biqq(stanmodel = stan_biqq_lower,\n             data = data_biqq_lower_init), 4)\n)\n\n\nsave(fit_biqq_lower, file = \"C:/Dropbox/github/biqq/data/fit_biqq_lower.rda\")\n\n\n\nY_u_prior      <- rep(1,  16)\nK_u_prior      <- rep(1,  4)\nY_u_prior[3:4] <- .1\nK_u_prior[3]   <- .1\n\nbiqq_lower(K_u_prior = K_u_prior,\n           Y_u_prior = Y_u_prior)\n\n# Y_u_prior[c(3, 7, 9, 10, 12, 15)] <- .1\n\n\nbiqq_lower(K_u_prior = K_u_prior,\n           Y_u_prior = Y_u_prior,\n           XYK = c(4,0,4,0,4,0,0,4))\n\nbiqq_lower()\n",
+    "created" : 1500911358178.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "642854430",
+    "id" : "5472D161",
+    "lastKnownWriteTime" : 1499432466,
+    "last_content_update" : 1499432466,
+    "path" : "C:/Dropbox/ProcessTracing/5 Analysis/5 SANDBOX/version_2_from_prrimitives/prepping for package.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

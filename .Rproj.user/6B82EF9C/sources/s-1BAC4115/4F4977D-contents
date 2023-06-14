@@ -1,0 +1,81 @@
+options(mc.cores = parallel::detectCores())
+
+library(gbiqq)
+
+gen_given <- function(n00=1, n01=1, n10=1, n11=1,times = 1) {
+  data.frame(X = c(0,0,1,1), Y =c(0,1,0,1), M = NA, ns = c(n00, n01, n10, n11)*times) %>%
+    tidyr::uncount(ns)}
+
+data <- gen_given(times = 1000)
+  
+model <- make_model("X->M->Y") %>% set_priors(rep(.5, 10))
+
+model <- gbiqq(model, data, chains = 12, iter = 16000)
+
+queries = list(ATE = "Y[X=1]-Y[X=0]", 
+               a = "Y[X=1]<Y[X=0]", 
+               b = "Y[X=1]>Y[X=0]", 
+               c = "(Y[X=1]==0) & (Y[X=0]==0)", 
+               d = "(Y[X=1]==1) & (Y[X=0]==1)",
+               a1 = "M[X=1]<M[X=0]", 
+               b1 = "M[X=1]>M[X=0]", 
+               c1 = "(M[X=1]==0) & (M[X=0]==0)", 
+               d1 = "(M[X=1]==1) & (M[X=0]==1)",
+               a2 = "Y[M=1]<Y[M=0]", 
+               b2 = "Y[M=1]>Y[M=0]", 
+               c2 = "(Y[M=1]==0) & (Y[M=0]==0)", 
+               d2 = "(Y[M=1]==1) & (Y[M=0]==1)"
+)
+
+
+query_model(model, queries, using = "parameters")
+query_model(model, queries, using = "posteriors")
+
+
+XYmodel <- make_model("X->Y") %>%
+   gbiqq(data)
+
+gen_given <- function(n00=1, n01=1, n10=1, n11=1,times = 1) {
+  data.frame(X = c(0,0,1,1), Y =c(0,1,0,1), M = NA, ns = c(n00, n01, n10, n11)*times) %>%
+    tidyr::uncount(ns)}
+
+data <- gen_given(times = 1000)
+
+
+qabcd = list(ATE = "Y[X=1]-Y[X=0]", 
+               a = "Y[X=1]<Y[X=0]", 
+               b = "Y[X=1]>Y[X=0]", 
+               c = "(Y[X=1]==0) & (Y[X=0]==0)", 
+               d = "(Y[X=1]==1) & (Y[X=0]==1)")
+               
+
+query_model(XYmodel, qabcd, using = c( "priors", "posteriors"), expand_grid = TRUE)
+
+cor(XYmodel$posterior_distribution)
+
+
+with(data.frame(XYmodel$posterior_distribution), plot(Y.Y01, X.X0))
+with(data.frame(XYmodel$posterior_distribution), plot(Y.Y01, Y.Y00))
+with(data.frame(XYmodel$posterior_distribution), plot(Y.Y01, Y.Y10))
+
+
+XYmodel_Xknown <- make_model("X->Y") %>%
+  set_parameters(c(1,1, 1, 1, 1, 1)) %>%
+  gbiqq(data, iter = 10000)
+get_parameters(XYmodel_Xknown, param_type = "posterior_mean")
+
+XYmodel_Xknown <- make_model("X->Y") %>%
+  set_parameters(c(200,200, 1, 1, 1, 1)) %>%
+  gbiqq(data, iter = 10000)
+get_parameters(XYmodel_Xknown, param_type = "posterior_mean")
+
+
+
+XYmodel_Jeffreys <- make_model("X->Y") %>%
+  set_parameters(c(1,1, 1, 1, 1, 1)/2) %>%
+  gbiqq(data, iter = 10000)
+get_parameters(XYmodel_Jeffreys, param_type = "posterior_mean")
+
+
+with(data.frame(XYmodel_Jeffreys$posterior_distribution), plot(Y.Y01, X.X0))
+with(data.frame(XYmodel_Jeffreys$posterior_distribution), hist(Y.Y11))

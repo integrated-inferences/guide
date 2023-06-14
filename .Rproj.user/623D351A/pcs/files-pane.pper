@@ -1,0 +1,13 @@
+{
+    "path" : "~/Dropbox/ProcessTracing/8 Book/ii",
+    "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}

@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Defining models | Causal Models: Guide to CausalQueries</title>
+  <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="generator" content="bookdown 0.17 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Defining models | Causal Models: Guide to CausalQueries" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  <meta name="github-repo" content="rstudio/causalmodels" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Defining models | Causal Models: Guide to CausalQueries" />
+  
+  <meta name="twitter:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
+  
+
+<meta name="author" content="Macartan Humphreys and Alan Jacobs" />
+
+
+<meta name="date" content="2020-06-10" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="package.html"/>
+<link rel="next" href="updating-models-with-stan.html"/>
+<script src="libs/jquery/jquery.min.js"></script>
+<link href="libs/gitbook/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="headers\style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Model based causal inference: A guide to gbiqq</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="part"><span><b>I Causal Models</b></span></li>
+<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a><ul>
+<li class="chapter" data-level="1.1" data-path="cm.html"><a href="cm.html#two-approaches-to-inference"><i class="fa fa-check"></i><b>1.1</b> Two approaches to inference</a></li>
+<li class="chapter" data-level="1.2" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-difference-in-means"><i class="fa fa-check"></i><b>1.2</b> Recovering the ATE with Difference in Means</a></li>
+<li class="chapter" data-level="1.3" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-a-causal-model"><i class="fa fa-check"></i><b>1.3</b> Recovering the ATE with a Causal Model</a></li>
+<li class="chapter" data-level="1.4" data-path="cm.html"><a href="cm.html#going-further"><i class="fa fa-check"></i><b>1.4</b> Going further</a></li>
+</ul></li>
+<li class="part"><span><b>II The Package</b></span></li>
+<li class="chapter" data-level="2" data-path="package.html"><a href="package.html"><i class="fa fa-check"></i><b>2</b> Installation</a></li>
+<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a><ul>
+<li class="chapter" data-level="3.1" data-path="defining-models.html"><a href="defining-models.html#getting-going"><i class="fa fa-check"></i><b>3.1</b> Getting going</a></li>
+<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="defining-models.html"><a href="defining-models.html#nodal-types"><i class="fa fa-check"></i><b>3.2.1</b> Nodal types</a></li>
+<li class="chapter" data-level="3.2.2" data-path="defining-models.html"><a href="defining-models.html#causal-types"><i class="fa fa-check"></i><b>3.2.2</b> Causal types</a></li>
+<li class="chapter" data-level="3.2.3" data-path="defining-models.html"><a href="defining-models.html#parameters-dataframe"><i class="fa fa-check"></i><b>3.2.3</b> Parameters dataframe</a></li>
+<li class="chapter" data-level="3.2.4" data-path="defining-models.html"><a href="defining-models.html#parameter-matrix"><i class="fa fa-check"></i><b>3.2.4</b> Parameter matrix</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="defining-models.html"><a href="defining-models.html#restrictions"><i class="fa fa-check"></i><b>3.3</b> Setting restrictions</a></li>
+<li class="chapter" data-level="3.4" data-path="defining-models.html"><a href="defining-models.html#confounding"><i class="fa fa-check"></i><b>3.4</b> Allowing confounding</a></li>
+<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="defining-models.html"><a href="defining-models.html#custom-priors"><i class="fa fa-check"></i><b>3.5.1</b> Custom priors</a></li>
+<li class="chapter" data-level="3.5.2" data-path="defining-models.html"><a href="defining-models.html#prior-warnings"><i class="fa fa-check"></i><b>3.5.2</b> Prior warnings</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="defining-models.html"><a href="defining-models.html#parameters"><i class="fa fa-check"></i><b>3.6</b> Setting Parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a><ul>
+<li class="chapter" data-level="4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#data-for-stan"><i class="fa fa-check"></i><b>4.1</b> Data for <code>stan</code></a></li>
+<li class="chapter" data-level="4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#stan-code"><i class="fa fa-check"></i><b>4.2</b> <code>stan</code> code</a></li>
+<li class="chapter" data-level="4.3" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a></li>
+<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#arbitrary-parameters"><i class="fa fa-check"></i><b>4.4.1</b> Arbitrary parameters</a></li>
+<li class="chapter" data-level="4.4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#non-binary-data"><i class="fa fa-check"></i><b>4.4.2</b> Non binary data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a><ul>
+<li class="chapter" data-level="5.1" data-path="querying-models.html"><a href="querying-models.html#case-level-queries"><i class="fa fa-check"></i><b>5.1</b> Case level queries</a></li>
+<li class="chapter" data-level="5.2" data-path="querying-models.html"><a href="querying-models.html#posterior-queries"><i class="fa fa-check"></i><b>5.2</b> Posterior queries</a></li>
+<li class="chapter" data-level="5.3" data-path="querying-models.html"><a href="querying-models.html#query-distribution"><i class="fa fa-check"></i><b>5.3</b> Query distribution</a></li>
+<li class="chapter" data-level="5.4" data-path="querying-models.html"><a href="querying-models.html#token-and-general-causation"><i class="fa fa-check"></i><b>5.4</b> Token and general causation</a></li>
+<li class="chapter" data-level="5.5" data-path="querying-models.html"><a href="querying-models.html#complex-queries"><i class="fa fa-check"></i><b>5.5</b> Complex queries</a></li>
+</ul></li>
+<li class="part"><span><b>III Applications</b></span></li>
+<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a><ul>
+<li class="chapter" data-level="6.1" data-path="applications.html"><a href="applications.html#the-ladder-of-causation-in-an-x-rightarrow-y-model"><i class="fa fa-check"></i><b>6.1</b> The ladder of causation in an <span class="math inline">\(X \rightarrow Y\)</span> model</a></li>
+<li class="chapter" data-level="6.2" data-path="applications.html"><a href="applications.html#x-causes-y-with-unmodelled-confounding"><i class="fa fa-check"></i><b>6.2</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with unmodelled confounding</a></li>
+<li class="chapter" data-level="6.3" data-path="applications.html"><a href="applications.html#x-causes-y-with-confounding-modeled"><i class="fa fa-check"></i><b>6.3</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with confounding modeled</a></li>
+<li class="chapter" data-level="6.4" data-path="applications.html"><a href="applications.html#simple-mediation-model"><i class="fa fa-check"></i><b>6.4</b> Simple mediation model</a></li>
+<li class="chapter" data-level="6.5" data-path="applications.html"><a href="applications.html#simple-moderator-model"><i class="fa fa-check"></i><b>6.5</b> Simple moderator model</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a><ul>
+<li class="chapter" data-level="7.1" data-path="explanation.html"><a href="explanation.html#tightening-bounds-on-causes-of-effects-using-an-unobserved-covariate"><i class="fa fa-check"></i><b>7.1</b> Tightening bounds on causes of effects using an unobserved covariate</a></li>
+<li class="chapter" data-level="7.2" data-path="explanation.html"><a href="explanation.html#Billy"><i class="fa fa-check"></i><b>7.2</b> Actual Causation: Billy and Suzy’s moderator and mediation model</a></li>
+<li class="chapter" data-level="7.3" data-path="explanation.html"><a href="explanation.html#diagnosis-inferring-a-cause-from-symptoms"><i class="fa fa-check"></i><b>7.3</b> Diagnosis: Inferring a cause from symptoms</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a><ul>
+<li class="chapter" data-level="8.1" data-path="process-tracing.html"><a href="process-tracing.html#what-to-infer-from-what"><i class="fa fa-check"></i><b>8.1</b> What to infer from what</a></li>
+<li class="chapter" data-level="8.2" data-path="process-tracing.html"><a href="process-tracing.html#probative-value-and-d-separation"><i class="fa fa-check"></i><b>8.2</b> Probative value and <span class="math inline">\(d\)</span>-separation</a></li>
+<li class="chapter" data-level="8.3" data-path="process-tracing.html"><a href="process-tracing.html#foundations-for-van-everas-tests"><i class="fa fa-check"></i><b>8.3</b> Foundations for Van Evera’s tests</a></li>
+<li class="chapter" data-level="8.4" data-path="process-tracing.html"><a href="process-tracing.html#clue-selection-clues-at-the-center-of-chains-can-be-more-informative"><i class="fa fa-check"></i><b>8.4</b> Clue selection: clues at the center of chains can be more informative</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a><ul>
+<li class="chapter" data-level="9.1" data-path="identification.html"><a href="identification.html#illustration-of-the-backdoor-criterion"><i class="fa fa-check"></i><b>9.1</b> Illustration of the backdoor criterion</a></li>
+<li class="chapter" data-level="9.2" data-path="identification.html"><a href="identification.html#identification-instruments"><i class="fa fa-check"></i><b>9.2</b> Identification: Instruments</a></li>
+<li class="chapter" data-level="9.3" data-path="identification.html"><a href="identification.html#identification-through-the-frontdoor"><i class="fa fa-check"></i><b>9.3</b> Identification through the frontdoor</a></li>
+<li class="chapter" data-level="9.4" data-path="identification.html"><a href="identification.html#simple-sample-selection-bias"><i class="fa fa-check"></i><b>9.4</b> Simple sample selection bias</a></li>
+<li class="chapter" data-level="9.5" data-path="identification.html"><a href="identification.html#addressing-both-sample-selection-bias-and-confounding"><i class="fa fa-check"></i><b>9.5</b> Addressing both sample selection bias and confounding</a></li>
+<li class="chapter" data-level="9.6" data-path="identification.html"><a href="identification.html#learning-from-a-collider"><i class="fa fa-check"></i><b>9.6</b> Learning from a collider!</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a><ul>
+<li class="chapter" data-level="10.1" data-path="mixing-methods.html"><a href="mixing-methods.html#using-within-case-data-to-help-with-identification"><i class="fa fa-check"></i><b>10.1</b> Using within case data to help with identification</a></li>
+<li class="chapter" data-level="10.2" data-path="mixing-methods.html"><a href="mixing-methods.html#distinguishing-paths"><i class="fa fa-check"></i><b>10.2</b> Distinguishing paths</a></li>
+<li class="chapter" data-level="10.3" data-path="mixing-methods.html"><a href="mixing-methods.html#nothing-from-nothing"><i class="fa fa-check"></i><b>10.3</b> Nothing from nothing</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a><ul>
+<li class="chapter" data-level="11.1" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#transportation-of-findings-across-contexts"><i class="fa fa-check"></i><b>11.1</b> Transportation of findings across contexts</a></li>
+<li class="chapter" data-level="11.2" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#combining-observational-and-experimental-data"><i class="fa fa-check"></i><b>11.2</b> Combining observational and experimental data</a></li>
+<li class="chapter" data-level="11.3" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#a-jigsaw-puzzle-learning-across-populations"><i class="fa fa-check"></i><b>11.3</b> A jigsaw puzzle: Learning across populations</a></li>
+</ul></li>
+<li class="part"><span><b>IV Notation</b></span></li>
+<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a><ul>
+<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a><ul>
+<li class="chapter" data-level="12.1.1" data-path="notation.html"><a href="notation.html#parents"><i class="fa fa-check"></i><b>12.1.1</b> Parents, children, and all that</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2" data-path="notation.html"><a href="notation.html#syntax"><i class="fa fa-check"></i><b>12.2</b> Causal syntax</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/macartan/gbiqq/" target="blank">Uses gbiqq</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Causal Models: Guide to <code>CausalQueries</code></a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="defining-models" class="section level1">
+<h1><span class="header-section-number">Chapter 3</span> Defining models</h1>
+<div id="getting-going" class="section level2">
+<h2><span class="header-section-number">3.1</span> Getting going</h2>
+<p>Model definition involves:</p>
+<ul>
+<li>Defining a <a href="defining-models.html#structure">causal structure</a> (required)</li>
+<li>Indicating causal type <a href="defining-models.html#restrictions">restrictions</a> (optional)</li>
+<li>Indicating possible unobserved <a href="defining-models.html#confounding">confounding</a> (optional)</li>
+<li>Providing <a href="defining-models.html#priors">priors</a> and <a href="defining-models.html#parameters">parameters</a> (required, but defaults are provided)</li>
+</ul>
+<p>We discuss these in turn.</p>
+</div>
+<div id="structure" class="section level2">
+<h2><span class="header-section-number">3.2</span> Causal structure</h2>
+<p>A simple model is defined in one step using a <code>dagitty</code> syntax in which the structure of the model is provided as a statement.</p>
+<p>For instance:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y &lt;- X&quot;</span>)</a></code></pre></div>
+<p>The statement (in quotes) provides the names of nodes. An arrow (“<code>-&gt;</code>” or “<code>&lt;-</code>”) connecting nodes indicates that one node is a potential cause of another (that is, whether a given node is a “parent” or “child” of another; see section <a href="notation.html#parents">12.1.1</a>).</p>
+<p>Formally a statement like this is interpreted as:</p>
+<ol style="list-style-type: decimal">
+<li>Functional equations:</li>
+</ol>
+<ul>
+<li><span class="math inline">\(Y = f(M, X, \theta^Y)\)</span></li>
+<li><span class="math inline">\(M = f(X, \theta^M)\)</span></li>
+<li><span class="math inline">\(X = \theta^X\)</span></li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Distributions on shocks:</li>
+</ol>
+<ul>
+<li><span class="math inline">\(\Pr(\theta^i = \theta^i_k) = \lambda^i_k\)</span></li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
+<li>Independence assumptions:<br />
+</li>
+</ol>
+<ul>
+<li><span class="math inline">\(\theta_i \perp\!\!\! \perp \theta_j, i\neq j\)</span></li>
+</ul>
+<p>where function <span class="math inline">\(f\)</span> maps from the set of possible values of the parents of <span class="math inline">\(i\)</span> to values of node <span class="math inline">\(i\)</span> given <span class="math inline">\(\theta^i\)</span>. Units with the same value on <span class="math inline">\(\theta^i\)</span> react in the same way to the parents of <span class="math inline">\(i\)</span>. Indeed in this discrete world we think of <span class="math inline">\(\theta^i\)</span> as fully dictating the functional form of <span class="math inline">\(f\)</span>, indicating what outcome is observed on <span class="math inline">\(i\)</span> for any value of <span class="math inline">\(i\)</span>’s parents.</p>
+<p>In addition, it is also possible to indicate “unobserved confounding”, that is, the presence of an unobserved variable that might influence observed variables. In this case condition 3 above is relaxed. We describe how this is done in greater detail in section <a href="defining-models.html#confounding">3.4</a>.</p>
+<p>For instance:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- W -&gt; X; X &lt;-&gt; Y&quot;</span>)</a></code></pre></div>
+<p>Note that different segments of the graph can be included in the same statement, separated by semicolons. There are many ways to write the same model. Here is the same model written once using a three part statement and once as a chain (with the same node appearing possibly more than once).</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;W -&gt; X; W -&gt; Y; X -&gt; Y&quot;</span>)</a>
+<a class="sourceLine" id="cb11-2" title="2">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- W -&gt; X&quot;</span>)</a></code></pre></div>
+<p>Once defined, a model can be graphed (we use the <code>dagitty</code> package for this):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- W -&gt; X; X &lt;-&gt; Y&quot;</span>)</a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="kw">plot</span>(model)</a></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-16"></span>
+<img src="causalmodels_files/figure-html/unnamed-chunk-16-1.png" alt="A plotted model. Curved double headed arrows indicate unobserved confounding" width="672" />
+<p class="caption">
+Figure 3.1: A plotted model. Curved double headed arrows indicate unobserved confounding
+</p>
+</div>
+<p>This is useful to check that you have written the structure down correctly.</p>
+<p>When a model is defined, a set of objects are generated. These are the key quantities that are used for all inference. We discuss each in turn. (See the notation guide—section <a href="notation.html#notation">12</a>—for definitions and code pointers).</p>
+<div id="nodal-types" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Nodal types</h3>
+<p>Two units have the same <em>nodal type</em> at node <span class="math inline">\(Y\)</span>, <span class="math inline">\(\theta^Y\)</span>, if their outcome at <span class="math inline">\(Y\)</span> responds in the same ways to parents of <span class="math inline">\(Y\)</span>.</p>
+<p>A node with <span class="math inline">\(k\)</span> parents has <span class="math inline">\(2^{2^k}\)</span> nodal types. The reason is that with <span class="math inline">\(k\)</span> parents, there are <span class="math inline">\(2^k\)</span> possible values of the parents and so <span class="math inline">\(2^{2^k}\)</span> ways to respond to these possible parental values. As a convention we say that a node with no parents has two nodal types (0 or 1).</p>
+<p>When a model is created the full set of “nodal types” is identified. These are stored in the model. The subscripts become very long and hard to parse for more complex models so the model object also includes a guide to interpreting nodal type values. You can see them like this.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y&quot;</span>)<span class="op">$</span>nodal_types</a></code></pre></div>
+<pre><code>$X
+[1] &quot;0&quot; &quot;1&quot;
+
+$Y
+[1] &quot;00&quot; &quot;10&quot; &quot;01&quot; &quot;11&quot;
+
+attr(,&quot;interpret&quot;)
+attr(,&quot;interpret&quot;)$X
+  node position display interpretation
+1    X       NA      X0          X = 0
+2    X       NA      X1          X = 1
+
+attr(,&quot;interpret&quot;)$Y
+  node position display interpretation
+1    Y        1   Y[*]*      Y | X = 0
+2    Y        2   Y*[*]      Y | X = 1</code></pre>
+<p>Note that we use <span class="math inline">\(\theta^j\)</span> to indicate nodal types because for qualitative analysis the nodal types are often the parameters of interest.</p>
+</div>
+<div id="causal-types" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Causal types</h3>
+<p>Causal types are collections of nodal types. Two units are of the same <em>causal type</em> if they have the same nodal type at every node. For example in a <span class="math inline">\(X \rightarrow M \rightarrow Y\)</span> model, <span class="math inline">\(\theta = (\theta^X_0, \theta^M_{01}, \theta^Y_{10})\)</span> is a type that has <span class="math inline">\(X=0\)</span>, <span class="math inline">\(M\)</span> responds positively to <span class="math inline">\(X\)</span>, and <span class="math inline">\(Y\)</span> responds positively to <span class="math inline">\(M\)</span>.</p>
+<p>When a model is created, the full set of causal types is identified. These are stored in the model object:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;A -&gt; B&quot;</span>)<span class="op">$</span>causal_types</a></code></pre></div>
+<pre><code>       A  B
+A0.B00 0 00
+A1.B00 1 00
+A0.B10 0 10
+A1.B10 1 10
+A0.B01 0 01
+A1.B01 1 01
+A0.B11 0 11
+A1.B11 1 11</code></pre>
+<p>A model with <span class="math inline">\(n_j\)</span> nodal types at node <span class="math inline">\(j\)</span> has <span class="math inline">\(\prod_jn_j\)</span> causal types. Thus the set of causal types can be large. In the model <span class="math inline">\((X\rightarrow M \rightarrow Y \leftarrow X)\)</span> there are <span class="math inline">\(2\times 4\times 16 = 128\)</span> causal types.</p>
+<p>Knowledge of a causal type tells you what values a unit would take, on all nodes, absent an intervention. For example for a model <span class="math inline">\(X \rightarrow M \rightarrow Y\)</span> a type <span class="math inline">\(\theta = (\theta^X_0, \theta^M_{01}, \theta^Y_{10})\)</span> would imply data <span class="math inline">\((X=0, M=0, Y=1)\)</span>. (The converse of this, of course, is the key to updating: observation of data <span class="math inline">\((X=0, M=0, Y=1)\)</span> result in more weight placed on <span class="math inline">\(\theta^X_0\)</span>, <span class="math inline">\(\theta^M_{01}\)</span>, and <span class="math inline">\(\theta^Y_{10})\)</span>.)</p>
+</div>
+<div id="parameters-dataframe" class="section level3">
+<h3><span class="header-section-number">3.2.3</span> Parameters dataframe</h3>
+<p>When a model is created, <code>CausalQueries</code> attaches a “parameters dataframe” which keeps track of model parameters, which belong together in a family, and how they relate to causal types. This becomes especially important for more complex models with confounding that might involve more complicated mappings between parameters and nodal types. In the case with no confounding the nodal types <em>are</em> the parameters; in cases with confounding you generally have more parameters than nodal types.</p>
+<p>For instance:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>)<span class="op">$</span>parameters_df <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb17-2" title="2"><span class="st">  </span><span class="kw">kable</span>()</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">param_names</th>
+<th align="right">param_value</th>
+<th align="left">param_set</th>
+<th align="left">node</th>
+<th align="left">nodal_type</th>
+<th align="right">gen</th>
+<th align="right">priors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">X.0</td>
+<td align="right">0.50</td>
+<td align="left">X</td>
+<td align="left">X</td>
+<td align="left">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">X.1</td>
+<td align="right">0.50</td>
+<td align="left">X</td>
+<td align="left">X</td>
+<td align="left">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Y.00</td>
+<td align="right">0.25</td>
+<td align="left">Y</td>
+<td align="left">Y</td>
+<td align="left">00</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">Y.10</td>
+<td align="right">0.25</td>
+<td align="left">Y</td>
+<td align="left">Y</td>
+<td align="left">10</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Y.01</td>
+<td align="right">0.25</td>
+<td align="left">Y</td>
+<td align="left">Y</td>
+<td align="left">01</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">Y.11</td>
+<td align="right">0.25</td>
+<td align="left">Y</td>
+<td align="left">Y</td>
+<td align="left">11</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>Each row in the dataframe corresponds to a single parameter.</p>
+<p>The columns of the parameters data frame are understood as follows:</p>
+<ul>
+<li><code>param_names</code> gives the name of the parameter, in shorthand. For instance the parameter <span class="math inline">\(\lambda^X_0 = \Pr(\theta^X = \theta^X_0)\)</span> has <code>par_name</code> <code>X.0</code>. See section <a href="notation.html#notation">12</a> for a summary of notation.</li>
+<li><code>param_value</code> gives the (possibly default) parameter values. These are probabilities.<br />
+</li>
+<li><code>param_set</code> indicates which parameters group together to form a simplex. The parameters in a set have parameter values that sum to 1. In this example <span class="math inline">\(\lambda^X_0 + \lambda^X_1 = 1\)</span>.</li>
+<li><code>node</code> indicates the node associated with the parameter. For parameter <code>\lambda^X_0</code> this is <span class="math inline">\(X\)</span>.</li>
+<li><code>nodal_type</code> indicates the nodal types associated with the parameter.</li>
+<li><code>gen</code> indicates the place in the partial causal ordering (generation) of the node associated with the parameter</li>
+<li><code>priors</code> gives (possibly default) Dirichlet priors arguments for parameters in a set. Values of 1 (.5) for all parameters in a set implies uniform (Jeffrey’s) priors over this set.</li>
+</ul>
+<p>Below we will see examples where the parameter dataframe helps keep track of parameters that are created when confounding is added to a model.</p>
+</div>
+<div id="parameter-matrix" class="section level3">
+<h3><span class="header-section-number">3.2.4</span> Parameter matrix</h3>
+<p>The parameters dataframe keeps track of parameter values and priors for parameters but it does not provide a mapping between parameters and the probability of causal types.</p>
+<p>The parameter matrix (<span class="math inline">\(P\)</span> matrix) is added to the model to provide this mapping. The <span class="math inline">\(P\)</span> matrix has a row for each parameter and a column for each causal type. For instance:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>get_parameter_matrix <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb18-2" title="2"><span class="st">  </span>kable</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">X0.Y00</th>
+<th align="right">X1.Y00</th>
+<th align="right">X0.Y10</th>
+<th align="right">X1.Y10</th>
+<th align="right">X0.Y01</th>
+<th align="right">X1.Y01</th>
+<th align="right">X0.Y11</th>
+<th align="right">X1.Y11</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>X.0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>X.1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td>Y.00</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Y.10</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>Y.01</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Y.11</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>The probability of a causal type is given by the product of the parameters values for parameters whose row in the <span class="math inline">\(P\)</span> matrix contains a 1.</p>
+<p>Below we will see examples where the <span class="math inline">\(P\)</span> matrix helps keep track of parameters that are created when confounding is added to a model.</p>
+</div>
+</div>
+<div id="restrictions" class="section level2">
+<h2><span class="header-section-number">3.3</span> Setting restrictions</h2>
+<p>When a model is defined, the complete set of possible causal relations are identified. This set can be very large.</p>
+<p>Sometimes for theoretical or practical reasons it is useful to constrain the set of types. In <code>CausalQueries</code> this is done at the level of nodal types, with restrictions on causal types following from restrictions on nodal types.</p>
+<p>For instance to impose an assumption that <span class="math inline">\(Y\)</span> is not decreasing in <span class="math inline">\(X\)</span> we generate a restricted model as follows:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">set_restrictions</span>(<span class="st">&quot;Y[X=1] &lt; Y[X=0]&quot;</span>)</a></code></pre></div>
+<p>or:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">set_restrictions</span>(<span class="kw">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>))</a></code></pre></div>
+<p>Viewing the resulting parameter matrix we see that both the set of parameters and the set of causal types are now restricted:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="kw">get_parameter_matrix</span>(model)</a></code></pre></div>
+<pre><code>
+Rows are parameters, grouped in parameter sets
+
+Columns are causal types
+
+Cell entries indicate whether a parameter probability is used
+in the calculation of causal type probability
+
+     X0.Y00 X1.Y00 X0.Y01 X1.Y01 X0.Y11 X1.Y11
+X.0       1      0      1      0      1      0
+X.1       0      1      0      1      0      1
+Y.00      1      1      0      0      0      0
+Y.01      0      0      1      1      0      0
+Y.11      0      0      0      0      1      1
+
+ 
+ param_set  (P)
+ </code></pre>
+<p>Here and in general, setting restrictions typically involves using causal syntax; see Section <a href="notation.html#syntax">12.2</a> for a guide the syntax used by <code>CausalQueries</code>.</p>
+<p>Note:</p>
+<ul>
+<li>Restrictions have to operate on nodal types: restrictions on <em>levels</em> of endogenous nodes aren’t allowed. This, for example, will fail:
+<code>make_model("X-&gt;Y") %&gt;% set_restrictions(statement =  "(Y == 1)")</code>. The reason is that it requests a correlated restriction on nodal types for <code>X</code> and <code>Y</code> which involves undeclared confounding.</li>
+<li>Restrictions implicitly assume fixed values for <em>all</em> parents of a node. For instance: <code>make_model("A -&gt; B &lt;- C") %&gt;% set_restrictions("(B[C=1]==1)")</code> is interpreted as shorthand for the restriction <code>"B[C = 1, A = 0]==1 | B[C = 1, A = 1]==1"</code>.</li>
+<li>To place restrictions on multiple nodes at the same time, provide these as a vector of restrictions. This is not permitted: <code>set_restrictions("Y[X=1]==1 &amp; X==1")</code>, since it requests correlated restrictions. This however is allowed: <code>set_restrictions(c("Y[X=1]==1", "X==1"))</code>.<br />
+</li>
+<li>Use the <code>keep</code> argument to indicate whether nodal types should be dropped (default) or retained.</li>
+<li>Restrictions can be set using nodal type labels. <code>make_model("S -&gt; C -&gt; Y &lt;- R &lt;- X; X -&gt; C -&gt; R") %&gt;% set_restrictions(labels = list(C = "C1000", R = "R0001", Y = "Y0001"), keep = TRUE)</code></li>
+<li>Wild cards can be used in nodal type labels: <code>make_model("X-&gt;Y") %&gt;% set_restrictions(labels = list(Y = "Y?0"))</code></li>
+</ul>
+</div>
+<div id="confounding" class="section level2">
+<h2><span class="header-section-number">3.4</span> Allowing confounding</h2>
+<p>(Unobserved) confounding between two nodes arises when the nodal types for the nodes are not independently distributed.</p>
+<p>In the <span class="math inline">\(X \rightarrow Y\)</span> graph, for instance, there are 2 nodal types for <span class="math inline">\(X\)</span> and 4 for <span class="math inline">\(Y\)</span>. There are thus 8 joint nodal types (or causal types):</p>
+<table>
+<colgroup>
+<col width="5%" />
+<col width="6%" />
+<col width="34%" />
+<col width="34%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"></th>
+<th align="center"></th>
+<th align="center"><span class="math inline">\(\theta^X\)</span></th>
+<th align="left"></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">0</td>
+<td align="left">1</td>
+<td>Sum</td>
+</tr>
+<tr class="even">
+<td align="center"><span class="math inline">\(\theta^Y\)</span></td>
+<td align="center">00</td>
+<td align="center"><span class="math inline">\(\Pr(\theta^X_0, \theta^Y_{00})\)</span></td>
+<td align="left"><span class="math inline">\(\Pr(\theta^X_1, \theta^Y_{00})\)</span></td>
+<td><span class="math inline">\(\Pr(\theta^Y_{00})\)</span></td>
+</tr>
+<tr class="odd">
+<td align="center"></td>
+<td align="center">10</td>
+<td align="center"><span class="math inline">\(\Pr(\theta^X_0, \theta^Y_{10})\)</span></td>
+<td align="left"><span class="math inline">\(\Pr(\theta^X_1, \theta^Y_{10})\)</span></td>
+<td><span class="math inline">\(\Pr(\theta^Y_{10})\)</span></td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center">01</td>
+<td align="center"><span class="math inline">\(\Pr(\theta^X_0, \theta^Y_{01})\)</span></td>
+<td align="left"><span class="math inline">\(\Pr(\theta^X_1, \theta^Y_{01})\)</span></td>
+<td><span class="math inline">\(\Pr(\theta^Y_{01})\)</span></td>
+</tr>
+<tr class="odd">
+<td align="center"></td>
+<td align="center">11</td>
+<td align="center"><span class="math inline">\(\Pr(\theta^X_0, \theta^Y_{11})\)</span></td>
+<td align="left"><span class="math inline">\(\Pr(\theta^X_1, \theta^Y_{11})\)</span></td>
+<td><span class="math inline">\(\Pr(\theta^Y_{11})\)</span></td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center">Sum</td>
+<td align="center"><span class="math inline">\(\Pr(\theta^X_0)\)</span></td>
+<td align="left"><span class="math inline">\(\Pr(\theta^X_1)\)</span></td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>This table has 8 interior elements and so an unconstrained joint distribution would have 7 degrees of freedom. A no confounding assumption means that <span class="math inline">\(\Pr(\theta^X | \theta^Y) = \Pr(\theta^X)\)</span>, or <span class="math inline">\(\Pr(\theta^X, \theta^Y) = \Pr(\theta^X)\Pr(\theta^Y)\)</span>. In this case we just put a distribution on the marginals and there would be 3 degrees of freedom for <span class="math inline">\(Y\)</span> and 1 for <span class="math inline">\(X\)</span>, totaling <span class="math inline">\(4\)</span> rather than 7.</p>
+<p><code>set_confounds</code> lets you relax this assumption by increasing the number of parameters characterizing the joint distribution. Using the fact that <span class="math inline">\(\Pr(A,B) = \Pr(A)\Pr(B|A)\)</span> new parameters are introduced to capture <span class="math inline">\(\Pr(B|A=a)\)</span> rather than simply <span class="math inline">\(\Pr(B)\)</span>.</p>
+<p>The simplest way to allow for confounding is by adding a bidirected edge, such as via: <code>set_confound(model, list("X &lt;-&gt; Y"))</code>. In this case the descendant node has a distribution conditional on the value of the ancestor node. To wit:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">confounded &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb23-2" title="2"><span class="st">  </span><span class="kw">set_confound</span>(<span class="st">&quot;X &lt;-&gt; Y&quot;</span>)</a>
+<a class="sourceLine" id="cb23-3" title="3"></a>
+<a class="sourceLine" id="cb23-4" title="4">confounded<span class="op">$</span>parameters_df <span class="op">%&gt;%</span><span class="st"> </span>kable</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">param_names</th>
+<th align="right">param_value</th>
+<th align="left">param_set</th>
+<th align="left">node</th>
+<th align="left">nodal_type</th>
+<th align="right">gen</th>
+<th align="right">priors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">X.0</td>
+<td align="right">0.50</td>
+<td align="left">X</td>
+<td align="left">X</td>
+<td align="left">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">X.1</td>
+<td align="right">0.50</td>
+<td align="left">X</td>
+<td align="left">X</td>
+<td align="left">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Y_0.00</td>
+<td align="right">0.25</td>
+<td align="left">Y_0</td>
+<td align="left">Y</td>
+<td align="left">00</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">Y_0.10</td>
+<td align="right">0.25</td>
+<td align="left">Y_0</td>
+<td align="left">Y</td>
+<td align="left">10</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Y_0.01</td>
+<td align="right">0.25</td>
+<td align="left">Y_0</td>
+<td align="left">Y</td>
+<td align="left">01</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">Y_0.11</td>
+<td align="right">0.25</td>
+<td align="left">Y_0</td>
+<td align="left">Y</td>
+<td align="left">11</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Y_1.00</td>
+<td align="right">0.25</td>
+<td align="left">Y_1</td>
+<td align="left">Y</td>
+<td align="left">00</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">Y_1.10</td>
+<td align="right">0.25</td>
+<td align="left">Y_1</td>
+<td align="left">Y</td>
+<td align="left">10</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Y_1.01</td>
+<td align="right">0.25</td>
+<td align="left">Y_1</td>
+<td align="left">Y</td>
+<td align="left">01</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">Y_1.11</td>
+<td align="right">0.25</td>
+<td align="left">Y_1</td>
+<td align="left">Y</td>
+<td align="left">11</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>We see here that there are now two parameter families for parameters associated with the node <span class="math inline">\(Y\)</span>. Each family captures the conditional distribution of <span class="math inline">\(Y\)</span>’s nodal types, given <span class="math inline">\(X\)</span>. For instance the parameter <code>Y-1.Y01</code> can be interpreted as <span class="math inline">\(\Pr(\theta^Y = \theta^Y _{01} | X=1)\)</span>.</p>
+<p>To see exactly how the parameters map to causal types we can view the parameter matrix:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1"><span class="kw">get_parameter_matrix</span>(confounded) <span class="op">%&gt;%</span><span class="st"> </span>kable</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">X0.Y00</th>
+<th align="right">X1.Y00</th>
+<th align="right">X0.Y10</th>
+<th align="right">X1.Y10</th>
+<th align="right">X0.Y01</th>
+<th align="right">X1.Y01</th>
+<th align="right">X0.Y11</th>
+<th align="right">X1.Y11</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>X.0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>X.1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td>Y_0.00</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Y_0.10</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>Y_0.01</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Y_0.11</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>Y_1.00</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Y_1.10</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>Y_1.01</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Y_1.11</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>Importantly, the <span class="math inline">\(P\)</span> matrix works as before, despite confounding. We can assess the probability of causal types by multiplying the probabilities of the constituent parameters.</p>
+<p>Note:</p>
+<ul>
+<li><p>Ordering of conditioning can also be controlled however via <code>set_confound(model, list(X = "Y"))</code> in which case X is given a distribution conditional on nodal types of Y.</p></li>
+<li><p>More specific confounding statements are also possible using causal syntax.</p>
+<ul>
+<li>A statement of the form <code>list(X = "Y[X=1]==1")</code> can be interpreted as: “Allow X to have a distinct conditional distribution when <span class="math inline">\(Y\)</span> has types that involve <span class="math inline">\(Y(do(X=1))=1\)</span>.” In this case, nodal types for <span class="math inline">\(Y\)</span> would continue to have 3 degrees of freedom. But there would be parameters assigning the probability of <span class="math inline">\(X\)</span> when <span class="math inline">\(\theta^Y = \theta^Y_{01}\)</span> or <span class="math inline">\(\theta^Y = \theta^Y_{11}\)</span> and other parameters for residual cases. Thus 6 degrees of freedom in all.</li>
+<li>Similarly a statement of the form <code>list(Y = "X==1")</code> can be interpreted as: “Allow Y to have a distinct conditional distribution when X=1.” In this case there would be two distributions over nodal types for Y, producing 2*3 = 6 degrees of freedom. Nodal types for X would continue to have 1 degree of freedom. Thus 7 degrees of freedom in all, corresponding to a fully unconstrained joint distribution.</li>
+</ul></li>
+<li><p>Unlike nodal restrictions, a confounding relation can involve multiple nodal types simultaneously. For instance <code>make_model("X -&gt; M -&gt; Y") %&gt;% set_confound(list(X = "Y[X=1] &gt; Y[X=0]"))</code> allows for a parameter that renders <span class="math inline">\(X\)</span> more or less likely depending on whether <span class="math inline">\(X\)</span> has a positive effect on <span class="math inline">\(Y\)</span> whether it runs through a positive or a negative effect on <span class="math inline">\(M\)</span>.</p></li>
+<li><p>The parameters needed to capture confounding relations depend on the direction of causal arrows. For example compare:</p>
+<ul>
+<li><code>make_model("A -&gt; W &lt;- B ; A &lt;-&gt; W; B &lt;-&gt; W")$parameters_df %&gt;% dim</code> In this case we can decompose shocks on <span class="math inline">\(A, B, W\)</span> via: <span class="math inline">\(\Pr(\theta^A, \theta^B, \theta^W) = \Pr(\theta^W | \theta^A, \theta^A)\Pr(\theta^A)\Pr(\theta^B)\)</span>, and we have 68 parameters.</li>
+<li><code>make_model("A &lt;- W -&gt; B ; A &lt;-&gt; W; B &lt;-&gt; W")$parameters_df %&gt;% dim</code> In this case we have <span class="math inline">\(\Pr(\theta^A, \theta^B, \theta^W) = \Pr(\theta^A | \theta^W)\Pr(\theta^B|\theta^W)\Pr(\theta^W)\)</span> and just has just 18 parameters.</li>
+</ul></li>
+</ul>
+<p>When confounding is added to a model, a dataframe, <code>confounds_df</code> is created and added to the model, recording which variables involve confounding. This is then used for plotting:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;A &lt;- X -&gt; B; A &lt;-&gt; X; B &lt;-&gt; X&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>plot</a></code></pre></div>
+<p><img src="causalmodels_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p>Sometimes the <code>confounds_df</code> can highlight nonobvious confounding relations:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb26-2" title="2"><span class="st">  </span><span class="kw">set_confound</span>(<span class="kw">list</span>(<span class="dt">X =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>))</a>
+<a class="sourceLine" id="cb26-3" title="3">model<span class="op">$</span>confounds_df</a></code></pre></div>
+<pre><code>  node 1 node 2
+1      X      M
+2      X      Y</code></pre>
+<p>In this example, the confounding statement implies confounding between <span class="math inline">\(X\)</span> and <span class="math inline">\(M\)</span> even though <span class="math inline">\(M\)</span> is not included explicitly in the confound statement (the reason is that <span class="math inline">\(X\)</span> can have a positive effect on <span class="math inline">\(Y\)</span> by having a positive effect on <span class="math inline">\(M\)</span> and this in turn having a positive effect on <span class="math inline">\(Y\)</span> <em>or</em> by having a negative effect on <span class="math inline">\(M\)</span> and this in turn having a negative effect on <span class="math inline">\(Y\)</span>).</p>
+</div>
+<div id="priors" class="section level2">
+<h2><span class="header-section-number">3.5</span> Setting Priors</h2>
+<p>Priors on model parameters can be added to the parameters dataframe. The priors are interpreted as alpha arguments for a Dirichlet distribution. They can be seen using <code>get_priors</code>.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>get_priors</a></code></pre></div>
+<pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+   1    1    1    1    1    1 </code></pre>
+<p>Here the priors have not been specified and so they default to 1, which corresponds to uniform priors.</p>
+<p>Alternatively you could set jeffreys priors like this:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">set_priors</span>(<span class="dt">distribution =</span> <span class="st">&quot;jeffreys&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>get_priors</a></code></pre></div>
+<pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+ 0.5  0.5  0.5  0.5  0.5  0.5 </code></pre>
+<div id="custom-priors" class="section level3">
+<h3><span class="header-section-number">3.5.1</span> Custom priors</h3>
+<p>Custom priors are most simply specified by being added as a vector of numbers using <code>set_priors</code>. For instance:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">set_priors</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">6</span>) <span class="op">%&gt;%</span><span class="st"> </span>get_priors</a></code></pre></div>
+<pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+   1    2    3    4    5    6 </code></pre>
+<p>The priors here should be interpreted as indicating:</p>
+<ul>
+<li><span class="math inline">\(\alpha_X = (1,2)\)</span>, which implies a distribution over <span class="math inline">\((\lambda^X_0, \lambda^X_1)\)</span> centered on <span class="math inline">\((1/3, 2/3)\)</span>.</li>
+<li><span class="math inline">\(\alpha_Y = (3,4,5,6)\)</span>, which implies a distribution over <span class="math inline">\((\lambda^Y_{00}, \lambda^Y_{10}, \lambda^Y_{01} \lambda^Y_{11})\)</span> centered on <span class="math inline">\((3/18, 4/18, 5/18, 6/18)\)</span>.</li>
+</ul>
+<p>For larger models it can be hard to provide priors as a vector of numbers and so <code>set_priors</code> can allow for more targeted modifications of the parameter vector. For instance:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb34-2" title="2"><span class="st">  </span><span class="kw">set_priors</span>(<span class="dt">statement =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, <span class="dt">alphas =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb34-3" title="3"><span class="st">  </span>get_priors</a></code></pre></div>
+<pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+   1    1    1    1    3    1 </code></pre>
+<p>See <code>?set_priors</code> and <code>?make_priors</code> for many examples.</p>
+</div>
+<div id="prior-warnings" class="section level3">
+<h3><span class="header-section-number">3.5.2</span> Prior warnings</h3>
+<p>“Flat” priors over parameters in a parameter family put equal weight on each nodal type, but this in turn can translate into strong assumptions on causal quantities of interest.</p>
+<p>For instance in an <span class="math inline">\(X \rightarrow Y\)</span> model model in which negative effects are ruled out, the average causal effect implied by “flat” priors is <span class="math inline">\(1/3\)</span>. This can be seen by querying the model:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-2" title="2"><span class="st">  </span><span class="kw">set_restrictions</span>(<span class="kw">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-3" title="3"><span class="st">  </span><span class="kw">query_model</span>(<span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>, <span class="dt">n_draws =</span> <span class="dv">10000</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb36-4" title="4"><span class="st">  </span>kable</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q 1</td>
+<td align="left">-</td>
+<td align="left">priors</td>
+<td align="right">0.33</td>
+<td align="right">0.233</td>
+</tr>
+</tbody>
+</table>
+<p>More subtly the <em>structure</em> of a model, coupled with flat priors, has substantive importance for priors on causal quantities. For instance with flat priors, priors on the probability that <span class="math inline">\(X\)</span> has a positive effect on <span class="math inline">\(Y\)</span> in the model <span class="math inline">\(X \rightarrow Y\)</span> is centered on <span class="math inline">\(1/4\)</span>. But priors on the probability that <span class="math inline">\(X\)</span> has a positive effect on <span class="math inline">\(Y\)</span> in the model <span class="math inline">\(X \rightarrow M \rightarrow Y\)</span> is centered on <span class="math inline">\(1/8\)</span>.</p>
+<p>Again, you can use <code>query_model</code> to figure out what flat (or other) priors over parameters imply for priors over causal quantities:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb37-2" title="2"><span class="st">  </span><span class="kw">query_model</span>(<span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, <span class="dt">n_draws =</span> <span class="dv">10000</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb37-3" title="3"><span class="st">  </span>kable</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q 1</td>
+<td align="left">-</td>
+<td align="left">priors</td>
+<td align="right">0.249</td>
+<td align="right">0.196</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb38-2" title="2"><span class="st">  </span><span class="kw">query_model</span>(<span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, <span class="dt">n_draws =</span> <span class="dv">10000</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb38-3" title="3"><span class="st">  </span>kable</a></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Query</th>
+<th align="left">Given</th>
+<th align="left">Using</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q 1</td>
+<td align="left">-</td>
+<td align="left">priors</td>
+<td align="right">0.125</td>
+<td align="right">0.099</td>
+</tr>
+</tbody>
+</table>
+<p>Caution regarding priors is particularly important when models are not identified, as is the case for many of the models considered here. In such cases, for some quantities, the marginal posterior distribution can be the same as the marginal prior distribution <span class="citation">(Poirier <a href="#ref-poirier1998revising" role="doc-biblioref">1998</a>)</span>.</p>
+<p>The key point here is to make sure you do not fall into a trap of thinking that “uninformative” priors make no commitments regarding the values of causal quantities of interest. They do, and the implications of flat priors for causal quantities can depend on the structure of the model. Moreover for some inferences from causal models the priors can matter a lot even if you have a lot of data. In such cases it can be helpful to know what priors on parameters imply for priors on causal quantities of interest (by using <code>query_model</code>) and to assess how much conclusions depend on priors (by comparing results across models that vary in their priors).</p>
+</div>
+</div>
+<div id="parameters" class="section level2">
+<h2><span class="header-section-number">3.6</span> Setting Parameters</h2>
+<p>By default, models have a vector of parameter values included in the <code>parameters_df</code> dataframe. These are useful for generating data, or for situations, such as process tracing, when one wants to make inferences about causal types (<span class="math inline">\(\theta\)</span>), given case level data, under the assumption that the model is known.</p>
+<p>Consider the causal model below. It has two parameter sets, X and Y, with six nodal types, two corresponding to X and four corresponding to Y. The key feature of the parameters is that they must sum to 1 within each parameter set.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">get_parameters</span>()</a></code></pre></div>
+<pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+0.50 0.50 0.25 0.25 0.25 0.25 </code></pre>
+<p>Setting parameters can be done using a similar syntax as <code>set_priors</code>. The main difference is that when a given value is altered the entire set must still always sum to 1. The example below illustrates a change in the value of the parameter <span class="math inline">\(Y\)</span> in the case it is increasing in <span class="math inline">\(X\)</span>. Here nodal type <code>Y.Y01</code> is set to be .5, while the other nodal types of this parameter set were renormalized so that the parameters in the set still sum to one.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb41-2" title="2"><span class="st">  </span><span class="kw">set_parameters</span>(<span class="dt">statement =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, <span class="dt">parameters =</span> <span class="fl">.5</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb41-3" title="3"><span class="st">  </span>get_parameters</a></code></pre></div>
+<pre><code>   X.0    X.1   Y.00   Y.10   Y.01   Y.11 
+0.5000 0.5000 0.1667 0.1667 0.5000 0.1667 </code></pre>
+<p>Alternatively, instead of setting a particular new value for a parameter you can set a value that then gets renormalized along with all other values. In the example below, if we begin with vector (.25, .25, .25, .25) and request a value of <code>Y.Y01</code> of .5, <em>without</em> requesting a renormalization of other variables, then we get a vector (.2, .2, .4, .2) which is itself a renormalization of (.25, .25, .5, .25).</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1"><span class="kw">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb43-2" title="2"><span class="st">  </span><span class="kw">set_parameters</span>(<span class="dt">statement =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, <span class="dt">parameters =</span> <span class="fl">.5</span>, <span class="dt">normalize=</span><span class="ot">FALSE</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb43-3" title="3"><span class="st">  </span>get_parameters</a></code></pre></div>
+<pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+ 0.5  0.5  0.2  0.2  0.4  0.2 </code></pre>
+<p>This normalization behavior can mean that you can control parameters better if they are set in a single step rather than in multiple steps, compare:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1"><span class="kw">make_model</span>(<span class="st">&#39;X -&gt; Y&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb45-2" title="2"><span class="st">  </span><span class="kw">make_parameters</span>(<span class="dt">statement =</span> <span class="kw">c</span>(<span class="st">&#39;Y[X=1]&lt;Y[X=0] | Y[X=1]&gt;Y[X=0]&#39;</span>), <span class="dt">parameters =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">/</span><span class="dv">2</span>, <span class="dv">0</span>))</a></code></pre></div>
+<pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+0.50 0.50 0.25 0.50 0.00 0.25 </code></pre>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" title="1"><span class="kw">make_model</span>(<span class="st">&#39;X -&gt; Y&#39;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb47-2" title="2"><span class="st">  </span><span class="kw">make_parameters</span>(<span class="dt">statement =</span> <span class="kw">c</span>(<span class="st">&#39;Y[X=1]&lt;Y[X=0]&#39;</span>, <span class="st">&#39;Y[X=1]&gt;Y[X=0]&#39;</span>), <span class="dt">parameters =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">/</span><span class="dv">2</span>, <span class="dv">0</span>))</a></code></pre></div>
+<pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
+ 0.5  0.5  0.2  0.6  0.0  0.2 </code></pre>
+<p>Here the .6 in the second vector arises because a two step process is requested (<code>statement</code> is of length 2) and the vector first becomes (1/6, 1/2, 1/6, 1/6) and then becomes (.2, .6, 0, .2) which is a renormalization of (1/6, 1/2, 0, 1/6).</p>
+<p>If in doubt, check parameter values.</p>
+<p>See <code>? set_parameters</code> for some handy ways to set parameters either manually (<code>define</code>) or using <code>prior_mean</code>, <code>prior_draw</code>, <code>posterior_mean</code>, <code>posterior_draw</code>.</p>
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-poirier1998revising">
+<p>Poirier, Dale J. 1998. “Revising Beliefs in Nonidentified Models.” <em>Econometric Theory</em> 14 (4): 483–509.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="package.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="updating-models-with-stan.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook/js/app.min.js"></script>
+<script src="libs/gitbook/js/lunr.js"></script>
+<script src="libs/gitbook/js/clipboard.min.js"></script>
+<script src="libs/gitbook/js/plugin-search.js"></script>
+<script src="libs/gitbook/js/plugin-sharing.js"></script>
+<script src="libs/gitbook/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook/js/jquery.highlight.js"></script>
+<script src="libs/gitbook/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": false,
+"twitter": false,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": false,
+"google": false,
+"instapper": false
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["causalmodels.pdf"],
+"toc": {
+"collapse": "section"
+},
+"toolbar": {
+"position": "static"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,772 @@
+---
+title: "Integrated Inferences"
+author: "Macartan Humphreys and Alan Jacobs"
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{xcolor}
+- \usepackage{graphicx}
+- \newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
+- \usepackage{bbold, mathabx}
+output:
+  beamer_presentation:
+    incremental: yes
+    slide_level: 2
+  slidy_presentation:
+    incremental: yes
+bibliography: bib.bib
+---
+
+```{r, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include = FALSE}
+source("../6 Book/ii/hj_dag.R")
+```
+
+
+
+
+
+# 9 Process Tracing from a Causal Model
+
+## Theories in process tracing
+
+* Process-tracers look to theory to justify probative value of observations
+
+      * Did economic crisis cause collapse of this dictatorship?
+      
+      * Theory tells me economic crisis causes authoritarian collapse *by diminishing rents to regime supporters*, so...
+      
+      * I go and look for a clue: *Did rents to regime supporters diminish?*
+      
+* What sort of theory is this?
+
+* How does it relate to models?
+
+* How can we build process tracing atop a causal model?
+
+<!-- * Our answer: yes. Process tracing is hostage to theory. -->
+
+<!--       * So *the conclusions are credible to the extent that the theory is credible* -->
+
+<!--       * This gets us into difficult waters, if you are wont to believe that theories are never credible) -->
+
+
+<!-- ## Process tracing with mediator clue -->
+
+
+<!-- ## Levels of theories -->
+
+<!-- * We illustrated the types of higher level models that are *implied* by our running example --- there are many -->
+<!-- * We also give examples of lower level models that imply the running example -->
+<!--      * For instance an **extensive form game**, coupled with a **solution concept**, implies the dag in the running example. -->
+<!--      * An even deeper model of play in abstract games, coupled with the claim that the game in question is being played implies the lower level model -->
+<!--      * Multiple lower level models can of course imply a given higher level model -->
+
+## Where does probative value come from?
+
+* In Humphreys & Jacobs (2015), we denote probative value with $\phi$ parameters
+    * $\phi_b$ = probability of seeing clue if case is a $b$ ($\theta_{01}$) type
+    * $\phi_d$ = probability of seeing clue if case is a $d$ ($\theta_{11}$) type
+    * Probative value for $X=Y=1$ case depends on difference between them
+
+
+
+
+## Test types in continuous space
+
+
+```{r echo=FALSE, out.width="220px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/testtypes.png")
+```
+
+## Where does probative value come from?
+
+* But where do these probabilities come from? 
+
+* The causal model
+
+* Let's see how we can do this with somewhat generic lower-level models of 
+    * mediation 
+    * moderation 
+
+
+## How to do process tracing with a causal model
+
+## How to do process tracing with a causal model
+    
+1. Write down the causal query in a simple ("high level") model
+
+2. Write down a *more detailed* ("lower-level") model expressing more specific beliefs
+
+3. Redefine query in terms of nodes in lower-level model
+
+4. Express prior beliefs over types in the lower-level model
+
+5. Observe a node from the lower-level model that is NOT conditionally independent of query node(s)
+
+6. Given this observation, eliminate (or reduce weight on) "types" incompatible with this evidence
+
+7. Draw an inference, taking data and prior beliefs into account
+
+
+## Process tracing with a causal model: notional example
+
+1. Express query in a simple model
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 5, fig.align="center", out.width='.8\\textwidth'}
+
+hj_dag(x = c(1,2,2),
+       y = c(1,1,2),
+       names = c(
+         "Free press (X)",
+         "Govt removal (Y)",
+         expression(paste(theta^Y))
+         ),
+       arcs = cbind( c(1,3),
+                     c(2,2)),
+       add_functions = 0,
+       contraction = .28,
+       padding = .2
+)
+
+
+```
+
+Query: What is the value of $\theta_Y$? $\theta_{10}, \theta_{01}, \theta_{00}$, or $\theta_{11}$?
+
+## Process tracing with a causal model: notional example
+
+2. Write down lower-level model -- here, a mediation model
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 4, fig.align="center", out.width='.9\\textwidth'}
+
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1  , 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(U[X])),
+         expression(paste(Y)),
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(R)),
+         expression(paste(theta^R))
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,5, 3, 5, 3)),
+       add_functions = 0,
+       contraction = .16,
+       padding = .1
+)
+
+```
+
+* Say we observe $X=1, Y=1$ in a case
+* Did $X=1$ cause $Y=1$ in this case?
+* How can we learn about this from $R$?
+
+## Process tracing with a causal model: notional example
+
+3. Define query on lower-level model
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 4, fig.align="center", out.width='.8\\textwidth'}
+
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1  , 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(U[X])),
+         expression(paste(Y)),
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(R)),
+         expression(paste(theta[R]))
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,5, 3, 5, 3)),
+       add_functions = 0,
+       contraction = .16,
+       padding = .1
+)
+
+```
+
+* $X=1$ causes $Y=1$ if either:
+    * $\theta^R = \theta_{01}$ and $\theta_Y^{lower} = \theta_{01}$: linked positive effects; or
+    * $\theta^R = \theta_{10}$ and $\theta_Y^{lower} = \theta_{10}$: linked negative effects
+
+
+## Process tracing with a causal model: notional example
+
+* A type-reduction table
+* Columns are mediator response to $X$
+* Rows are $Y$'s response to mediator
+* Cells are higher-level types
+    
+|                 | $\theta_R=\theta_{10}$ | $\theta_R=\theta_{01}$ | $\theta_R=\theta_{00}$ | $\theta_R=\theta_{11}$ |
+|-----------------|---------|---------|---------|---------|
+| $\theta_Y^{lower}=\theta_{10}$ |         |         |         |         |
+| $\theta_Y^{lower}=\theta_{01}$ |         |         |         |         |
+| $\theta_Y^{lower}=\theta_{00}$ |         |         |         |         |
+| $\theta_Y^{lower}=\theta_{11}$ |         |         |         |         |
+
+
+
+## Process tracing with a causal model: notional example
+
+* A type-reduction table
+* Columns are mediator response to $X$
+* Rows are $Y$'s response to mediator
+* Cells are higher-level types
+
+|                 | $\theta_R=\theta_{10}$ | $\theta_R=\theta_{01}$ | $\theta_R=\theta_{00}$ | $\theta_R=\theta_{11}$ |
+|:---------------:|:-------:|:-------:|:-------:|:-------:|
+| $\theta_Y^{lower}=\theta_{10}$  |    $\theta_{01}$    |    $\theta_{10}$    |    $\theta_{11}$    |    $\theta_{00}$    |
+| $\theta_Y^{lower}=\theta_{01}$ |    $\theta_{10}$    |    $\theta_{01}$    |    $\theta_{00}$    |    $\theta_{11}$    |
+| $\theta_Y^{lower}=\theta_{00}$ |    $\theta_{00}$    |    $\theta_{00}$    |    $\theta_{00}$    |    $\theta_{00}$    |
+| $\theta_Y^{lower}=\theta_{11}$ |    $\theta_{11}$    |    $\theta_{11}$    |    $\theta_{11}$    |    $\theta_{11}$    |
+
+    
+## Process tracing with a causal model: notional example
+
+(Skip 4, setting priors, for now.)
+
+5. Observe a node NOT conditionally independent of query nodes
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 4, fig.align="center", out.width='.7\\textwidth'}
+
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1  , 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(U[X])),
+         expression(paste(Y)),
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(R)),
+         expression(paste(theta[R]))
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,5, 3, 5, 3)),
+       add_functions = 0,
+       contraction = .16,
+       padding = .1
+)
+
+```
+
+* Assuming we have already observed $Y$, $R$ is NOT conditionally independent of:
+
+    * $\theta_R$
+    * $\theta_Y$
+    
+* $\Rightarrow R$ has possible probative value for our query
+
+
+## Process tracing with a causal model: notional example
+
+6. Collect within-case data, eliminate incompatible "types"
+
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 4, fig.align="center", out.width='.5\\textwidth'}
+
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1  , 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(U[X])),
+         expression(paste(Y)),
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(R)),
+         expression(paste(theta[R]))
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,5, 3, 5, 3)),
+       add_functions = 0,
+       contraction = .16,
+       padding = .1
+)
+
+```
+
+
+* Observing $R$ rules out some *lower-level* types for $\theta_R$ and $\theta_Y$
+
+* Suppose we see $R=1$ (with $X=Y=1$). We can then deduce from the model:
+
+    * $\theta_R \neq \theta_{10}$ (not a negative $X \rightarrow R$ effect)
+    
+    * $\theta_R \neq \theta_{00}$ ($R$ not stuck at 0)
+    
+    * $\theta_Y \neq \theta_{00}$ ($Y$ not stuck at 0---already knew that from seeing $Y=1$)
+    
+    * $\theta_Y \neq \theta_{10}$ (not a negative $R \rightarrow Y$ effect)
+    
+## Process tracing with a causal model: notional example
+
+* $\theta_R \neq \theta_{10}$ (not a negative $X \rightarrow R$ effect)
+    
+* $\theta_R \neq \theta_{00}$ ($R$ not stuck at 0)
+    
+* $\theta_Y \neq \theta_{00}$ ($Y$ not stuck at 0---already knew that from seeing $Y=1$)
+    
+* $\theta_Y \neq \theta_{10}$ (not a negative $R \rightarrow Y$ effect)
+
+<!-- |                 | $T_R=a$ | $T_R=b$ | $T_R=c$ | $T_R=d$ | -->
+<!-- |:---------------:|:-------:|:-------:|:-------:|:-------:| -->
+<!-- | $T_Y^{lower}=a$ |    --   |    --   |    --   |    --   | -->
+<!-- | $T_Y^{lower}=b$ |    --   |    b    |    --   |    d    | -->
+<!-- | $T_Y^{lower}=c$ |    --   |    --   |    --   |    --   | -->
+<!-- | $T_Y^{lower}=d$ |    --   |    d    |    --   |    d    | -->
+
+
+|                 | $\theta_R=\theta_{10}$ | $\theta_R=\theta_{01}$ | $\theta_R=\theta_{00}$ | $\theta_R=\theta_{11}$ |
+|:---------------:|:-------:|:-------:|:-------:|:-------:|
+| $\theta_Y^{lower}=\theta_{10}$  |    --    |    --    |    --    |    --    |
+| $\theta_Y^{lower}=\theta_{01}$ |    --    |    $\theta_{01}$    |    --    |    $\theta_{11}$    |
+| $\theta_Y^{lower}=\theta_{00}$ |    --    |    --    |    --    |    --    |
+| $\theta_Y^{lower}=\theta_{11}$ |    --    |    $\theta_{11}$    |    --    |    $\theta_{11}$    |
+
+
+
+## Process tracing with a causal model: notional example
+
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 4, fig.align="center", out.width='.5\\textwidth'}
+
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1  , 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(U[X])),
+         expression(paste(Y)),
+         expression(paste(theta[Y]^{lower})),
+         expression(paste(R)),
+         expression(paste(theta[R]))
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,5, 3, 5, 3)),
+       add_functions = 0,
+       contraction = .16,
+       padding = .1
+)
+
+```
+
+* We've ruled out linked negative effects, and one kind of null effect
+
+* But this does NOT answer our query. $R=1$ still consistent with:
+
+    * $\theta_R = \theta_{01}$ (positive $X \rightarrow R$ effect)
+    
+    * $\theta_R = \theta_{11}$ (no $X \rightarrow R$ effect)
+    
+    * $\theta_Y = \theta_{01}$ (positive $R \rightarrow Y$ effect)
+    
+    * $\theta_Y = \theta_{11}$ (no $R \rightarrow Y$ effect)
+
+## Process tracing with a causal model: notional example
+
+* We need to bring *more* background knowledge to bear $\Rightarrow$ importance of priors
+
+4. Express prior beliefs about possible causal effects in the model
+
+* We likely know *something* about the relative plausibility of different possible causal effects in our model, e.g.:
+
+    * How likely is it that a free press *reduces* reports of corruption? (Probably not very)
+    
+    * How likely is it that reports of corruption *keep* a government in office that would have otherwise been removed? (Also probably not very)
+    
+    
+## Process tracing with a causal model: notional example
+
+4. Express prior beliefs about possible causal effects in the model, for example:
+
+* **$\theta_R$: $X$'s effect on $R$**
+
+    * $\theta_{10}$: A free press reduces reports of corruption: **Very unlikely ($0.1$)**
+
+    * $\theta_{01}$: A free press increases reports of corruption: **Somewhat likely ($0.4$)**
+       
+    * $\theta_{00}$: Reports of corruption will be low regardless of whether the press is free: **Somewhat likely ($0.4$)**
+
+    * $\theta_{11}$: Reports of corruption will be high regardless of whether the press is free: **Very unlikely ($0.1$)**
+
+
+
+
+## Process tracing with a causal model: notional example
+
+4. Express prior beliefs about possible causal effects in the model
+
+* Similar exercise for effects of media reports on government removal
+
+* **$\theta_Y$: $R$'s effect on $Y$**
+
+    * $\theta_{10}$: Reports of corruption prevent government removal: **Rather unlikely** ($0.2$)
+
+    * $\theta_{01}$: Reports of corruption cause government removal: **More likely than not ($0.6$)**
+
+    * $\theta_{00}$: Government removal will not happen regardless of reports of corruption. **Excluded** by $Y=1$ ($0$).
+
+    * $\theta_{11}$: Government removal happens regardless of reports of corruption: **Rather unlikely** ($0.2$)**
+
+
+
+## Process tracing with a causal model: notional example
+
+* With priors
+
+<!-- |                 |       | $T_R=a$ | $T_R=b$ | $T_R=c$ | $T_R=d$ | -->
+<!-- |:---------------:|-------|:-------:|:-------:|:-------:|:-------:| -->
+<!-- |                 |       |  (0.1)  |  (0.4)  |  (0.4)  |  (0.1)  | -->
+<!-- | $T_Y^{lower}=a$ | (0.2) |  **b**  |    a    |  **d**  |    c    | -->
+<!-- | $T_Y^{lower}=b$ | (0.6) |    a    |  **b**  |    c    |  **d**  | -->
+<!-- | $T_Y^{lower}=c$ | (0)   |    c    |    c    |    c    |    c    | -->
+<!-- | $T_Y^{lower}=d$ | (0.2) |  **d**  |  **d**  |  **d**  |  **d**  | -->
+
+|                 |         |$\theta_R=\theta_{10}$ | $\theta_R=\theta_{01}$ | $\theta_R=\theta_{00}$ | $\theta_R=\theta_{11}$ |
+|:---------------:|-------|:-------:|:-------:|:-------:|:-------:|
+|                 |         | (0.1)        |  (0.4)       |   (0.4)    |  (0.1)       |         
+| $\theta_Y^{lower}=\theta_{10}$  | (0.2) |    **$\theta_{01}$**    |    $\theta_{10}$    |    **$\theta_{11}$**    |    $\theta_{00}$    |
+| $\theta_Y^{lower}=\theta_{01}$ | (0.6) |   $\theta_{10}$    |    **$\theta_{01}$**    |    $\theta_{00}$    |    **$\theta_{11}$**    |
+| $\theta_Y^{lower}=\theta_{00}$ | (0) |    $\theta_{00}$    |    $\theta_{00}$    |    $\theta_{00}$    |    $\theta_{00}$    |
+| $\theta_Y^{lower}=\theta_{11}$ | (0.2) |    **$\theta_{11}$**    |    **$\theta_{11}$**    |    **$\theta_{11}$**    |    **$\theta_{11}$**    |
+
+
+
+* So what is our prior on free press causing removal?
+
+<!-- ## Process tracing with a causal model: notional example -->
+
+<!-- * With priors -->
+
+<!-- |                 | $T_R=a$ | $T_R=b$ | $T_R=c$ | $T_R=d$ | -->
+<!-- |:---------------:|:-------:|:-------:|:-------:|:-------:| -->
+<!-- |                 |  (0.1)  |  (0.4)  |  (0.4)  |  (0.1)  | -->
+<!-- | $T_Y^{lower}=a$ |  **b**  |    a    |  **d**  |    c    | -->
+<!-- |           (0.2) |         |         |         |         | -->
+<!-- | $T_Y^{lower}=b$ |    a    |  **b**  |    c    |  **d**  | -->
+<!-- |           (0.6) |         |         |         |         | -->
+<!-- | $T_Y^{lower}=c$ |    c    |    c    |    c    |    c    | -->
+<!-- |             (0) |         |         |         |         | -->
+<!-- | $T_Y^{lower}=d$ |  **d**  |  **d**  |  **d**  |  **d**  | -->
+<!-- |           (0.2) |         |         |         |         | -->
+
+
+## Process tracing with a causal model: notional example
+
+7. Draw inferences incorporating priors *and* the data
+
+* Say we observe $R=1$, with $X=Y=1$
+
+
+<!-- |                 |       | $T_R=a$ | $T_R=b$ | $T_R=c$ | $T_R=d$ | -->
+<!-- |:---------------:|-------|:-------:|:-------:|:-------:|:-------:| -->
+<!-- |                 |       |  (0.1)  |  (0.4)  |  (0.4)  |  (0.1)  | -->
+<!-- | $T_Y^{lower}=a$ | (0.2) |  ~~b~~  |  ~~a~~  |  ~~d~~  |  ~~c~~  | -->
+<!-- | $T_Y^{lower}=b$ | (0.6) |  ~~a~~  |  **b**  |  ~~c~~  |  **d**  | -->
+<!-- | $T_Y^{lower}=c$ | (0)   |  ~~c~~  |  ~~c~~  |  ~~c~~  |  ~~c~~  | -->
+<!-- | $T_Y^{lower}=d$ | (0.2) |  ~~d~~  |  **d**  |  ~~d~~  |  **d**  | -->
+
+|                 |         |$\theta_R=\theta_{10}$ | $\theta_R=\theta_{01}$ | $\theta_R=\theta_{00}$ | $\theta_R=\theta_{11}$ |
+|:---------------:|-------|:-------:|:-------:|:-------:|:-------:|
+|                 |         | (0.1)        |  (0.4)       |   (0.4)    |  (0.1)       |         
+| $\theta_Y^{lower}=\theta_{10}$  | (0.2) |    ~~$\theta_{01}$~~    |    ~~$\theta_{10}$~~    |    ~~$\theta_{11}$~~    |    ~~$\theta_{00}$~~    |
+| $\theta_Y^{lower}=\theta_{01}$ | (0.6) |   ~~$\theta_{10}$~~    |    **$\theta_{01}$**    |    ~~$\theta_{00}$~~    |    **$\theta_{11}$**    |
+| $\theta_Y^{lower}=\theta_{00}$ | (0) |    ~~$\theta_{00}$~~    |    ~~$\theta_{00}$~~    |    ~~$\theta_{00}$~~    |    ~~$\theta_{00}$~~    |
+| $\theta_Y^{lower}=\theta_{11}$ | (0.2) |    ~~**$\theta_{11}$**~~    |    **$\theta_{11}$**    |    ~~$\theta_{11}$~~    |    **$\theta_{11}$**    |
+
+* What is our posterior now on free press causes removal?
+
+## Process tracing with a causal model: notional example
+
+7. Draw inferences incorporating priors *and* the data
+
+* Say we observe $R=0$, with $X=Y=1$
+
+
+<!-- |                 |       | $T_R=a$ | $T_R=b$ | $T_R=c$ | $T_R=d$ | -->
+<!-- |:---------------:|-------|:-------:|:-------:|:-------:|:-------:| -->
+<!-- |                 |       |  (0.1)  |  (0.4)  |  (0.4)  |  (0.1)  | -->
+<!-- | $T_Y^{lower}=a$ | (0.2) |  **b**  |  ~~a~~  |  **d**  |  ~~c~~  | -->
+<!-- | $T_Y^{lower}=b$ | (0.6) |  ~~a~~  |  ~~b~~  |  ~~c~~  |  ~~d~~  | -->
+<!-- | $T_Y^{lower}=c$ | (0)   |  ~~c~~  |  ~~c~~  |  ~~c~~  |  ~~c~~  | -->
+<!-- | $T_Y^{lower}=d$ | (0.2) |  **d**  |  ~~d~~  |  **d**  |  ~~d~~  | -->
+
+|                 |         |$\theta_R=\theta_{10}$ | $\theta_R=\theta_{01}$ | $\theta_R=\theta_{00}$ | $\theta_R=\theta_{11}$ |
+|:---------------:|-------|:-------:|:-------:|:-------:|:-------:|
+|                 |         | (0.1)        |  (0.4)       |   (0.4)    |  (0.1)       |         
+| $\theta_Y^{lower}=\theta_{10}$  | (0.2) |    **$\theta_{01}$**    |    ~~$\theta_{10}$~~    |    **$\theta_{11}$**    |    ~~$\theta_{00}$~~    |
+| $\theta_Y^{lower}=\theta_{01}$ | (0.6) |   ~~$\theta_{10}$~~    |    ~~$\theta_{01}$~~    |    ~~$\theta_{00}$~~    |    ~~$\theta_{11}$~~    |
+| $\theta_Y^{lower}=\theta_{00}$ | (0) |    ~~$\theta_{00}$~~    |    ~~$\theta_{00}$~~    |    ~~$\theta_{00}$~~    |    ~~$\theta_{00}$~~    |
+| $\theta_Y^{lower}=\theta_{11}$ | (0.2) |    **$\theta_{11}$**    |    ~~$\theta_{11}$~~    |    **$\theta_{11}$**    |    ~~$\theta_{11}$~~    |
+
+* What is our posterior now on free press causes removal?
+
+## Process tracing with a causal model: notional example
+
+7. Draw inferences incorporating priors *and* the data
+
+* Our priors over lower-level causal effects, imply a prior on higher-level effect of $X$ on $Y$:
+
+    * Prior belief that free press caused govt removal = **$0.433$**
+
+* If we observe many reports of corruption ($R=1$), posterior belief that free press caused removal moves up to **$0.6$**
+
+* If we observe few reports of corruption ($R=0$), posterior belief that free press caused removal plummets to **$0.1$**
+
+* $R$ is a fairly strict "hoop test" (Van Evera 1997) for the causal effect
+
+
+## Process tracing with a causal model: how data and priors interact
+
+* Prior knowledge has allowed us to put more weight on some intermediate causal possibilities than others
+
+* E.g., observing $R=0$ forces us to eliminate the causal sequence that we considered the *more* likely way of generating a positive causal effect:
+
+    * Linked positive effects of $X$ on $R$ and of $R$ on $Y$
+
+* Only sequence consistent with the $X=1, R=0, Y=1$ that could generate a positive effect is one that prior knowledge already told us was very unlikely:
+
+    * Free press reduces corruption reports; fewer corruption reports causes government removal
+
+* Meanwhile, the no-effect types that we have eliminated were among least likely to begin with.
+
+* End up with a belief set heavily tilted toward no effect
+
+
+
+## Where does probative value come from?
+
+In a mediation model:
+
+\begin{eqnarray*}
+\phi_{b1} &=& \frac{\lambda_{01}^{K}\lambda_{01}^{Y}}{\lambda_{01}^{K}\lambda_{01}^{Y}+\lambda_{10}^{K}\lambda_{10}^{Y}}\\ 
+\phi_{d1} &=& \frac{\lambda_{11}^{Y}(\lambda_{01}^{K}+\lambda_{11}^{K})+\lambda_{11}^{K}\lambda_{01}^{Y}}{\lambda_{11}^{Y} + \lambda_{00}^{K}\lambda_{10}^{Y} + \lambda_{11}^{K}\lambda_{01}^{Y}}
+\end{eqnarray*}
+
+
+So $\phi_{b1}$ is the probabilty that $X$ causes $K$ and $K$ causes $Y$ divided by the probability (a positive channel) divided by the probability of a positive **or** a negative channel
+
+## Probative value from a model
+
+```{r echo=FALSE, out.width="250px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/hooptest.png")
+```
+
+## Probative value from a model
+
+```{r echo=FALSE, out.width="250px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/smokinggun.png")
+```
+
+## For us:
+
+Can you think of any processes that involve a mediating variable for which you have a  theory given grounds to put constraints on possible values of lower level types?
+
+
+## Process tracing with moderator clue: lower-level model of moderation
+
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 5, fig.align="center", out.width='.8\\textwidth'}
+
+hj_dag(x = c(1,1,2,2, 1.5, 1.5),
+       y = c(1,2,1,2, 1.5, 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(U[X])),  
+         expression(paste("Y")),  
+         expression(paste(U[Y]^{lower})),
+         expression(paste(K)),
+         expression(paste(U[K])) 
+         ),
+       arcs = cbind( c(2,1, 4, 6, 5),
+                     c(1,3, 3, 5, 3)),
+             add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+```
+
+* Suppose we observe $X=Y=1$.
+
+* How can searching for $K$ help us determine whether $X=1$ caused $Y=1$?
+
+## Process tracing with moderator clue: $U_Y^{lower}$'s range
+
+```{r echo=FALSE, out.width="200px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/causaltypesmoderation.png")
+```
+
+
+## Process tracing with moderator clue: $X,Y$ information
+
+Observing $X=Y=1$ rules out all types in which $Y=0$ whenever $X=1$
+
+```{r echo=FALSE, out.width="200px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/causaltypesmoderationx1y1.png")
+```
+
+
+## Process tracing with moderator clue: learning from $K$
+
+How does observing $K$ help us?
+
+It helps us figure out:
+
+* Which row we're in: How does the case respond to conditions?
+
+* Which pair of columns to focus on
+
+```{r echo=FALSE, out.width="150px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/causaltypesmoderation.png")
+```
+
+
+## Process tracing with moderator clue: learning from $K$
+
+So suppose we start with $X=Y=1$ and then observe $K=1$.
+
+Did $X=1$ cause $Y=1$?
+
+* Rows: Eliminate all where $Y=0 | X=K=1$ (3, 7, 11, 15)
+
+* Columns: Must be second and fourth columns (As $K=1$)
+
+```{r echo=FALSE, out.width="150px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/causaltypesmoderation.png")
+```
+
+
+## Process tracing with moderator clue: learning from $K$
+
+So suppose we start with $X=Y=1$ and then observe $K=1$.
+
+Did $X=1$ cause $Y=1$?
+
+* Rows: Eliminate all where $Y=0 | X=K=1$ (3, 7, 11, 15)
+
+* Columns: Must be second and fourth columns
+
+```{r echo=FALSE, out.width="150px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/causaltypesmoderation2.png")
+```
+
+
+## Process tracing with moderator clue: learning from $K$
+
+* This still doesn't answer the query: did $X=1$ cause $Y=1$?
+
+    * It *did* if we're in rows 2, 4, 10, or 12
+    
+    * It *didn't* if we're in rows 6, 8, 14, or 16
+
+```{r echo=FALSE, out.width="150px", fig.align="center", eval = TRUE}
+knitr::include_graphics("figures/causaltypesmoderation2.png")
+```
+
+So ultimately inference comes down to the weights on these rows.
+
+## Probative value
+
+We can also calculate $\phi_{b1}$ and $\phi_{d1}$ directly and use the approach from the higher level
+
+
+$$\phi_{b1} = \frac{\pi^K\left(\lambda_{00}^{01}+\lambda_{10}^{01}+\lambda_{01}^{01}+\lambda_{11}^{01}\right)}{\pi^K\left(\lambda_{00}^{01}+\lambda_{10}^{01}+\lambda_{01}^{01}+\lambda_{11}^{01}\right)
++
+(1-\pi^K)\left(\lambda_{01}^{00}+\lambda_{01}^{10}+\lambda_{01}^{01}+\lambda_{01}^{11}\right)}$$
+
+i.e. $\Pr(K,b)/\Pr(b)$ (note in this simple example $X$ does not depend on type)
+
+Similarly:
+
+$$\phi_{d1} = \frac{\pi^K\left(\lambda_{00}^{11}+\lambda_{10}^{11}+\lambda_{01}^{11}+\lambda_{11}^{11}\right)}{\pi^K\left(\lambda_{00}^{11}+\lambda_{10}^{11}+\lambda_{01}^{11}+\lambda_{11}^{11}\right)
++
+(1-\pi^K)\left(\lambda_{11}^{00}+\lambda_{11}^{10}+\lambda_{11}^{01}+\lambda_{11}^{11}\right)}$$
+
+
+<!-- ## Process tracing with moderator clue: priors -->
+
+<!-- We can form priors based on beliefs such as: -->
+
+<!-- * free press will represent a threat to governments that are insensitive to public opinion -->
+
+<!-- * free press could plausibly reinforce the legitimacy and thus prevent the removal of a government sensitive to public opinion (i.e., could have the opposite effect for a sensitive and an insensitive government) -->
+
+<!-- * free press rarely prevents government removal when the government is insensitive to public opinion -->
+
+<!-- * that sensitivity of the government to public opinion rarely causes government removal -->
+
+<!-- * it is not unlikely that the free press has no effect, regardless of sensitivity -->
+
+<!-- * it is somewhat likely that *neither* a free press nor sensitivity has an effect, regardless of the other.  -->
+
+
+<!-- ## Process tracing with moderator clue: priors -->
+
+<!-- These beliefs might yield priors like those in final column: -->
+
+<!-- ```{r echo=FALSE, out.width="200px", fig.align="center", eval = TRUE} -->
+<!-- knitr::include_graphics("figures/causaltypesmoderationpriors.png") -->
+<!-- ``` -->
+
+<!-- ## Process tracing with moderator clue: priors plus $K$ -->
+
+<!-- And then see how the elimination works: -->
+
+<!-- ```{r echo=FALSE, out.width="120px", fig.align="center", eval = TRUE} -->
+<!-- knitr::include_graphics("figures/causaltypesmoderationpriors2.png") -->
+<!-- ``` -->
+
+<!-- $K=1$ eliminates higher-probability rows with positive effects, e.g.: -->
+
+<!-- * Eliminates rows 3 and 7, where positive effect if $K=0$ (which you think it could be before you've looked!) -->
+
+<!-- * Retains rows 10 and 12, where positive effect if $K=1$, but very low priors -->
+
+<!--     * Using background knowledge telling us that these effects are very unlikely -->
+
+
+<!-- ## Process tracing with moderator clue: inference -->
+
+<!-- * Our priors at lower-level, imply a prior on higher-level beliefs about positive causal effect: -->
+
+<!--     * Calculate share of lower-level types that involve positive effects for a given value of $K$, weighted by prior probability $K$ takes on that value -->
+
+<!--         * Means we also need a prior on $K=1$, which we set to 0.5 -->
+
+<!--     * Prior: $p(U_Y^{higher}=t_{01}^{higher}|X=Y=1)=0.61$ -->
+
+<!-- * If we observe $K=1$ (sensitive government), take remaining lower-level types consistent with positive causal effect when $K=1$, as a share of all remaining lower-level types -->
+
+<!-- $\Rightarrow$ posterior: $p(U_Y^{higher}=t_{01}^{higher}|K=1, X=Y=1)=0.325$ -->
+
+<!-- * If we observe $K=0$ -->
+
+<!-- $\Rightarrow$ posterior: $p(U_Y^{higher}=t_{01}^{higher}|K=0, X=Y=1)=0.73$ -->
+
+
+
+<!-- ## For us: -->
+
+<!-- Can you think of any processes that involve a moderating variable for which you have a theory given grounds to put constraints on possible values of lower level types? -->
+

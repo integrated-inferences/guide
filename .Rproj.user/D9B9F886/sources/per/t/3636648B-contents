@@ -1,0 +1,61 @@
+# Post-estimation: Robustness and Model Evaluation {#evaluation}
+
+***
+
+Model based inference takes the model seriously. But deep down we know that all of these models are wrong, in myriad ways. We examine strategies for figuring out whether a model is likely doing more harm than good.
+
+***
+
+
+```{r, include = FALSE}
+source("_packages_used.R")
+```
+
+
+Throughout this book we have maintained the conceit that you believe your model. But it is also obvious that even the most non-parametric seeming models depend on substantive assumptions. 
+
+## Tools for evaluating models
+
+Check conditional independencies
+Check confounding assumptions approach 2 -- say actual confound is q~=0; but model  assumes q = 0. Draw data from priors, draw data; given data type (001, 100 etc) plot (a) the posterior distribution under no confounding nad (b) the distribution of estimands that gave rise to the data.  
+
+Change qual to quant priors in PIMD model
+
+Check restrictions
+
+Check fit
+
+Compare out of sample fit between model
+
+Reality checks -- posterior fits
+
+
+
+## Evaluating the Democracy-Inequality model
+
+
+## Prior check
+In a second iteration of the analysis, we show what happens if we loosen the monotonicity restriction on $I$'s effect on $M$. Here we  consider negative effects of $I$ on $M$ *unlikely*, rather than impossible, and we consider null and positive effects somewhat likely. We refer to these priors as "quantitative priors" in the sense that they place a numerical value on beliefs rather than a logical restriction. Here, we set our prior on $U^M$ as: $p(U^M=t^M_{10})=0.1$, $p(U^M=t^M_{00})=0.25$, $p(U^M=t^M_{11})=0.25$, and $p(U^M=t^M_{01})=0.4$. We show the results for the inferences given different findings in tables \ref{tab:HK8cases1quant} and \ref{tab:HK8cases2quant}. The mapping into expected posterior variance associated with each strategy is shown by the numbers in parentheses in  Table \ref{CaseLearn}.
+
+```{r, echo = FALSE, eval = FALSE}
+I0D12 <- some_results(i=0, d=1, example = example_a2)
+I0D12 <- round(I0D12, 3)
+kable(cases_table(I0D12,  cases = cases1), caption = "\\label{tab:HK8cases1quant} Four cases with low inequality and  democratization. Question of interest: Was low inequality a cause of democracy? Table shows posterior beliefs for different data for 4 cases given information on $M$ or $P$. Data from Haggard and Kaufman (2012). Analyses here use priors assuming quantitative restrictions.")
+I1D12 <- some_results(i=1, d=1, example = example_b2)
+I1D12 <- round(I1D12, 3)
+kable(cases_table(I1D12, cases = cases2), caption = "\\label{tab:HK8cases2} Four cases with high inequality and  democratization. Question of interest: Was high inequality a cause of democratization? Table shows posterior beliefs for different data for 4 cases given information on $M$ or $P$. Data from Haggard and Kaufman (2012). Analyses here use priors assuming quantitative restrictions.")
+
+```
+
+
+The results differ in various modest ways. However, the biggest difference we observe is in the degree to which the mobilization clue matters when we are looking for negative effects of inequality. As discussed, if we assumed monotonic positive effects of inequality on mobilization and monotonic positive effects of mobilization on inequality, then the mediator clue is uninformative about the indirect pathway since that pathway can only generate a positive effect. However, if we allow for the possibility of a negative effect of inequality on mobilization, we now make $M$ informative as a mediator even when the effect of inequality that we are interested in is negative: it is now possible that inequality has a negative effect on democratization via a negative effect on mobilization, followed by a positive effect of mobilization on democratization. So now, observing whether mobilization occurred adds information about whether a negative effect could have occurred via the mobilization pathway. 
+
+Moreover, it is possible for the two effects of observing $M$ on our beliefs to work in opposite ways. What we learn from observing $M$ about the $I \rightarrow M \rightarrow D$ pathway may push in a different direction from what we learn from observing $M$ about the direct $I \rightarrow D$ pathway. We see this dynamic at work in a case with low inequality and democratization. Where we are only learning about $M$ as a moderator of $I$'s direct effect (monotonicity assumption in place), observing $M=0$ shifts our beliefs in favor of $I$'s negative effect. But where we are learning about $M$ as both mediator and moderator, observing $M=0$ shifts our beliefs *against* $I$'s negative effect. The reason for this latter result is straightforward: if $I=0$ and we then see $M=0$, then we have just learned that inequality's possible indirect negative effect, running via the mobilization pathway, has *not* in fact occurred; and this has a considerable downward effect on our beliefs in an overall negative effect of inequality. This learning outweighs the small positive impact of observing $M=0$ on our confidence that $I$ had a direct negative effect on $D$.
+
+We see these differences most clearly in the cases of Albania (as compared to Mexico) and Nicaragua (as compared to Taiwan). Under priors fully constrained to monotonic causal effects, we saw that the mediator clue, $M$, made only a small difference to our inferences. However, if we allow for a negative effect of $I$ on $M$, even while believing it to be unlikely, observing mobilization in Albania and Nicaragua makes us substantially more confident that inequality mattered, and differentiates our conclusions about these cases more sharply from our conclusions about Mexico and Taiwan, respectively. 
+
+
+## Monotonic restrictions
+
+Compare fit between model with and without monotonic restrictions
+

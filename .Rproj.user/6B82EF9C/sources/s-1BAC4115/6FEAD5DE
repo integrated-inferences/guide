@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567356135879.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6FEAD5DE",
+    "lastKnownWriteTime" : 1578859417,
+    "last_content_update" : 1578859423004,
+    "path" : "C:/Dropbox/github/integrated_inferences/08-mixing-methods.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "174,29",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 13,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

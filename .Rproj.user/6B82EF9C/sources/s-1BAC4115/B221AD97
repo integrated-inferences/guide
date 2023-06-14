@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567947150848.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "B221AD97",
+    "lastKnownWriteTime" : 1568273962,
+    "last_content_update" : 1568273962,
+    "path" : "C:/Dropbox/github/integrated_inferences/16-conclusion.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "40,61",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 19,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

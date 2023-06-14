@@ -1,0 +1,256 @@
+# Going wide and going deep {#wide}
+
+***
+
+Researchers often need to choose between collecting data on more cases or collecting more data within cases. We discuss the tradeoffs and communicate an intuition that clue data, even on a small number of cases, can be informative even when there is $X, Y$ data on a very large number of cases, but only if it provides information that cannot be gathered from $X,Y$ data, such as selection into treatment. Simulations suggest that going deep is especially valuable for observational research, situations with homogeneous treatment effects, and, of course, when there is strong probative value.
+
+***
+
+```{r, include = FALSE}
+source("_packages_used.R")
+```
+
+
+How does this approach guide researchers in making choices about research designs?
+
+We address this question with a focus  on characterizing the kind of learning that emerges from gathering different sorts of data---such ,  *under different research conditions*. We report the results here of simulation-based experiments designed to tell us under what research conditions different mixes of methods can be expected to yield more accurate inferences. We also discuss, at a high level, the implications of the framework for strategies of qualitative case-selection.  
+
+
+## Intuitions: Does a sufficiently large $N$ always trump $K$?
+
+We begin by considering the learning that occurs upon observing outcomes from varying numbers of cases given different $XY$ data ranging from small to quite large. 
+
+The goal here is to build up intuitions on how beliefs change given different observations and how this affects posterior variance. We address the question is a very controlled setting in which 
+
+* a researcher is confronted with balanced $X,Y$ data that exhibits no correlation
+* the  researcher can seek information on a highly informative ("doubly decisive") clue, $K$, on cases in the $X=Y=1$ cell 
+* though not known in advance, it turns out that each time the researcher finds evidence suggesting that the case in question is a $b$ type (that is, indeed $X$ causes $Y$)
+* the selection probabilities are either unknown or known with near certainty
+
+In this case, we can expect that seeing evidence of $b$ types will shift the researcher to increase her beliefs on the average causal effect. But how strong will these shifts be and how does this depend on the amount of $X, Y$ data available? Does the signal from the $XY$ data drown out any signal from the  $K$ data?
+
+Figure \ref{morn} reports answers to these questions. For the simulations we varied the size of the $XY$ data from 5  observations in each cell to 5000. The key features of the simulations are:
+
+1. When assignment propensities are unknown---as for example with observational data---the clue information shifts beliefs independent of how many $XY$ cases there are. The key insight is that the clue provides information on assignment propensities which are informative about the share of each type in each cell and these shares determine treatment effects no matter how large or small the cells are.
+
+2. When assignment propensities are known with large data there is a lot of learning over the distribution of types in a population (at least up to differences in types rather than the distribution of fundamental types). Clue information shifts beliefs about the types of the particular cases for which clue data is gathered but has almost no effect on estimates of the population estimand. 
+
+3. Not visible from the figure however: in the case with large $N$ and known propensities, observation on many $b$ types in the $X=Y=1$ cell, while not changing estimates of *average* treatment effects ($\lambda_b- \lambda_s$) does affect beliefs on *heterogeneity*, because the data is more consistent with a world with many $a$s and $b$s than one with many $c$s and $d$s.  For example if there were 10,000 data points in each $X,Y$ and clue information on  20 cases in the $X=Y=1$ cell suggest that these are all $b$ types, then the conclusion would be that 95% of the cases are $a$ and $b$ types, in equal proportion.   
+
+
+```{r}
+model <- make_model("X -> Y <- K") %>%
+  set_restrictions("(Y[X=0, K=1]==1) | (Y[X=0, K=0]==0)") %>%
+  set_parameters(c(0.01, .99, .5, .5, .25, .25, .25, .25))
+```
+
+We see that prior beliefs are for a 0 average effect which rises to approximately .5 for cases in which $K=1$ is observed and falls to -.5 for cases in which $K=0$ is observed.  
+
+```{r, echo = FALSE}
+kable(
+  query_model(model, queries = list(ATE = "Y[X=1] - Y[X=0]"), 
+              using =  "priors", 
+              subsets = list(TRUE, "K==1", "K==0")))
+```
+
+We see little  difference in the prior on estimands. Despite this an important difference is that the model that allows for confounding also allows for updating on confounding, which the simple model does not.
+
+```{r, echo  = FALSE}
+model_confound <-   set_confound(model, list(X = "(Y[X=1] > Y[X=0])")) %>%
+  set_parameters(c(0.001, .999, .5, .5, .2, .8, .25, .25, .25, .25)) 
+
+  q2 <- query_model(model_confound, 
+              queries = list(ATE = "Y[X=1] - Y[X=0]"), 
+              using = "priors",
+              subsets = list(TRUE, "K==1", "K==0"))
+kable(q2)
+
+#x <- (get_types(model_confound, query = "Y[X=1] - Y[X=0]", join_by = "|")$types)
+```
+
+We now examine inferences given different data strategies:
+
+
+```{r , echo = FALSE, message = FALSE}
+
+given_fold <- function(n_fold) 
+  data.frame(X = c(0,0,0,1,1,1), Y = c(0,0,1,0,1,1), K = NA) %>%
+        slice(rep(row_number(), n_fold)) %>%
+        collapse_data(model, remove_family = TRUE)
+
+
+wd <- function(n_fold=2, sims = 600)  {
+      
+  diagnose_strategies(
+    
+   analysis_model = model,
+   
+   given = given_fold(n_fold),
+
+   data_strategies = list(
+     QL1 =  list(N = 1, within = TRUE, vars = "K", conditions = c("X==1 & Y==1")),
+     QL2 =  list(N = 2, within = TRUE, vars = "K", conditions = c("X==1 & Y==1")),
+     QL3 =  list(N = 3, within = TRUE, vars = "K", conditions = c("X==1 & Y==1")),
+     QL4 =  list(N = 4, within = TRUE, vars = "K", conditions = c("X==1 & Y==1"))),
+   
+   queries = "Y[X=1] - Y[X=0]",
+   
+   sims = sims
+   
+   )
+}
+
+if(do_diagnosis) {
+  diagnosis <- wd(2)
+  write_rds(diagnosis, "saved/ch12diagnosiswd.rds")
+  }
+
+
+diagnosis <- read_rds("saved/ch12diagnosiswd.rds")
+
+plot(0:4, diagnosis$diagnoses_df$MSE, ylim = c(0, max(diagnosis$diagnoses_df$MSE)), ylab = "MSE",
+     xlab = "Cases with within case data", type = "b")
+```
+
+```{r, eval = FALSE}
+if(do_diagnosis){
+  wd_1_2 <- wide_or_deep(model, 1, 2)
+  write_rds( wd_1_2, "saved/wd_1_2.rds")
+}
+
+wd_1_2 <- read_rds("saved/wd_1_2.rds")
+
+
+wd_sim <- function(model, n_K, n_fold) {
+  
+    df <- data.frame(X = c(0,0,1,1), Y = c(0,0,0,1), K = NA) %>%
+      slice(rep(row_number(), n_fold))
+    df <- mutate(df, K = c(rep(1, n_K), rep(NA, n()-n_K)))
+    
+    given <-  collapse_data(df, model)
+
+    updated <- gbiqq::gbiqq(model, data = df, stan_model = fit)
+    query_model(updated, 
+                  queries = list(ATE = "Y[X=1] - Y[X=0]"), 
+                  using = "posteriors")
+  
+}
+
+if(do_diagnosis){
+  if(!exists("fit")) fit <- gbiqq::fitted_model()
+  out <- sapply(c(4,8), function(n_K) {sapply(c(2, 10, 20), function(k) wd_sim(model, n_K, k))})
+  write_rds(out, "saved/wide_or_deep_XMY.rds")
+  }
+
+wd <- read_rds("saved/wide_or_deep_XMY.rds")
+wd <- t(wd[c(4,9,14), ])
+rownames(wd) <- c("Clues on 4 cases", "Clues on 8 cases")
+colnames(wd) <- c("N=8", "N=40", "N=80")
+kable((wd))
+
+if(do_diagnosis){
+  if(!exists("fit")) fit <- gbiqq::fitted_model()
+  out <- sapply(c(4,8), function(n_K) {sapply(c(2, 10, 20), function(k) wd_sim(model_confound, n_K, k))})
+  write_rds(out, "saved/wide_or_deep_XMY2.rds")
+  }
+
+wd2 <- read_rds("saved/wide_or_deep_XMY2.rds")
+wd2 <- t(wd2[c(4,9,14), ])
+rownames(wd2) <- c("Clues on 4 cases", "Clues on 8 cases")
+colnames(wd2) <- c("N=8", "N=40", "N=80")
+kable((wd2))
+```
+
+
+
+## Evaluating strategies
+
+As a metric of the returns from different research strategies we calculate the *expected* inaccuracy in the estimation of the average treatment effect, as given by:
+
+$$\mathcal{L}=\mathbb{E}_\theta(\mathbb{E}_{\mathcal{D}|\theta}(\tau(\theta)-\hat{\tau}(\mathcal{D}))^2) $$
+
+
+where $\tau(\theta)$ is the value of $\lambda_b-\lambda_a$ (the average treatment effect) given $\theta$, and $\hat{\tau}(\mathcal{D})$  is the *estimate* of this treatment effect (the mean posterior value) that is generated following some realization of data $\mathcal{D}$. Thus, if some $\theta$ characterized the true state of the world, then $\mathbb{E}_{\mathcal{D}|\theta}(\tau^\theta-\hat{\tau})^2$ is the expected error in estimation of the causal effect given different realizations of the data, $\mathcal{D}$,  that could obtain in this state of the world.  $\mathcal{L}$ is then the expected value of these errors given prior beliefs over possible values of $\theta$.
+
+Note that, while we focus on errors on estimated average causal effects, similar exercises could assess how cross- and within-case observations distinctively contribute to other estimands | including the causal explanations for individual cases and the validity of causal theories | as well as to learning about inferential assumptions themselves (assignment and clue probabilities). 
+For all simulations, prior distributions are drawn with parameters as described in the Supplementary Materials (\S \ref{AppSimNotes}, Table \@ref(tab:sims)). Priors on the type distribution are drawn from a Dirichlet distribution; priors for each of the $\pi$ and $\phi$ values are drawn independently from Beta distributions. We note that, while by construction priors on each parameter are independent, this will not generally be the case for posterior distributions. In most cases we simulate the prior distribution using 5200 draws of each parameter. For most experiments we then systematically vary the prior distribution for one parameter of the research situation between two extreme positions. We then calculate the expected posterior from each possible data realization and, in turn, the expected loss in estimates of treatment effects for a range of levels of investment in qualitative and quantitative evidence. 
+
+
+A few further features of the experiments below are worth noting. First, our illustrations focus on learning about population-level causal effects; however, the model can yield results about the benefits of alternative research designs for estimating a wide range of other quantities of interest, such as case-specific causal explanations or clue probabilities. Second, while we focus on the search for a *single* clue in each case, the analysis can be extended to the case of an arbitrarily large set of clues. Third, in many of these experiments, the probative values are set at doubly decisive levels for all $\phi$ parameters, and thus focus on the very optimistic case of maximally informative process tracing. Fourth, we illustrate tradeoffs at low levels of $n$, but the model can be employed to make choices for arbitrarily large numbers of cases. Finally, we note that some results may be sensitive to the choice of priors. The results below should thus be understood as an illustration of the utility of the BIQQ framework for guiding research choices, rather than as a set of more general prescriptive design rules.
+
+
+
+## Varieties of mixing {#varieties}
+
+What are the marginal gains from additional pieces of correlational and process-tracing evidence for the  accuracy of causal estimates? Figure \ref{morn} displays  results,  plotting the errors associated with different mixes of correlational and process data. 
+
+*  **Qualitative and quantitative data can act as partial substitutes for assessing causal effects**.
+*  **The *relative* marginal gains from going wider and going deeper vary with the study design**. 
+* **Optimal strategies might involve going deep in a subsample of cases only.**
+
+
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{Figures/m_or_n.pdf}
+\caption{{Expected errors in the estimation of average treatment effects for designs in which $X, Y$, data is sought in $n$ studies (horizontal axis) and clue data is sought within $m$ of these. The shading of dots indicates the proportion of cases for which within-case data is sought (white = none; black = all). For small sample sizes ($n \in \{1,2,3,4\}$) we show results for all designs ($m \in \{1,2,\dots, n\})$. For larger sample sizes, we show only designs with clues sought in 0, half, and all cases.}}
+\label{morn}
+\end{figure}
+
+
+
+
+```{r, echo = FALSE}
+
+model <- make_model("K-> X -> Y <- K")
+
+if(do_diagnosis){
+
+ data_strategies = list(
+ 		N4L0 =  list(N=4, withins = FALSE, vars = list(c("X", "Y")), conditions = TRUE),
+ 		N2L2 =  list(N=2, withins = FALSE, vars = list(c("X", "K", "Y")), conditions = TRUE)
+ 		#,
+ 		#N3L1 =  list(N=list(1,2), withins = FALSE, vars = list(c("X", "K", "Y"), c("X", "Y")), conditions = TRUE)
+ 		)
+ 	
+ 	possible_data_list = lapply(data_strategies, function(ds)
+ 		with(ds, make_possible_data(model = model, given = NULL, 
+ 		N = N, withins = withins, conditions = conditions, vars = vars)))
+ 	
+
+diagnosis <- 
+  
+  diagnose_strategies(
+    
+   analysis_model = model,
+   
+   possible_data_list = possible_data_list,
+   
+   data_strategies = data_strategies,
+
+   queries = "Y[X=1] - Y[X=0]",
+   
+   sims = 400
+   
+   )
+
+write_rds(diagnosis, "saved/ch11diagnosisa.rds")
+}
+
+diagnosis <- read_rds("saved/ch13diagnosis.rds")
+kable(diagnosis$diagnoses_df, digits = 3)
+
+```
+
+
+
+## Probative value of clues
+
+## Effect Heterogeneity
+
+## Uncertainty Regarding Assignment Processes
+
+
+## Uncertainty regarding the probative value of clues
+

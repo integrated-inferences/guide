@@ -1,0 +1,526 @@
+# Case selection as a Decision Problem {#caseselection}
+
+```{r, include = FALSE}
+source("_packages_used.R")
+do_diagnosis = FALSE
+```
+
+***
+
+With a causal model in hand, together with priors over parameters, you can assess in advance what conclusions you will draw from different observations and assess what kinds of observations are most worth seeking. We draw out the implications of this idea for case selection.
+
+***
+
+
+A critical decision for scholars employing mixed methods is to determine which cases are most valuable for within-case analysis.  
+
+A host of different strategies have been proposed for selecting cases for in-depth study based on the observed values of $X$, $Y$ data. Perhaps the most common strategy is to select cases in which $X=1$ and $Y=1$ and look to see whether in fact $X$ caused $Y$ in the case in question (using some more or less formal strategy for inferring causality from within-case evidence). But many other strategies have been proposed, including strategies to select cases "on the regression line" or, for some purposes, cases "off the regression line" (e.g., @Lieberman2005nested). Some scholars suggest ensuring variation in $X$ (most prominently, @king1994designing), while others have proposed various kinds of matching strategies. Some have pointed to the advantages of random sampling of cases, either stratified or unstratified by values on $X$ or $Y$ (@FL2008, @HerronQuinn). 
+
+Which cases you should choose will likely depend on the purposes to which you want to put them. 
+
+A matching strategy for instance---selecting cases that are comparable on many features but that differ on $X$---replicates at a small scale the kind of inference done by matching estimators with large-$n$ data. The strategy emphasize the inferences to be made from $X,Y$ variation rather than inferences drawn specifically from within case information beyond what is available in the measurement of $X$ and $Y$. (Citations needed.)
+
+Other treatments seek to use qualitative information to check assumptions made in $X, Y$ analysis: for example, is the measurement of $X$ and $Y$ reliable in critical cases? (Citations needed) For such questions with limited resources, it might make sense to focus on cases for which validation plausibly makes a difference to the $X,Y$ inferences: for example influential cases that have unusually extreme values on $X$ and $Y$.^[Note: We can say more about why these would be good choices from a Bayesian perspective, based on the idea that measurement is more likely to be wrong in such cases and shifting them to more typical values would make a big difference.] Similar arguments are made for checking assumptions on selection processes, though we consider this a more complex desideratum since this requires making case level causal inferences and not simply measurement claims.
+
+A third purpose is to use a case to generate alternative or richer theories of causal processes, as in Lieberman's "model-building" mode of "nested analysis" (@Lieberman2005nested). Here it may be cases off the regression line that are of interest.
+
+Weller and Barnes (CITE article) on case selection focus on (a) X/Y relations and (b) whether the cases are useful for hypothesis generation. 
+
+In what follows, we focus on a simpler goal: given existing $X, Y$ data for a set of cases and a given clue (or set of clues) that we can go looking for in the intensive analysis of some subset of these cases, for which cases would process tracing yield the greatest learning about the population-level causal effect of $X$ on $Y$?
+
+The basic insight of this chapter is simple enough: *the optimal strategy for case selection for a model-based analysis can be determined by the model and the query*, just as we saw for the optimal clue-selection strategy in Chapter \@ref(Clues). Using this strategy yields guidance that is consistent with some common advice but at odds with other advice. The main principles that emerge from the analysis can be summarized as:
+
+* go where the probative value is, and
+* sample from $X$ and $Y$ values in proportion to their occurrence in the population,
+* invest in collections of cases that provide complementary learning. 
+
+Beyond these general principles, other patterns are more complex and thus more difficult to neatly summarize. The most general message of this chapter is about the general approach: that is, that we can use a causal model to tell us what kinds of cases are likely to yield the greatest learning, given the model and a strategy of inference. We provide a tool for researchers to undertake this analysis, at least for simple problems with $X, Y, K$ data.
+
+
+## Explorations
+Most closely related to our analysis in this chapter is the contribution of @HerronQuinn, who build on @SeawrightGerring2008. While Seawright and Gerring provide a taxonomy of approaches to case selection, they do not provide a strategy for assessing the relative merits of these different approaches.  As we do, @HerronQuinn focus on a situation with binary $X,Y$ data and assess the gains from learning about causal type in a set of cases (interestingly in their treatment causal type, $Z_i$  is called a confounder rather than being an estimand of direct interest; in our setup, confounding as normally understood arises because of different probabilities of different causal types of being assigned to "treatment", or an $X=1$ value). @HerronQuinn assume that in any given case selected for analysis a qualitative researcher is able to infer the causal type perfectly.  
+
+Our setup differs from that in @HerronQuinn in a few ways.  @HerronQuinn paramaterize differently, though this difference is not important.^[@HerronQuinn have a parameter $\theta$ that governs the distribution of data over $X$ and $Y$ and then, conditional on $X,Y$ values, a set of parameters $\psi_{xy}$ that describe the probability of a case's being of a given causal type. We take both $\theta$ and $\psi_{xy}$ to derive from the fundamental distribution of causal types and assignment probabilities. Thus, for example, $\psi_{00}$ from @HerronQuinn corresponds to $\frac{(1-\pi_b)\lambda_b}{(1-\pi_b)\lambda_b + (1-\pi_c)\lambda_c}$ in our notation. The difference in  paramaterization does have implications for interpretations of the priors. For example flat priors over $\theta$ and $\psi$ implies a tighter distribution that a uniform prior over the causal types. In fact @HerronQuinn use priors with greater variance than uniform in any event.] Perhaps the most important difference between our analysis and that in @HerronQuinn  is that we connect the inference strategy to process-tracing approaches. Whereas @HerronQuinn assume that causal types can be read directly, we assume that these are inferred *imperfectly* from clues. As in our baseline model, our ability to make inferences for causal types can differ by type and as a function of $X$. And, as in the baseline model, not only can we have uncertainty about the probative value of clues, but researchers can learn about the probative value of clues by examining cases.
+
+<!-- Are Herron and Quinn's priors Jeffrey priors? -->
+
+Here we assume that the case selection decision is made after observing the $XY$ distribution and we explore a range of different possible contingency tables. In  @HerronQuinn the distribution from which the contingency tables are drawn is fixed, though set to  exhibit an expected  observed difference in means (though not necessarily a true treatment effect) of 0.2. They assume large $XY$ data sets (with 10,000) units and case selection strategies ranging from 1 to 20 cases.
+
+Another important difference, is that in many of their analyses, @HerronQuinn take the perspective of an outside analyst who knows the true treatment effect; they then assess the expected bias generated by a research strategy over the possible data realizations. We, instead, take the perspective of a researcher who has *beliefs* about the true treatment effect that correspond to their priors, and for whom there is therefore no *expected* bias. This has consequences also for the assessment of expected posterior variance, as in our analyses the expectation of the variance is taken with respect to the researcher's beliefs about the world, rather than being made conditional on some specific world (ATE). We think that this setup is addressed to the question that a researcher must answer when deciding on a strategy: given what they know now, what will produce the greatest reduction in uncertainty (the lowest expected posterior variance)?
+
+Finally, we proceed somewhat differently in our identification of strategies from Herron and Quinn: rather than pre-specifying particular sets of strategies (operationalizations of those identified by @SeawrightGerring2008) and evaluating them, we define a strategy as the particular distribution over $XY$ cells to be examined and proceed to examine *every possible strategy* given a choice of a certain number of cases in which to conduct process tracing. We thus let the clusters of strategies---those strategies that perform similarly---emerge from the analysis rather than being privileged by past conceptualizations of case-selection strategies.
+
+Despite these various differences, our results will agree in key ways with those in @HerronQuinn.
+
+
+### Procedure
+
+The procedure requires as inputs  (i) a causal model, (ii) any data we have already observed, and (iii) the causal query we seek to answer. 
+
+The general intuition is that we can use the causal model and any previously observed data to estimate what observations we are more or less likely to make under a given case-selection strategy, and then figure out how far off from the (under the model) true estimand we can expect to be under the strategy, given whatever causal question we seek to answer. 
+
+Suppose that we want to estimate the average treatment effect of $X$ on $Y$ in a population and have initially observed $X$ and $Y$ data on a set of cases. 
+
+Suppose that we are now considering gathering process-tracing evidence for one of these cases to inform our estimate of the ATE. There are many different case-selection strategies we might pursue, and each of these can give rise to different possible data and thus to different possible conclusions. What should we do?
+
+**DAG**. We start, as always, with a DAG representing our beliefs about which variables we believe to be direct causes of other variables. For the current illustration, suppose that we are operating with a simple mediation model, $X \rightarrow M \rightarrow Y$. 
+
+**Given data.** If we have already observed something in a set of cases, we can use this information to condition our strategy for searching for further information. For instance, if we have observed $X$'s and $Y$'s value in a set of cases, we might select cases for process tracing based on their values of $X$ and $Y$. Further, what we have already observed in the cases may constrain what possible data we could end up with once we have collected the additional (process tracing) data. 
+
+**Priors**. As when conducting mixed-method inference, we can set qualitative restrictions and/or differential quantitative weights on the (possibly conditional) nodal types in the model. And we can indicate our uncertainty over the latter, by setting the $\alpha$ parameters of the relevant Dirichlet distributions. For the current example, let us define restrictions at both the $M$ and $Y$ nodes, positing beliefs that $X$ never has a negative effect on $M$ and that $M$ never has a negative effect on $Y$. Let us further assume that we have flat priors over the remaining nodal types and posit similar assignment propensities for all types (no unobserved confounding).
+
+**Query**. We define our query. This might, for instance, be the share of cases in the population in which $X$ has a positive effect on $Y$; or it might be $X$'s average effect on $Y$. We can use the general procedure to identify case-selection strategies for any causal query that can be defined on a DAG. And, importantly, the optimal case-selection strategy may depend on the query. For instance, the best case-selection strategy for estimating the average causal effect of $X$ on $Y$ may not be the same as the best strategy for figuring out for what proportion of the population $X$ has a positive effect on $Y$.
+
+**Define one or more strategies**. A strategy is defined, generically, as the search for data on a given set of *nodes*, in a given *number* of cases randomly selected *conditional* on some information we already have about potential cases. Let us assume here that our strategy will involve uncovering $M$'s value in 1 case---but we are wondering how to choose this case. Consider four possible strategies, conditional on the $X$ and $Y$ values that we already know. We could do process tracing on a randomly selected $X=1, Y=1$ case, a randomly selected $X=0, Y=0$ case, the $X=1, Y=0$ case, or the $X=0, Y=1$ case. We itemize this set of possible strategies in the first column in Table \@ref(tab:caseselect1).
+
+**Possible data**. For each strategy, there are multiple possible sets of data that we could end up observing. In particular, the data we could end up with will be the $X,Y$ patterns we have already observed plus *either* $M=0$ *or* $M=1$ in the case that our strategy leads us to select for process tracing. We represent the data possibilities (showing just the possible $M$ values) in the second column in Table \@ref(tab:caseselect1). Thus, for instance, for a strategy in which we choose a random $X=1, Y=1$ case, we could end up observing the initial $X,Y$ pattern plus $M=0$ in one of the $X=1, Y=1$ cases, or the initial $X,Y$ pattern plus $M=1$ in one of the $X=1, Y=1$ cases. 
+
+**Probability of the data**. We now calculate a probability of each possible data realization, given the model and the data (the $X$'s and $Y$'s) that we have already observed. In practice, we do this in `gbiqq` via simulation. Starting with the model together with our priors, we update our beliefs about $\lambda$ based on the initial $X,Y$ data. This posterior now represents our *prior* for the purposes of the process tracing; it represents what we believe about causal-type share allocations in the population, having seen the $X,Y$ data only. We then use this posterior to draw a series of $\lambda$ values. 
+
+Given that the ambiguity matrix gives us the mapping from causal types to data realizations, we can calculate for each $lambda$ draw the probability of each data possibility given that particular $\lambda$ and the strategy. We then average across repeated $\lambda$ draws. (Since $\lambda$'s are being drawn from our prior, we are automatically weighting more heavily those $\lambda$'s that we believe to be most likely.)  We show the data probabilities in the third column of Table \@ref(tab:caseselect1): one probability for each data-possibility given each strategy.
+
+**Posterior variance on estimate given the data**. For each data possibility, we can then use `gibiqq` to ask what inference we would get from each data possibility, given whatever query we seek to answer. What we are in fact interested in for the purposes of case selection is the *variance* of the posterior. We indicate in the fourth column of Table \@ref(tab:caseselect1) the posterior variance for each possible data realization.
+
+**Expected posterior variance under each strategy**. The quantity of ultimate interest is the posterior variance that we expect to end up with under each *strategy*. Calculating this expectation is now elementary as we have both the posterior variance arising from each data possibility and the probability of each data possibility (given our prior beliefs and the data already observed). The expected posterior variance is simply an average of the posterior variances under each data possibility, weighted by the probability of each data possibility. The final column provides the expected posterior variances, one for each strategy.
+
+
+<!-- We can similarly diagnose strategies for a plan to process-trace any number of the cases for which we have $X,Y$ data. In Table \@ref(tab:caseselect3), we show results for six of the possible strategies we might employ for collecting $M$ for 3 cases. We compare going deeper into two $X=Y=1$ cases and one $X=Y=0$ case; two $X=Y=1$ cases and an $X=0, Y=1$ case; two $X=Y=1$ cases and an $X=1, Y=0$ case; and an $X=0, Y=1$, an $X=1, Y=0$, and an $X=1, Y=1$ case; two $X=Y=0$ cases and one $X=Y=1$ case; two $X=Y=0$ cases and an $X=0, Y=1$ case; two $X=Y=0$ cases and an $X=1, Y=0$ case; and an $X=0, Y=1$, an $X=1, Y=0$, and an $X=1, Y=0$ case. -->
+
+<!-- FLAG: Write code and generate results table, caseselect3. Same structure as caseselect1. -->
+
+<!-- We can now see that...... -->
+
+<!-- FLAG: Create Table (caseselectlots) with these diagnoses. Do not represent data possibilities in the table (too many). Strategies are: -->
+
+<!-- 1. Variation in $X$: Randomly select 3 $X=0$ cases and 3 $X=1$ cases -->
+
+<!-- 2. Variation in $Y$: Randomly select 3 $Y=0$ cases and 3 $Y=1$ cases -->
+
+<!-- 3. On the regression line: Randomly select 3 from the two $X=Y=0$ cell and 3 from the $X=Y=1$ cell. -->
+
+<!-- 4. Off the regression line: Randomly select 3 from the $X=0, Y=1$ cell and 3 from the $X=1, Y=0$ cell. -->
+
+<!-- 5. Representativeness: Randomly select 6 cases -->
+
+<!-- We can see that.... -->
+
+<!-- ## Different models, different strategies -->
+
+<!-- ## Different queries, different strategies -->
+
+
+
+
+<!-- Suppose, now, that she is choosing between two strategies: -->
+
+<!-- A. Select two $X=Y=1$ cases and one $X=Y=0$ case for investigation. She is thus choosing here cases "on the regression line" generated by the $X,Y$ data pattern.  -->
+
+<!-- B. Take one case from each of the diagonal cells and one from the off-diagonal $X=1, Y=0$ cell -->
+
+
+
+<!-- From which strategy should she expect to learn more about the average, population-level causal effect of $X$ on $Y$, given her prior beliefs? We answer the question by considering each data pattern that she might see given a strategy and then calculating (a) the probability with which she expects to see such an outcome, given her priors (or more accurately, given her posterior after observing the $X,Y$ pattern only), and (b) the uncertainty (posterior variance) that she would have upon seeing that pattern. We then calculate the expected posterior variance of the strategy by considering all possible data patterns that could emerge from that strategy and their probabilities. We ignore the fact that in principle the subjective probability of observing one pattern is correlated with the subjective probability of observing another pattern. -->
+
+<!-- ^[For example, a researcher may be uncertain regarding $\phi_b$; if it is high then the probability of observing any profile of outcomes with many clues observed is higher than if $\phi_b$ is low; this introduces a correlation between outcomes that have similar clue observations. However only one of these patterns will be observed in fact. NOTE ON RISK-NEUTRALITY HERE?] -->
+
+<!-- Tables 11.1 and 11.2 present the results of our comparison of the researcher's two strategies. Table 11.1 examines strategy A, while Table 11.2 examines strategy B. In each table, the lefthand column lists all possible realizations of clue data that might be found under the strategy in question. In the notation that we use here, each place in the four-digit sequence refers to one cell in the 2-by-2 table implied by a binary $X$ and binary $Y$ variable. The ordering is:  -->
+
+<!-- * $X=Y=0$ -->
+<!-- * $X=0, Y=1$ -->
+<!-- * $X=1, Y=0$ -->
+<!-- * $X=Y=1$  -->
+
+<!-- As an easy mnemonic, the outside digits are "on-the-diagonal" (on the regression line consistent with a positive causal effect); the inside digits are off-the-diagonal. Thus, for instance, the sequence $1001$ means that we have seen the clue in two on-the-diagonal cases: an $X=Y=0$ case and a $X=Y=1$ case. The sequence 0200 means that we have seen the clue in two cases in the $X=0, Y=1$ cell. -->
+
+<!-- In each row, we see information about one possible data pattern that we could potentially observe under the strategy. The second column indicates the probability that this data pattern will arise, given the priors and the $X,Y$ data. The third column then indicates the uncertainty---the posterior variance---that we would be left with given the information provided by each clue pattern. In the final column, we provided the expected posterior variance for each strategy, given the posterior variances for each clue pattern, weighting each clue pattern by its probability of occurring.  -->
+
+
+### Illustration
+
+```{r selection_code, echo = FALSE}
+
+# We define a model
+model <- make_model("X->M->Y")  %>%
+ set_restrictions(c("(Y[M=1]<Y[M=0])", "(M[X=1]<M[X=0])")) %>%
+ set_parameter_matrix() %>%
+ set_parameters(type = "flat")
+
+# We imagine some preexisting data we have observed
+data  <-  data.frame(X = c(0,0,0,1,1,1), M = NA, Y = c(0,0,1,0,1,1))
+given <-  collapse_data(data, model, remove_family = TRUE)
+
+# We can then imagine what data we might observe if we examine M inside some subset of cases
+A_on_regression_line <- 
+  make_possible_data(model, given = given, vars = "M", N = c(1,1), 
+                     condition = c("X==1 & Y==1", "X==0 & Y==0"), prefix = "A")
+names(A_on_regression_line)[-c(1:2)] <- c("A1", "A2", "A3", "A4")
+
+B_off_regression_line <- 
+  make_possible_data(model, given = given, vars = "M", N = c(1,1), 
+                     condition = c("X==1 & Y==0", "X==0 & Y==1"), prefix = "B")
+names(B_off_regression_line)[-c(1:2)] <- c("B1", "B2", "B3", "B4")
+
+C_X1Y1_only <- 
+  make_possible_data(model, given = given, vars = "M", N = 2, 
+                     condition = c("X==1 & Y==1"), prefix = "C")
+names(C_X1Y1_only)[-c(1:2)] <- c("C1", "C2", "C3")
+
+```
+
+Consider a situation in which one has access to $X,Y$ data on just six cases of the form:
+
+```{r, echo = FALSE}
+kable(given)
+```
+
+We will consider three strategies:
+
+* Strategy $A$ chooses two cases on the regression line (one in the $X=Y=0$ cell and one in the $X=Y=1$ cell)
+* Strategy $B$ chooses off the regression line 
+* Strategy $C$ selects on the dependent variable -- choosing cases with $X=1, Y = 1$.
+
+Different strategies yield different data types. Each one of these is likely to arise with a different probabilities and is associated with a different inference. This allows is to assess the *expected* posterior variance associated with each strategy. 
+
+
+```{r, echo = FALSE}
+# Combine data types
+df <- A_on_regression_line[,-2] %>% 
+  merge(B_off_regression_line[,-2], by = "event", all = TRUE) %>%
+  merge(C_X1Y1_only[,-2], by = "event", all = TRUE) %>%
+  dplyr:::mutate_if(is.numeric, ~replace(., is.na(.), 0))
+
+# table(duplicated(t(df)))
+```
+
+For each of these possible strategies we can assess the posterior that we would obtain.
+
+```{r, echo = FALSE}
+
+if(do_diagnosis){
+  
+ if(!exists("fit")) fit  <- fitted_model()
+ 
+ strategies <- 
+   list(A_on_regression_line, B_off_regression_line, C_X1Y1_only)
+
+ 	write_rds(strategies, "saved/illustration_strategies.rds")
+  
+ 
+ estimates_dbs <- lapply(strategies, function(s) 
+    make_estimates_database(model, given, possible_data = s[, -2], queries = "Y[X=1]-Y[X=0]")
+    )
+    
+	write_rds(estimates_dbs, "saved/illustration_estimates.rds")
+
+# The reference model is the original model updated with the XY data we've already seen.
+ reference_model <- gbiqq(model, data, stan_model = fit)
+ 
+	write_rds(reference_model, "saved/reference_XMY_updated_model.rds")
+
+ probabilities <- lapply(strategies, function(s) 
+    average_data_probabilities(reference_model, s, using = "posteriors", sims = 3000)
+    )
+   
+	write_rds(probabilities, "saved/illustration_probabilities.rds")
+
+}
+
+  reference_model <- read_rds("saved/reference_XMY_updated_model.rds")
+	probabilities   <- read_rds("saved/illustration_probabilities.rds")
+  strategies      <- read_rds("saved/illustration_strategies.rds")
+  estimates_db    <- read_rds("saved/illustration_estimates.rds")
+  
+  digits <- 3
+
+  df <- rbind(df, 
+          c("Probability", round(unlist(probabilities),digits)),
+          c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean))))))),
+          c("Posterior variance",   round(unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean^2))))), digits)))
+```
+
+The data possibilities, probabilities of each, and inferences given each, are shown in Table \@ref(tab:chselillustration).
+  
+```{r chselillustration, echo = FALSE}  
+kable(df, caption = "Each column shows a possible distribution of data that can be generated from a given strategy. We calculate the probability of each data possibility, given the data seen so far, and the posterior variance associated with each one.", digits = 2)
+```
+
+Each of the first two strategies generates one of four different data patterns. The third data strategy generates up to three data patterns. None of these data patterns overlap across strategies. 
+From the calculated  probability of each data type, given the data seen so far, and the posterior variance given each data realization, the implied *expected* variance is  easily calculated. These are summarized below:
+
+```{r, echo = FALSE}
+expected_posterior_var <- sapply(1:3, function(i) 
+  sum(probabilities[[i]]*unlist(lapply(estimates_db[[i]], function(x) x$sd^2)))
+ )
+kable(data.frame(Strategy = c("Online", "Offline", "X=1, Y=1"), Variance = expected_posterior_var), digits = 3)
+```
+
+
+In this example, we see that the researcher would expect to be better off---in the sense of having less posterior uncertainty---by focusing her process-tracing efforts where a greater share of the population of cases lies: on the regression line.  
+
+All of this can be done in code in a single line. 
+
+
+```{r showx1y1diagnosestrategies, eval=FALSE, include = TRUE}
+
+diagnose_strategies(
+    
+   analysis_model = model,
+   
+   given = given,
+   
+   data_strategies = list(
+     A_online  = list(N=c(1,1), within = TRUE, vars = "M", 
+                       conditions = c("X==1 & Y==1", "X==0 & Y==0")),
+     B_offline = list(N=c(1,1), within = TRUE, vars = "M", 
+                       conditions = c("X==1 & Y==0", "X==0 & Y==1")),
+     C_X1Y1    = list(N=2, within = TRUE, vars = "M", 
+                       conditions = c("X==1 & Y==1"))),
+   
+   queries = "Y[X=1] - Y[X=0]"
+   
+   )
+
+```
+
+```{r , echo = FALSE, message = FALSE}
+
+if(do_diagnosis){
+  
+diagnosis <- 
+  
+  diagnose_strategies(
+    
+   analysis_model = model,
+   
+   given = given,
+   
+   data_strategies = list(
+     A_online =  list(N=c(1,1), within = TRUE, vars = "M", 
+                       conditions = c("X==1 & Y==1", "X==0 & Y==0")),
+     B_offline = list(N=c(1,1), within = TRUE, vars = "M", 
+                       conditions = c("X==1 & Y==0", "X==0 & Y==1")),
+     C_X1Y1 = list(N=2, within = TRUE, vars = "M", 
+                       conditions = c("X==1 & Y==1")),
+     D_random = list(N=2, within = TRUE, vars = "M", conditions = TRUE)),
+   
+   queries = "Y[X=1] - Y[X=0]",
+   
+   sims = 6000
+   
+   )
+
+write_rds(diagnosis, "saved/ch13diagnosis.rds")
+
+}
+
+diagnosis <- read_rds("saved/ch13diagnosis.rds")
+kable(diagnosis$diagnoses_df[, c(1, 4:7)], digits = 4, caption = "The estimand and the expected estimate are the same under each data strategy. ")
+```
+
+On the relation between MSE and posterior variance:
+
+```{r, echo = FALSE, out.height= 10, out.width= 10}
+with(diagnosis$diagnoses_df, plot(MSE, post_var))
+abline(a=0, b = 1)
+with(diagnosis$diagnoses_df, text(MSE, post_var, strategy, pos = 3))
+
+```
+
+## Results from experiments
+
+We now apply the procedure systematically to a set of strategies for multiple models and given different types of pre-existing data. 
+
+The qualitative case-selection literature has identified a range of possible strategies for choosing cases for in-depth analysis. These include, for instance, selecting for variation on $X$ (KKV), selecting for variation on $Y$, selecting cases on the regression line (Seawright and Gerring, Lieberman), and selecting off the regression line (Seawright and Gerring, Seawright 2017, Lieberman).[These authors view selection off the regression line as best for arriving at inductive insight. We address this strategy primarily to show the contrast with the on-the-line strategy.] While we have not seen it advocated elsewhere, we might add to this list the strategy of selecting cases that are representative in their $X,Y$ values of the larger set of cases from which we are selecting. (FLAG: insert proper citations). While it is difficult to clearly distinguish these strategies from each other with a small initial set of $X, Y$ cases, we can do so readily if we start with a larger set of $X,Y$ cases.
+
+In Table \@ref(caseselectlots), we show the results of diagnoses of each of these five classes of strategies, assuming that we will be process-tracing 6 cases. In each diagnosis we start with 500 $X, Y$ cases, with 100 $X=Y=0$ cases, 200 $X=Y=1$ cases, 130 $X=0, Y=1$ cases, and 70 $X=1, Y=0$ cases. The regression line here represents a positive association. We work with the same model and priors as above. Importantly, this  means that the results we show here are not *general* evaluations of these strategies, but contingent on this particular model and set of priors. And that is precisely our point: optimal case-selection will always hinge on our model, a claim that we demonstrate further below.
+
+
+```{r ch13n1n2cases, echo=FALSE, include = FALSE}
+if(do_diagnosis){
+  
+diagnoses_n1 <- 
+  diagnose_strategies(
+    reference_model = reference_model, 
+    analysis_model  = model,
+		given = given, 
+		queries = "Y[X=1] >Y[X=0]",
+		vars = "M",
+		within = TRUE, 
+		N = 1,
+		conditions = c("X==1 & Y==1", 
+									 "X==1 & Y==0", 
+									 "X==0 & Y==1", 
+									 "X==0 & Y==0" ))
+
+diagnoses_n2 <- 
+  diagnose_strategies(
+    reference_model = reference_model, 
+    analysis_model  = model,
+		given = given, 
+		queries = "Y[X=1]>Y[X=0]",
+		vars = "M",
+		within = TRUE, 
+		N = 2,
+		conditions = c("X==1 & Y==1", 
+									 "(X==0 & Y==1) | (X==1 & Y==1)", 
+									 "(X==1 & Y==0) | (X==1 & Y==1)", 
+									 "(X==1 & Y==0) | (X==0 & Y==1)",
+									 "(X==0 & Y==1) | (X==0 & Y==0)",
+									 "(X==0 & Y==1) | (X==0 & Y==0)" ,
+									 "X==0 & Y==0"))
+
+ write_rds(diagnoses_n1, "saved/diagnoses_n1.rds")
+ write_rds(diagnoses_n2, "saved/diagnoses_n2.rds")
+	
+} 
+diagnoses_n1 <- read_rds("saved/diagnoses_n1.rds")
+diagnoses_n2 <- read_rds("saved/diagnoses_n2.rds")
+```
+
+
+
+```{r, echo=FALSE, include = FALSE, eval = FALSE}
+
+diagnoses_df_n1 <- lapply(diagnoses_n1, function(x) x$diagnosis )
+diagnoses_df_n2 <- lapply(diagnoses_n2, function(x) x$diagnosis )
+diagnoses_df_n1 <- do.call(rbind, diagnoses_df_n1)
+diagnoses_df_n2 <- do.call(rbind, diagnoses_df_n2)   
+
+kable(rbind(diagnoses_df_n1, diagnoses_df_n2), digits = 3)
+
+# A model with complementarity of X and M 
+comp_model <- make_model("X->Y<-M")  %>%
+					 set_restrictions("(Y[M=1, X =0] == 1) | (Y[M=0, X =1] == 1)") %>%
+					 set_parameter_matrix() %>%
+					 set_parameters(type = "flat")
+
+data  <-  data.frame(X = c(0,0,0,1,1,1), M = NA, Y = c(0,0,1,0,1,1)) 
+given <-  collapse_data(data, comp_model)
+
+if(do_diagnosis){
+ comp_reference_model <- gbiqq(comp_model, data)
+ write_rds(comp_reference_model, "saved/comp_reference_model.rds")
+}
+ comp_reference_model <- read_rds("saved/comp_reference_model.rds")
+
+
+ if(do_diagnosis){
+comp_diagnoses_n1 <- diagnose_strategies(
+  reference_model = comp_reference_model, 
+	analysis_model  = comp_model,
+	given = given, 
+	queries = "Y[X=1]>Y[X=0]",
+	vars = "M",
+	within = TRUE, 
+	N = 1,
+	conditions = c( "X==1 & Y==1", 
+									"X==1 & Y==0", 
+									"X==0 & Y==1", 
+									"X==0 & Y==0" ))
+
+comp_diagnoses_n2 <- 
+  diagnose_strategies(
+    reference_model = comp_reference_model, 
+	  analysis_model  = comp_model,
+		given = given, 
+		queries = "Y[X=1]>Y[X=0]",
+		vars = "M",
+		within = TRUE, 
+		N = 2,
+		conditions = c("X==1 & Y==1", 
+									 "(X==0 & Y==1) | (X==1 & Y==1)", 
+									 "(X==1 & Y==0) | (X==1 & Y==1)", 
+									 "(X==1 & Y==0) | (X==0 & Y==1)",
+									 "(X==0 & Y==1) | (X==0 & Y==0)",
+									 "(X==0 & Y==1) | (X==0 & Y==0)" ,
+									 "X==0 & Y==0"))
+
+  write_rds(comp_diagnoses_n1, "saved/comp_diagnoses_n1.rds")
+  write_rds(comp_diagnoses_n2, "saved/comp_diagnoses_n2.rds")
+	
+} 
+comp_diagnoses_n1 <- read_rds("saved/comp_diagnoses_n1.rds")
+comp_diagnoses_n2 <- read_rds("saved/comp_diagnoses_n2.rds")
+
+c_diagnoses_df_n1 <- lapply(comp_diagnoses_n1, function(x) x$diagnosis )
+c_diagnoses_df_n2 <- lapply(comp_diagnoses_n2, function(x) x$diagnosis )
+c_diagnoses_df_n1 <- do.call(rbind, c_diagnoses_df_n1)
+c_diagnoses_df_n2 <- do.call(rbind, c_diagnoses_df_n2)   
+
+kable(rbind(c_diagnoses_df_n1, c_diagnoses_df_n2), digits = 3)
+```
+
+## Different strategies for different estimands
+
+## Where the probative value is
+For the general intuition, recall that the probative value of a process-tracing test hinges on the difference in clue likelihoods associated with the alternative hypotheses in play for a given case. Recall that for different values of $X$ and $Y$ cell, we want to use process tracing to help us distinguish between two specific types that are consistent with the $X, Y$ pattern. Which types are in question varies across $X,Y$ combinations. Table \@ref(tab:FP) illustrates.
+
+| \small      |          $Y=0$           |           $Y=1$             |  
+|-------------|:------------------------:|:---------------------------:|
+|     $X=0$   |     $b$ or $c$           |       $a$ or $d$            |
+|     $X=1$   |     $a$ or $c$           |       $b$ or $d$            |
+Table: (\#tab:FP). The ambiguity about types in each $X, Y$ cell.
+
+Thus, in the $X=0, Y=0$ cell, what would be most useful is a clue that has high probative value in distinguishing between an untreated ($X=0$) $b$ type and and an untreated $c$ type. For a case in the $X=1, Y=0$ cell, on the other hand, what matters is how well the clue can discriminate between treated ($X=1$) $a$ and $c$ types. In our notation, it is the difference in $\phi_{jx}$ values for that indicates these cell-specific degrees of leverage. 
+
+To illustrate, consider a situation in which for a given clue we have  $\phi_{b1}$=0.5^[The probability of observing the clue for a $b$ type (positive causal effect) case with $X=1$.]; $\phi_{d1}$=0.5 ^[The probability of observing the clue for a $d$ type (zero causal effect, $Y$ fixed at 1) case with $X=1$.]; $\phi_{b0}$=0.5^^[The probability of observing the clue for a $b$ type (positive causal effect) case with $X=0$.]; and $\phi_{c0}$=0.1^[The probability of observing the clue for a $c$ type (zero causal effect, $Y$ fixed at 0) case with $X=0$.]. In this situation, searching for the clue in $X=Y=1$ cases will yield no leverage since the clue does not discriminate between the two types ($b$ and $d$) that need to be distinguished given $X=Y=1$. Here there is no additional learning about $\lambda_b$ that can be gained from looking for the clue. In contrast, $X=0, Y=0$ cases will be informative since the clue is much better at distinguishing between $b$ and $c$ types---the two types in contention for this kind of case. Thus, although process tracing here does not provide information on the prevalence of positive causal effects ($b$ types) for an $X=Y=1$ case, it does provide information when $X=Y=0$. 
+
+While it is common practice for mixed-method researchers to perform their process tracing "on the regression line," the BIQQ framework suggests that the gains to process tracing for different $X$ and $Y$ values in fact depend on the particular constellations of $\phi$ values for the potentially available clues. More generally, the framework allows one to assess the expected gains from any given case-selection strategy *ex ante* once priors have been specified. 
+
+
+## Chapter Appendix: Accounting for case selection
+### Independent case selection strategy
+We have focused on cases in which  the researcher examines a fixed number of cases for clue information. An alternative strategy that produces a simpler likelihood is one in which each case is selected for within-case data gathering with some independent probability. The likelihood below introduces a case selection probability $\kappa_{xy}$ that covers this case and allows for the possibility that selection probabilities are different for different $X,Y$ combinations.
+
+ Thus we assume that $X$, $Y$ data is observed for all cases under study, but that $K$ data may be sought for only a subset of these (we use the wildcard symbol ''$*$'' to denote that the value of the clue is unknown). We let $n_{xyk}$ denote the number of cases of each type. Then, again assuming data is independently and identically distributed, the likelihood is:
+
+$$\Pr(\mathcal{D}|\theta)= {\text{Multinomial}}(n_{000}, n_{001},n_{00*},n_{010}, n_{010},n_{01*}, n_{100}, n_{101},n_{10*},n_{110},n_{111} ,n_{11*} |
+w_{000}, w_{001},w_{00*},w_{010}, w_{010},w_{01*}, w_{100}, w_{101},w_{10*},w_{110},w_{111} ,w_{11*})$$
+
+
+where the event probabilities are now given by:
+
+
+$${\left( \begin{array}{c}
+w_{000} \\ w_{001} \\  \vdots \\ w_{11*} \end{array} \right)=
+\left( \begin{array}{c}
+\lambda_b(1-\pi_b)\kappa_{00}(1-\phi_{b0}) + \lambda_c(1-\pi_c)\kappa_{00}(1-\phi_{c0})\\
+\lambda_b(1-\pi_b)\kappa_{00}\phi_{b0} + \lambda_c(1-\pi_c)\kappa_{00}\phi_{c0}\\
+\vdots \\
+\lambda_b\pi_{b}(1-\kappa_{11}) + \lambda_d\pi_{d}(1-\kappa_{11})
+\end{array} \right)}$$
+
+Note we use a Greek symbol for the case selection probabilities to highlight that these may also be unknown and be an object of inquiry, entering into the vector of parameters, $\theta$.
+\subsubsection{Non-random $XY$ Sample Selection}\label{nonrandomcase}
+While we have assumed in the canonical model that $X,Y$ cases are selected at random, this need not be the case. Say instead that each case of type $j$ is selected into the study with probability $\rho_j$. In that case, assuming independent selection of cases for qualitative analysis, the likelihood function is now:
+
+
+$$\Pr(\mathcal{D}|\theta) = {\text{Multinomial}}(n, w)$$
+where: $$n = (n_{000}, n_{001},n_{00*},n_{010}, n_{010},n_{01*}, n_{100}, n_{101},n_{10*},n_{110},n_{111} ,n_{11*})$$
+
+and the event probabilities, $w$, are now, given by:
+
+$$\left( \begin{array}{c}
+w_{000} \\ w_{001} \\  \vdots \\ w_{11*}
+\end{array} \right)=
+\left( \begin{array}{c}
+\frac{\rho_b \lambda_b}{\rho_a \lambda_a+\rho_b \lambda_b+\rho_c \lambda_c+\rho_d \lambda_d}(1-\pi_b)\kappa_{00}(1-\phi_{b0}) +
+\frac{\rho_c \lambda_c}{\rho_a \lambda_a+\rho_b \lambda_b+\rho_c \lambda_c+\rho_d \lambda_d}(1-\pi_c)\kappa_{00}(1-\phi_{c0})\\
+\frac{\rho_b \lambda_b}{\rho_a \lambda_a+\rho_b \lambda_b+\rho_c \lambda_c+\rho_d \lambda_d}(1-\pi_b)\kappa_{00}\phi_{b0}+
+\frac{\rho_c \lambda_c}{\rho_a \lambda_a+\rho_b \lambda_b+\rho_c \lambda_c+\rho_d \lambda_d}(1-\pi_c)\kappa_{00}\phi_{c0}\\
+\vdots \\
+\frac{\rho_b \lambda_b}{\rho_a \lambda_a+\rho_b \lambda_b+\rho_c \lambda_c+\rho_d \lambda_d}\pi_{b}(1-\kappa_{11})+
+\frac{\rho_d \lambda_d}{\rho_a \lambda_a+\rho_b \lambda_b+\rho_c \lambda_c+\rho_d \lambda_{11}}\pi_{d}(1-\kappa_{11})
+\end{array} \right)$$
+
+Note we have used a Greek symbol for the selection probabilities to highlight that these probabilities may be unknown and could enter into the set of parameters of interest, $\theta$.
+
+### Conditional random case selection
+
+Finally consider the likelihood for a design in which a researcher selects to search for clues as a function of the $X,Y$ data. This is a somewhat harder case because the size of each $X,Y$ group is stochastic. Let $n_{xy} = n_{xy0}+n_{xy1}+n_{xy*}$ denote the number of cases with particular values on $X$ and $Y$, and let $n_{XY}=(n_{00},n_{01},n_{10},n_{11})$ denote the collection of $n_{xy}$ values.
+
+Say now that conditional on the $X,Y$ observations, a researcher sets a target of $k_{xy}(n_{XY})$ cases for clue examination (note here that the number of clues sought for a particular $X,Y$ combination can be allowed to depend on what is observed across all $X$, $Y$ combinations). Then the likelihood is:
+$$\text{Multinomial}(n_{XY}|w_{XY})\prod_{x\in\{0,1\},y \in\{0,1\}}\text{Binom}(n_{xy1}|k_{xy}(n_{xy}), \psi_{xy1})$$
+
+The multinomial part of this expression gives the probability of observing the particular $X,Y$ combinations; the event probabilities for these depend on $\lambda$ and $\pi$ only | for example  $w_{11} = \lambda_b \pi_b+\lambda_d \pi_d$. The subsequent binomials give the probability of observing the clue patterns conditional on searching for a given number of clues ($k_{xy}(n_{xy})$) and given an event probability $\psi_{xy1}$ for seeing a clue given that the clue is sought for an $x,y$ combination; thus for example:
+$$ \psi_{111} = \frac{\lambda_b \pi_b}{\lambda_b \pi_b+\lambda_d \pi_d} \phi_{b1} + \frac{\lambda_d \pi_d}{\lambda_b \pi_b+\lambda_d \pi_d} \phi_{d1}$$

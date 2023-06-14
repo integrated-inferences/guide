@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1578846488818.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "584960A",
+    "lastKnownWriteTime" : 1567356248,
+    "last_content_update" : 1567356248,
+    "path" : "C:/Dropbox/github/integrated_inferences/05-being-Bayesian.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "49,0",
+        "ignored_words" : "CluesInferences,Evera's,amidst,AppPriors,subgraph,bayeschapter,frac\n",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 52,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

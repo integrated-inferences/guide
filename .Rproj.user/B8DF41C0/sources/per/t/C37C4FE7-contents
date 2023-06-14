@@ -1,0 +1,85 @@
+# (PART) Notation {-}
+
+
+```{r, include = FALSE}
+source("_packages_used.R")
+do_diagnosis <- FALSE
+if(do_diagnosis & !exists("fit")) fit <- gbiqq::fitted_model()
+fit <- read_rds("saved/fit.rds")
+```
+
+
+
+# Notation and syntax {#notation}
+
+## Notation
+
+A guide to key notation used in the `gbiqq` package:
+
+**term**          |**symbol** |**meaning**
+:-------------:|:---------:|:-----------------------------------------:
+nodal type        |$\theta^X$ | The way that a node responds to the values of its parents. Example: $\theta^Y_{10}$, written `Y10`: $Y$ takes the value 1 if $X=0$ and 0 if $X=1$. For interpretation of syntax, see `make_model("X->Y") %>% get_nodal_types` 
+causal type       |$\theta$   | A causal type is a concatenation of nodal types, one for each node. Example:  $(\theta^X_0\theta^Y_{00})$, written `X0.Y00`,  is a type that has $X=0$ and $Y=0$ no matter what the value of $X$. See: `make_model("X->Y") %>% get_causal_types`
+parameter         | $\lambda$ | An unknown quantity of interest that generates the probability of causal types. In models without confounding parameters are the probabilities of nodal types. In models with confounding parameters are the conditional probabilities of causal types. Example: `X.X0`$=\lambda^X_0 = \Pr(\theta^X = \theta^X_0)$ See `make_model("X->Y") %>% get_parameters`
+data event type         |           | A possible set of values on all nodes (including, possibly, NAs). Example: `X0Y1` $= (X=0, Y = 1)$
+event probability |   $w$     | The probability of a data event type. Example: $w_{00}=\Pr(X=0, Y=1)$
+Dirichlet priors  | alpha, $\alpha$ | Non negative numbers used to characterize a prior distribution over a simplex. The implied mean is the normalized vector $\mu= \alpha/\sum(\alpha)$ and the variance is $\mu(1-\mu)/(1+\sum\alpha)$. 
+parameter matrix  | $P$  | A matrix of 0s and 1s that maps from parameters (rows) to causal types (columns).  Example: see `make_model("X->Y") %>% get_parameter_matrix`
+ambiguities matrix  | $A$  | A matrix of 0s and 1s that maps from causal types (rows) to data types (columns).  Example: see `make_model("X->Y") %>%  get_ambiguities_matrix`
+families matrix | $E$ | A matrix of 0s and 1s that maps from partial data events to complete data events. Example: see `make_model("X->Y") %>% get_data_families`
+data strategy | $S$ | A plan indicating for  how many nodes different types of data will be gathered. See `? make_data`
+
+
+
+### Parents, children, and all that {#parents}
+
+The causal models analyzed by `gbiqq` all involve *directed* edges between nodes, with cycles over nodes precluded. In turn this implies a partial ordering over nodes which motivates some useful terminology:
+
+* $X$ is a *parent* of $Y$ if a change in $X$ sometimes induces a change in $Y$ even when all other nodes are fixed. On the graph, there's an arrow from $X$ to $Y$.
+* $Y$ is a *child* of $X$ if a change in $X$ sometimes induces a change in $Y$ even when all other nodes are fixed. On the graph, there's an arrow from $X$ to $Y$.
+* $A$ is an *ancestor* of $B$ by analogy: a parent is an ancestor and any parent of an ancestor is an ancestor. On the graph there is a chain of arrows pointing in one direction going from $A$ to $B$. Similarly for *descendant*.
+
+You should find that the package complains if you try to specify a cyclical graph.
+
+## Causal syntax {#syntax}
+
+Both model definition and model querying requires a simple way to make arbitrary causal statements. 
+
+
+* You can query **observational quantities**. For instance:
+  * `make_model("X->Y") %>% get_query_types("Y==1")` Figures out the types that produce $Y=1$ absent any interventions.
+* You can query **experimental quantities**. For instance:
+  * `make_model("X->Y") %>% get_query_types("Y[X=1]==1")` figures out the types that produce $Y=1$ when $X$ is set to 1.
+  * `make_model("X->M->Y") %>% get_query_types("Y[X=1]>Y[X=0]")` figures out the types that have a positive causal effect. 
+* You can make queries with **complex counterfactuals**. For instance:
+   * `make_model("X->M->Y") %>% get_query_types("Y[M=M[X=0], X=1]==1")` looks for the types for which $Y=1$ when $X=1$ and $M$ is held constant at the value it would take if $X$ were 0.
+* You can use **wild cards** and AND or OR operators. For instance:
+   * `make_model("X->Y") %>% get_query_types("(Y[X = .]==1)", join_by = "|")` figures out the causal types for which $Y=1$ for some value of $X$. 
+   * `make_model("X->Y") %>% get_query_types("(Y[X = .]==1)", join_by = "&")` figures out the causal types for which $Y=1$ for *all* values of $X$. 
+   * Note that the use of "." as a wild card also requires placing the causal statement in parentheses, as in these examples. 
+* You can make **conditional queries**. For instance, conditioning on observational or counterfactual quantities:
+   * `make_model("X->Y") %>% query_model("Y[X = 1] > Y[X = 0]", subset = "X==1 & Y==1")` 
+asks what is the probability that $X$ has a positive effect on $Y$ given $X=Y=1$.
+   * `make_model("X->M->Y") %>% query_model("Y[X = 1] != Y[X = 0]", subsets = "M[X=1]==M[X=0]")` 
+asks what is the probability that $X$ matters for $Y$ given $X$ doesn't matter for $M$.
+
+
+We provide a few helpers for common causal statements:
+
+* `increasing("A", "B")` produces the statement `"B[A=1] > B[A=0]"`
+* `decreasing("A", "B")` produces the statement `"B[A=1] < B[A=0]"`
+* `interacts("A", "B", "C")` produces the statement `"((C[A =1, B = 1]) - (C[A = 0, B = 1])) != ((C[A =1, B = 0]) - (C[A = 0, B = 0]))"`
+* `complements("A", "B", "C")` produces the statement `"((C[A =1, B = 1]) - (C[A = 0, B = 1])) > ((C[A =1, B = 0]) - (C[A = 0, B = 0]))"`
+* `substitutes("A", "B", "C")` produces the statement `"((C[A =1, B = 1]) - (C[A = 0, B = 1])) < ((C[A =1, B = 0]) - (C[A = 0, B = 0]))"`
+
+These helpers can be used for setting restrictions, setting confounds, defining priors or parameter values, or querying models. 
+
+For instance:
+
+```{r, comment = ""}
+get_query_types(model = make_model("A -> B <- C"),
+         query = substitutes("A", "C", "B"))
+
+```
+
+`r if (knitr:::is_html_output()) '# References {-}'`

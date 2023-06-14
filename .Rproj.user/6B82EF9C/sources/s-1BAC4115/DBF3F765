@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1570053876129.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "DBF3F765",
+    "lastKnownWriteTime" : 7287422521198649957,
+    "last_content_update" : 1570053876129,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "context" : "package:gbiqqtools:::make_estimates_database"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 30,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_code_browser"
+}

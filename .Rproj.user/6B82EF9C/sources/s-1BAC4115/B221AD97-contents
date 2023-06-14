@@ -1,0 +1,46 @@
+# Final Words
+
+The central idea of this book is that many of the claims we want to make as social scientists require causal models that have sufficient complexity to be able to account of how and under what conditions causal relations play out. 
+
+The focus on design based inference that has grown in influence over the last decade has made it possible to dispense with such models. This is a remarkable achievement and has made it possible to put the testing of hypotheses on firm footing. But it has also come at the cost of a narrowing of questions to focus on variants of the average causal effect. 
+
+
+Building on pioneering work  by scholars in computer science, statistics, and philosophy we have outlined an approach that uses Bayesian networks to shift in focus towards treating causal models as both tools and objects of inquiry. The models both guide inference---by providing guidance on what conclusions can one draw from a given case or set of cases given background evidence and a background model---and evolve as new data comes along.  This approach     holds out the promise of addressing a wide set of questions in an integrated way:
+
+* **Case level questions**: does $X$ explain $Y$ in this case?
+* **Process questions**: did $X$ matter for $Y$ through this or that channel?
+* **Transportation questions**: what are the implications of this study for processes in other places?
+
+Using causal models also provides a clear *procedure* for drawing inferences. They clarify when different kinds of information will be informative for different estimands and they clarify what inferences you can draw. Even when quantities are not identified, they can be used to assess when conclusions are consistent with the data for different priors. 
+
+In exploring this approach we have rethought much of how we had been thinking about qualitative and quantitative inference. In starting to use these models and seeing their benefits we have have also developed a keener sense of the risks they entail. We outline these lessons and these risks next.   
+
+## General lessons
+
+We were motivated by an interest in showing that inferences from within case qualitative data could be combined with inferences from between case quantitative data. A canonical case might be gathering data on $X$, $Y$ data on many cases and $M$ data on process for some. In fact however this distinction has no meaning in the formal set up and analysis of models. One could just as easily be interested in the effect of $X$ on $Y$ and have plentiful data on $M$ but limited data on $Y$ or $X$. In this framework the qualitative and quantitative inference strategies are not just integrated, the distinction between them breaks down completely.
+
+We started off thinking of beliefs about the values of estimands and beliefs about the informativeness of within case information as being essentially independent. This was a feature of the  models we explored in @humphreys2015mixing and implicit in many accounts of process tracing: you articulate a belief about some hypothesis  and you articulate a belief about how informative evidence will be about your hypothesis. When both of these beliefs are tehmselves derived from an integrated model however then the same conjectures that infrom your beliefs about the hypotheses also inform your beliefs about the informativeness of additional data, you just cannot think of them as independent from each other.
+
+We started off thinking that in providing priors over causal relations you were directly stating beliefs about how the world works. In the simple case one might think that either $X$ cuased $Y$ or it did not and either $M$ should be seen in the event that $X$ caused $Y$ or it shouldn't be.  But these statements are in fact clearly model dependent. Beyond the model required to describe events in such crisp terms, the statements involve counterfactuals on counterfactuals---models of causal processes. Once a model involves assertions of conditional independence we are clearly in the business of dealing in simplifications and our priors become less statements of how we believe the world works to become somewhat statements about what set of models are least bad within a class of abstractions.    
+
+## Worries about what you have to put in
+
+Trading in models also brought into focus some of the limitations of DAGs in representing causal processes. 
+
+**Well defined nodes?** Do DAGs actually capture causal processes that qualitative researchers see -- qualitative researchers see that the domino 2 fell *the moment it was hit* by domino 1. How do we express this in a DAG?
+
+**Acyclic really?** The first assumption made in the construction of causal models in this book is the underlying DAG. One can specify a DAG without making any substantive claims about function forms or patterns of confounding. Yet even the  DAG presents worries. 
+
+**Theoretically deeper models.** 
+
+
+## Limits on what you can get out
+
+**Complexity.** We have sought to use non-parametric models.. To maintain simplicity we have largely focused on models with binary nodes. At first blush this class of causal models appears very simple. In fact however we quickly learn that even with a small set of nodes produces a dizzying variety of causal types.   
+
+**Identification.** In modelling complete structures we see clearly how much easier it is to define problems than it is to solve them. Many of the quantities we care about are easily shown to not be identified by the causal models we employ. The causes of effect estimand is perhaps the most obvious of these. 
+
+**Limits of qualitative data under ignorable assignments.** You generally cannot conclude all that much about population quantities from only a small number of cases when causal effects are identified. 
+
+
+## A world of models: Practical steps forward for collective cumulation

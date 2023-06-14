@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1578846453717.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "8E62E906",
+    "lastKnownWriteTime" : 1572013324,
+    "last_content_update" : 1572013324,
+    "path" : "C:/Dropbox/github/integrated_inferences/04-causal-questions.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "99,159",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 51,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

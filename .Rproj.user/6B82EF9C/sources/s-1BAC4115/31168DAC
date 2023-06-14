@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1568058236431.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "31168DAC",
+    "lastKnownWriteTime" : 1568060699,
+    "last_content_update" : 1568060699533,
+    "path" : "C:/Dropbox/School zoning, RAs (Julian, Moritz)/Model/simple.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "42,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled2"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 25,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

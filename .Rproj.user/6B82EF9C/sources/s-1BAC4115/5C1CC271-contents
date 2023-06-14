@@ -1,0 +1,39 @@
+---
+title: "Untitled"
+author: "Macartan"
+date: "12/31/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+data <- data.frame(K=c(0,0,1,1), X = c(0,1,0,1), Y = c(0,0,0,1))
+
+
+```
+
+
+
+```{r, eval = FALSE}
+
+library(gbiqq)
+
+model <- 
+  
+  make_model("X -> Y <- K") %>%
+  
+  update_model(data) 
+
+
+plot(model)
+
+
+query_model(
+  model,
+  query = "Y[X = 1] > Y[X = 0]",
+  using = "posteriors",
+  given = c("K==0", "K==1"))
+
+```
+    

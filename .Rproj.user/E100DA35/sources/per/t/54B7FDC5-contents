@@ -1,0 +1,53 @@
+--- 
+title: "Integrated Inferences"
+author: "Macartan Humphreys and Alan Jacobs"
+date: "Rough first draft!: `r Sys.Date()`"
+output:
+  bookdown::gitbook:
+    config:
+      download: ["pdf", "epub", "mobi"]
+      toc:
+        before: |
+          <li><a href="...">Integrated Inferences</a></li>
+          <li><a href="...">Humphreys and Jacobs</a></li>
+        after: |
+          <li><a href="https://github.com/rstudio/bookdown">
+          Assembled using bookdown</a></li>
+  bookdown::pdf_book:
+    includes:
+      in_header: preamble.tex
+site: bookdown::bookdown_site
+documentclass: book
+fontsize: 12pt
+bibliography: [bib.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: rstudio/ii
+description: "Model based strategies for integrating qualitative and quantitative inferences."
+cover-image: "Figures/kreuzer20141121.pdf"
+header-includes:
+ - \usepackage{color}
+ - \usepackage{amssymb} 
+ - \usepackage{amsfonts} 
+---
+
+
+
+
+```{r, include=FALSE}
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+
+```
+
+
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("hj_dag.R")
+source("function_perm.R")
+library(hop)
+source("function_tree.R")
+```
+

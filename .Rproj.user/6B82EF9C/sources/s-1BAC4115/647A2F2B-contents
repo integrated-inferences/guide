@@ -1,0 +1,1133 @@
+# Theories as causal models {#theory}
+
+```{r, include = FALSE}
+source("_packages_used.R")
+```
+
+***
+
+We introduce the idea of thinking of (applied) theoretical claims as claims within hierarchies of causal models. Lower level models serve as a theory for a higher level model if the higher level model can be deduced from the lower level model. The empirical content of a lower level model is the possible reduction in variance of the higher level model that it can provide. 
+
+***
+
+
+Theory plays an important role in this book's use of causal models for causal inference. Yet the term "theory" in the empirical social sciences means very different things in different contexts.  In this book, we will refer to a theory is an *explanation* of a phenomeon: a theory provides an account of how or under what conditions a set of causal relationships operate. Moreover, we can express both a theory and the claims being theorized as causal models. A theory, then, is a model that explains and implies another model---possibly with the help of some data. 
+
+We discuss toward the end of the chapter how this definition of theory relates to common understandings of theory in the social sciences. First, however, we focus on unpacking our working definition. In embedding theorization within the world of causal models, we ultimately have an empirical objective in mind. Theorizing a causal relationship of interest, in our framework, means elaborating our causal beliefs about the world in greater detail. As we show in later chapters, theorizing in the form of a causal model allows us to generate research designs: to identify sources of inferential leverage and to explicitly and systematically link observations of components of a causal system to the causal questions we seek to answer. 
+
+
+## Theory as a "lower-level" model
+
+Let us say that a causal model, $M^\prime$, is a *theory* of $M$ if $M$ is implied by $M^\prime$. Theory is, thus, all relative. $M^\prime$ might itself sit atop a theory, $M^{\prime\prime}$, that implies $M^\prime$. To help fix the idea of theory as "supporting" or "underlying" the model(s) it theorizes, we refer to the theory, $M^\prime$, as a *lower*-level model relative to $M$ and refer to $M$ as a *higher*-level model relative to its theorization, $M^\prime$.^[We note that our definition of theory differs somewhat from that given in @pearl2009causality (p207): there a theory is a (functional) causal model and a restriction over $\times_j \mathcal{R}(U_j)$, that is, over the collection of contexts envisionable. Our definition also considers probabilistic models as theories, allowing statements such as ''the average effect of $X$ on $Y$ is 0.5.''] 
+
+<!-- Higher-level models can be generated from lower-level models in two ways, both of which are consistent with common understandings of what it is for a set of claims to constitute or, conversely, derive from a ''theory.'' -->
+
+<!-- We can distill two ways in which lower-level models can relate to, or support, higher-level models: -->
+
+
+<!-- ### Disaggregating nodes -->
+
+We illustrate showing two models, $M^\prime$, $M^{\prime\prime}$ that each imply a model  $M$. In each case the lower level models contain additional nodes in a way that allows for  a kind of "disaggregation"  of exogenous nodes.
+
+
+```{r Highlow, echo = FALSE, fig.width = 8, fig.height = 5,  fig.align="center", out.width='.5\\textwidth', fig.cap = "Here we represent the simple claim that one variable causes another, and two theories --- lower-level models --- that could explain this claim. Both model (b) and model (c) involve theorization via disaggregation of nodes."}
+
+par(mfrow = c(3,1))
+par(mar=c(1,1,3,1))
+hj_dag(x = c(1,2,2),
+       y = c(1,1,2),
+       names = c(
+         expression(paste(X)),
+         expression(paste("Y")),  
+         expression(paste(theta^Y))),
+       arcs = cbind( c(1, 3),
+                     c(2, 2)),
+       title = "(a) A Higher-Level Model, M",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,2,2, 1.5, 1.5),
+       y = c(1,1,2, 1  , 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste("Y")),  
+         expression(paste(theta^Y[lower])),
+         expression(paste(K)),
+         expression(paste(theta[K])) 
+         ),
+       arcs = cbind( c(1, 3, 5, 4),
+                     c(4, 2, 4, 2)),
+       title = "(b) Lower-Level Model, M': Disaggregating via Mediation",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,2, 2, 1.5),
+       y = c(1,1, 2, 2),
+       names = c(
+         expression(paste(X)),
+         expression(paste("Y")),  
+         expression(paste(theta^Y[lower])),
+         expression(paste(C)) 
+         ),
+       arcs = cbind( c(1, 3, 5, 4),
+                     c(2, 2, 4, 2)),
+       title = "(c) Lower-Level Model M'': Disaggregating via Moderation",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+```
+
+
+
+
+We start with the higher-level model, $M$, represented in Figure \@ref(fig:Highlow)(a). We can then offer the model, $M^\prime$ in panel (b) as a *theory*, a lower-level model, of $M$. We have added a node, $K$, in the causal chain between $X$ and $Y$, a familiar mode of theorization. In doing do we have in fact *split* the error $\theta^Y$ into two parts: $\theta^{Y_\text{lower}}$ and $\theta^K$. 
+
+Intuitively, in the higher-level model, (a), $Y$ is a function of $X$ and a disturbance $\theta^Y$, the latter representing all things other than $X$ than can affect $Y$. In our four-type setup, $\theta^Y$ represents all of the (unspecified) sources of variation in $X$'s effect on $Y$. When we add $K$, $X$ now does not directly affect $Y$ but only does so via $K$. Further, we model $X$ as acting on $K$ "with error," with $\theta^K$ representing all of the (unspecified) factors determining $X$'s effect on $K$. The key thing to notice here is that $\theta^K$ now represents *a portion of the variance that $\theta^Y$ represented in the higher-level graph*: some of the variation in $X$'s effect on $Y$ now arises from $X$'s effect on $K$, which is captured by $\theta^K$. So, for instance, $X$ might have no effect on $Y$ because $\theta^K$ takes on a value such that $X$ has no effect on $K$. Likewise, any effect of $X$ on $Y$ must arise from an effect of $X$ on $K$, captured in $\theta^K$'s value. ^[As we emphasize further below, it is in fact only this "error" in the $X\rightarrow K$ link that makes the addition of $K$ potentially informative as a matter of research design: if $K$ were a deterministic function of $X$ only, then knowledge of $X$ would provide full knowledge of $K$, and nothing could be learned from observing $K$.] What $\theta^K$ represents, then, is that part of the original $\theta^Y$ that arose from some force other than $X$ operating at the *first* step of the causal chain from $X$ to $Y$. 
+
+So now, $\theta^Y$ is not quite the same entity in the lower-level graph that it was in the higher-level graph. In the original graph, $\theta^Y$ represented *all* sources of variation in $X$'s effect on $Y$. In the lower-level model, with $K$ as mediator, $\theta^Y$ represents only random variation in $K$'s effect on $Y$. $\theta^Y$ has been expunged of any factors shaping the first stage of the causal process, which now reside in $\theta^K$. Reflecting a convention that we use throughout the book, we highlight this change in $\theta^Y$'s meaning by referring in the second model to $\theta^{Y_\text{lower}}$. 
+
+Theorization here thus starts with the proliferation of substantive variables---adding beliefs about intervening steps in a causal process. But, critically, it also involves an accompanying disaggregation of unexplained variation. Addition and splitting thus go hand-in-hand: the *insertion* of a mediator between $X$ and $Y$ also involves the *splitting* of $Y$'s unspecified parent ($\theta_Y$).   
+
+<!-- Put differently, when we construct the lower-level model in (b), we are taking that part of $Y$ not determined by $X$ and splitting it in two: a non-$X$ input into $K$ and a non-$K$ (and thus also non-$X$) input into $Y$. -->
+
+Consider next model $M''$ panel (c) in Figure \@ref(fig:Highlow), which also supports (implies) the higher-level theory in panel $(a)$. The logical relationship between models $(a)$ and $(c)$, however, is somewhat different. Here the lower-level model *specifies* one of the conditions that comprised $\theta^Y$ in the higher-level model. In specifying a moderator, $C$, we have extracted $C$ from $\theta^Y$, leaving $\theta^{Y_\text{lower}}$ to represent all factors *other than $C$* that condition $X$'s effect on $Y$. (Again, the relabeling as $\theta^{Y_\text{lower}}$ reflects this change in the term's meaning.) While we might add a $\theta^C$ term pointing into $C$, this is not necessary. Whereas in Model (b) we have extracted $\theta^K$ from $\theta^Y$, in Model (c), it is $C$ itself that we have extracted from $\theta^Y$, substantively specifying what had been just a random disturbance.
+
+
+<!-- ### Generalizing a model -->
+
+<!-- A lower-level model, $M^\prime$, can also be a representation of $M$ in which a node has been introduced that permits variation in a feature of context that is fixed and taken-for-granted in $M$. Here, $M^\prime$ theorizes $M$ in the sense of embedding $M$ within a *more general* set of beliefs about how the world works. $M$ then becomes a special case of the theorized relations, one that holds when we condition on some data, specifying some particularity of context. -->
+
+<!-- To illustrate this approach to theorization, consider again graphs (a) and (c) in Figure \ref{fig:Highlow}. We have discussed how the graph in panel (c) can represent a disaggregation of $\theta^Y$ from panel (a) into $\theta^{Y_\text{lower}}$ and $C$. An alternative possibility, however, is to employ a moderation model that represents a more general claim than the higher-level model that it supports. For instance, the graph in panel (a) might represent the causal function $Y=X+\theta^Y$. In this model, $X$ always has an effect on $Y$. The graph in panel (c), in turn, might represent the more general function, $Y=XC+\theta^Y$ (where $C$ is binary). Now, whether $X$ has an effect depends on the value of $C$. In particular, model (c) combined with the observation $C=1$ directly implies model (a). Model (a) is a special case of model (c) that holds in and only in the context $C=1$. In answer to the question, "Why do you believe model (a)?" one could respond with model (c) plus the observation $C=1$.  -->
+
+<!-- Note the difference in how theorization has proceeded for the two moderation models (both graphically represented in panel (c)). When we introduce moderation via the disaggregation of nodes, we pull content out of $\theta^Y$ and specify it substantively. When we generalize, on the other hand, we *add* a node, a source of variation not factored into the original model at all. We can think of that variation as implicitly conditioned-on in the higher-level model. -->
+
+<!-- As a secondary matter, note that the $\theta$ term pointing into $Y$ may or may not be altered by the addition. In particular, we will explore later, if $\theta^Y$ is a vessel for causal types, then the number of possible causal types---and, thus, $\theta^Y$'s range---must expand as we add nodes pointing into $Y$. But in the functions we have used in our illustration, $\theta^{Y_\text{lower}}$ remains unchanged when we add the $C$ node. In both the higher- and lower-level models, $\theta^Y$ represents precisely the same random disturbance.  -->
+
+
+
+<!-- $M^\prime$ is a *theory* of $M$ in that it, in a sense, helps explain the dependencies of $Y$ on $X$ more fully than does $M$. -->
+
+
+
+Critically, notice that since lower level models imply higher level models we think of theories as implying the models they are theorizing. If you believe Model $M'$, then you also must believe Model $M$. If it is possible that $X$ can affect $K$ and possible that $K$ can affect $Y$ then it is possible that $X$ can affect $Y$. The converse is not true, however. It is not possible to still believe that $X$ can effect $Y$ if you do not think that $X$ can affect $K$. Similarly, if you believe Model (c), then you must also believe Model (a): if it is true that $X$ can affect $Y$, possibly in ways that are moderated by $C$, then it is trivially true, more simply, that $X$ can affect $Y$. 
+
+## Illustration of unpacking causal types
+
+We now show more specifically how causal types in lower level models map into causal types in higher level models. 
+
+For concreteness, let us return to our democratization example and consider first the very basic claim that inequality can have an affect on democratization. We represent this simple claim in Figure \@ref(fig:demtheory5), Panel (a). In this simple model, $I$ may sometimes have an effect of $D$, and sometimes not; and that effect may be positive or negative. All of this will depend on the case's causal type. 
+
+```{r demtheory5, echo = FALSE, fig.width = 6, fig.height = 5,  fig.align="center", out.width='.5\\textwidth', fig.cap = "DAG representations of three theories. DAGs only capture claims that one variable causes another, conditional on other variables. Theories (b) and (c) each imply theory (a)."}
+
+par(mfrow = c(3,1))
+par(mar=c(1,1,3,1))
+hj_dag(x = c(1,2,2),
+       y = c(1,1,2),
+       names = c(
+         expression(paste(I)),
+         expression(paste("D")),  
+         expression(paste(theta[D]))),
+       arcs = cbind( c(1, 3),
+                     c(2, 2)),
+       title = "(a) A Claim: Inequality Causes Democratization",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,2,2, 1.5, 1.5),
+       y = c(1,1,2, 1  , 2),
+       names = c(
+         expression(paste(I)),
+         expression(paste("D")),  
+         expression(paste(theta[D])),
+         expression(paste(M)),
+         expression(paste(theta[M])) 
+         ),
+       arcs = cbind( c(1, 3, 5, 4),
+                     c(4, 2, 4, 2)),
+       title = "(b) A Theory: How Inequality Causes Democratization",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,2, 2, 1.5),
+       y = c(1,1, 2, 2),
+       names = c(
+         expression(paste(I)),
+         expression(paste("D")),  
+         expression(paste(theta[D])),
+         expression(paste(E)) 
+         ),
+       arcs = cbind( c(1, 3, 5, 4),
+                     c(2, 2, 4, 2)),
+       title = "(c) Another theory: When Inequality Causes Democratization",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+```
+
+
+In addition the figure shows two models that each *explain* Model (a), though in different ways. Model (b) answers the explanatory question, "*How* does inequality affect democratization?" Model (c) answers the explanatory question, "*Why* does inequality's effect on democratization vary?" Both theories provide richer, more interpretable accounts of the phenomenon of interest than the simpler model that they are theorizing.
+
+These lower level models imply a set of causal types that are richer than that implied by (a). Recall that in Chapter \@ref(models), we considered the idea that at any node, a causal type may be conceptualized as a case specific disturbance, that governs the mapping from input variables to outcome variables.  
+
+<!-- To fix this idea going forward, we make a shift in notation and use $\theta$ to indicate that a node is a receptacle for causal types. Thus, $\theta_D$ here captures the case's causal type, or $I$'s causal effect on $D$ for a given case.  -->
+
+In particular if we  deploy our four-causal-type function from Chapter \@ref(models) we have: 
+
+  * $a$: $\theta^D=\theta^D_{10}$, then $D=1-I$ ($I$ has a negative effect on $D$)
+  * $b$: $\theta^D=\theta^D_{01}$, then $D=I$ ($I$ has a positive effect on $D$)
+  * $c$: $\theta^D=\theta^D_{00}$, then $D=0$ ($I$ has no causal effect)
+  * $d$: $\theta^D=\theta^D_{11}$, then $D=1$ ($I$ has no causal effect)
+
+Knowing $\theta$ tells us how $D$ responds to $I$ and it ignores any heterogeneity between units as long they respond in the same way. For any causal type the model is *consistent* with $I$'s causal effect operating for different reasons for different units, but these differences are left entirely unaccounted for. 
+
+### Type disaggregation in a mediation model
+
+<!-- We might then wonder *how* inequality might exert its effect on democratization. One possible answer, drawing on our model in Chapter \@ref(models) is that inequality can affect mass-mobilization, which in turn can affect democratization. This explanatory claim is visually represented in Panel (b) of the figure. Here, we can see that any effect of $I$ on $D$ runs through $M$. There are details of this graph that we will delve into later. But for now, it is sufficient to see that we have partly explained variation left unexplained by model (a). Model (b) allows us to say, for instance, that whether inequality has an effect on democratization has to depend on whether inequality has an effect on mobilization. Model (b) thus theorizes, in one important sense, a part of inequality's effect that is left untheorized in model (a).  -->
+
+
+Model (b) has causal types defined for nodes $M$ and for $D$. As with the overall $I,D$ relationship. We thus allow $I$ to have a positive, negative, or no effect on $M$, with $\theta^M$ taking on four possible values, again corresponding to $a,b,c,d$ nodal types (now: *a*: $\theta_{10}^M$, *b*: $\theta_{01}^M$,  *c*: $\theta_{00}^M$, *d*: $\theta_{11}^M$).
+
+
+And we allow for $M$ to have a positive, negative, or no effect on $D$, with $\theta^D_{\text{lower}}$ possible values again being one of four nodal types ($\theta_{10}^D$, $\theta_{01}^D$, $\theta_{00}^D$, $\theta_{11}^D$).
+
+We can now think about _combinations_ of types in the lower-level model as mapping onto types in the higher-level model. Table \@ref(tab:highlowmapping) illustrates.
+
+
+|                    | $\theta_{10}^{D_{lower}}$  | $\theta_{01}^{D_{lower}}$  | $\theta_{00}^{D_{lower}}$  | $\theta_{11}^{D_{lower}}$  |
+|--------------------|----------------------------|----------------------------|----------------------------|----------------------------|
+| $\theta_{10}^{M}$  | $\theta_{01}^{D_{higher}}$ | $\theta_{10}^{D_{higher}}$ | $\theta_{00}^{D_{higher}}$ | $\theta_{11}^{D_{higher}}$ |
+| $\theta_{01}^{M}$  | $\theta_{10}^{D_{higher}}$ | $\theta_{01}^{D_{higher}}$ | $\theta_{00}^{D_{higher}}$ | $\theta_{11}^{D_{higher}}$ |
+| $\theta_{00}^{M}$  | $\theta_{11}^{D_{higher}}$ | $\theta_{00}^{D_{higher}}$ | $\theta_{00}^{D_{higher}}$ | $\theta_{11}^{D_{higher}}$ |
+| $\theta_{11}^{M}$  | $\theta_{00}^{D_{higher}}$ | $\theta_{11}^{D_{higher}}$ | $\theta_{00}^{D_{higher}}$ | $\theta_{11}^{D_{higher}}$ |
+Table: (\#tab:highlowmapping) Mapping from lower level nodal types on $M$ and $D$ to higher level causal types on $D$. 
+
+For instance, in a case in which both $\theta^M=\theta^M_{01}$ (a positive effect of $I$ on $M$) and $\theta^{D_{\text{lower}}}=\theta_{01}^{D_{lower}}$ (a positive effect of $M$ on $D$), we have a positive effect of $I$ on $D$---meaning that, in the _higher-level_ model, $\theta^{D_{higher}}=\theta^{D_{higher}}_{01}$. Two linked negative effects also generate a positive effect of $I$ on $D$ and so map onto the same higher-level type. Further, it is easy to see that if there is no causal effect at _either_ the $I \rightarrow M$ step _or_ the $M \rightarrow D$ step, we will have one of the null effect types at the higher level since, in this model, $I$ cannot affect $D$ unless there are causal effects at both constituent steps.^[These mappings, of course, hinge on the fact that $I$ affects $D$ _only_ through $M$ in this model (no direct effects or other pathways).]
+
+To foreshadow the discussion in later chapters, these mappings are critical: they allow us to use inferences drawn at a lower level to answer questions posed at a higher level.
+
+<!-- The lower-level functional equations are formally similar though now each unit's outcome (given $X$) depends on two event probabilities: one that determines type with respect to the effect of $X$ on $K$ ($t_{ij}^{K}$), and one with respect to the effect of $K$ on $Y$ ($u_{ij}^{Y}$): -->
+
+<!-- $$Y(K, u_{ij}^{Y}) = \left\{ \begin{array}{cc}   -->
+<!-- i & \text{ if } K=0 \\ j & \text{ if } K=1 \end{array}  \right.$$ -->
+<!-- $$K(X, u_{ij}^{K}) = \left\{ \begin{array}{cc}   -->
+<!-- i & \text{ if } X=0 \\ j & \text{ if } X=1 \end{array}  \right.$$ -->
+
+<!-- Thus, in the lower-level model, there are sixteen types that derive from the cross product of two independent random terms. -->
+
+<!-- Critically, one can derive the higher-level types from the lower level types, and beliefs about the higher level types from beliefs about the lower level types. For example, using the nomenclature in @humphreys2015mixing: -->
+
+<!-- \begin{eqnarray*} -->
+<!-- \text{adverse: }u_{10}^{high} &=& u_{01}^{K}\&u_{10}^{Y} \text{ or } u_{10}^{K}\&u_{01}^{Y} \\ -->
+<!-- \text{beneficial: }u_{01}^{high} &=& u_{01}^{K}\&u_{01}^{Y} \text{ or }  u_{10}^{K}\&u_{10}^{Y} \\ -->
+<!-- \text{chronic: } u_{00}^{high} &=& u_{00}^{Y} \text{ or }  u_{00}^{K}\&u_{01}^{Y} \text{ or }  u_{11}^{K}\&u_{10}^{Y}\\ -->
+<!-- \text{destined: }u_{11}^{high} &=& u_{11}^{Y} \text{ or }  u_{00}^{K}\&u_{10}^{Y} \text{ or }  u_{11}^{K}\&u_{01}^{Y} -->
+<!-- \end{eqnarray*} -->
+
+<!-- In the same way, the higher-level probabilities are implied by the lower level probabilities. -->
+
+<!-- \begin{eqnarray*} -->
+<!-- \text{adverse: }\lambda_{10}^{high} &=& \lambda_{01}^{K}\lambda_{10}^{Y} + \lambda_{10}^{K}\lambda_{01}^{Y} \\ -->
+<!-- \text{beneficial: }\lambda_{01}^{high} &=& \lambda_{01}^{K}\lambda_{01}^{Y} + \lambda_{10}^{K}\lambda_{10}^{Y} \\ -->
+<!-- \text{chronic: } \lambda_{00}^{high} &=& \lambda_{00}^{Y} + \lambda_{00}^{K}\lambda_{01}^{Y} + \lambda_{11}^{K}\lambda_{10}^{Y}\\ -->
+<!-- \text{destined: }\lambda_{11}^{high} &=& \lambda_{11}^{Y} + \lambda_{00}^{K}\lambda_{10}^{Y} + \lambda_{11}^{K}\lambda_{01}^{Y} -->
+<!-- \end{eqnarray*} -->
+
+<!-- Importantly, even without specifying a distribution over $U_K$ or $U_Y^{\text{lower}}$, a lower-level structural model could be informative by restricting the *ranges* of  $U_K$ or $U_Y^{\text{lower}}$. For instance, a lower level theory that imposed a monotonicity condition (no adverse effects) might exclude $t^K_{10}$ and $t^y_{10}$---that is, increasing $X$ never reduces $K$, and increasing $K$ never reduces $Y$.  -->
+
+<!-- We return  to this example below and show how observation  of $K$ can yield inference on causal estimands when  the theory places this kind of a structure on relationships. -->
+
+### Type disaggregation in a moderation model
+
+Alternatively, we might wonder *when* inequality causes democratization. Our simple claim, in panel (a), allows that $I$ *can* cause $D$, but provides no information about the conditions under which it does so. Those conditions are implicitly embedded within $\theta^D$, where they are left unspecified. We could, however, theorize some of what is left unsaid in in panel (a). We do this in panel (c), where we posit ethnic homogeneity ($E$) as a moderator of  inequality's effect on democratization. Panel (c) represents a theory of panel (a) in that it can help account for variation in causal effects that is unaccounted for by the model in (a).
+
+
+Model (c) has thus given substantive meaning to an aspect of the phenomenon that was merely residual variation in Model (a). Model (a) provides no account of why inequality has the effects it does, relying fully on $\theta^D$ as a placeholder for this uncertainty. In Model (c), $\theta^D$ plays a more modest role, with ethnic homogeneity doing a good deal of the work of determining inequality's possible effects. 
+
+
+<!-- We note one final possibility. Imagine that we started with the quite *specific* claim that inequality sometimes has a positive effect on democratization and sometimes has no effect (with democratization happening for other reasons). Suppose we believed this claim to be true for some, possibly not well defined, domain of cases.^[This claim could be graphically represented by panel (a), but would involve a more restricted range for $\theta^D$ and simpler functional equation, involving only two types.] Model (c) could serve as a theory of this more specific claim in that Model (c), paired with some data, could explain the claim. In particular, Model (c) paired with the data $E=1$---we are in an ethnically homogeneous context---produces the more specific claim. Here, it is the theory *plus an observation* of context that accounts for the specific claim.  -->
+
+<!-- Similarly, take the functional equation $f_1: Y=X_1X_2$. Coupled with data $X_2=1$, $f_1$ implies the functional equation $f_2: Y=X_1$.  -->
+
+
+<!-- ### Causal types in lower level models  -->
+
+<!-- We have discussed theorization largely from a graphical perspective, showing how features of causal graphs change (nodes get split, combined, added, or removed) as we move down or up levels. But there is more that happens beneath the surface of a graphical structure when we theorize a claim: the space of causal types itself changes. We walk through how this works for the mediation and moderation theories described above.  -->
+
+<!-- ### Mediation {#medtheory} -->
+
+<!-- We begin with a simple claim: there are two binary variables, $X$ and $Y$, and $X$ may have an effect on $Y$. This claim is represented in Figure \@ref(fig:Highlow)(a) above. In this graph, $X$ is independent of $\theta^Y$, which means that it is as if $X$ is randomly assigned. -->
+
+<!-- We will let $\theta^Y$ be a variable that ranges across our four different causal types, conditioning how $Y$ responds to $X$. While  $a, b, c$, and $d$ were heuristically useful as a way of introducing the  idea of a causal type, things will soon get more complicated, so it will be useful to have more flexible notation. Going forward, we will usually refer to causal types using $\theta$ notation, with subscripts and superscripts used to denote potential outcomes and outcome variables. In our binary $X \rightarrow Y$ setup, we can indicate the causal type governing $Y$'s response with notation of the form $\theta^Y_{ij}$, where $i$ and $j$ represent $Y$'s potential outcomes. Specifically, $i$ represents the value $Y$ takes on when $X=0$, while $j$ represents the value $Y$ takes on when $X=1$.^[The functional equation for $Y$ is then given by:  -->
+<!-- $$Y(x, \theta_{ij}^{Y_\text{higher}}) = \left\{ \begin{array}{cc}   -->
+<!-- i & \text{ if } x=0 \\ j & \text{ if } x=1 \end{array}  \right.$$] Thus, the translation from $a, b, c$ and $d$ notation is: -->
+
+
+<!-- * *a*: $\theta_{10}^Y$. A negative effect implies that $Y$ is $1$ when $X=0$ and $0$ when $X=1$. -->
+<!-- * *b*: $\theta_{01}^Y$. A positive effect implies that $Y$ is $0$ when $X=0$ and $1$ when $X=1$. -->
+<!-- * *c*: $\theta_{00}^Y$. A null "chronic" effect implies that $Y$ is $0$ regardless of $X$'s value. -->
+<!-- * *d*: $\theta_{11}^Y$. A null "destined" effect implies that $Y$ is $1$ regardless of $X$'s value. -->
+
+
+<!-- To be clear, these $\theta_{ij}^Y$ terms are not random variables; they are the four _values_ (types) that the type-variable $\theta^Y$ can take on. -->
+
+<!-- represented with the notation $u_{ij}$: we read the subscripts to mean that a unit of type $u_{ij}$ has outcome $i$ when $X=0$ and $j$ when $X=1$. Then let $u_Y^{higher}$ have a multinomial distribution over the four values of  $u_{ij}$ with event probabilities  $\lambda_{ij}^{higher}$. ; for example, let $u_X\sim \text{Unif}[0,1]$ and $X = \mathbb{1}(u_K<\pi^K)$. -->
+
+
+<!-- For example if $U_Y^{higher}$ is distributed normally and $Y$ takes on the value 1 if $bX+u_Y^{higher}$ is above some threshold, we have a probit model.  -->
+
+
+<!-- Now consider a theory that specifies a variable intervening between $X$ and $Y$. This theory is depicted in Figure \@ref(fig:Highlow)(b) above, where $M$ mediates the relationship. We see that there are now two $\theta$ terms, each representing a set of causal types for a different step in the causal chain. While $\theta^Y$ represented $Y$'s response to its parent $X$, $\theta^Y_{\text{lower}}$ represents $Y$'s response to its "new" parent, $M$. We now also need to conceive of a causal type capturing $M$'s response to $X$, and we let $\theta^M$ represent this type.^[This graph assumes no confounding in the mediating relationship either as the two $\theta$ terms and $X$'s assignment are all independent of one another.] -->
+
+
+
+<!-- Now consider the alternative lower-level theory in which  $E$ is posited as a second parent of $D$. This graph contains the substantive assumptions that $E$'s value is determined independently of $I$'s, as well as the assumption that $I$ and $E$ are both as-if randomly assigned. -->
+
+In this graph, we again have a $\theta_D^{\text{lower}}$ term, but it is a different object from $\theta_D^{\text{lower}}$ in the mediation graph. In this moderation model, $\theta_D^{\text{lower}}$ is more complex as it determines the mapping from two binary variables into $D$. A causal type in this setup now represents how a case will respond to four different possible combinations of $I$ and $E$ values. Rather than four causal types, we now have 16, as there are 16 possible ways in which a case might respond to two binary variables (see Table  \@ref(tab:PO16) in Chapter \@ref(models)).
+
+In Table \@ref(tab:PO16b) we give a mapping from a subset of these lower level types to the upper level types corresponding to the model in (a). 
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+   Low Type                  $I=0,E=0$     $I=0,E=1$     $I=1,E=0$      $I=1, E=1$    High Type
+-------------------------  ------------  -------------  -------------  -------------  ------------------------------------------------
+$\theta^{D}_{0000}$            0           0             0             0              $\theta^{D}_{00}$
+
+$\theta^{D}_{0001}$            0           0             0             1              $\theta^{D}_{01}$ if $E=1$, else $\theta^D_{00}$ 
+$\theta^{D}_{0010}$            0           0             1             0              $\theta^D_{00}$ if $E=1$, else $\theta^D_{01}$
+
+$\theta^{D}_{0011}$            0           0             1             1              $\theta^{D}_{01}$
+
+$\vdots$                       $\vdots$    $\vdots$      $\vdots$      $\vdots$       $\vdots$     
+
+$\theta^{D}_{1110}$            1           1             1             0              $\theta^D_{11}$ if $E=0$, else $\theta^D_{10}$
+
+$\theta^{D}_{1111}$            1           1             1             1              $\theta^D_{11}$
+-----------------------------------------------------------------------------------------------------------------------------
+Table: (\#tab:PO16b) Values for $D$ given $E$ and $I$. With two binary causal variables, there are 16 nodal types: 16 ways in which $Y$ depends on $I$ and $E$. These lower level types map into higher level types for a model in which $Y$ depends on $I$ only, as shown in the final column. 
+
+
+<!-- To illustrate, $\theta_Y^{\text{lower}}=$: -->
+
+
+<!-- * $\theta_{00}^{11}$ means that $I$ has no effect under any value of $E$, and $E$ has a positive effect under any value of $I$.  -->
+<!-- * $\theta_{10}^{10}$ implies that $I$ always has a negative effect, and $E$ never has an effect.  -->
+<!-- * $\theta_{01}^{11}$ represents one kind of conditional effect: $I$ has a positive effect only when $E=0$, and $E$ has a positive effect only when $I=0$. -->
+
+
+Importantly we see that the mapping between lower- and higher-level types can depend on the value of the moderator. More generally, since we can think of the value of exogeneous nodes, $E$ and $I$, as being nodal types for those nodes, we can think of the lower level nodal type as a concatenation of the upper level nodal types for $E$ and $D$. Thus we can think of the the higher level type as depending uniquely on the fully specified lower level type.
+
+For instance, a case that has type $\theta_{01}$ in the higher-level model if it has type $\theta_{0010}$ in the lower-level model _and_ $E=0$. This is a case for which $I$ has a positive effect on $D$ when $E=0$ _and_ in which $E$ _is in fact_ 0. On the other hand, the same lower level type,  in combination with $E=1$ maps onto the type $\theta_{10}$ in the higher-level model---a type in which $D$ responds negatively to $I$. 
+
+In later chapters, we represent all lower- to higher-level mappings relevant to a question of interest with the use of "type-reduction" tables that allow one to readily see how inferences drawn at one level inform causal questions posed at another level.
+
+<!-- We let $u_Y^{\text{lower}}$ in this graph denote a multinomial distribution over the sixteen values of  $u_{ij}^{gh}$ with event probabilities  $\lambda_{ij}^{gh}$. -->
+
+<!-- I changed abcd scripts above to ghij and made corresponding (I think) changes below. I don't care what it is but abcd obviously could be confusing in this context. -->
+
+<!-- The sixteen types are illustrated in Table \@ref(tab:types2X) in the appendices. -->
+
+<!-- Again, the types in the higher level mapping are functions of the types in the lower-level mapping. For example,  a unit has type $u_{01}$ in the higher level model if $K=1$ and it is of type $u_{00}^{01},u_{10}^{01},u_{01}^{01}$, or $u_{11}^{01}$, or if $K=0$ and it is of type $\lambda_{01}^{00},\lambda_{01}^{10},\lambda_{01}^{01}$, or $\lambda_{01}^{11}$.  -->
+
+<!-- We write this as: -->
+
+<!-- $$u_{01} =  ((K=1) \land (t^{lower} \in \{u_{00}^{01} \cup u_{10}^{01} \cup  u_{01}^{01} \cup u_{11}^{01} \}) \lor  ((K=0) \land (t^{lower} \in \{\lambda_{01}^{00} \cup \lambda_{01}^{10} \cup \lambda_{01}^{01} \cup \lambda_{01}^{11}\})$$ -->
+
+<!-- In the same way, the probability of type $u_{01}$ can be written in terms of the parameters of the lower-level graph.  Importantly, the parameters of the higher-level distribution  $u_Y^{higher}$ depend on both $u_K$ and $u_Y^{\text{lower}}$. Thus, unlike the mediation case above, the probative value depends on the likelihood of an *observable* event occurring. Specifically, the share of a given higher-level type is given by: -->
+
+<!-- $$\lambda_{ij} = P(u_Y^{higher} = u_{ij}) = \pi^K\left(\lambda_{00}^{gh}+\lambda_{10}^{gh}+\lambda_{01}^{gh}+\lambda_{11}^{gh}\right) -->
+<!-- + -->
+<!-- (1-\pi^K)\left(\lambda_{ij}^{00}+\lambda_{ij}^{10}+\lambda_{ij}^{01}+\lambda_{ij}^{11}\right)$$ -->
+
+<!-- For example: -->
+
+<!-- $$\lambda_{00} = P(u_Y^{higher} = u_{00}) = \pi^K\left(\lambda_{00}^{00}+\lambda_{10}^{00}+\lambda_{01}^{00}+\lambda_{11}^{00}\right) -->
+<!-- + -->
+<!-- (1-\pi^K)\left(\lambda_{00}^{00}+\lambda_{00}^{10}+\lambda_{00}^{01}+\lambda_{00}^{11}\right)$$ -->
+
+
+<!-- Conditional probabilities follow in the usual way. Consider, for instance, the case where it is known that $X=Y=1$ and so the posterior probability of type $u_{01}$ is simply $P(i \in u_{01} | X=Y=1) = \frac{\lambda_{01}}{\lambda_{01}+\lambda_{11}}$. Note that $\pi^x$ does not appear here as this $X$ is orthogonal to $u_Y$. The probability of type $u_{01}$, knowing that $X=Y=1$, can be written in terms of the parameters of the $u$ distributions in the lower-level graph.  -->
+
+<!-- $$P(i \in u_{01} | X=Y=1) = \frac{ -->
+<!-- \pi^K\left(\lambda_{00}^{01}+\lambda_{10}^{01}+\lambda_{01}^{01}+\lambda_{11}^{01}\right) -->
+<!-- + -->
+<!-- (1-\pi^K)\left(\lambda_{01}^{00}+\lambda_{01}^{10}+\lambda_{01}^{01}+\lambda_{01}^{11}\right) -->
+<!-- }{ -->
+<!-- \sum_{i = 0}^1\left(\pi^K\left(\lambda_{00}^{i1}+\lambda_{10}^{i1}+\lambda_{01}^{i1}+\lambda_{11}^{i1}\right) -->
+<!-- + -->
+<!-- (1-\pi^K)\left(\lambda_{i1}^{00}+\lambda_{i1}^{10}+\lambda_{i1}^{01}+\lambda_{i1}^{11}\right) -->
+<!-- \right)}$$ -->
+
+<!-- We return below to this example and describe how the lower-level model can be used to generate inferences on relations implied by the higher level model.  -->
+
+
+
+
+
+## Rules for moving between higher- and lower-level models
+
+Thinking about models as conditionally nested within one another can be empirically useful. It provides a way of generating empirical leverage on a causal question by plumbing more deeply our background knowledge about a domain of interest. When we more fully specify higher-level claims via a more elaborate, lower-level model, we are a making explicit unspecified conditions on which the higher-level relationships depend. In doing this, we are identifying potentially observable nodes that might be informative about our research question.
+
+
+As we develop lower-level models to support our claims, or determine which claims are supported by our theories, what kinds of moves are we permitted to make? One important thing to note is that the mappings between higher-level claims and theories may not be one-to-one. A single theory can support multiple higher-level theories. Moreover, a single higher-level relation can be supported by multiple, possibly incompatible lower-level theories. 
+
+To illustrate, consider two "lower level" theories of democratization:
+
+
+* ($L_1$): $Inequality \rightarrow Democratization  \leftarrow Mobilization$  
+* ($L_2$): $Inequality \rightarrow Mobilization \rightarrow Democratization$
+
+
+Note how these theories are incompatible with one another. While  $Inequality$ and $Democratization$ are independent in $L_1$, they are causally related in $L_2$. Moreover, in $L_2$, $Inequality$ and $Democratization$ are related only through $Mobilization$, while in $L_1$, $Democratization$ is directly affected by $Inequality$.^[Put differently, these two theories record different relations of conditional independence: in $L_1$, $Inequality$ and $Mobilization$ are unconditionally independent, but they are not unconditionally independent in $L_2$. Also, in $L_2$, $Inequality$ is independent of $Democratization$ conditional on $Mobilization$; but this is not the case in $L_1$.]
+
+Now, consider the following three higher-level claims:
+
+
+* ($H_1$): $Inequality \rightarrow Democratization$
+* ($H_2$): $Mobilization \rightarrow Democratization$
+* ($H_3$): $Inequality \rightarrow Mobilization$
+
+
+$H_1$ could be derived from (explained by) either theory, $L_1$ or $L_2$. Although the two theories are incompatible with one another, in both theories $Inequality$ affects $Democratization$. Both theories likewise imply $H_2$, in which $Mobilization$ affects $Democratization$.
+
+$H_3$, however, can be supported only by one of these theories: only in $L_2$, and not in $L_1$, does $Inequality$ cause $Mobilization$.^[In addition, the *conditional* higher-level model $((Inequality \rightarrow Democratization)|Mobilization=1)$ can be supported by model $L_1$ but not by model $L_2$, where holding $Mobilization$ constant would sever the dependence of $Democratization$ on $Inequality$.]
+
+Thus multiple (possibly *incompatible*) theories can usually be proposed to explain any given causal effect.  When seeking an explanation for, say, $H_1$, the choice between $L_1$ and $L_2$ is not dictated by logic; it must be drawn from a substantive belief about which set of causal dependencies operates in the world. On the other hand, $L_2$ *is* logically ruled out as an explanation of $H_3$. Further, any given theory logically implies multiple (necessarily *compatible*) higher-level claims about causal relations.
+
+
+What, more generally, are the permissible moves across levels? 
+
+### Moving down levels 
+
+We have already discussed two possible forms of theorization --- moves down a level: (i) disaggregating existing nodes, i.e., by introducing beliefs about mediation or moderation, or (ii) adding nodes representing variation in a feature of context that is implicitly held constant in the higher-level model.
+
+There are other possible ways of elaborating a model. For instance, we can add *antecedent conditions*: causes of nodes that were exogenous in the higher-level model. Likewise, we can add *downstream effects*: outcomes of nodes that were terminal in the higher-level model.
+
+
+```{r incompat, echo = FALSE, fig.width = 9, fig.height = 7, fig.align="center", out.width='.7\\textwidth', fig.cap = "A higher-level model and a lower-level model that is impermissible."}
+
+par(mfrow = c(2,1))
+par(mar=c(1.5,1.5,3.5,1.5))
+hj_dag(x = c(1,2,1.5,2),
+       y = c(1,1,1,2),
+       names = c(
+         expression(paste(Inequality)),
+         expression(paste("Democratization")),
+         expression(paste("Mobilization")),
+         expression(paste(theta^D[higher]))),
+       arcs = cbind( c(1,3,4),
+                     c(3,2,2)),
+       title = "(a) Higher-level model",
+       add_functions = 0,
+       contraction = .16,
+       padding = .1
+)
+
+hj_dag(x = c(1,2,1.5, 2, 1.5),
+       y = c(1,1,1, 2, 1.5),
+       names = c(
+         expression(paste(Inequality)),
+         expression(paste("Democratization")),
+         expression(paste("Mobilization")),
+         expression(paste(theta^D[lower])),
+         expression(paste("Ethnic homogeneity"))
+         ),
+       arcs = cbind( c(1,3, 4, 5, 5),
+                     c(3,2, 2, 1, 2)),
+       title = "(b) An incompatible lower-level model",
+       add_functions = 0,
+       contraction = .16,
+       padding = .1
+)
+
+```
+
+The central principle governing allowable elaborations is that a lower-level model *must not introduce dependencies between variables that were omitted in the higher-level model.* We provide an example of a violation of this principle in Figure \@ref(fig:incompat). 
+
+We start with a higher-level model, in panel (a), in which inequality affects democratization through mobilization. We then elaborate the model in panel (b) by adding ethnic homogeneity as a moderator of mobilization's effect. However, because ethnic homogeneity is also modeled here as affecting inequality, we have now introduced a source of dependence between inequality and democratization that was omitted from the higher-level model. In panel (a), democratization and inequality were dependent only via mobilization; and so they are conditionally independent given mobilization. In panel (b), democratization and mobilization are additionally dependent via their common cause, ethnic homogeneity. By the rules governing causal graphs (see Chapter \ref{models}), the higher-level specifically *prohibited* this second source of dependency---since all dependencies between variables must be represented. 
+Put differently, if two variables are independent--- or conditionally independent given a third variable---in one model, then this same relation of independence (or conditional independence) must be captured in any theory of that model. A theory can *add* conditional independencies not present in the higher-level model. For instance, a mediation theory, $X \rightarrow M \rightarrow Y$, implies a conditional independence that is not present in the higher-level model that it supports, $X \rightarrow Y$: in the lower-level model only, $X$ is conditionally independent of $Y$ given $M$. But we may not theorize away (conditional) independencies insisted on by our higher-level claim.
+
+
+### Moving up levels
+
+Moving in the other direction, what, in general, are the permissible *simplifications* of lower-level models? In other words, given a theory, what are the higher-level claims that it can support?
+
+When we move up a level --- i.e., eliminate one or more nodes --- the key rule is that the higher-level graph must take into account: 
+
+(a) all *dependencies* among remaining nodes and 
+(b) all *variation* generated by the eliminated node. 
+
+We can work out what this means, separately, for eliminating *endogenous* nodes and for eliminating *exogenous* nodes.
+
+*Eliminating endogenous nodes*
+
+Eliminating an endogenous node means removing a node with parents (direct causes) represented on the graph. If the node also has one or more children, then the node captures a dependency: it links its parents to its children. When we eliminate this node, preserving these dependencies requires that all of the eliminated node's parents adopt---become parents of---all of the eliminated node's children. Thus, for instance in panel (b) of Figure \@ref(fig:Highlow), if we were to eliminate $M$, $M$'s parents ($X$ and $\theta^M$) need to adopt $M$'s child, $Y$. We see in panel (a) of the figure, the higher-level model, that $X$ is now pointing directly into $Y$. 
+
+As for $\theta^M$, it too must now point directly into $Y$---though we can use a bit of shorthand to make this happen. Recall that $\theta^M$ represents the part of $M$ that is randomly determined. Rather than drawing two separate disturbance ($\theta$) terms pointing into $Y$, however, we more simply represent the combined disturbance term as $\theta^Y_{\text{higher}}$, with the ''higher'' signaling the aggregation of roots. (This is, of course, simply reversing the disaggregation that we undertook earlier to move from the higher- to the lower-level model.)
+
+More intuitively, when we simplify away a mediator, we need to make sure that we preserve the causal relationships being mediated---both those among substantive variables and any random shocks at the mediating causal steps.^[Eliminating endogenous nodes may also operate via "encapsulated conditional probability distributions" [@koller2009probabilistic] wherein a system of nodes, $\{Z_i\}$  is represented by a single node, $Z$,  that takes the parents of  $\{Z_i\}$ not in $\{Z_i\}$ as parents to $Z$ and issues the children of $(Z_i)$ that are not  in $(Z_i)$ as children. However, this is not a fundamental alteration of the graph.]
+
+*Eliminating exogenous nodes*
+
+What about eliminating exogenous nodes---nodes with no parents? For the most part, exogenous nodes cannot be eliminated, but must either be replaced by or incorporated into $U$ (or $\theta$) terms. The reason is that we need preserve any dependencies or variation generated by the exogenous node.  Figure \@ref(fig:elimrules) walks through four different situations in which we might want to simplify away the exogenous node, $X$. (Here we use the more generic $U$ notation, though the same principles apply if these are type-receptacles($\theta$.)
+
+```{r elimrules, echo = FALSE, fig.width = 10, fig.height = 10,  fig.align="center", out.width='.5\\textwidth', fig.cap = "Here we represent the basic principles for eliminating exogenous nodes."}
+
+
+par(mfrow = c(4,2))
+par(mar=c(1,1,3,1))
+hj_dag(x = c(1,2,2),
+       y = c(2,3,1),
+       names = c(
+         expression(paste(X)),
+         expression(paste(W)),
+         expression(paste("Y"))
+         ),  
+       arcs = cbind( c(1, 1),
+                     c(3, 2)),
+       title = "(a1) Lower-level: X has two children",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,2,2),
+       y = c(2,3,1),
+       names = c(
+         expression(paste(U)),
+         expression(paste(W)),
+         expression(paste(Y))
+       ),
+       arcs = cbind( c(1, 1),
+                     c(3, 2)),
+       title = "(a2) Higher-level: Dependency between W and Y must be preserved",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+hj_dag(x = c(1,1,2),
+       y = c(3,1,2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(W)),
+         expression(paste("Y"))
+       ),
+       arcs = cbind( c(1, 2),
+                     c(3, 3)),
+       title = "(b1) Lower-level: X has a substantive spouse",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+hj_dag(x = c(1,1,2),
+       y = c(3,1,2),
+       names = c(
+         expression(paste(U[Y])),
+         expression(paste(W)),
+         expression(paste("Y"))
+       ),
+       arcs = cbind( c(1, 2),
+                     c(3, 3)),
+       title = "(b2) Higher-level: X must be replaced with U term",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,1,2),
+       y = c(3,1,2),
+       names = c(
+         expression(paste(X)),
+         expression(paste(U^Y[lower])),
+         expression(paste("Y"))
+       ),
+       arcs = cbind( c(1, 2),
+                     c(3, 3)),
+       title = "(c1) Lower-level: X has a random spouse",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(1,2),
+       y = c(1,1),
+       names = c(
+         expression(paste(U^Y[higher])),
+         expression(paste("Y"))
+       ),
+       arcs = cbind( c(1),
+                     c(2)),
+       title = "(c2) Higher-level: X absorbed into $U$ term",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+hj_dag(x = c(1,3,2),
+       y = c(1,1,1),
+       names = c(
+         expression(paste(X)),
+         expression(paste(W)),
+         expression(paste("Y"))
+       ),
+       arcs = cbind( c(1, 3),
+                     c(3, 2)),
+       title = "(d1) Lower-level: X has one child and no spouse",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+hj_dag(x = c(3,2),
+       y = c(1,1),
+       names = c(
+         expression(paste(W)),
+         expression(paste("Y"))
+       ),
+       arcs = cbind( c(2),
+                     c(1)),
+       title = "(d2) Higher-level: X can be safely removed",
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+
+
+```
+
+
+
+
+
+*  *Multiple children.* In (a1), we start with a lower-level model in which $X$ has two children, thus generating a dependency between $W$ and $Y$. If we eliminate $X$, we must preserve this dependency. We can do so, as pictured in (a2), by replacing $X$ with a $U$ term that also points into $W$ and $Y$.^[By DAG convention, we could, alternatively, convey the same information with a dashed, undirected line between $W$ and $Y$.] Though we are no longer specifying what it is that connects $W$ and $Y$, the correlation itself is retained.
+*  *Substantive spouse.* In (b1), $X$ has a spouse that is substantively specified, $W$. If we eliminate $X$, we have to preserve the fact that $Y$ is not fully determined by $W$; *something* else also generates variation in $Y$. We thus need to replace $X$ with a $U$ term, $U_Y$, to capture the variation in $Y$ that is not accounted for by $W$.
+* *$U$-term spouse.* In (c1), $X$ has a spouse that is *not* substantively specified, $U^{Y_\text{lower}}$. Eliminating $X$ requires, again, capturing the variance that it generates as a random input. As we already have a $U$ term pointing only into $Y$, we can substitute in $U^{Y_\text{higher}}$, which represents both $U^{Y_\text{lower}}$ and the variance generated by $X$.*IS THIS FOOTNOTE RIGHT?*^[This aggregation cannot occur if $U^{Y_\text{lower}}$ also has another child, $W$, that is not a child of $X$ since then we would be representing $Y$'s and $W$'s random components as identical, which they are not in the lower-level graph.]
+*  *One child, no spouse.* In (d1), $X$ has only one child and no spouse. Here we can safely eliminate $X$ with no loss of information. It is always understood that every exogenous node has some cause, and there is no loss of information in simply eliminating a node's causes if those causes are exogenous and do not affect  other endogenous nodes in the model. In (d2) we are simply not specifying $Y$'s cause, but we have not lost any dependencies or sources of variance that had been expressed in (d1).
+
+
+One interesting effect of eliminating a substantive exogenous node can be to render seemingly deterministic relations effectively probabilistic. In moving from (b1) to (b2), we have taken a component of $Y$ that was determined by $X$ and converting it into a random disturbance. Just as we can explain a more probabilistic claim with a less probabilistic theory, we can derive higher-level claims with greater probabilism from theories with greater determinism.
+
+
+```{r lowercomplexdem, echo = FALSE, fig.width = 10, fig.height = 6,  fig.align="center", out.width='.5\\textwidth', fig.cap = "A lower-level model  from which multiple higher level models can be derived."}
+
+
+par(mfrow = c(1,1))
+par(mar=c(1,1,3,1))
+hj_dag(x = c(1,1,2,2,3),
+       y = c(2,1,2,1,1.5),
+       names = c(
+         expression(paste("I: Inequality")),
+         expression(paste("E: Ethnic\nhomogeneity")),
+         expression(paste("M: Mobilization")),
+         expression(paste("R: Redistributive\npreferences")),
+         expression(paste("D: Democratization"))
+         ),  
+       arcs = cbind( c(1, 3, 2, 2, 3, 4),
+                     c(3, 4, 4, 3, 5, 5)),
+       add_functions = 0, 
+       contraction = .16, 
+       padding = .2
+)
+```
+
+
+
+```{r runningsubs, echo = FALSE, fig.width = 12, fig.height = 13.5, fig.cap = "Higher level models derived from the lower level model of Figure X. Nodes that are eliminated are marked in grey; circles denote exogenous nodes that are replaced in subgraphs by unidentified variables. (A circled node pointing into two other nodes could equivalently be indicated as an undirected edge connecting the two.) Note that $M$, $R$, and $D$ are deterministic functions of $I$ and $E$ in this example."}
+
+par(mfrow = c(5,5))
+par(mar=c(1,1,3.5,1))
+x = c(0,0, 1, 1, 2)
+y = c(2,0, 2, 0, 1)
+names = c("I", "E", "M", "R", "D")
+
+M <- matrix(0, 5, 5)
+M[1, c(3)] <-1
+M[2, c(3,4)] <-1
+M[3, c(4,5)] <-1
+M[4, 5] <-1
+
+matrix_remove <- function(M, remove = NULL){
+  M2 <- M
+if(!is.null(remove)) {
+  for(j in remove) {M2 <- (M2 + outer(M[, j], M[j,]))}  # connect parents to children
+  for(j in remove) {if(sum(M2[,j]>0)) {M2[j,] <- 0; M2[,j] <- 0}}  # disconnect non-roots (roots may have to be renamed)
+}
+M2[M2>1] <- 1
+M2
+}
+
+removes <- perm_bb(c(2,2,2,2,2))[-1,]
+removes <- removes[rowSums(removes)<=3,]
+removes <- removes==1
+removes <- removes[order(rowSums(removes) - (1:nrow(removes))/100),]
+for(j in 1:nrow(removes)){
+GO <- (1:5)[removes[j,]]
+    hj_dag(
+       x = x,
+       y = y,
+       names = names,
+       arcs = which(matrix_remove(M, GO)==1, arr.ind = TRUE),
+       add_points = FALSE,
+       solids = c(mysolids[[j]]),
+       )
+text(x[GO],y[GO],names[GO], col = "grey")
+title(j, adj=0)
+for(i in 1:ncol(M)) if((sum(M[,i])==0) & (i%in% GO)) points(x[i], y[i], cex = 3, col = "grey")
+}
+```
+
+
+We can apply these principles to a model of any complexity. We illustrate a wider range of simplifications by starting with Figure \@ref(fig:lowercomplexdem), which represents a somewhat amended version of our inequality and democratization model from Chapter \@ref(models), with more complex causal relations. Then, in Figure \@ref(fig:runningsubs), we show all permissible reductions of the more elaborate model. We can think of these reductions as the full set of simpler claims (involving at least two nodes) that can be derived from the lower-level theory. In each subgraph, 
+
+* we mark eliminated nodes in grey; 
+* those nodes that are circled must be replaced with $U$ terms; and
+* arrows represent the causal dependencies that must be preserved. 
+
+
+Note, for instance, that neither $E$ (because it has a spouse) nor $I$ (because it has multiple children) can be simply eliminated; each must be replaced with a $U$ term. Also, the higher-level graph with nodes missing can contain arrows that do not appear at all in the lower-level graph: eliminating $M$, for instance, forces an arrow running from $X$ to $R$ and another running from $X$ to $Y$, as $X$ must adopt $M$'s children. The simplest elimination is of $D$ itself since it does not encode any dependencies between other variables.
+<!-- ^[Put differently, and in language that we introduce below, colliding arrowheads do not represent a path in DAG analysis.]  -->
+
+We can also read Figure \@ref(fig:runningsubs) as telling us the set of claims for which the lower-level graph in Figure \ref{fig:running} can serve as a theory. As we can see, the range of claims that a moderately complex model can theorize is vast. For each simpler claim, moreover, there may be other possible lower-level graphs---theories besides ---consistent with it.
+
+
+
+#### Conditioning on nodes
+
+A further permissible "upward" move is conditioning on a node. When we condition on a node, we are restricting the higher-level model in scope to situations in which that node's value is held constant. Doing so allows us to eliminate the node as well as all arrows pointing into it or out of it. Consider three different situations in which we might condition on a node:
+
+
+* *Exogenous, with multiple children.* In simplifying (a1) in Figure \@ref(fig:elimrules), we need to be sure we retain any dependence that $X$ generates between $W$ and $Y$. However, recalling the rules of conditional independence on a graph (see Chapter \ref{models}), we know that $W$ and $Y$ are *independent* conditional on $X$. Put differently, if we restrict the analysis to contexts in which $X$ takes on a constant value, the lower-level model implies that $Y$ and $W$ will be uncorrelated across cases. As fixing $X$'s value breaks the dependence between $Y$ and $W$, we can drop $X$ (and the arrows pointing out of it) without having to represent that dependence. 
+*  *Exogenous, with spouse.* In simplifying (b1) or (c1) in Figure \@ref(fig:elimrules), we need to account for the variation generated by $X$. If we fix $X$'s value, however, then we eliminate this variation by assumption and do not need to continue to represent it (or the arrow pointing out of it) on the graph.
+*  *Endogenous.* When we condition on an endogenous node, we can eliminate the node as well the arrows pointing into and out of it. We, again, leverage relations of conditional independence here. If we start with graph (b) in Figure \@ref(fig:Highlow), and we condition on the mediator, $M$, we sever the link between $Y$ on $X$, rendering them conditionally independent of one another. We can thus remove $M$, the arrow from $X$ to $M$, and the arrow from $M$ to $Y$. In the new model, with $M$ fixed, $Y$ will be entirely determined by the random disturbance $\theta^{Y_\text{lower}}$.^[Note that such conditioning does not add any variance to the $\theta^Y$ term, so we retain the notation $\theta^{Y_\text{lower}}$.]
+
+
+In sum, we can work with models that are simpler than our causal beliefs: we may believe a complex lower-level model to be true, but we can derive from it a sparer set of claims. There may be intervening causal steps or features of context that we believe matter, but that are not of  interest for a particular line of inquiry. While these can be removed, we nonetheless have to make sure that their *implications* for the relations remaining in the model are not lost. Understanding the rules of reduction allow us to undertake an important task: checking which simpler claims are and are not consistent with our full belief set.
+
+<!-- Nodes with no parents in $\mathcal{U}\cup\mathcal{V}$ cannot be eliminated as this would entail a loss of information. The graph in Figure \ref{fig:K}(d) illustrates the importance of this. Here $K$ is a cause of both $X$ and $Y$, in other words it is a possible confounder. A higher-level graph that does not include $K$ still requires a $U_K$ node pointing into both $K$ and $Y$ to capture the fact that there is a confounder. -->
+
+
+<!-- ^[The conditioning approach can also handle theoretical propositions in the form of structural causal models that make no immediate empirical claims but still have "empirical content" in the sense of being able to inform *conditional* claims. The claim "if $X$ then $Y$" says nothing about $P(Y)$ by itself. However, it says a lot about $P(Y)$ if $P(X)$ is known.] -->
+
+
+<!-- One  effect of elimination is to render seemingly deterministic relations effectively probabilistic. For example, in the lower level graph $C$ is a deterministic function of $X$ and $S$. But in higher level graphs it can depend probabilistically on one of these: in submodel 21, $C$  depends probabilistically on  $X$ since $S$ is now a stochastic disturbance; in 34 $C$ depends probabilistically on $S$. This illustrates how unobserved or unidentified  features render a model "as-if" stochastic. Conversely, models that exclude this form of uncertainty implicitly claim model-completeness. -->
+
+
+
+<!-- Consider a second manner in which a higher level model  can be deduced from a lower level model, this time in conjunction with data (or more broadly, ancillary claims): -->
+
+<!-- 2. A higher level model may be formed by conditioning on values of nodes in a lower level model. Conversely, a higher-level functional model, $M$, can be theorized via a lower-level $M^\prime$ in which conditions shaping the operation of the causal effect in $M$, unspecified in $M$, are now specified. -->
+
+<!-- To illustrate this approach, consider again the graphs in Figure \ref{fig:K}. Above we described how the graph in  panel (a) can be produced by aggregating $U_Y^{\text{lower}}$ and $U_K$ from panel (c). An alternative possibility is to simplify by conditioning: we derive a higher-level graph from $M^\prime$ by fixing the value of $K$. For instance, if $Y=XK+U_Y^{\text{lower}}$ in $M'$, then at $K=1$, we have the submodel $M_k$ in which $Y=X+U_Y^{\text{lower}}$. Note that, in generating a submodel by conditioning on $K$, we retain the term $U_Y^{\text{lower}}$ as we have not added causal force into $Y$'s unspecified parent. -->
+
+
+
+
+<!-- Perhaps surprisingly, in this treatment, the theoretical support for a causal model is itself just another causal model: a set of beliefs about structural relations between variables. Thus, a theory is an object that is formally similar to an empirical claim.  -->
+
+<!-- Would like to clarify last sentence above. -->
+
+
+
+<!-- This next paragraph is hard to follow. The u's come out of nowhere. What's a mapping from R1 to R1? Generally seems like the points could be made more simply. -->
+
+<!-- I THINK THE UNIVERSALITY AND PRECISION MATERIAL IS INTERESTING BUT NOT SOMETHING WE NEED TO DO ON OUR ROAD TO USING CAUSAL MODELS FOR CAUSAL INFERENCE. AND IT'S NOT EASY. SO I SUGGEST WE CUT.
+
+We can, however, use the approach to assessment of two features sometimes considered important to assess empirical content of a theory: the level of *universality* of a theory and the degree of *precision* of a theory [@popper2005logic, @glockner2011empirical]. ***DEFINE THESE HERE.*** For instance, consider a theory over $X_1, X_2, A, B, Y$ that specified $X_1, X_2 \rightarrow Y \leftarrow A, B, g$ with functional equations: -->
+
+<!-- $$Y = \left\{ \begin{array}{ccc}  -->
+<!-- A + BX_1 & \text{ if } & X_2 = 1\\    -->
+<!--   g(X_1) &\text{ if } & X_2 = 0 \end{array} \right.$$  -->
+
+<!-- where the domain of $g$, $\mathcal{R}(g)$, is the set of all functions that map from $\mathbb{R}^1$ to $\mathbb{R}^1$, and the ranges of $A$ and $B$ are the real number line. Say the distributions over $A, B, X_1, X_2$, and  $g$ are not specified. Then the theory makes a precise claim conditional on $u_1, u_2, X_1, X_2$, and  $g$. But since the distribution over $\mathcal{R}(g)$ is not provided by the theory, the theory only claims knowledge of a functional form for $Y$ for those cases in which $X_2=1$. Thus in this case the *universality* of the theory for the claim "$Y$ is a linear function of $X$," is  $P(X_2=1)$. This is the domain over which the theory has something to say about this proposition. Note that in this case the universality is not  provided by the theory, but is rather an external proposition that depends on additional data. The *precision* of the theory depends both on the claim of interest and the distribution of root variables. For example, the precision of the theory for the causal effect of $X_1$ on $Y$ when $X_2=1$ depends on the distribution of $B$: the theory is more precise about this causal effect the less uncertainty there is about the value of $B$. Moreover, a theory that specified that $B$ has large variance would be making a precise claim about causal *heterogeneity*, even if it was imprecise about the causal effect. Again this feature cannot be read from the theory without access to ancillary information that the theory itself does not provide. -->
+
+<!-- AJ comments: -->
+
+<!-- - Not clear what the "this approach" is that this is illustrating a feature of. Expressing theory as structural equations?  -->
+
+<!-- - There seems to be a more specific point here than just that we can assess universality and precision. In fact, it's actually that we *can't* assess these things purely from structural models. We need probabilistic models or information on variable values, no? -->
+
+<!-- - Universality seems an odd term for a concept that is continuous. Generality? Coverage? -->
+
+<!-- - There was switching between precision and specificity. I've gone with precision, but could see either. -->
+
+
+
+<!-- Better to replace type with variables.  -->
+
+<!-- For example rather thatn $X \rightarrow Y \leftarrow Q$ where $Q$ takes on values of the four tyes.  -->
+<!-- ROUGH NOTES -->
+<!-- Say $Y = AX +B(1- X)$ in which case  uncertainty over functional forms, or  uncertainty about undefuned causal types  can be reconceptualized as uncertainty around positive and negative drivers -->
+
+
+<!-- Drawing on different theories for subcomponents; eg theory of human decision making.  -->
+<!-- More or less specified theories.  -->
+
+<!-- Encapsulated CPDs are one way to wrap subtheories. Two identical DAGS could have two distinct theoretical underpinnings in the sense of having different encapsulated CPDs.    -->
+
+<!-- When is one theory more general than another? When is one more specified than another? -->
+
+<!-- If you specify a more detailed theory, the theory has more testable implications, but it is less general.  -->
+
+<!-- Theory T'' is implied by theory T' if V'' is a subset of V' and the relations in T'' are implied by the relations in the reduced set T'' -->
+
+<!-- For example:  -->
+<!-- T'': A = 1 with prob .5, B = 1 with prob .5, if A = 1; 0 otherwise, C = 1 if B = 1 -->
+<!-- T'': A = 1 with prob .5, C = 1 with prob .5, if A = 1; 0 otherwise -->
+<!-- Different  subparts of theories may be implied by distinct theories provided implication relations satisfied -->
+<!-- eg T'' part 1 may be implied by T, and T' implied by T'''', but T'' and T'''' not mutually consistent -->
+
+<!-- Theory T'' explains more than T' if it identifies more causal relations -->
+<!-- Theory T'' is more fertile  than T' if it implies more theories (same?) -->
+<!-- Theory T'' has more observable implications that Theory T' if.... -->
+<!-- Theory T'' is more falsifiable than theory T'.... -->
+<!-- Theory T'' is more general (wide scope) than theory T' if its conditioning set is a  subset of theory T''s conditioning set -->
+<!-- Theory T'' is more parsimonious  than theory T' if it predicts the same or more causal relations  with fewer nodes -->
+<!-- Theory T'' is more complete (fully specified) than theory T' if it has lower prior variance (?) -->
+
+<!-- Key -- there is no distinction between aleatory and epistemic uncertainty. It is all epistemic.  -->
+<!-- eg the goalie might well randomize, but if we do not know which way she will go it is because we do not know  -->
+<!-- what randomizing device she is using -->
+<!-- Key: priors specified over all relations -->
+<!-- Possibly need that nodes have classes -- eg utility -- that are used for some lo level theories -->
+<!-- Question; ultimately is htere only one net and the universe is a realization of it? -->
+
+
+<!-- SAME THING HERE. AN INTERESTING POINT, BUT A SEPARATE ENDEAVOR.
+
+Functional (but not probabilistic)  causal models allow for the representation of logically derived relations between nodes without implying any unconditional empirical claims; that is, all claims may be of the  *if-then* variety, as is typical for example of propositions derived from game theoretic models. The process of connecting such models to the empirical claims can be thought of as the embedding of these incomplete models within larger structures.  -->
+
+<!-- Consider for example the claim that in normal form games,  players play Nash equilibrium.  This claim in itself is not a tautology; that is, it is not a result. It can be contrasted for example with the *analytic result* that when rational players play a game and players have common knowledge of the game structure and of player rationality they will only play ''rationalizable'' strategies. Even still, the Nash claim does provide a set of analytically derived functional equations that relate nodes that describe game forms to actions  taken, and from actions to utilities. Representation as a causal graph can make explicit what conditional independencies are assumed in the move from analytic results to empirical claims. For example, are actions independent of the game form conditional on beliefs about the game form; are utilities independent of expectations conditional on actions, and so on. -->
+
+<!-- We give an example of one such model below when we turn to extensive-form games for a lower-level theory that supports our running example.   -->
+
+
+#### Relation to technical literature
+
+Formally moving from lower level DAG to a higher level DAG requires *marginalization*: assessing the joint marginal distribution of observed nodes in the higher level graph over the distribution of unobserved nodes in the lower level graph. 
+<!-- In Verma and Pearl 1990 (Equivalence and Synthesis of Causal Models) these higher level models are called "embedded causal models." -->
+
+Unfortunately there is no guarantee that the  margin of a distribution that is consistent with a lower level DAG will be consistent with any higher level DAG (techically, "DAGS are not closed under marginalization"). 
+
+In response, various types of richer graphs have been developed, such as "acyclic directed mixed graphs" (ADMGs) Maximal Ancestral Graphs (Spirtes and Richardson, Ancestral graph Markov models, 2002), or mDAGs (Evans 2015 (Graphs for Margins)). See also (Wermuth 2011)
+
+ADMGs for example have directed and bidirected edges but no directed cycles and are closed under marginalization.
+
+We use two approaches in our applications to engage with this problem. First we generally allow for *unobserved confounding* in models.  Second we will allow for the estimation of lower level models with unobserved nodes.
+
+
+## Conclusion
+
+We close this chapter by considering how the understanding of theory that we work with in this book compares to other prominent understandings of theory. 
+
+**Theory as tautology.**  The claim that the number of Nash equilibria is generically odd in finite games is often understood to be a theoretical claim. Unless there are errors in the derivation of the result, the claim is true in the sense that the conclusions follow from the assumptions. There is no evidence that we could go looking for in the world to assess the claim. The same can be said of the theoretical claims of many formal models in social sciences; they are theoretical deductions of the if-then variety [@clarke2012model]. Theory in this sense is true by tautology. By contrast, theory as we define it in this book refers to claims with *empirical* content: a theory refers to causal relations in the world that might or might not hold, and is susceptible to empirical testing. The deductive _logical_ relations that hold in a causal model are those of conditional independence, as discussed in Chapter \@ref(models): for instance, if $X$ causes $Y$ only through $M$ in a theory, then $X$ and $Y$ are conditionally independent given some value of $M$.
+
+**Theory as a collection of maps.** According to @clarke2012model, building on a semantic view of theory (@giere2010explaining), a theory is a collection of models, together with a set of hypotheses linking them to the real world. As in our usage, Clarke and Primo see theories and models as very similar objects: for them, a theory is a system of models; for us, a theory is a supporting model. In both frameworks, there is no real difference in kind between models and theories.
+
+Our approach also shares with Clarke and Primo the idea that models are not full and faithful reflections of reality; they are maps designed for a particular purpose. In the case of causal models, the purpose is to capture relationships of independence and possible causal dependence. As we have shown, that is a purpose that allows for the stripping away of detail---though it also forbids certain simplifications (such as any simplification that removes a dependency between variables). Clarke and Primo see models as useful to the extent that they are similar to features of the real world in ways related to the model's purpose. Along these lines, a causal model will be useful to the extent that it posits relations of independence that are similar to those prevailing in the domain under investigation.
+
+**Theory as a testable claim** In the hypothetico-deductive framework, often traced back to @popper2014conjectures and highly influential in empirical political science, empirical social science is an activity of theory-*testing*.  Having developed a theory, we then derive from it a set of empirical predictions and then test those predictions against evidence. In @clarke2012model, we also seek to confirm theories by developing and testing hypotheses about the similarity of a model or theory to particular features of the world. In both cases, a theory is posited---possibly on the basis of logic or background knowledge---and then assessed. The value (truth or usefulness) of the model itself is the object of inquiry.
+
+In a causal-model framework, theories are always tentative, and we can subject any model or theory to empirical evaluation, a task to which we turn in Chapter \@ref(evaluation). However, in the book's setup, theories are first and foremost _expressions of what we already know and don't know_ about a given causal domain when inquiry begins. We encode this background knowledge in order to inform research-design choices and draw inferences from the data.  Models and theories are thus, in this sense, the world within which inquiry unfolds. Indeed, as we explore in Chapter \@ref(questions), the very questions we ask live within---can be represented as parts of---our theories. 
+
+<!-- **Theory as model.** Although @clarke2012model argue for a separation of the ideas of model and theory, it is common for social scientists to use the terms interchangeably to denote an abstract representation of some part of the world that is of interest. For instance, a model may stipulate that outcome $X$ can have a positive effect on $Y$ because $X$ can cause $M$ and $M$ can cause $Y$.  One can read from a model how things work in the context of the model: for instance, if $M$ does not obtain, then under this model, $X$ does not cause $Y$.   One can use a model to make claims about the world only by assuming a mapping from elements in the model to elements in the worlds.  In this sense a  model is best thought of as an object that may or may not be useful [@clarke2012model]; whether the model itself is true or false is, in this usage, not a coherent question.  -->
+
+<!-- **Theory as empirical claim.** In common usage, "a theory of" a phenomenon is a direct claim about the phenomenon, in the world. The claim that natural resources cause conflict is a theoretical claim of this form. The claim is certainly not true by definition, and empirical evidence can be used to assess it. In this claim, the *theory*, as usually understood, is certainly thin; the claim is no more than an empirical proposition, and it possesses no internal logic. Yet, more elaborate collections of empirical propositions are easily constructed. For instance: natural resources cause conflict because they can finance secessionist claims in resource rich areas.^[This latter claim does seem to possess something like a logic; though it does not take much to see that the logic is just a slightly more elaborate set of empirical claims. The outcomes do not follow  *logically* from the causes----there is no logical reason why secessionist claims would cause conflict, but the theory---as a collection of claims---has implications similar to those in the model in the paragraph above: if there are no secessionist claims, then under this theory, natural resources are not causing conflict.] Theory in this sense can certainly be right or wrong. -->
+
+
+
+<!-- In this book we take a somewhat idealist position and assume that we are permanently inhabiting a world of models.  -->
+
+<!-- The distinction between the last two accounts is sometimes confusing, and  @clarke2012model make a case for cleaning up the language on this front. In their account, drawing on @giere2010explaining, a theory might be best thought of as a set of models accompanied by hypotheses linking the model to the question of interest in the  world.  -->
+
+<!-- We see our approach to theory as models as following in the spirit of  @clarke2012model and  @giere2010explaining yet also as being consistent with the treatment of models in the literature on probabilistic causal models with which this book is centrally engaged. A nice feature is that it preserves a close associated between theory and explanation and it incorporates naturally the notion of deduction without requiring that models themselves are statements of the  *if-then* variety. -->
+
+**Theory as generalization** In another of the many uses of "theory," political scientists often think of theorization as generalization. For @Van-Evera:1997 and @przeworski1970logic, for instance, theories are by their nature general statements that we can use to explain specific events. In this view, "Diamond resources caused Sierra Leone's civil war" is a case-specific explanation; "Natural resource endowments cause civil war" is a theoretical formulation. 
+
+In our treatment of theory as a lower-level causal model, however, there is no generic sense in which a theory is more or less general than the higher-level claim that it explains. In this book's framework, we _can_ theorize by generalizing: when we elaborate a model by building in variation in a factor that was held constant in the higher-level claim, we are making the model more general in scope. If our natural resources claim implicitly applies only to weak states, we can theorize this claim by allowing state strength to vary and articulating how the natural-resource effect hinges on that claim. 
+
+However, when we theorize by disaggregating nodes---say, by adding intervening causal steps---we have in fact made a more _specific_ claim. Natural resources may cause civil war under a broad set of circumstances. Natural resources will cause civil war *through looting by rebel groups* under an almost certainly narrower set of circumstances. Here, the more elaborate argument---the theorization of *why* $X$ causes $Y$---is actually a stronger claim, with narrower scope, than the simpler one that it supports. 
+
+**The value of parsimony** @Van-Evera:1997 and @przeworski1970logic also express a common view in characterizing _parsimony_ as a quality of good theory. While they recognize that parsimony must often be traded off against other goods, such as accuracy and generality, _ceteris paribus_ a more parsimonious theory---one that uses fewer causal variables to explain variation in a given outcome---is commonly understood to be a better theory. 
+
+We do not take issue with the idea that simpler models and explanations are, all else equal, better. But the succeeding chapters also demonstrate a distinctive and important way in which all else will often not be equal when we seek to use theory to guide research design and support causal inference. To foreshadow the argument to come, the elaboration of more detailed, lower-level models can direct us to new opportunities for learning. As we unpack a higher-level claim, we will often be identifying additional features of a phenomenon the observation of which can shed light on causal questions of interest. Moreover, our background beliefs---the prior knowledge on which causal inference must usually rest---are often more informative at lower levels than at higher levels: it will, for instance, often be easier for us express beliefs about causal effects for smaller steps along a causal chain than about an overarching $X \rightarrow Y$ effect. 
+
+Making things more complicated, of course, still makes things more complicated. And we should avoid doing so when the payoff is small, as it will sometimes be. But in the pages to come, we will also see a distinct set of benefits that arise from drilling more deeply into our basis of prior knowledge when formulating inferential strategies.
+
+<!-- , with these claims,  perhaps derived or inspired from some model via a statement that the model represents the world faithfully for some purpose.  -->
+
+<!-- The key difference as we see it is between representations of a system, a model, and claims that the model itself represents another system---the world---in some ways. The difference betw  -->
+
+
+
+### Quantifying the gains of a theory
+
+What are the gains of a thoery that introduces a node $K$ relative to one that does not include $K$. What is the value added of the more elaborate theory?
+
+One approach to assessing the contribution of a theory is to calculate  the mean reduction in Bayes risk:
+
+$$\text{Gains from theory} = 1- \frac{E_{K|W}(Var(Q|K,W))}{Var(Q|W)}$$
+
+This is a kind of $R^2$ measure (see also @gelman2006bayesian). 
+
+Another approach is to ask: how much better are my guesses now compared to what I would have guessed before, given what I know now. 
+
+Expected wisdom.
+
+$$Wisdom  = \int(q_0 - q)^2 - (q_k - q)^2 p(q | k)dq$$
+This captures how much better off we are with the guess we have made given current data ($q_k$) compared to the guess we woudl have made without it ($q_0$), knowing what we know now ($p(q|k)$. An advantage of this conceptualization is that you can record gains in learning even if posterior variance is larger than prior variance.  Even still the implications for strategy are the same since wisdom is maximized by a strategy that reduces expected squared error. 
+
+
+Other possible measures of gains from theory might include the simple correlation between $K$ and $Q$, or entropy-based measures (see @zhang2003properties for many more possibilities). 
+
+For this problem the correlation is given by (see appendix):
+
+$$\rho_{KQ} = \frac{(\phi_b+\phi_d)(1-2p)(p(1-p))^{.5}}{
+(p\phi_b+(1-p)\phi_d)(1-(p\phi_b+(1-p)\phi_d)))^{.5}}$$
+
+One might also use a measure of "mutual information" from information theory:
+
+$$I(Q,K) = \sum_q \sum_k P(q,k)\log\left(\frac{P(q,k)}{P(q)P(k)}\right)$$
+
+<!-- here: -->
+
+
+<!-- \begin{equation} -->
+<!-- \begin{aligned} -->
+<!-- I(Q,K) ={} & p\phi_b\log\left(\frac{\phi_b}{p\phi_b+(1-p)\phi_d}\right)+ (1-p)\phi_d\log\left(\frac{\phi_d}{p\phi_b+(1-p)\phi_d}\right) \\ -->
+<!--       & +p(1-\phi_b)\log\left(\frac{1-\phi_b}{1-p\phi_b-(1-p)\phi_d}\right)+ -->
+<!-- (1-p)(1-\phi_d)\log\left(\frac{1-\phi_d}{1-p\phi_b-(1-p)\phi_d}\right) -->
+<!-- \end{aligned} -->
+<!-- \end{equation} -->
+
+To express this mutual information as a share of variation explained, we could divide $I(Q,K)$ by the entropy of $Q$, $H(Q)$ where $H(Q) = -\sum_qP(q)\log(P(q))$. The resulting ratio can  be interpreted as 1 minus the ratio of the entropy of $Q$ conditional (on $K$) to the unconditional entropy of $Q$.
+
+For this example, Figure \ref{fig:probative_value} shows gains as a function of $\phi_b$ given a fixed value of $\phi_d$. The figure also shows other possible measures of probative value, with, in this case, the reduction in entropy tracking the reduced posterior variance closely. 
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 5,  fig.align="center", out.width='.7\\textwidth', fig.cap = "\\label{fig:probative_value} The solid line shows gains in precision (reduced posterior variance) for different values of $\\phi_b$ given $\\phi_d=0.25$ and $p=.5$ for the example given in the text. Additional measures of probative value are also provided including $|\\phi_b - \\phi_d|$, the correlation of $K$ and $Q$, and the reduction in entropy in $Q$ due to mutual information in $Q$ and $K$."}
+
+
+
+gains = function(p, phi_b, phi_d){
+  1- (phi_b*phi_d)/(phi_b*p +phi_d*(1-p)) - (1-phi_b)*(1-phi_d)/((1-phi_b)*p+(1-phi_d)*(1-p))
+}
+
+corr_qk <- function(p, phi_b, phi_d){
+  ((phi_b-phi_d)*(p*(1-p))^{.5})/
+  (((p*phi_b+(1-p)*phi_d)*(1-(p*phi_b+(1-p)*phi_d)))^{.5})
+  }
+# Mutual Information
+mi_qk <- function(p, phi_b, phi_d, base = 2){
+ p*phi_b*        log({phi_b}   / {p*phi_b+(1-p)*phi_d}, base = base)+
+(1-p)*phi_d*     log({phi_d}   / {p*phi_b+(1-p)*phi_d}, base = base)+
+p*(1-phi_b)*     log({1-phi_b} / {1-p*phi_b-(1-p)*phi_d}, base = base)+
+(1-p)*(1-phi_d)* log({1-phi_d}/ {1-p*phi_b-(1-p)*phi_d}, base = base)
+  }
+
+norm_mi_qk <-  function(p, phi_b, phi_d, base = 2){
+    -mi_qk(p, phi_b, phi_d, base = base)/(p*log(p, base = base)+(1-p)*log(1-p, base = base))}
+
+phi_b = seq(0,1,.01)
+
+plot(phi_b, gains(.75, phi_b, .25), type = "l", xlab = expression(paste(phi[b])), ylab = "Probative Value")
+  points(phi_b, abs(corr_qk(.75, phi_b, .25)), type = "l", lty=2)
+  points(phi_b, (norm_mi_qk(.75, phi_b, .25)), type = "l", lty = 3)
+  points(phi_b, abs(phi_b - .25), type = "l", lty = 4)
+  title("Reduced posterior variance, correlation, mutual information")
+text(.8, c(.15, .25, .3, .62, .41), c("I(K,Q)/H(Q)","(Reduced posterior variance)", "Gains",  expression(paste(abs(phi[b]-phi[d]))), "Cor(K,Q)"))
+
+#plot(abs(corr_qk(.75, phi_b, .25)), gains(.75, phi_b, .25), type = "l", xlab = "Probative value")
+#lines(abs(phi_b - .25), gains(.75, phi_b, .25), type = "l", lty=2)
+#lines(norm_mi_qk(.75, phi_b, .25), gains(.75, phi_b, .25), type = "l", lty=2)
+
+
+```
+
+## Chapter Appendices
+
+### Summary Boxes
+
+***
+
+**BOX 1**
+
+**Two kinds of theories.**
+
+Theories are “lower-level” causal models that explain or provide an account of a “higher-level”, simpler model. There are two forms of theorization:
+
+1. The disaggregation of nodes. A single node in a higher-level model can be split into multiple nodes. For instance, for a higher-level model in which $X \rightarrow Y \leftarrow \theta^Y$:
+  * *Mediation*: A mediator, $M$, can be introduced between $X$ and $Y$, thus splitting $\theta^Y$ into $\theta^M$ and $\theta^{Y_\text{lower}}$. The mediation theory thus explains the $X \rightarrow Y$ relationship.
+  * *Moderation*: A component of $\theta^Y$ can be extracted and specified as a substantive variable. This variable is now a substantively conceptualized moderator of the $X \rightarrow Y$ relationship. The moderation theory thus provides a fuller explanation of why $X$ has different effects on $Y$ in different contexts.
+2. Generalization. A feature of context omitted and implicitly held constant in a higher-level model can be explicitly included in the model. The higher-level model is now explained as a special case of a more general set of causal relations.
+
+***
+
+
+***
+
+**BOX 2**
+
+**Rules for moving between levels**
+
+*Moving down levels*: 
+
+All (conditional) independencies represented in a higher-level model must be preserved in the lower-level model. 
+
+When we disaggregate or add nodes to a model, new conditional independencies can be generated. But any variables that are independent or conditionally independent (given a third variable) in the higher-level model must also be independent or conditionally independent in the lower-level model.
+
+*Moving up levels*: We can move up levels by eliminating an exogenous node, eliminating an endogenous node, or conditioning on a node. When we eliminate a node from a model, we must preserve any variation and dependencies that it generates: 
+
+1. When eliminating an endogenous node, that node’s parents adopt (become direct causes of) that node’s children. 
+2. When eliminating an exogenous node, we must usually replace it with a $U$ term. If the node has more than one child, it must be replaced with a $U$ term pointing into both children (or an undirected edge connecting them) to preserve the dependency between its children. If the node has a spouse, the eliminated node’s variation must also be preserved using a $U$ term. Where the spouse is (already) a $U$ term with no other children, $U$ terms can be combined.  
+3. Since conditioning on a node “blocks” the path through which it connects its children, we can simply eliminate the node and the arrows between it and its children.
+4. An exogenous node with no spouse and only one child can be simply eliminated.
+
+***
+
+
+
+### Illustration of a Mapping from a Game to a DAG
+
+Our running example supports a set of higher level models, but it can also  be *implied* by a lower level models. Here we illustrate with an example in which the lower level model is a game theoretic model, together with a solution.^[Such representations have been discussed as multi agent influence diagrams, for example in @koller2003multi or @white2009settable on "settable systems"--- an extension of the "influence diagrams" described by @dawid2002influence.] 
+
+In Figure \@ref(fig:tree) we show a game in which nature first decides on the type of the media and the politician -- is it a media that values reporting on corruption or not? Is the politician one who has a dominant strategy to engage in corruption or one who is sensitive to the risks of media exposure? In the example the payoffs to all players are fully specified, though for illustration we include parameter $b$ in the voter's payoffs which captures utility gains from sacking a politician that has had a negative story written about them *whether or not they actually engaged in corruption*. A somewhat less specific, though more easily defended, theory would not specify particular numbers as in the figure, but rather assume ranges on payoffs that have the same strategic implications.  
+
+The theory is then the  game plus a solution to the game. Here for a solution the theory specifies subgame perfect equilibrium.
+
+In the subgame perfect  equilibrium of the game; marked out on the game tree (for the case  $b=0$) the sensitive politicians do not engage in corruption when there is a free press -- otherwise they do; a free press writes up any acts of corruption, voters throw out the politician if indeed she is corrupt and this corruption is reported by the press.  
+
+As with any structural model, the theory says what will happen but also what *would* happen if things that should not happen indeed happened. 
+
+```{r tree, echo=FALSE, fig.width = 15, fig.height = 12, fig.cap = "\\label{fig:tree} A Game Tree. Solid lines represent choices on the (unique) equilibrium path of the subgames starting after nature's move for the case in which  $b=0$."}
+
+H <-  matrix(c(rep("O", 32), 
+rep("X=1, S=1", 8), rep("X=1, S=0", 8), rep("X=0, S=1", 8), rep("X=0, S=0",8 ),
+rep(rep(c("C","NC"), each = 4 ), 4),
+rep(rep(c("R","NR"), each = 2 ), 8),
+rep(c("Y","NY"), 16)), 
+ 32)[32:1,]
+
+in.history = function(action) rowSums(H==action)>0
+
+P <- cbind(rep(1, 32), 
+           rep(2, 32), 
+           rep(3, 32), 
+           rep(4, 32))[32:1,]
+U <- matrix(NA, 32, 4)
+U[,2] <- in.history("C") -   
+          2*in.history("Y") + 
+          2*(in.history("X=0, S=0")+ in.history("X=1, S=0"))*in.history("C") 
+
+
+# Media gains only when it does reliable story 
+U[,3] <- in.history("NR") +   
+          2*in.history("R")*in.history("C")*(in.history("X=1, S=0")+ in.history("X=1, S=1")) 
+
+
+# Voters prefer firing if reports on corrupt politician
+U[,4] <- in.history("NY") +   
+          2*in.history("Y")*in.history("C")*in.history("R") 
+
+        
+gt_tree(H,U,P, player.names = c("Nature", "Gov", "Media", "Voters"),         
+  mark.branches=((ncol(H)-1):2),
+  print.utilities = c(FALSE, TRUE, TRUE, TRUE),
+  force_solution = TRUE, warnings = FALSE)
+
+text(6.6, (1:32)[in.history("Y") & in.history("R")]- .02, expression(italic(+b)) , cex = 1.2) 
+
+```
+
+
+
+To draw this  equilibrium as a DAG we include nodes for every action taken, nodes for features that determine the game being played, and the utilities at the end of the game. 
+
+If equilibrium claims are justified by claims about the beliefs of actors then these could also appear as nodes. To be clear however these are not required to represent the game  or the equilibrium, though they can capture assumed logics underlying the equilibrium choice. For instance a theorist might claim that humans are wired so that whenever they are playing a "Stag Hunt" game they play "defect." The game and this solution can be represented on a DAG without reference to the  beliefs of actors about the action of other players. However, if the *justification* for the equilibrium involves optimization given the beliefs of other players, a lower level DAG could represent this by having a node for the  game description that points to beliefs about the actions of others, that then points to choices. In a game with dominant strategies, in contrast, there would be no arrows from these beliefs to actions.
+
+For our running example, nodes could usefully include the politician's expectations, since the government's actions depend on expectations of the actions of others. However, given the game there is no gain from  including the media's expectations of the voter's actions since in this case the media's actions do not depend on expectations of the voters actions then these expectations should be included.  
+
+In Figure \@ref(fig:gamedag) we provide two examples of DAGs that illustrate lower level models that support our running example. 
+
+The upper panel gives a DAG reflecting equilibrium play in the game described in Figure \@ref(fig:tree). Note that in this game there is an arrow between $C$ and $Y$ even though $Y$ does not depend on $C$ for some values of $b$---this is because conditional independence requires that two variables are independent for *all* values of the conditioning set. For simplicity also we mark $S$ and $X$, along with $b$ as features that affect which subgame is being played---taking the subgames starting after Nature's move. Note that the government's expectations of responses by others matters, but the expectations of other players do not matter given this game and solution. Note that the utilities appear twice in a sense. They appear in the subgame node, as they are part of the definition of the game--though here they are the utilities that players expect at each terminal node; when they appear at the end of the DAG they are the utilities that actually arise (in theory at least). 
+
+The lower level DAG  is very low and much more general, representing the theory that in three player games of complete information, players engage in backwards induction and choose the actions that they expect to maximize utility given their beliefs about the actions of others. The DAG assumes that players know what game is being played ("Game"), though this could also be included for more fundamental justification of behavioral predictions. Each action is taken as a function of the beliefs about the game, the expectations about the actions of others, and knowledge of play to date. The functional equations---not shown---are given by optimization and belief formation assuming optimization by others.  
+
+
+```{r gamedag, echo = FALSE, fig.width = 12, fig.height = 10, out.width='\\textwidth', fig.cap = "\\label{fig:gamedag} The upper panel shows a causal graph that describes  relations between nodes suggested by analysis of  the  game  in Figure \\ref{fig:tree} and which can imply the causal graph of  Figure \\ref{fig:running}. The game itself  (or beliefs about the game) appear as a node, which are in turn determined by exogneous factors.   The lower panel represents a still lower level and more general theory ``players use backwards induction in three step games of complete information.''", fig.align="center", warning = FALSE}
+
+par(mfrow = c(2,1))
+par(mar=c(1,1,3.5,1))
+
+
+x = c(0, 1, 2, 2,  3,  3, 4, 5)
+y = c(0, 0, 2, -2, 2, -2.5, -2, 0)
+
+names = c("S, X, b",                                        #1 
+          "Subgame",                                           #2 
+          "E: Gov's Beliefs\nabout responses by\n Media and Voters",    #3
+          "Corruption",                                       #4
+          "",            #5
+          "Report",                                       #6
+          "Remove\nGovernment",                                       #7
+          "Utilities"                          #8
+)
+
+hj_dag(x =  x,
+       y = y,
+       names = c(names, " ", " "),
+       arcs = cbind( c(1,rep(2,5)  ,3, c(4,6,7),  4, 4, 6),
+                     c(2,3:4, 6:8,      4,  rep(8, 3), 6, 7, 7)),
+       title = "Lower DAG: Backwards induction in a game with 3 players  with one  move  each",
+       contraction = .22,
+       padding = .5)
+
+
+
+x = c(0, 1, 2, 2,  3,  3, 4, 5)
+y = c(0, 0, 2, -2, 2, -2.5, -2, 0)
+
+names = c("Context",                                        #1 
+          "Game",                                           #2 
+          "1's Beliefs\nabout actions \n 2|1 and 3|2,1",    #3
+          "Action 1",                                       #4
+          "2's Beliefs\nabout actions \n 3|2,1",            #5
+          "Action 2",                                       #6
+          "Action 3",                                       #7
+          "Utilities"                          #8
+)
+
+hj_dag(x =  x,
+       y = y,
+       names = c(names, " ", " "),
+       arcs = cbind( c(1,rep(2,6)  ,3, 5, c(4,6,7),  4, 4, 6),
+                     c(2,3:8,      4, 6, rep(8, 3), 6, 7, 7)),
+       title = "Still lower: Backwards induction, 3 player game with one  move for each player",
+       contraction = .2,
+       padding = .5)
+
+
+
+
+```
+
+These lower level graphs can themselves provide clues for assessing relations in the higher level graphs. For instance, the lower level model might specify that the value of $b$ in the game affects the actions of the government only through their beliefs about the behavior of voters, $E$. These beliefs may themselves have a stochastic component, $U_E$. Thus  $b$ high  might be thought to reduce the effect of media on corruption. For instance if $b \in \mathbb{R}_+$, we have $C= 1-FG(1-\mathbb{1}(b>1))$. If $X$ is unobserved and one is interested in whether $S=0$ caused corruption, knowledge of $b$ is informative. It is a root node in the causal estimand. If $b>1$ then $S=0$ did not cause corruption. However if $b$ matters only because of its effect on $E$ then the query depends on $U_E$.  In this case, while knowing $b$ is informative about whether $S=0$ caused $C=1$, knowing $E$ from the lower level graph is more informative.
+
+Note that the  model we have examined here involves no terms for $U_C$, $U_R$ and $U_Y$---that is, shocks to outcomes given action. Yet clearly any of these could exist. One could imagine a version of this game with "trembling hands," such that errors are always made with some small probability, giving rise to a much richer set of predictions.  These can be  represented in the game tree as moves by nature between actions chosen and outcomes realized. Importantly in a strategic environment such noise could give rise to different types of conditional independence. For instance say that a Free Press only published its report on corruption with  probability $\pi^R$, then with $\pi^R$ high enough the sensitive government might decide it is worth engaging in corruption even if there is a free press; in this case the arrow from $X$ to $C$ would be removed. Interestingly in this case as the error rate rises, $R$ becomes less likely, meaning that the effect of a $S$ on $Y$ becomes gradually weaker (since governments that are not sensitive become  more likely to survive) and then drops to 0 as sensitive governments start acting just like nonsensitive governments. 
+
+

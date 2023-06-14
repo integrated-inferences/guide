@@ -1,0 +1,13 @@
+{
+    "path" : "C:/Dropbox/github/causalmodels",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        },
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        }
+    ]
+}

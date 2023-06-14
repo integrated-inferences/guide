@@ -1,0 +1,142 @@
+
+// Grounded model I --> M; I, M, P --> D, possible selection on I for I causes D types 
+// u_D restricted to one of 20 fundamental types; u_M to one of four types
+
+data {
+  int<lower=0>  PIM_D1[8];    // summary data
+  int<lower=0>  ID[4];       // summary data distribution on inequality for non democracy types
+
+  vector[4]  M_u_prior;    // initial hyperparameters for the Dirichlet distribution; provided as data. Note independent priors on Y and K.
+  vector[20] D_u_prior;    // initial hyperparameters for the Dirichlet distribution; provided as data
+  vector[3]  pi_alpha;     // initial hyperparameters for the beta distributions for three pis
+  vector[3]  pi_beta ;     // initial hyperparameters for the beta distributions for three pis
+  }
+
+parameters {
+  simplex[4]  lambda_M;     // Parameters of interest: share of M causal types in population
+  simplex[20] lambda_D;     // Parameters of interest: share of D causal types in population
+
+  real <lower=0, upper = 1>   pi_I_b;             
+  real <lower=0, upper = 1>   pi_I_o;
+  real <lower=0, upper = 1>   pi_P;
+  
+  }
+
+transformed parameters {
+// Parameters determine the multinomial event probabilities
+
+  simplex[16] w_PIMD;   // Probability of the data
+  simplex[4]  w_ID;     // Probability of ID data; transformation of w_PIMD
+  simplex[8]  w_PIM_D1; // Probability of IPM data given D = 1; transformation of w_PIMD
+
+// probability of observing combinations of PIMD
+
+
+w_PIMD[1] = (1-pi_P)*(0+(1-pi_I_b)*(lambda_M[2])*(lambda_D[3]+lambda_D[8]+lambda_D[12]+lambda_D[13]+lambda_D[14])+(1-pi_I_o)*(lambda_M[3])*(lambda_D[3]+lambda_D[8]+lambda_D[12]+lambda_D[13]+lambda_D[14])+(1-pi_I_o)*(lambda_M[2] + lambda_M[3])*(lambda_D[1]+lambda_D[2]+lambda_D[4]+lambda_D[5]+lambda_D[6]+lambda_D[7]+lambda_D[9]+lambda_D[10]+lambda_D[11]) );
+w_PIMD[2] = (1-pi_P)*(0  +(1-pi_I_o)*(lambda_M[2] + lambda_M[3])*(lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19]+lambda_D[20]) );
+w_PIMD[3] = (1-pi_P)*(0   +(1-pi_I_o)*(lambda_M[1] + lambda_M[4])*(lambda_D[1]+lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[6]));
+w_PIMD[4] = (1-pi_P)*(0   +(1-pi_I_o)*(lambda_M[1] + lambda_M[4])*(lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[12]+lambda_D[13]+lambda_D[14]+lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19]+lambda_D[20]));
+w_PIMD[5] = (1-pi_P)*(0   +(pi_I_o)*(lambda_M[1] + lambda_M[3])*(lambda_D[1]+lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[6]+lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[12]+lambda_D[13]+lambda_D[14]+lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19]));
+w_PIMD[6] = (1-pi_P)*(0   +(pi_I_o)*(lambda_M[1] + lambda_M[3])*(lambda_D[20]));
+w_PIMD[7] = (1-pi_P)*(0+(pi_I_b)*(lambda_M[2])*(lambda_D[3]+lambda_D[8])+(pi_I_o)*(lambda_M[4])*(lambda_D[3]+lambda_D[8])+(pi_I_o)*(lambda_M[2] + lambda_M[4])*(lambda_D[1]+lambda_D[2]+lambda_D[4]+lambda_D[5]+lambda_D[6]+lambda_D[7]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[15]+lambda_D[16]+lambda_D[17]) );
+w_PIMD[8] = (1-pi_P)*(0+(pi_I_b)*(lambda_M[2])*(lambda_D[12]+lambda_D[13]+lambda_D[14])+(pi_I_o)*(lambda_M[4])*(lambda_D[12]+lambda_D[13]+lambda_D[14])+(pi_I_o)*(lambda_M[2] + lambda_M[4])*(lambda_D[18]+lambda_D[19]+lambda_D[20]) );
+w_PIMD[9] = pi_P*(0+(1-pi_I_b)*(lambda_M[2])*(lambda_D[3]+lambda_D[8]+lambda_D[12])+(1-pi_I_o)*(lambda_M[3])*(lambda_D[3]+lambda_D[8]+lambda_D[12])+(1-pi_I_o)*(lambda_M[2] + lambda_M[3])*(lambda_D[1]+lambda_D[2]+lambda_D[7]) );
+w_PIMD[10] = pi_P*(0+(1-pi_I_b)*(lambda_M[2])*(lambda_D[13]+lambda_D[14])+(1-pi_I_o)*(lambda_M[3])*(lambda_D[13]+lambda_D[14])+(1-pi_I_o)*(lambda_M[2] + lambda_M[3])*(lambda_D[4]+lambda_D[5]+lambda_D[6]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19]+lambda_D[20]) );
+w_PIMD[11] = pi_P*(0   +(1-pi_I_o)*(lambda_M[1] + lambda_M[4])*(lambda_D[1]));
+w_PIMD[12] = pi_P*(0   +(1-pi_I_o)*(lambda_M[1] + lambda_M[4])*(lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[6]+lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[12]+lambda_D[13]+lambda_D[14]+lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19]+lambda_D[20]));
+w_PIMD[13] = pi_P*(0   +(pi_I_o)*(lambda_M[1] + lambda_M[3])*(lambda_D[1]+lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[12]+lambda_D[13]+lambda_D[15]+lambda_D[16]+lambda_D[18]));
+w_PIMD[14] = pi_P*(0   +(pi_I_o)*(lambda_M[1] + lambda_M[3])*(lambda_D[6]+lambda_D[11]+lambda_D[14]+lambda_D[17]+lambda_D[19]+lambda_D[20]));
+w_PIMD[15] = pi_P*(0   +(pi_I_o)*(lambda_M[2] + lambda_M[4])*(lambda_D[1]+lambda_D[2]+lambda_D[4]+lambda_D[7]+lambda_D[9]+lambda_D[15]) );
+w_PIMD[16] = pi_P*(0+(pi_I_b)*(lambda_M[2])*(lambda_D[3]+lambda_D[8]+lambda_D[12]+lambda_D[13]+lambda_D[14])+(pi_I_o)*(lambda_M[4])*(lambda_D[3]+lambda_D[8]+lambda_D[12]+lambda_D[13]+lambda_D[14])+(pi_I_o)*(lambda_M[2] + lambda_M[4])*(lambda_D[5]+lambda_D[6]+lambda_D[10]+lambda_D[11]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19]+lambda_D[20]) );	
+
+// lambda_D[1]  there for w_PIMD[15] ? as this is another way to have 1110
+
+
+	
+	w_ID[1] =  w_PIMD[1] +w_PIMD[3]+w_PIMD[9]+w_PIMD[11];     // 00
+	w_ID[2] =  w_PIMD[2] +w_PIMD[4]+w_PIMD[10]+w_PIMD[12];     // 01 I = 0, D = 1
+	w_ID[3] =  w_PIMD[5] +w_PIMD[7]+w_PIMD[13]+w_PIMD[15];  // 10 I = 1, D = 0 
+	w_ID[4] =  w_PIMD[6] +w_PIMD[8]+w_PIMD[14]+w_PIMD[16]; // 11
+
+	w_PIM_D1[1] = w_PIMD[2]  / (w_ID[2] + w_ID[4]);
+	w_PIM_D1[2] = w_PIMD[4]  / (w_ID[2] + w_ID[4]);
+	w_PIM_D1[3] = w_PIMD[6]  / (w_ID[2] + w_ID[4]);
+	w_PIM_D1[4] = w_PIMD[8]  / (w_ID[2] + w_ID[4]);
+	w_PIM_D1[5] = w_PIMD[10] / (w_ID[2] + w_ID[4]);
+	w_PIM_D1[6] = w_PIMD[12] / (w_ID[2] + w_ID[4]);
+	w_PIM_D1[7] = w_PIMD[14] / (w_ID[2] + w_ID[4]);
+	w_PIM_D1[8] = w_PIMD[16] / (w_ID[2] + w_ID[4]);
+
+ }
+
+model {
+  lambda_D ~ dirichlet(D_u_prior);               // Priors for causal types
+  lambda_M ~ dirichlet(M_u_prior);               // Priors for causal types
+
+  pi_P   ~ beta(pi_alpha[1], pi_beta[1]);
+  pi_I_b ~ beta(pi_alpha[2], pi_beta[2]);
+  pi_I_o ~ beta(pi_alpha[3], pi_beta[3]);
+
+  ID      ~  multinomial(w_ID)  ;       // Likelihood: probability of I, D combinations
+  PIM_D1  ~  multinomial(w_PIM_D1)  ;   // Likelihood: probability of IPM data given D = 1
+ 
+ }
+
+
+generated quantities{
+
+  simplex[4] lambda_high; //
+  real <lower=-1, upper = 1>    ID_ate; 
+  real <lower=-1, upper = 1>    IM_ate;
+  vector[16]  pr_ab_PIMD; // Probability of being an a or b given PIMD 
+
+    // Probability of being an a given value of M and value of P
+  vector[4]   p_a_P0_M;
+  vector[4]   p_a_P1_M;
+  
+	lambda_high[1] = (1-pi_P)*(lambda_M[1]*(lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[12]+lambda_D[13]+lambda_D[14]+lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19])+lambda_M[2]*(lambda_D[15]+lambda_D[16]+lambda_D[17])+lambda_M[3]*(lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19])+lambda_M[4]*(lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[15]+lambda_D[16]+lambda_D[17]))+ pi_P*(lambda_M[1]*(lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[12]+lambda_D[13]+lambda_D[15]+lambda_D[16]+lambda_D[18])+lambda_M[2]*(lambda_D[4]+lambda_D[9]+lambda_D[15])+lambda_M[3]*(lambda_D[4]+lambda_D[5]+lambda_D[9]+lambda_D[10]+lambda_D[13]+lambda_D[15]+lambda_D[16]+lambda_D[18])+lambda_M[4]*(lambda_D[2]+lambda_D[4]+lambda_D[7]+lambda_D[9]+lambda_D[15]));
+	lambda_high[2] = (1-pi_P)*(0+lambda_M[2]*(lambda_D[12]+lambda_D[13]+lambda_D[14])+0+0)+ pi_P*(0+lambda_M[2]*(lambda_D[3]+lambda_D[8]+lambda_D[12])+0+0);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+	lambda_high[3] = (1-pi_P)*(lambda_M[1]*(lambda_D[1]+lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[6])+lambda_M[2]*(lambda_D[1]+lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[6]+lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11])+lambda_M[3]*(lambda_D[1]+lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[6]+lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[12]+lambda_D[13]+lambda_D[14])+lambda_M[4]*(lambda_D[1]+lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[6]))+ pi_P*(lambda_M[1]*(lambda_D[1])+lambda_M[2]*(lambda_D[1]+lambda_D[2]+lambda_D[7])+lambda_M[3]*(lambda_D[1]+lambda_D[2]+lambda_D[3]+lambda_D[7]+lambda_D[8]+lambda_D[12])+lambda_M[4]*(lambda_D[1]));                                                                                                                                                    
+	lambda_high[4] = (1-pi_P)*(lambda_M[1]*(lambda_D[20])+lambda_M[2]*(lambda_D[18]+lambda_D[19]+lambda_D[20])+lambda_M[3]*(lambda_D[20])+lambda_M[4]*(lambda_D[12]+lambda_D[13]+lambda_D[14]+lambda_D[18]+lambda_D[19]+lambda_D[20]))+ pi_P*(lambda_M[1]*(lambda_D[6]+lambda_D[11]+lambda_D[14]+lambda_D[17]+lambda_D[19]+lambda_D[20])+lambda_M[2]*(lambda_D[5]+lambda_D[6]+lambda_D[10]+lambda_D[11]+lambda_D[13]+lambda_D[14]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19]+lambda_D[20])+lambda_M[3]*(lambda_D[6]+lambda_D[11]+lambda_D[14]+lambda_D[17]+lambda_D[19]+lambda_D[20])+lambda_M[4]*(lambda_D[3]+lambda_D[5]+lambda_D[6]+lambda_D[8]+lambda_D[10]+lambda_D[11]+lambda_D[12]+lambda_D[13]+lambda_D[14]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19]+lambda_D[20]));
+
+	ID_ate = lambda_high[2] - lambda_high[1];                
+	IM_ate = lambda_M[2] - lambda_M[1];                
+	
+
+    // Better here would be to do a matrix of the probability of each fundamental type given the data; then any aggregation easy. That would be 20*4*14
+	// Could be done using a loop, perhaps
+
+
+	p_a_P0_M[1] = lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[12]+lambda_D[13]+lambda_D[14]+lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19];
+	p_a_P0_M[2] = lambda_D[15]+lambda_D[16]+lambda_D[17];
+	p_a_P0_M[3] = lambda_D[15]+lambda_D[16]+lambda_D[17]+lambda_D[18]+lambda_D[19];
+	p_a_P0_M[4] = lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[11]+lambda_D[15]+lambda_D[16]+lambda_D[17] ;
+	p_a_P1_M[1] = lambda_D[2]+lambda_D[3]+lambda_D[4]+lambda_D[5]+lambda_D[7]+lambda_D[8]+lambda_D[9]+lambda_D[10]+lambda_D[12]+lambda_D[13]+lambda_D[15]+lambda_D[16]+lambda_D[18];
+	p_a_P1_M[2] = lambda_D[4]+lambda_D[9]+lambda_D[15];
+	p_a_P1_M[3] = lambda_D[4]+lambda_D[5]+lambda_D[9]+lambda_D[10]+lambda_D[13]+lambda_D[15]+lambda_D[16]+lambda_D[18];
+	p_a_P1_M[4] = lambda_D[2]+lambda_D[4]+lambda_D[7]+lambda_D[9]+lambda_D[15];
+
+	
+	pr_ab_PIMD[1]	=  (1-pi_P)*(1-pi_I_b)*                             lambda_high[2]/w_PIMD[1];           // pr_b_0000
+	pr_ab_PIMD[2]	=  (1-pi_P)*(1-pi_I_o)* (lambda_M[2]*p_a_P0_M[2] + lambda_M[3]*p_a_P0_M[3])/w_PIMD[2];  // pr_a_0001  
+	pr_ab_PIMD[3]	=  0;                                                                                   // pr_b_0010 
+	pr_ab_PIMD[4]	=  (1-pi_P)*(1-pi_I_o)* (lambda_M[1]*p_a_P0_M[1] + lambda_M[4]*p_a_P0_M[4])/w_PIMD[4];  // pr_a_0011
+
+	pr_ab_PIMD[5]	=  (1-pi_P)*pi_I_o*     (lambda_M[1]*p_a_P0_M[1] + lambda_M[3]*p_a_P0_M[3])/w_PIMD[5];  // pr_a_0100
+	pr_ab_PIMD[6]	=  0;                                                                                   // pr_b_0101
+	pr_ab_PIMD[7]	=  (1-pi_P)*pi_I_o*     (lambda_M[2]*p_a_P0_M[2] + lambda_M[4]*p_a_P0_M[4])/w_PIMD[7];  // pr_a_0110
+	pr_ab_PIMD[8]	=  (1-pi_P)*pi_I_b*                                 lambda_high[2]/w_PIMD[8];           // pr_b_0111
+
+	pr_ab_PIMD[9]	=  pi_P*(1-pi_I_b)*                                 lambda_high[2]/w_PIMD[9];           // pr_b_1000
+	pr_ab_PIMD[10]	=  pi_P*(1-pi_I_o)*     (lambda_M[2]*p_a_P1_M[2] + lambda_M[3]*p_a_P1_M[3])/w_PIMD[10]; // pr_a_1001 
+	pr_ab_PIMD[11]	=  0;                                                                                   // pr_b_1010
+	pr_ab_PIMD[12]	=  pi_P*(1-pi_I_o)*     (lambda_M[1]*p_a_P1_M[1] + lambda_M[4]*p_a_P1_M[4])/w_PIMD[12]; // pr_a_1011
+
+	pr_ab_PIMD[13]	=  pi_P*(  pi_I_o)*     (lambda_M[1]*p_a_P1_M[1] + lambda_M[3]*p_a_P1_M[3])/w_PIMD[13]; // pr_a_1100
+	pr_ab_PIMD[14]	=  0;                                                                                   // pr_b_1101
+	pr_ab_PIMD[15]	=  pi_P*( pi_I_o)*      (lambda_M[2]*p_a_P1_M[2] + lambda_M[4]*p_a_P1_M[4])/w_PIMD[15]; // pr_a_1110
+	pr_ab_PIMD[16]	=  pi_P*( pi_I_b)*                                  lambda_high[2]/w_PIMD[16];          // pr_b_1111 
+		
+	}
+
+	

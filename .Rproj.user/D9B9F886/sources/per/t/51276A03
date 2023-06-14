@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1561241840612.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1060575995",
+    "id" : "51276A03",
+    "lastKnownWriteTime" : 1561241906,
+    "last_content_update" : 1561241906296,
+    "path" : "~/Dropbox/ProcessTracing/7 Teaching/w3 Draw your own DAG.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "38,34",
+        "scrollLine" : "22"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

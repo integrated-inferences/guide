@@ -1,0 +1,12 @@
+{
+    "data" : [
+        "\nR version 3.6.1 (2019-07-05) -- \"Action of the Toes\"\nCopyright (C) 2019 The R Foundation for Statistical Computing\nPlatform: x86_64-w64-mingw32/x64 (64-bit)\n\nR is free software and comes with ABSOLUTELY NO WARRANTY.\nYou are welcome to redistribute it under certain conditions.\nType 'license()' or 'licence()' for distribution details.\n\nR is a collaborative project with many contributors.\nType 'contributors()' for more information and\n'citation()' on how to cite R or R packages in publications.\n\nType 'demo()' for some demos, 'help()' for on-line help, or\n'help.start()' for an HTML browser interface to help.\nType 'q()' to quit R.\n\n",
+        "Registered S3 methods overwritten by 'ggplot2':\n  method         from \n  [.quosures     rlang\n  c.quosures     rlang\n  print.quosures rlang\n",
+        "[Workspace loaded from C:/Dropbox/github/integrated_inferences/.RData]\n\n\nRestarting R session...\n\n"
+    ],
+    "type" : [
+        2,
+        3,
+        2
+    ]
+}

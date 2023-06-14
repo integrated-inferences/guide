@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1562733900664.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "559B583C",
+    "lastKnownWriteTime" : 1567950969,
+    "last_content_update" : 1567950969052,
+    "path" : "C:/Dropbox/github/integrated_inferences/01-intro.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "139,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

@@ -1,0 +1,21 @@
+---
+title: "Untitled"
+author: "Macartan"
+date: "10/8/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Say in truth:
+
+```{r}
+
+model <- make_model("X -> K -> Y") %>%
+  set_restrictions(c("K[X=1] < K[X=0]","Y[K=1] < Y[K=0]")) %>% 
+  set_confound(list(X = "Y[K=1] > Y[K=0]") %>%
+  set_parameters(c(.2, .8, .8, .8, 1, 1, 1, 1, 1, 1))
+  
+```

@@ -1,0 +1,15 @@
+"0","source(""_packages_used.R"")
+
+actual_cause <- query_model(
+    model, 
+    using = ""priors"",
+    queries = c(
+        Counterfactual = ""Smash[Suzy = 1] > Smash[Suzy = 0]"",
+        Actual = ""Smash[Suzy = 1, Billy = Billy[Suzy = 1] ] > 
+              Smash[Suzy = 0, Billy = Billy[Suzy = 1]]""),
+    subsets = c(""Suzy==1 & Smash==1"", ""Suzy==1 & Smash==1 & Billy==0"", ""Suzy==1 & Smash==1 & Billy==1""),
+    expand_grid = TRUE
+)
+"
+"2","Error in eval(parse(text = w_query), eval_var) : object 'Suzy' not found
+"

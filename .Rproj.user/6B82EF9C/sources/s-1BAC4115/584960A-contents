@@ -1,0 +1,498 @@
+# Bayesian Answers {#bayeschapter}
+
+***
+
+We run through the logic of Bayesian updating and show how it is used for answering queries of interest. We illustrate with applications to correlational and process tracing inferences.
+
+***
+
+
+
+```{r, include = FALSE}
+source("_packages_used.R")
+```
+
+
+```{r, include = FALSE}
+
+pv = function(k0,k1) k1 - k0
+
+gt.slope.text = function(text, f, xl=0, xh=1, vshift=.05, col="black", fixer=1){
+	TX = c(" ", strsplit(text, "")[[1]]," ")
+	k = length(TX)
+	z = xl+ ((0:(k-1))/k)*(xh-xl)
+	angles = 	c(0,(atan2(f(z)[3:k]  - f(z)[1:(k-2)],fixer*2*(xh-xl)/(k))*180/pi),0)
+	for(i in 1:k){text(z[i], f(z[i])+vshift, TX[i], col = col, srt=angles[i])}
+	}
+		
+k0 = .1
+k1 = .9
+
+# posterior = Prob(data|A)Prior(A)/Prob(Data)
+posterior = function(prior, observed, k0, k1) observed*k1*prior/(k1*prior+k0*(1-prior)) +  (1-observed)*(1-k1)*prior/(1-(k1*prior+k0*(1-prior)))
+plotit = function(k0, k1, main="", xl=.25, xh=.75){
+	prior = seq(0,1,.02)
+	plot(prior, posterior(prior, 1, k0, k1), type="l",      
+       main = bquote( atop(.(main), 
+                           phi[0]~'='~ .(k0)~','~ phi[1]~'='~ .(k1))), 
+       
+             ylab="Posterior")
+	lines(prior, posterior(prior, 0, k0, k1), type="l")
+	abline(a=0, b=1)
+	gt.slope.text("posterior if clue present", f= function(x) posterior(x, 1, k0, k1), xl = xl, xh=xh) 
+	gt.slope.text("posterior if clue absent", f= function(x) posterior(x, 0, k0, k1), xl = xl, xh=xh) 
+	gt.slope.text("prior", f= function(x) x, xl = xl, xh=xh) 
+	}
+
+```		
+
+
+Bayesian methods are just sets of procedures to figure out how to update beliefs in light of new information. 
+
+We begin with a prior belief about the probability that a hypothesis is true. New data then allow us to form a posterior belief about the probability of the hypothesis. Bayesian inference takes into account the consistency of the evidence with a hypothesis, the uniqueness of the evidence to that hypothesis, and background knowledge about the problem. 
+
+In the next section we review the basic idea of Bayesian updating. The following section applies it to the problem of updating on causal estimands given a causal model and data.  
+
+## Bayes Basics
+
+For simple problems, Bayesian inference accords well with our intuitions. Once problems get slightly more complex however, our intuitions often fail us. 
+
+
+### Simple instances
+
+Say I draw a card from a deck. The chances it is a  Jack of Spades is just 1 in 52. If I tell you that the card is indeed a spade and asked you now what are the chances it is a Jack of Spades, you should guess 1 in 13. If I told you it was a heart you should guess there is no chance it is a  Jack of Spades. If I said it was a face card and a spade you should say  1 in 3. 
+
+All those answers are applications of Bayes' rule.  In each case the answer is derived by assessing what is possible, given the new information, and then assessing how likely the outcome of interest among the states that are  possible. In all the cases you calculate:
+
+$$\text{Probability Jack of Spades | Information} = \frac{\text{Is Jack of Spades Consistent with Information?}}{\text{How many cards are consistent with Information?}} $$
+
+The same logic goes through when things are not quite so black and white.
+
+Now consider two slightly trickier examples. 
+
+**Interpreting Your Test Results**. Say that you take a test to see whether you suffer from a disease that affects 1 in 100 people. The test is good in the sense that if you have the disease it will say you have it with a 99% probability. If you do not have it, then with a 99% probability, it will say that you do not have it. The test result says that you have the disease. What are the chances you have it? You might think the answer is 99%, but that would be to mix up the probability of the result given the disease with the probability of the disease given the result. In fact the right answer is 50%, which you can think of as the share of people that have the disease among all those that test positive. For example if there were 10,000 people, then 100 would have the disease and 99 of these would test positive. But 9,900 would not have the disease and 99 of these would test positive. So the people with the disease that test positive are half of the total number testing positive.
+
+As an equation this might be written:
+
+$$\text{Probability You have the Disease | Test} = \frac{\text{How many people have the disease and test positive?}}{\text{How many people test positive?}} $$
+
+**Two-Child Problem** Consider last an old puzzle found described @gardner1961second.  *Mr Smith has two children, $A$ and $B$. At least one of them is a boy. What are the chances they are both boys?* 
+To be explicit about the puzzle, we will assume that the information that one child is a boy is given as a truthful  answer to the question "is at least one of the children a boy?" Assuming that there is a 50% probability that a given child is a boy, people often assume the answer is 50%. But surprisingly the answer is 1 in 3. The information provided rules out the possibility that both children are girls and so the right answer is found by readjusting the probability that two children are boys based on this information. As an equation:
+
+
+$$\text{Probability both are boys | Not both girls} = \frac{\text{Probability  both boys}}{\text{Probability they are not both girls}} = \frac{\text{1 in 4}}{\text{3 in 4}}$$
+
+
+### Bayes' Rule for Discrete Hypotheses
+
+Formally, all of these equations are applications of Bayes' rule which is a simple and powerful formula for deriving updated beliefs from new data. 
+
+The formula is given as:
+\begin{eqnarray}
+\Pr(H|\mathcal{D})&=&\frac{\Pr(\mathcal{D}|H)\Pr(H)}{\Pr(\mathcal{D})}\\
+                  &=&\frac{\Pr(\mathcal{D}|H)\Pr(H)}{\sum_{H'}\Pr(\mathcal{D}|H')\Pr(H'))}
+\end{eqnarray}
+
+
+where $H$ represents a hypothesis and $\mathcal{D}$ represents a particular realization of new data (e.g., a particular piece of evidence that we might observe). 
+
+Looking at the formula we see that the  posterior belief derives from three considerations. First, the likelihood: how likely are we to have observed these data if the hypothesis were true, $\Pr(\mathcal{D}|H$)? Second, how likely were we to have observed these data regardless of whether the hypothesis is true or false, $\Pr(\mathcal{D})$? These first two questions, then, capture how consistent the data are with our hypothesis and how specific the data are to our hypothesis. As shown in the equation above the second question can usefully be reposed as one about all the different ways (alternative Hypotheses, $H'$) that could give rise to the data. 
+
+Note, that contrary to some claims, the denominator does not require a listing of all possible hypotheses, just an exhaustive collection of hypotheses. For example we might have the notion of the probability that the accused's fingerprints would be on the door if she were or were guilty without having to decompose the "not guilty" into a set of hypotheses regarding who else might be guilty.
+
+Our posterior belief is further conditioned by the strength of our prior level of confidence in the hypothesis, $\Pr(H)$. The greater the prior likelihood that our hypothesis is true, the greater the chance that new data consistent with the hypothesis has *in fact* been generated by a state of the world implied by the hypothesis.
+
+### The Dirichlet family and Bayes' Rule for Continuous Parameters
+
+This basic formula extends in a simple way to collections of continuous variables. For example, say we are interested in the value of some parameter vector $\theta$ (as a vector, $\theta$ can contain many quantities we are uncertain about), we can calculate this, given a prior probability distribution over possible values of $\theta$, $p$, and given data $D$ as:
+
+$$p(\theta|\mathcal{D})=\frac{p(\mathcal{D}|\theta)p(\theta)}{\int_{\theta'}p(\mathcal{D|\theta'})p(\theta')d\theta}$$
+
+
+Bayes rule requires the ability to express a prior distribution but it does not require that the prior have any particular properties other than being probability distributions. 
+
+In practice however when we are dealing with continuous parameters, it  can be useful to make use of "off the shelf" distributions. 
+
+In practice we will often be interested in forming beliefs about the share of units that are of a particular type. For this type of question we will make quite heavy use of "Dirichlet" distributions -- a family of distributions that capture beliefs about shares. 
+
+Consider for example the share of people in a population that voted---this is a quantity between 0 and 1. Two people might may both believe that the turnout was around 50\% but may differ in how certain they are about this claim. One might claim to have no information and to believe that any turnout rate between 0 and 100% is equally likely, giving an expected turnout of 50%; another might be completely confident that the number if 50% and entertain no other possibilities.
+
+
+We can capture such beliefs quite well by using the Beta distribution---a special case of the Dirichlet. The Beta is a distribution over the $[0,1]$ that is governed by two parameters , $\alpha$ and $\beta$. In the case in which both $\alpha$ and $\beta$ are 1, the distribution is uniform -- all values are seen as equally likely. As $\alpha$ rises large outcomes are seen as more likely and as $\beta$ rises, lower outcomes are seen as more likely. If both rise proportionately the expected outcome does not change but the distribution becomes tighter. 
+
+An attractive feature of the Beta distribution is that if one has a prior Beta($\alpha$, $\beta$) over the probability of some event (e.g.  that a coin comes up heads), and then one observes a positive case, the Bayesian posterior distribution is also a Beta with with parameters $\alpha+1, \beta$. Thus in a sense if people start with uniform priors and build up knowledge on seeing outcomes, their posterior beliefs should be Beta distributions.
+
+Figure \@ref(fig:Betas) shows a set of such distributions, starting with one that has greater variance than uniform (this corresponds to the non informative "Jeffrey's prior"), then uniform, then for a case in which multiple negative and positive outcomes are seen, in equal number, and finally a set of priors with mean of 3/4. 
+
+```{r Betas, echo = FALSE, fig.cap="Beta distributions"}
+par(mfrow = c(2,2))
+
+x <- seq(0,1,.01)
+plot(x, dbeta(x, .5, .5), type = "l", main = expression(paste("Beta distribution: ", alpha, ", ", beta, " = 0.5")))
+plot(x, dbeta(x, 1, 1), type = "l", main = expression(paste("Beta distribution: ", alpha, ", ", beta, " = 1")))
+plot(x, dbeta(x, 20, 20), type = "l", main = expression(paste("Beta distribution: ", alpha, " =20, ", beta, " = 20")))
+plot(x, dbeta(x, 30, 10), type = "l", main = expression(paste("Beta distribution: ", alpha, "=30, ", beta, " = 10")))
+
+```
+
+Dirichlet distributions generalize the Beta to the situation in which there are beliefs not just over a proportion, or a probability, but over collections of probabilities. For example if four outcomes are possible and each is likely to occur with probability $\theta_k$, $k=1,2,3,4$ then beliefs about these probabilities are distributions over the a three dimensional unit simplex---that is, all 4 element vectors of probabilities that add up to 1. The distribution has as many parameters as there are outcomes and these are traditionally recorded in a vector, $\alpha$. Similar to the Beta distribution, an uninformative prior (Jeffrey's prior) has $\alpha$ parameters of  $(.5,.5,.5, \dots)$ and a uniform ("flat") distribution has $\alpha = (1,1,1,,\dots)$.
+
+As with the Beta distribution, the Dirichlet updates in a simple way. If you have a Dirichlet prior with parameter $\alpha = (\alpha_1, \alpha_2, \dots)$ and you observe outcome $1$, for example, then then posterior distribution is also Dirichlet with parameter vector $\alpha' = (\alpha_1+1, \alpha_2,\dots)$. 
+
+### Moments
+
+In what follows we often refer to the "posterior mean" or the "posterior variance." These are simply summary statistics of the posterior distribution and can be calculated easily once the posterior is known. For example the posterior mean of a parameter $\theta_1$---just one in a collection of parameters stored in $\theta$---is simply $\overline{\theta}_1 | \mathcal{D} = \int \theta_1 p(\theta | \mathcal{D}) d\theta$. Note importantly that this is calculated using the posterior over the entire vector $\theta$, there is no notion of updating parameter $\theta_1$ on its own. Similarly the posterior variance is $\int (\theta_1 - (\overline{\theta}_1 | \mathcal{D})^2  p(\theta | \mathcal{D}) d\theta$. 
+
+### Bayes estimation in practice
+
+Although the principle of Bayesian inference is quite simple, in practice calculating posteriors for continuous parameters is computationally complex. 
+
+In principle with continuous parameters there is an infinity of possible parameter values. Analytic solutions are not, in general, easy to come by and so in practice researchers use some form of sampling.
+
+Imagine for instance you were interested in forming a posterior on the share intending to vote democrat, given polling data. (This is not truly continuous, but with large elections it might as well be).   
+
+One approach is to coarsen the parameter space---we calculate the probability of observing the polling data given possible values $\theta = 0, \theta = .1, \theta = .2, \dots, \theta = 1$, and, apply Bayes rule to form a posterior for each of these  these possibilities.  The downside of the this approach is that it for a decent level of precision it becomes computationally expensive with large parameter spaces and parameter spaces get large quickly. For instance if you are interested in vote shares you might find .4, .5, and .6 too coarse and want posteriors for 0.51 or even 0.505; this would require calculations for 200 parameter values. If you had two parameters that you wanted to slice up each into 200 possible values, you would then have 40,000 parameter pairs to worry about. What's more, *most* of those calculations would not be very informative if the real uncertainty all lies in some small (though possibly unknown) range -- such as between 40% and 60%.  
+
+An alternative approach is to use variants of Markov Chain Monte Carlo sampling. Under these approaches parameter vectors are sampled and their likelihood is evaluated. If they have high likelihood then new parameter vectors near them are draw with a high probability. Based on the likelihood associated with these new draws, new draws are made. The result is a chain of draws that build up to approximate the posterior distribution. The output from these procedures is not a set of probabilities for each possible parameter vector but rather a a set of draws of parameter vectors from the  posterior distribution. 
+
+Many algorithms have been developed to achieve these tasks efficiently; in all of our applications we rely on the `stan` procedures which involve....
+
+
+## Bayes applied
+
+### Bayesian Inference on Queries
+
+In Chapter 2 we described estimands of interest as queries over the values of root nodes in directed acyclic graphs. 
+
+Once queries are defined in terms of the values of roots then formation of beliefs, given data $W$,  about estimands follows immediately from application of Bayes rule. 
+
+Let $Q(u)$ define the value of the query in context $u$. The updated beliefs about the query are given by the distribution:
+
+$$P(q | W) = \int_{u:Q(u) = q} P(u|W)du =  \int_{u:Q(u) = q} \frac{P(W|u)P(u)}{\int_{u'}P(W|u')P(u')du'}du$$
+
+This expression gathers together all the contexts that produce a given value of $Q$ and assesses how likely these are, collectively, given the data.^[Learning about roots from observed data is sometimes termed *abduction*; see @pearl2009causality, p 206.] For an abstract representation of the relations between  assumptions, queries, data, and conclusions, see Figure 1 in @pearl2012causal.  
+
+
+Return now to Mr Smith's puzzle. The two "roots" are the sexes of the two children, child $A$ and child $B$. The query here is $Q$: "Are both boys?" which can be written in terms of the roots. The statement "$Q=1$" is equivalent to the statement ($A$ is a boy \& $B$ is a boy). Thus it takes the value $q=1$ in just one context. Statement $q=0$ is  the statement ("$A$ is a boy \& $B$ is a girl" or "$A$ is a girl \& $B$ is a boy" or "$A$ is a girl \& $B$ is a girl"). Thus $q=0$ in three contexts.  If we assume that each of the two children is equally likely to be a boy or a girl with independent probabilities, then  each of the four contexts is equally likely. 
+ The  result can then be figured out as $P(Q=1) = \frac{1\times \frac{1}{4}}{1\times \frac{1}{4} + 1\times \frac{1}{4}+1\times \frac{1}{4}+0\times \frac{1}{4}} = \frac{1}{3}$. This answer requires summing  over only one context. $P(Q=0)$ is of course the complement of this, but using the Bayes formula one can see that it can be found by summing over the posterior probability of three contexts in which the statement $Q=0$ is true. 
+ 
+We will often want to think about our causal queries being collections of states of the world --- i.e., of unit causal types. Returning to our discussion of queries in Chapter \@ref(questions), suppose we start with the model $X \rightarrow M \rightarrow Y$, and our query is whether $X$ has a positive effect on $Y$. This is a query that is satisfied by four sets of unit types: those in which $X$ has a positive effect on $M$ and $M$ has a positive effect on $Y$, with $X$ being either 0 or 1; and those in which $X$ has a negative effect on $M$ and $M$ has a negative effect on $Y$, with $X$ being either 0 or 1. Our inferences on the query will thus involve gathering these different unit types, and their associated posterior probabilities, together.
+
+One interesting feature of Bayesian updating is that we update more strongly in favor of the hypothesis for which the evidence is least damaging to the most-likely ways in which the hypothesis could be true. Suppose our prior belief was that it was much more unlikely that $M$ had a negative effect on $Y$, than that $M$ had a positive effect on $Y$. This makes one of the ways in which $X$ could have a positive effect on $Y$ (the chain of negative effects) much less likely than the other way in which $X$ could have a positive effect on $Y$ (the chain of positive effects). This means that evidence, say, against a chain of negative effects and evidence against a chain of positive effects will not be equally consequential for our query: in particular, we will update more strongly against the query if we find evidence against a chain of positive effects than if we find evidence against a chain of negative effects. Evidence against a chain of positive effects speaks against the *most* likely way in which the query could be true, whereas evidence against a chain of negative effects speaks against a way the query could be true that we did not think was very likely to begin with.
+
+
+
+<!-- ### Bayesian correlational inference -->
+
+
+<!-- In all the examples describe above Bayes rule was used to update inferences about a particular case given additional information about that case. But the same logic works just as well for problems in which one tries to update about a general relation given a set of cases.  -->
+<!-- The correlational solution to the fundamental problem of causal inference is to focus on *population-level* effects. Rather than seeking to identify the types of particular cases, researchers exploit covariation across cases between the treatment and the outcome variables---i.e., dataset observations---in order to assess the {average effect} of treatment on outcomes for a {population} or {sample} of cases. In the simplest, frequentist approach, under conditions described by \citep{Rubin1974} the average effect of a treatment may be estimated as the difference between the average outcome for those cases that received treatment and the average outcome for those cases that did not receive treatment. -->
+
+<!-- Although this frequentist approach to estimating causal effects from correlational data is more familiar, the problem can also be described in Bayesian terms.^[For a fuller treatment, see for example \citet{heckman2014treatment}.] -->
+
+<!-- <!-- % I think the below is necessary because we do not properly define the Bayesian approach generally; we only do it for a very special illustration -->
+
+
+
+<!-- ```{r simpleXYDAG, echo = FALSE, fig.width = 7, fig.height = 4,  fig.align="center", out.width='.5\\textwidth', fig.cap = "A graph depicting a situation in which it is possible that $X$ causes $Y$; the unit level causal type is $\\theta^Y$ and the distribution of causal types is $\\lambda^Y$."} -->
+<!-- hj_dag(x = c(0, 0, 1, 1, 2, -1), -->
+<!--        y = c(1, 0, 0, 1, 1, 1), -->
+<!--        names = c( -->
+<!--          expression(paste(theta^X)), -->
+<!--          "X", -->
+<!--          "Y", -->
+<!--          expression(paste(theta^Y)),  -->
+<!--          expression(paste(lambda^Y)),  -->
+<!--          expression(paste(lambda^X))  -->
+<!--          ), -->
+<!--        arcs = cbind( c(1, 2, 4, 5, 6), -->
+<!--                      c(2, 3, 3, 4, 1)), -->
+<!--        title = "", -->
+<!--        padding = .2, contraction = .15, box = FALSE)  -->
+
+<!-- ``` -->
+
+
+<!-- Suppose we are interested in determining the *distribution* of causal types in a population. We again need to specify our parameters, priors, likelihood, the probability of the data, and the inference strategy. -->
+
+<!-- In turn we have: -->
+
+<!-- **Parameters.** Our hypothesis consists of a set of $\lambda$ values: i.e., the proportion of the population of authoritarian regimes for which economic crisis would generate or has generated collapse ($\lambda_b$); the proportion for which collapse is inevitable ($\lambda_d$); and so on. -->
+
+<!-- We can now define our hypothesis as a vector, $\lambda = (\lambda^X_0,\lambda^X_1,\lambda^Y_{00},\lambda^Y_{10},\lambda^Y_{01}, \lambda^Y_{11})$, that registers a possible set of values for the parameters over which we will update: type proportions in the population and assignment propensities by type.  -->
+
+<!-- **Prior.** We next need to assign a prior probability to $\lambda$. In the general case, we will do so by defining a prior probability distribution, $p(\lambda^j)$, over possible values of the elements of $\lambda^j$. Here $\lambda^Y$ has four possible values and we use a Dirichlet distribution on a 3-simplex.  $\lambda^X$ has has only two possible values and in this case the  Dirichlet distribution reduces to a Beta distribution.   -->
+
+<!-- **Likelihood.** Our data, $\mathcal{D}$, consist of $X$ and $Y$ observations for a sample of cases. With binary $X$ and $Y$, there are four possible data realizations (combinations of $X$ and $Y$ values) for a given case. For a single case, it is straightforward to calculate an event probability $w_{xy}$ | that is, the likelihood of observing the particular combination of $X$ and $Y$ given the type shares and assignment probabilities in $\theta$. For instance: -->
+
+<!-- $$w_{00}=\Pr(X=0, Y=0|\theta)=\lambda^X_0(\lambda^Y_{00} + \lambda^Y_{01})$$ -->
+
+
+<!-- More generally, let $w_{XY}$ denote the vector of these event probabilities for each combination of $X$ and $Y$ values, conditional on $\lambda$. Further,  let $n_{XY}$ denote vector containing the number of cases observed with each $X,Y$ combination. Under an assumption of independence (data are independently and identically distributed), the full likelihood is then given by the multinomial distribution: -->
+<!-- $$\Pr(\mathcal{D}|\lambda)= \text{Multinomial}(n_{XY}  | w_{XY})$$ -->
+
+<!-- Note again that here we have assumed that data is randomly drawn. More general functions can allow for more complex data gathering processes. -->
+
+<!-- **Probability of the data.** We calculate the unconditional probability of the data, $Pr(\mathcal{D})$, by integrating the likelihood function above over all parameter values, weighted by their prior probabilities. -->
+
+
+<!-- **Inference.** After observing our data, $\mathcal{D}$, we then form posterior beliefs over  $\lambda$ by direct application of Bayes' rule, above: -->
+
+<!-- $$p(\lambda|\mathcal{D}) = \frac{\Pr(\mathcal{D}|\lambda)p(\lambda)}{\int\Pr(\mathcal{D}|\lambda')p(\lambda')d\lambda'}$$ -->
+
+
+<!-- This posterior distribution reflects our updated beliefs about which sets of parameter values are most likely, given the data. Critically, note that, upon observing $X$ and $Y$ data, we  simultaneously update beliefs about all parameters in $\lambda$: both beliefs about causal effects (type shares) in the population *and* beliefs about the assignment propensities for $X$. -->
+
+
+<!-- <!-- Intuitively, we treat each set of possible values of our parameters of interest---each $\lambda$ vector, that is---as a hypothesis and apply Bayes' rule to assess its probability given the data, that is, the posterior.^[More generally we might think of a hypothesis as being a subset of values of $\theta$ | e.g. "there is a positive treatment effect" corresponds to the set of values for which $b>a$.]  We use three quantities to calculate the posterior. -->
+
+<!-- <!-- First, we ask, if this set of parameter values is true, how likely were the observed $X, Y$ values to have emerged? {This calculation in our binary framework is simple. For example, the probability of observing the event $X=1, Y=1$ for a single randomly selected case is given by event probability $w_{11}=b\pi_b+d\pi_d$. Note that we assume in this example that each *type* is drawn independently as would be the case if cases under study were randomly sampled from a large population.} Consider a hypothesis (a specific value of $\theta$) in which most authoritarian countries are assumed to be either susceptible to a regime-collapsing effect of economic crisis or destined to collapse anyway---i.e., a $\theta$ in which $\lambda_b$ and $\lambda_d$ are very high and $\lambda_a$ and $\lambda_c$ very low. Suppose we then observe data in which a large proportion of countries display values $X=1$ and $Y=0$---they experienced crisis and did not collapse---which pegs them as either $a$ or $c$ types. The probability of these data under the hypothesized $\theta$--- $\Pr(\mathcal{D}|\theta)$ | will then be low, reducing our confidence in this hypothesis. On the other hand, such data are far more likely under any $\theta$ vector in which $\lambda_a$ or $\lambda_c$ is high, boosting our confidence in such hypotheses. -->
+
+<!-- <!-- Second, we ask, how likely were we to observe these data, $\mathcal{D}$, regardless of whether this particular $\theta$ is true? This value appears in the denominator, where we take into account the likelihood of observing these data for *all* of the possible values of $\theta$, weighted by their prior probabilities. More formally, under the assumption of independence, the probability of observing $\mathcal{D}$, that is, a particular collection of $X,Y$ data, is given by the corresponding value of the multinomial distribution given the event probabilities implied by $\theta$.   -->
+
+<!-- <!-- The more likely the data are in general|whether the hypothesis is true or not|the smaller the effect of these data on our beliefs. On the other hand, if the observation of lots of crisis-suffering, collapsing regimes was generally *unlikely* across all $\theta$s, then observing these data will generate a larger shift in our confidence toward any particular $\theta$ vector with which the data are relatively consistent. -->
+
+<!-- <!-- Third, we multiply the ratio of these first two quantities by our confidence in the values in this $\theta$ prior to seeing the data ($p(\theta)$). The more prior confidence we have in a hypothesis, the greater the probability that evidence consistent with and unique to the hypothesis in fact indicates that the hypothesis is true. Thus, for instance, suppose that prior evidence and logic suggest that a high proportion of authoritarian regimes in the world are susceptible to a regime-collapsing effect of crisis (are $b$ types). This strong prior belief in a high $\lambda_b$ increases the likelihood that any data pattern consistent with a high $\lambda_b$---say, many $X=1, Y=1$ cases---has *in fact* been generated by a large set of $b$ cases. -->
+
+<!-- We illustrate Bayesian correlational inference with a simple case. Suppose we observe for all postwar authoritarian regimes, whether they did or did not suffer economic crisis and did or did not collapse. Say for simplicity we know that all authoritarian regimes were "assigned" to economic crisis with a 0.5 probability during the period under analysis (thus assignment is known to be *as if* random). And assume that, prior to observing $X$, $Y$ data we believe that each of two propositions are true with 0.5 probability. Under proposition **($\theta_1$)** all regimes are of type $b$ (and so the average treatment effect is 1); under proposition **($\theta_2$)** 50\% of regimes are of type $c$ and 50\% are of type $d$ (and so the average treatment effect is 0).^[In this simple case we can think of $\theta$ as being constrained to take on only one of two possible values: $\theta \in  \{\theta_1=\{a=0,b=1, c=0, d=0, \pi_a=0.5,\pi_b=0.5,\pi_c=0.5,\pi_d=0.5\},\{\theta_2=\{a=0,b=0, c=.5, d=.5, \pi_a=0.5,\pi_b=0.5,\pi_c=0.5,\pi_d=0.5\} \}$.]  -->
+
+
+<!-- <!-- %Suppose that we now randomly draw a set of authoritarian regimes from the population and observe the values on $X$ and $Y$. How should our observation of this data | $\mathcal{D}$ | shift our beliefs about the value $\lambda_b$? --> 
+<!-- <!-- % --> 
+<!-- <!-- %A Bayesian analysis draws on our prior beliefs about three quantities: -->
+<!-- <!-- % --> 
+<!-- <!-- %\begin{itemize} --> 
+<!-- <!-- % --> 
+<!-- <!-- %\item **$\Pr(\mathcal{D**|b=1$)}: The probability of observing this collection of $X$ and $Y$ values under $H_1$, that is, if all cases are susceptible to a positive treatment effect. Each case should either have values $X=Y=0$ or $X=Y=1$ if indeed $b=1$, and the distribution across these values should follow a binomial distribution with $p=.5$ (since cases of all types were assigned to treatment with 0.5 probability). -->
+<!-- <!-- % -->
+<!-- <!-- %\item **$\Pr(b=1$)**: The likelihood that $H_1$ is correct. This belief represents our prior level of confidence in $H_1$, before we observe the new evidence. We have set this belief in the present illustration to 0.5. -->
+<!-- <!-- % -->
+<!-- <!-- %\item **$\Pr(\mathcal{D**)$}: The probability of observing this collection of $X$ and $Y$ values *without* conditioning on $H_1$. The expression is an average of the probabilities of observing the data under the two hypotheses, weighted by our prior belief for each hypothesis that it is correct. That is, $\Pr(\mathcal{D}) = \Pr(\mathcal{D}|b=1)\Pr(b=1)+\Pr(\mathcal{D}|b=0)\Pr(b=0)$  -->
+<!-- <!-- %\end{itemize} --> 
+
+<!-- <!-- %Thus, the observation of $X$ and $Y$ values in the sample allows us to update our beliefs %on the correlation between treatment and outcomes in the population and, hence,  -->
+<!-- <!-- %on the average treatment effect. In this simple case  -->
+<!-- <!-- %%the only data consis: do we observe data in which $X$ and $Y$ are perfectly correlated or not? In this case,  -->
+<!-- <!-- %if we see a single case that has values $(X=0, Y=1)$, then we will know for certain that $H_1$ is false since this data structure could never arise under $H_1$. If we observe data in which $X$ and $Y$ are perfectly correlated, we may still think it possible that $H_2$ is true. However, such a pattern is {*less*} likely to emerge if $H_2$ is true than if $H_1$ is true.  -->
+<!-- <!-- % -->
+<!-- <!-- Suppose we draw a random sample of $n=2$ cases and observe one case in which $X=Y=0$ and one case in which $X=Y=1$. That is, we observe a perfect correlation between $X$ and $Y$ but only two cases. What then should we infer? -->
+
+<!-- Applying Bayes' rule, our posterior probability on proposition $\theta_1$, having observed the data, is: -->
+
+<!-- \begin{eqnarray*} -->
+<!-- \Pr(\theta_1|\mathcal{D})  -->
+<!-- =\frac{\Pr(\mathcal{D}|\theta_1)\Pr(\theta_1)}{\Pr(\mathcal{D}|\theta_1)\Pr(\theta_1)+\Pr(\mathcal{D}|\theta_2)\Pr(\theta_2)} -->
+<!-- \end{eqnarray*} -->
+
+<!-- or equivalently:  -->
+
+<!-- \begin{eqnarray*} -->
+<!-- \Pr(b=1|\mathcal{D})  -->
+<!-- %=\frac{\Pr(\mathcal{D}|b=1) \Pr(b=1)}{\Pr(\mathcal{D})} -->
+<!-- =\frac{\Pr(\mathcal{D}|\lambda_b=1)\Pr(\lambda_b=1)}{\Pr(\mathcal{D}|\lambda_b=1)\Pr(\lambda_b=1)+\Pr(\mathcal{D}|\lambda_b=0)\Pr(\lambda_b=0)} -->
+<!-- \end{eqnarray*} -->
+
+<!-- The event probabilities of each of the observed events is $0.5$ under $\theta_1$ but just $0.25$ under $\theta_2$.  Using the binomial distribution (a special case of the multinomial for this simple case) we know that the chances of such data arising are 1 in 2 under $\theta_1$ but only 1 in 8 under $\theta_2$. Our posterior would then be: -->
+
+<!-- \begin{eqnarray*} -->
+<!-- \Pr(\lambda_b=1|\mathcal{D}) =\frac{\frac{1}{2} \times \frac{1}{2}}{\frac{1}{2} \times \frac{1}{2} + \frac{1}{8}\times \frac{1}{2}} = \frac{4}{5}  -->
+<!-- \end{eqnarray*} -->
+
+<!-- The key difference between this example and more general applications is simply that in the general case we allow for uncertainty --- and updating --- not simply over whether $\lambda_b$ is 0 or 1, but over a range of possible values for multiple parameters of interest. Though this adds complexity, it does not change the fundamental logic of updating.   -->
+
+
+### Simple Bayesian Process Tracing
+
+Process tracing in its most basic form seeks to use within case evidence to draw inferences about the case. For example, with a focus on whether $X$ caused $Y$ , data on a "clue", $K$, is used to make inference about whether or not the outcome in that case was generated by the case's treatment status. We refer to the within-case evidence gathered during process tracing as *clues* in order to underline their probabilistic relationship to the causal relationship of interest. Readers familiar with the framework in @collier2004sources   can usefully think of our "clues" as akin to causal process observations, although we highlight that there is no requirement that the clues be generated by the causal process. 
+
+To make inferences, the analyst looks for clues that will be observed with some probability if the case is of a given type and that will *not* be observed with some probability if the case is *not* of that type.
+
+It is relatively straightforward to express the logic of process tracing in Bayesian terms, a step that will aid the integration of qualitative with quantitative causal inferences. As noted by others (e.g. @BennettBayes, @beachpedersen2013process,  @rohlfing2012case), there is an evident connection between the use of evidence in process tracing and Bayesian inference. .
+
+To illustrate, suppose we are interested in regime collapse. We already have $X,Y$ data on one authoritarian regime: we know that it suffered economic crisis ($X=1$) and collapsed ($Y=1$). We want to know what caused the collapse. To make progress we will try to draw inferences given a "clue." Beliefs about the probabilities of observing clues for cases with different causal effects  derive from theories of, or evidence about, the causal process connecting $X$ and $Y$. Suppose we theorize that the mechanism through which economic crisis generates collapse runs via diminished regime capacity to reward its supporters during an economic downturn. A possible clue to the operation of a causal effect, then, might be the observation of diminishing rents flowing to regime supporters shortly after the crisis. If we believe the theory, then this is a clue that we might believe to be highly probable for cases of type $b$ that have experienced economic crisis (where the crisis in fact caused the collapse) but of low probability for cases of type $d$ that have experienced crisis (where the collapse occurred for other reasons). 
+
+To make use of Bayes rule we need to:
+
+1. define our parameters, which are the key quantities of interest
+2. provide prior beliefs about the parameters of interest
+3. define a likelihood function
+4. provide the probability of the data
+5. plug these into Bayes' rule to calculate a posterior on the parameters of interest
+
+We discuss each of these in turn.
+
+**Parameters.** The inferential challenge is to determine whether the regime collapsed *because* of the crisis ($b$ type) or whether it would have collapsed even without it ($d$ type). We do so using further information from the case---one or more clues. We use the variable $K$ to register the outcome of the search for a clue, with $K$=1 indicating that a specific clue is searched for and found, and $K$=0 indicating that the clue is searched for and not found.
+
+Let $j\in \{a,b,c,d\}$ refer to the type of an individual case. Our hypothesis, in this initial setup, consists simply of a belief about $j$ for the case under examination: specifically whether the case is a $b$ type ($j=b)$. The parameter of interest is the causal type.
+
+**Prior.** We then assign a prior degree of confidence to the hypothesis ($p = Pr(H)$). This is, here, our prior belief that an authoritarian regime that has experienced economic crisis is a $b$.
+
+**Likelihood.** The likelihood, $\Pr(K=1|H)$ is the probability of observing the clue, when we look for it in our case, if the hypothesis is true---i.e., here, if the case is a $b$ type. The key feature of a clue is that the probability of observing the clue is believed to depend on the case's causal type. In order to calculate the probability of the data we will in fact need two such probabilities: we let $\phi_b$ denote the probability of observing the clue for a case of $b$ type ($\Pr(K=1|j=b)$), and $\phi_d$ the probability of observing the clue for a case of $d$ type ($\Pr(K=1|j=d)$). The key idea in many accounts of process tracing is that the *differences* between these probabilities provides clues with ''probative value,'' that is, the ability to generate learning about causal types. The likelihood, $\Pr(K=1|H)$, is simply $\phi_b$.
+
+**Probability of the data.** This is the probability of observing the clue when we look for it in a case, *regardless* of its type, $(\Pr(K=1))$. More specifically, it is the probability of the clue in a treated case with a positive outcome. As such a case can only be a $b$ or a $d$ type, this probability can be calculated simply from $\phi_b$ and $\phi_d$, together with our beliefs about how likely an $X=1, Y=1$ case is to be a $b$ or a $d$ type. 
+This probability aligns (inversely) with Van Evera's concept of ''uniqueness.''
+
+**Inference.**  We can now apply Bayes' rule to describe the learning that results from process tracing. If we observe the clue when we look for it in the case, then our *posterior* belief in the hypothesis that the case is of type *b* is:
+
+
+\begin{eqnarray*}
+\Pr(j = b |K=1, X=Y=1)=  \frac{\phi_b p }{\phi_b p+\phi_d (1-p)}
+\end{eqnarray*}
+
+
+In this exposition we did not make use of a causal model in a meaningful way---we simply need the priors and the clue probabilities. 
+
+In fact, however, these numbers can be derived from a causal model. To illustrate, imagine a simple causal model in which the $X, Y$ relationship is completely mediated by $K$. In particular, suppose, from background knowledge of the conditional distribution of outcomes given their causes, we have that:
+
+* $\Pr(K=1 | X=0) = 0$, $\Pr(K=1 | X=1) = .5$
+* $\Pr(Y=1 | K=0) = .5$, $\Pr(Y=1 | K=1) = 1$
+
+This data is consistent with a world in which half $b$ and $c$ types in the  first step and half $b$ and $d$ types in the second step. Assume that the case at hand is sampled from this world.
+
+Then we can calculate that the prior probability, $p$, that $X$ caused $Y$ given $X=Y=1$ is $p = \frac13$.^[Given $X=1$, $Y=1$ is consistent with $b$ types at both stages, which arises with probability .25,  or with a $d$ type in the second stage, which arises with probability .5. The conditional probability is therefore $.25/.75 = 1/3$.] We can also calculate the probability that $K=1$ for a treated $b$ and $d$ case respectively as $\phi_b=1$ and  $\phi_d=0.5$ (convince yourself of these numbers!). We then get:
+
+\begin{eqnarray*}
+\Pr(j = b |K=1, X=Y=1)&=&\frac{1\times \frac13}{1 \times \frac13 + 0.5 \times \frac23}=0.5
+\end{eqnarray*}
+
+We thus shift our beliefs from a prior of $\frac13$ to a posterior of $\frac12$. In contrast had we *not* observed the clue our posterior would have been 0. 
+
+As should be clear from the above, the inferential leverage in process tracing comes from differences in the probability of observing $K=1$ for different causal types. Thus, the logic described here generalizes Van Evera's familiar typology of tests by conceiving of the certainty and uniqueness of clues as lying along a continuum. 
+
+Van Evera's four tests ("smoking gun," "hoop," "straw in the wind," and "doubly decisive") represent, in this sense, special cases---particular regions that lie on the boundaries of a "probative-value space."  To illustrate the idea, we represent the range of combinations of possible probabilities for $\phi_b$ and $\phi_d$ as a square in Figure \ref{CluesInferences1} and mark the spaces inhabited by Van Evera's tests. As can be seen, the type of test involved depends on both the relative *and* absolute magnitudes of $\phi_b$ and $\phi_d$. The probative value of a test depends on the difference between them. Thus, a clue acts as a smoking gun for proposition "$b$" (the proposition that the case is a $b$ type)  if it is highly unlikely to be observed if proposition $b$ is false, and more likely to be observed if the proposition is true (bottom left, above diagonal). A clue acts as a "hoop" test if it is highly likely to be found if $b$ is true, even if it still quite likely to be found if it is false. Doubly decisive tests arise when a clue is very likely if $b$ and very unlikely if not. It is, however, also easy to imagine clues with probative qualities lying in the large space amidst these extremes. 
+
+
+
+```{r, fig.cap="\\label{CluesInferences1} A mapping from the probability of observing a clue if the proposition that a case is a $b$ type is true ($\\phi_b$) or false ($\\phi_d$) to a generalization of the tests described in Van-Evera (1997).", echo = FALSE, fig.height=12, fig.width=12}
+plot(c(0,1), c(0,1), type="l", col="grey", xlab=expression(paste(phi[d], " (Probability of observing ", italic(K), " given d)")), 
+				ylab=expression(paste(phi[b], " (Probability of observing ", italic(K), " given b)")), 
+				main="Classification of tests")
+text(.1,.95, "K present: \n doubly decisive for b  ")
+text(.1,.875, "K absent: \n doubly decisive for d  ")
+text(.08,.25, "K present: \n smoking gun for b \n K absent \n hoop test for d")
+text(.7,.9, "K present: \n hoop test for b \n K absent: \n smoking gun for d")
+text(.4,.6, "K present: \n straw in the wind for b \n K absent: \n straw in the wind for d")
+
+text(.9,.125, "K present: \n doubly decisive for d  ")
+text(.9,.05, "K absent: \n doubly decisive for b")
+text(.9,.7, "K present: \n hoop test for d \n K absent: \n smoking gun for b")
+text(.25,.05, "K present: \n smoking gun test for d \n K absent: \n hoop test for b")
+text(.6,.4, "K present: \n straw in the wind for d \n K absent: \n straw in the wind for b ")
+
+arrows(.25,.7, .25, .85, col="red")
+arrows(.25,.7, .1, .7, col="red")
+
+text(.35, .775, "More sensitive \n for b", col="red")
+text(.1775, .65, "More specific \n for b", col="red")
+
+
+arrows(.75,.3, .9, .3, col="red")
+arrows(.75,.3, .75, .15, col="red")
+
+text(.65, .225, "More specific \n for d", col="red")
+text(.825, .35, "More sensitive \n for d", col="red")
+
+
+```
+
+
+In this illustration we note that we draw both the priors and the probative value from a causal model.  If we altered the model---for example if we had a stronger first stage and so  a larger value for $\Pr(K=1|X=0)$---this would alter both our prior, $p$, and our calculations of $\phi_d$.  An implication of this is that, although one might be tempted to think of the priors and the probative values as independent quantities, and contemplate how inferences change as priors change (as we did for example in Appendix FLAG REF), keeping probative value fixed, that kind of thought experiment may assume values that are justified by an underlying model.
+
+## Three principles of Bayesian updating
+
+FLAG: REDO THESE THREE EXAMPLES WITHOUT PHI
+
+### Priors matter {#AppPriors}
+
+
+The amount of learning that results from a given piece of new data depends strongly on prior beliefs. We saw this already with the example of interpreting our test results above.  Figure \@ref(CluesInferences2) illustrates the point for process tracing inferences. 
+
+ In each subgraph of Figure \@ref(CluesInferences2) , we show how much learning occurs under different scenarios. The horizontal axis indicates the level of prior confidence in the hypothesis and the curve indicates the posterior belief that arises if we do (or do not) observe the clue. As can be seen, the amount of learning that occurs---the shift in beliefs from prior to posterior---depends a good deal on what prior we start out with. For a smoking gun test, the amount of learning is highest for values roughly in the 0.2 to 0.4 range---and then declines as we have more and more prior confidence in our hypothesis. For a hoop test, the amount of learning when the clue is *not* observed is greatest for hypotheses in which we have middling-high confidence (around 0.6 to 0.8), and minimal for hypotheses in which we have a very high or a very low level of confidence.
+
+
+```{r CluesInferences2, fig.cap = "Figure shows how the learning from different types of tests depends on priors regarding the proposition. A smoking gun test has the greatest impact on beliefs when priors are middling low and the clue is observed; a ''hoop test'' has the greatest effect when priors are middling high and the clue is not observed.", echo = FALSE, fig.height=10, fig.width=10}
+par(mfrow = c(2,2))
+	plotit(.4, .6, main="Straw in the Wind")
+	plotit(.6, .95, main="Hoop")
+	plotit(.05, .4, main="Smoking Gun")
+	plotit(.05, .95, main="Doubly Decisive")
+```
+
+
+The implication here is that our inferences with respect to a hypothesis must be based not just on the search for a clue predicted by the hypothesis but also on the *plausibility* of the hypothesis, based on other things we know. Suppose, for instance, that we fail to observe evidence that we are 90 percent sure we *should* observe if a hypothesized causal effect has occurred: a strong hoop test is failed. But suppose that the existing literature has given us a very high level of confidence that the hypothesis *is* right. This high prior confidence, sometimes referred to as a "base rate," is equivalent to believing that the causal effect exists in a very high proportion of cases. Thus, while any given case with a causal effect has only a 0.1 chance of not generating the clue, the high base rate means that the vast majority of cases that we observe without the clue will nonetheless be cases with causal effects. Thus, the failure of even a strong hoop test, involving a highly certain prediction, should only marginally reduce our confidence in a hypothesis that we strongly expect to be true. 
+
+A similar line of reasoning applies to smoking gun tests involving hypotheses that prior evidence suggests are very unlikely to be true. Innocent people may be very unlikely to be seen holding smoking guns after a murder. But if a very high proportion of people observed are known to be innocent, then a very high proportion of those holding smoking guns will in fact be innocent---and a smoking-gun clue will be far from decisive. 
+
+We emphasize two respects in which these implications depart from common intuitions. First, we cannot make *general* statements about how decisive different categories of test, in Van Evera's framework, will be. It is commonly stated that hoop tests are devastating to a theory when they are failed, while smoking gun tests provide powerful evidence in favor of a hypothesis. But, in fact the amount learned depends not just on features of the clues but also on prior beliefs. 
+
+Second, although scholars frequently treat evidence that goes against the grain of the existing literature as especially enlightening, in the Bayesian framework the contribution of such evidence may sometimes be modest, precisely because received wisdom carries weight. Thus, although the discovery of *disconfirming* evidence---an observation thought to be strongly inconsistent with the hypothesis---for a hypothesis commonly believed to be true is more informative (has a larger impact on beliefs) than *confirming* evidence, this does not mean that we learn more than we would have if the prior were weaker. % But it is not true as a general proposition that we learn more the bigger the "surprise" a piece of evidence is. 
+%The effect of disconfirming evidence on a hypothesis about which we are highly confident will be *smaller* than it would be for a hypothesis about which we are only somewhat confident. 
+When it comes to very strong hypotheses, the "discovery" of disconfirming evidence is very likely to be a false negative; likewise, the discovery of supporting evidence for a very implausible hypothesis is very likely to be a false positive. The Bayesian approach takes account of these features naturally.^[We note, however, that one common intuition---that little is learned from disconfirming evidence on a low-plausibility hypothesis or from confirming evidence on a high-plausibility one---*is* correct.] 
+
+
+### Simultaneous, joint updating
+
+When we update we often update over multiple quantities. When we see a smoking gun, for instance, we might update our beliefs that the butler did it, but we might also update our beliefs about how likely we are to see smoking guns -- maybe they are not so rare as we thought! 
+
+Intuitively you might think of this updating as happening sequentially -- first of all you update over the general proposition, then you update over the particular claim. But in fact you update over both quantities at once. 
+
+Here we elaborate on the intuition of fully Bayesian process tracing, in which updating occurs over both causal type ($j$) and beliefs about the probabilities with which clues are observed for each type ($\phi$ values). The illustration in the text makes clear how updating over type occurs, given beliefs about $\phi$ values. But how does updating over $\phi$ occur? 
+
+Suppose that we observe a case with values $X=1, Y=1$. We begin by defining a prior probability distribution over each parameter. Suppose that we establish a prior categorical distribution reflecting uncertainty over whether the case is a $b$ type (e.g., setting a probability of 0.5 that it is a $b$ and 0.5 that is a $d$ type). We also start with priors on $\phi_b$ and $\phi_d$. For concreteness, suppose that we are certain that the clue is unlikely for a $d$ type ($\phi_d=.1$), but we are very uncertain about  $\phi_b$; in particular, we have a  uniform prior distribution over $[0,1]$ for $\phi_b$. Note that, even though we are very uncertain about $\phi_b$, the clue still has probative value, arising from the fact that the expected value of $\phi_b$ is higher than that of $\phi_d$. 
+
+Suppose that we then look for the clue in the case and observe it. This observation shifts posterior weight away from a belief that the case is a $b$. See Figure \ref{fig:correlation} for an illustration. Yet it *simultaneously* shifts weight toward a higher value for $\phi_b$ and a lower value for $\phi_d$. The reason is that the observed clue has a relatively high likelihood *both* for combinations of parameter values in which the case is a $d$ and $\phi_b$ is low *and* for combinations in which the case is a $b$ and $\phi_b$ is *high* (or, equivalently, in this example, where $\phi_d$ is low). The marginal posterior distribution of $\phi_b$ will thus be shifted upward relative to its prior marginal distribution. The joint posterior distribution will also reflect a dependency between the probability that the case is a $b$ vs. a $d$, on the one hand, and $\phi_b$ and $\phi_d$ on the other. 
+
+
+
+
+```{r, echo = FALSE, fig.cap = "\\label{fig:correlation} Joint posteriors distribution on whether a case is a $b$ or $d$ and on the probability of seeing a clue for a $b$ type ($\\phi_b$)."}
+
+# X=1 Y=1 case chose. Is it b or d. Say phi_d = .1 and phi_b~ uniform[0,1]. Say prior on b is .5.
+
+k      <- 2000
+phi_b  <- seq(0.001,.999, length = k)
+theta  <- data.frame(type = c(rep(0,k), rep(1,k)), phi_b = c(phi_b, phi_b), phi_d  <- rep(.1,2*k)) 
+
+posterior_k_seen <- (theta$type*theta$phi_b + (1-theta$type)*theta$phi_d)
+posterior_k_seen <-  posterior_k_seen/sum(posterior_k_seen)
+
+posterior_k_not_seen <- (theta$type*(1-theta$phi_b) + (1-theta$type)*(1-theta$phi_d))
+
+posterior_k_not_seen <- posterior_k_not_seen/sum(posterior_k_not_seen)
+
+select1 <- sample(1:(2*k), k, replace = FALSE, prob = posterior_k_seen)
+select2 <- sample(1:(2*k), k, replace = FALSE, prob = posterior_k_not_seen)
+
+  par(mfrow=c(1,2))
+  plot(theta$type[select2]+(rnorm(2*k)/10)[select2], theta$phi_b[select2], col = rgb(.8,.1,.2,.4), pch =16, cex=.4, xlab = "Is it a b?", ylab = expression(phi[b]), main="Beliefs | K not seen", axes=FALSE) 
+  axis(1, at=c(0,1), labels=c("d", "b"));   axis(2)
+  box()
+  
+  plot(theta$type[select1]+(rnorm(2*k)/10)[select1], theta$phi_b[select1], col = rgb(.8,.1,.2,.4), pch =16, cex=.4, xlab = "Is it a b?", ylab = expression(phi[b]), main="Beliefs | K seen", axes=FALSE) 
+  axis(1, at=c(0,1), labels=c("d", "b"));   axis(2)
+  box()
+
+```
+
+
+
+### Posteriors are independent of the ordering of data
+
+We often think of learning as a process in which we start off with some set of beliefs---our priors, we gather data, $D_1$, and update our beliefs, forming a posterior; we then observe new data and we update again, forming a new posterior, having treated the previous posterior as a new prior. In such cases it might seem natural that it matters which data we saw first and which later. 
+
+For instance EXAMPLE
+
+In fact though, Bayesian updating is deaf to ordering. If we learn first that the card is a face card and second that it is black, our posteriors that it is a Jack of Spades go from 1 in 52 to 1 in 12 to 1 in 6.  If we learn first that the card is black and second that it is a face card, our posteriors that it is a Jack of Spades go from 1 in 52 to 1 in 26 to 1 in 6. We end up in the same places in both cases. And we would ave had the same conclusion if we learned in one go that the card is a black face card.
+
+The math of this is easy enough. Our posterior given two sets of data $D_1, D_2$ can be written:
+
+$$p(\theta | D_1, D_2) = \frac{p(\theta, D_1, D_2)}{p(D_1, D_2)} = \frac{p(\theta, D_1 | D_2)p(D_2)}{p(D_1 | D_2)p(D_2)}= \frac{p(\theta, D_1 | D_2)}{p(D_1 | D_2)}$$
+
+or, equivalently:
+
+$$p(\theta | D_1, D_2) = \frac{p(\theta, D_1, D_2)}{p(D_1, D_2)} = \frac{p(\theta, D_2 | D_1)p(D_1)}{p(D_2 | D_1)p(D_1)}= \frac{p(\theta, D_2 | D_1)}{p(D_2 | D_1)}$$
+
+In other words our posteriors given both $D_1$ and $D_2$ can be thought of as the result of updating on $D_2$ given we already know $D_1$ or the result of updating on $D_1$ given we already know $D_2$. 
+
+This fact will be useful in applications. In practice we might assume that we have beliefs based on background data $D_1$, for example regarding general relations between $X$ and $Y$ and a flat prior, and we then update again with new data on $K$. Rather than updating twice, the fact that updating is invariant to order means that we can assume a flat prior and update once given data on $X$, $Y$, and $K$.   
+

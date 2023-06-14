@@ -1,0 +1,19 @@
+
+
+model <- make_model("R -> X -> Y; O -> X <- Z; O <-> Y") %>%
+  set_restrictions("(X[R=1, Z=0]!=0) | 
+                    (X[R=1, Z=1]!=1) | 
+                    (X[R=0, O=0]!=0) | 
+                    (X[R=0, O=1]!=1)")
+model <- model %>%
+  set_parameters(node = "Y", confound = "O==0", alpha = c(.2, .4, .2, .2))%>%
+  set_parameters(node = "Y", confound = "O==1", alpha = c(.1, .1, .6, .1))
+
+model$parameters_df
+
+
+plot(model)
+
+
+model <- model %>%
+  set_parameters(node = "Y", confound = "O==0", alpha = 1:15)

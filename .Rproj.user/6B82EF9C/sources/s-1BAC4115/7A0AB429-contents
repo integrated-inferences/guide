@@ -1,0 +1,4 @@
+prob_b <- query_distribution(
+  model = updated, 
+#  using = "posteriors",
+  query = "D[I=1]==1") #For what proportion of cases does inequality have a positive effect on democratization?

@@ -1,0 +1,512 @@
+kable(df, caption = "Each column shows a possible distribution of data that can be generated from a given strategy. We calculate the probability of each data possibility, given the data seen so far, and the posterior variance associated with each one.", digits = 3)
+df <- rbind(df,
+c("Probability", (round(unlist(probabilities)),3),
+df <- rbind(df,
+c("Probability", round(unlist(probabilities),3)),
+c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(j[,4]))))),
+c("Posterior variance",   (unlist(lapply(estimates_db, function(j)   unlist(j[,5])))^2)))
+kable(df, caption = "Each column shows a possible distribution of data that can be generated from a given strategy. We calculate the probability of each data possibility, given the data seen so far, and the posterior variance associated with each one.", digits = 3)
+kable(data.frame(Strategy = c("Online", "Offline", "X=1, Y=1"), Variance = expected_posterior_var), digits = 3)
+expected_posterior_var <- sapply(1:3, function(i)
+sum(probabilities[[i]]*unlist(estimates_db[[i]][,4]))
+)
+kable(data.frame(Strategy = c("Online", "Offline", "X=1, Y=1"), Variance = expected_posterior_var), digits = 3)
+source("_packages_used.R")
+do_diagnosis = TRUE
+# We define a model
+model <- make_model("X->M->Y")  %>%
+set_restrictions(c("(Y[M=1]<Y[M=0])", "(M[X=1]<M[X=0])")) %>%
+set_parameter_matrix() %>%
+set_parameters(type = "flat")
+# We imagine some preexisting data we have observed
+data  <-  data.frame(X = c(0,0,0,1,1,1), M = NA, Y = c(0,0,1,0,1,1))
+given <-  collapse_data(data, model, remove_family = TRUE)
+# We can then imagine what data we might observe if we examine M inside some subset of cases
+A_on_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==1", "X==0 & Y==0"), prefix = "A")
+names(A_on_regression_line)[-1] <- c("A1", "A2", "A3", "A4")
+B_off_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==0", "X==0 & Y==1"), prefix = "B")
+names(B_off_regression_line)[-1] <- c("B1", "B2", "B3", "B4")
+C_X1Y1_only <-
+make_possible_data(model, given = given, vars = "M", N = 2,
+condition = c("X==1 & Y==1"), prefix = "C")
+names(C_X1Y1_only)[-1] <- c("C1", "C2", "C3")
+kable(given)
+# Combine data types
+df <- A_on_regression_line %>%
+merge(B_off_regression_line, by = "event", all = TRUE) %>%
+merge(C_X1Y1_only, by = "event", all = TRUE) %>%
+dplyr:::mutate_if(is.numeric, ~replace(., is.na(.), 0))
+# table(duplicated(t(df)))
+if(do_diagnosis){
+if(!exists("fit")) fit  <- fitted_model()
+strategies <-
+list(A_on_regression_line, B_off_regression_line, C_X1Y1_only)
+write_rds(strategies, "saved/illustration_strategies.rds")
+estimates_dbs <- lapply(strategies, function(s)
+make_estimates_database(model, given, possible_data = s, queries = "Y[X=1]-Y[X=0]")
+)
+write_rds(estimates_dbs, "saved/illustration_estimates.rds")
+# The reference model is the original model updated with the XY data we've already seen.
+reference_model <- gbiqq(model, data, stan_model = fit)
+write_rds(reference_model, "saved/reference_XMY_updated_model.rds")
+probabilities <- lapply(strategies, function(s)
+average_data_probabilities(reference_model, s, using = "posteriors", sims = 2000)
+)
+write_rds(probabilities, "saved/illustration_probabilities.rds")
+}
+reference_model <- read_rds("saved/reference_XMY_updated_model.rds")
+probabilities   <- read_rds("saved/illustration_probabilities.rds")
+strategies      <- read_rds("saved/illustration_strategies.rds")
+estimates_db    <- read_rds("saved/illustration_estimates.rds")
+df <- rbind(df,
+c("Probability", round(unlist(probabilities),3)),
+c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(j[,4]))))),
+c("Posterior variance",   (unlist(lapply(estimates_db, function(j)   unlist(j[,5])))^2)))
+reference_model <- read_rds("saved/reference_XMY_updated_model.rds")
+probabilities   <- read_rds("saved/illustration_probabilities.rds")
+strategies      <- read_rds("saved/illustration_strategies.rds")
+estimates_db    <- read_rds("saved/illustration_estimates.rds")
+df <- rbind(df,
+c("Probability", round(unlist(probabilities),3)),
+c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(j[,4]))))),
+c("Posterior variance",   (unlist(lapply(estimates_db, function(j)   unlist(j[,5])))^2)))
+reference_model
+round(unlist(probabilities),3))
+round(unlist(probabilities),3)
+(unlist(lapply(estimates_db, function(j)   unlist(j[,4]))))
+estimates_db
+estimates_db
+j <- estimates_db[[1]]
+j
+j[,4]
+unlist(j)
+lapply(j, function(k), k$mean
+lapply(j, function(k), k$mean)
+lapply(j, function(k) k$mean)
+unlist(lapply(j, function(k) k$mean)
+)
+(unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean))))))
+estimates_db
+unlist(lapply(j, function(k) k$mean))
+estimates_db
+df <- rbind(df,
+c("Probability", round(unlist(probabilities),3)),
+c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean))))))),
+c("Posterior variance",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean^2))))))))
+df
+expected_posterior_var <- sapply(1:3, function(i)
+sum(probabilities[[i]]*unlist(estimates_db[[i]][,4]))
+)
+estimates_db[[i]]
+2^100000000000000000000000000000000000000000000000000000000000000
+123456709876546^21234
+1^99994
+9^99994
+6666^697
+6666^6
+366^100
+109^9
+234^1025
+100^99
+1e=10
+diagnosis
+diagnosis
+nosis <- read_rds("saved/ch13diagnosis.rds")
+source("_packages_used.R")
+do_diagnosis = TRUE
+# We define a model
+model <- make_model("X->M->Y")  %>%
+set_restrictions(c("(Y[M=1]<Y[M=0])", "(M[X=1]<M[X=0])")) %>%
+set_parameter_matrix() %>%
+set_parameters(type = "flat")
+# We imagine some preexisting data we have observed
+data  <-  data.frame(X = c(0,0,0,1,1,1), M = NA, Y = c(0,0,1,0,1,1))
+given <-  collapse_data(data, model, remove_family = TRUE)
+# We can then imagine what data we might observe if we examine M inside some subset of cases
+A_on_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==1", "X==0 & Y==0"), prefix = "A")
+names(A_on_regression_line)[-1] <- c("A1", "A2", "A3", "A4")
+B_off_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==0", "X==0 & Y==1"), prefix = "B")
+names(B_off_regression_line)[-1] <- c("B1", "B2", "B3", "B4")
+C_X1Y1_only <-
+make_possible_data(model, given = given, vars = "M", N = 2,
+condition = c("X==1 & Y==1"), prefix = "C")
+names(C_X1Y1_only)[-1] <- c("C1", "C2", "C3")
+kable(given)
+# Combine data types
+df <- A_on_regression_line %>%
+merge(B_off_regression_line, by = "event", all = TRUE) %>%
+merge(C_X1Y1_only, by = "event", all = TRUE) %>%
+dplyr:::mutate_if(is.numeric, ~replace(., is.na(.), 0))
+source("_packages_used.R")
+do_diagnosis = TRUE
+model <- make_model("X->M->Y")  %>%
+set_restrictions(c("(Y[M=1]<Y[M=0])", "(M[X=1]<M[X=0])")) %>%
+set_parameter_matrix() %>%
+set_parameters(type = "flat")
+data  <-  data.frame(X = c(0,0,0,1,1,1), M = NA, Y = c(0,0,1,0,1,1))
+given <-  collapse_data(data, model, remove_family = TRUE)
+A_on_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==1", "X==0 & Y==0"), prefix = "A")
+names(A_on_regression_line)[-1] <- c("A1", "A2", "A3", "A4")
+B_off_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==0", "X==0 & Y==1"), prefix = "B")
+names(B_off_regression_line)[-1] <- c("B1", "B2", "B3", "B4")
+A_on_regression_line
+A_on_regression_line
+A_on_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==1", "X==0 & Y==0"), prefix = "A")
+A_on_regression_line
+A_on_regression_line
+A_on_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==1", "X==0 & Y==0"), prefix = "A")[,-2]
+names(A_on_regression_line)[-1] <- c("A1", "A2", "A3", "A4")
+B_off_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==0", "X==0 & Y==1"), prefix = "B")[,-2]
+names(B_off_regression_line)[-1] <- c("B1", "B2", "B3", "B4")
+C_X1Y1_only <-
+make_possible_data(model, given = given, vars = "M", N = 2,
+condition = c("X==1 & Y==1"), prefix = "C")[,-2]
+names(C_X1Y1_only)[-1] <- c("C1", "C2", "C3")
+df <- A_on_regression_line %>%
+merge(B_off_regression_line, by = "event", all = TRUE) %>%
+merge(C_X1Y1_only, by = "event", all = TRUE) %>%
+dplyr:::mutate_if(is.numeric, ~replace(., is.na(.), 0))
+df
+if(!exists("fit")) fit  <- fitted_model()
+strategies <-
+list(A_on_regression_line, B_off_regression_line, C_X1Y1_only)
+write_rds(strategies, "saved/illustration_strategies.rds")
+estimates_dbs <- lapply(strategies, function(s)
+make_estimates_database(model, given, possible_data = s, queries = "Y[X=1]-Y[X=0]")
+)
+write_rds(estimates_dbs, "saved/illustration_estimates.rds")
+# The reference model is the original model updated with the XY data we've already seen.
+reference_model <- gbiqq(model, data, stan_model = fit)
+write_rds(reference_model, "saved/reference_XMY_updated_model.rds")
+probabilities <- lapply(strategies, function(s)
+average_data_probabilities(reference_model, s, using = "posteriors", sims = 3000)
+)
+strategies
+strategies
+data  <-  data.frame(X = c(0,0,0,1,1,1), M = NA, Y = c(0,0,1,0,1,1))
+given <-  collapse_data(data, model, remove_family = TRUE)
+# We can then imagine what data we might observe if we examine M inside some subset of cases
+A_on_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==1", "X==0 & Y==0"), prefix = "A")
+names(A_on_regression_line)[-c(1:2)] <- c("A1", "A2", "A3", "A4")
+B_off_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==0", "X==0 & Y==1"), prefix = "B")
+names(B_off_regression_line)[-c(1:2)] <- c("B1", "B2", "B3", "B4")
+C_X1Y1_only <-
+make_possible_data(model, given = given, vars = "M", N = 2,
+condition = c("X==1 & Y==1"), prefix = "C")
+names(C_X1Y1_only)[-c(1:2)] <- c("C1", "C2", "C3")
+strategies <-
+list(A_on_regression_line, B_off_regression_line, C_X1Y1_only)
+strategies
+strategies
+probabilities <- lapply(strategies, function(s)
+average_data_probabilities(reference_model, s, using = "posteriors", sims = 3000)
+)
+probabilities <- lapply(strategies, function(s)
+average_data_probabilities(reference_model, s, using = "posteriors", sims = 3000)
+)
+write_rds(probabilities, "saved/illustration_probabilities.rds")
+probabilities <- lapply(strategies, function(s)
+average_data_probabilities(reference_model, s, using = "posteriors", sims = 30)
+)
+write_rds(probabilities, "saved/illustration_probabilities.rds")
+probabilities
+reference_model <- read_rds("saved/reference_XMY_updated_model.rds")
+probabilities   <- read_rds("saved/illustration_probabilities.rds")
+strategies      <- read_rds("saved/illustration_strategies.rds")
+estimates_db    <- read_rds("saved/illustration_estimates.rds")
+df <- rbind(df,
+c("Probability", round(unlist(probabilities),3)),
+c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean))))))),
+c("Posterior variance",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean^2))))))))
+df
+df
+kable(df, caption = "Each column shows a possible distribution of data that can be generated from a given strategy. We calculate the probability of each data possibility, given the data seen so far, and the posterior variance associated with each one.", digits = 3)
+c("Posterior variance",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean^2))))))))
+c("Posterior variance",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean^2)))))))
+c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean)))))))
+kable(df, caption = "Each column shows a possible distribution of data that can be generated from a given strategy. We calculate the probability of each data possibility, given the data seen so far, and the posterior variance associated with each one.", digits = 2)
+(unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean^2)))))))
+df <- rbind(df,
+c("Probability", round(unlist(probabilities),3)),
+c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean))))))),
+c("Posterior variance",   round(unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean^2))))), 3)))
+df
+digits <- 3
+expected_posterior_var <- sapply(1:3, function(i)
+sum(probabilities[[i]]*unlist(estimates_db[[i]][,4]))
+)
+expected_posterior_var
+i = 1
+probabilities[[i]]
+estimates_db[[i]]
+estimates_db[[i]]
+unlist(estimates_db[[i]])
+estimates_db[[i]]
+unlist(lapply(estimates_db[[i]], function(x) x$mean))
+sum(probabilities[[i]]*unlist(lapply(estimates_db[[i]], function(x) x$mean)))
+expected_posterior_var <- sapply(1:3, function(i)
+sum(probabilities[[i]]*unlist(lapply(estimates_db[[i]], function(x) x$sd^2)))
+)
+expected_posterior_var
+kable(data.frame(Strategy = c("Online", "Offline", "X=1, Y=1"), Variance = expected_posterior_var), digits = 3)
+source("_packages_used.R")
+do_diagnosis = TRUE
+# We define a model
+model <- make_model("X->M->Y")  %>%
+set_restrictions(c("(Y[M=1]<Y[M=0])", "(M[X=1]<M[X=0])")) %>%
+set_parameter_matrix() %>%
+set_parameters(type = "flat")
+# We imagine some preexisting data we have observed
+data  <-  data.frame(X = c(0,0,0,1,1,1), M = NA, Y = c(0,0,1,0,1,1))
+given <-  collapse_data(data, model, remove_family = TRUE)
+# We can then imagine what data we might observe if we examine M inside some subset of cases
+A_on_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==1", "X==0 & Y==0"), prefix = "A")
+names(A_on_regression_line)[-c(1:2)] <- c("A1", "A2", "A3", "A4")
+B_off_regression_line <-
+make_possible_data(model, given = given, vars = "M", N = c(1,1),
+condition = c("X==1 & Y==0", "X==0 & Y==1"), prefix = "B")
+names(B_off_regression_line)[-c(1:2)] <- c("B1", "B2", "B3", "B4")
+C_X1Y1_only <-
+make_possible_data(model, given = given, vars = "M", N = 2,
+condition = c("X==1 & Y==1"), prefix = "C")
+names(C_X1Y1_only)[-c(1:2)] <- c("C1", "C2", "C3")
+kable(given)
+# Combine data types
+df <- A_on_regression_line[,-2] %>%
+merge(B_off_regression_line[,-2], by = "event", all = TRUE) %>%
+merge(C_X1Y1_only[,-2], by = "event", all = TRUE) %>%
+dplyr:::mutate_if(is.numeric, ~replace(., is.na(.), 0))
+# table(duplicated(t(df)))
+digits <- 3
+if(do_diagnosis){
+if(!exists("fit")) fit  <- fitted_model()
+strategies <-
+list(A_on_regression_line, B_off_regression_line, C_X1Y1_only)
+write_rds(strategies, "saved/illustration_strategies.rds")
+estimates_dbs <- lapply(strategies, function(s)
+make_estimates_database(model, given, possible_data = s, queries = "Y[X=1]-Y[X=0]")
+)
+write_rds(estimates_dbs, "saved/illustration_estimates.rds")
+# The reference model is the original model updated with the XY data we've already seen.
+reference_model <- gbiqq(model, data, stan_model = fit)
+write_rds(reference_model, "saved/reference_XMY_updated_model.rds")
+probabilities <- lapply(strategies, function(s)
+average_data_probabilities(reference_model, s, using = "posteriors", sims = 3000)
+)
+write_rds(probabilities, "saved/illustration_probabilities.rds")
+}
+if(!exists("fit")) fit  <- fitted_model()
+strategies <-
+list(A_on_regression_line, B_off_regression_line, C_X1Y1_only)
+write_rds(strategies, "saved/illustration_strategies.rds")
+estimates_dbs <- lapply(strategies, function(s)
+make_estimates_database(model, given, possible_data = s, queries = "Y[X=1]-Y[X=0]")
+)
+strategies
+strategies
+estimates_dbs <- lapply(strategies, function(s)
+make_estimates_database(model, given, possible_data = s[, -2], queries = "Y[X=1]-Y[X=0]")
+)
+write_rds(estimates_dbs, "saved/illustration_estimates.rds")
+estimates_dbs
+estimates_dbs
+reference_model <- gbiqq(model, data, stan_model = fit)
+write_rds(reference_model, "saved/reference_XMY_updated_model.rds")
+probabilities <- lapply(strategies, function(s)
+average_data_probabilities(reference_model, s, using = "posteriors", sims = 3000)
+)
+write_rds(probabilities, "saved/illustration_probabilities.rds")
+reference_model <- read_rds("saved/reference_XMY_updated_model.rds")
+probabilities   <- read_rds("saved/illustration_probabilities.rds")
+strategies      <- read_rds("saved/illustration_strategies.rds")
+estimates_db    <- read_rds("saved/illustration_estimates.rds")
+digits <- 3
+df <- rbind(df,
+c("Probability", round(unlist(probabilities),digits)),
+c("Posterior mean",   (unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean))))))),
+c("Posterior variance",   round(unlist(lapply(estimates_db, function(j)   unlist(unlist(lapply(j, function(k) k$mean^2))))), digits)))
+kable(df, caption = "Each column shows a possible distribution of data that can be generated from a given strategy. We calculate the probability of each data possibility, given the data seen so far, and the posterior variance associated with each one.", digits = 2)
+expected_posterior_var <- sapply(1:3, function(i)
+sum(probabilities[[i]]*unlist(lapply(estimates_db[[i]], function(x) x$sd^2)))
+)
+kable(data.frame(Strategy = c("Online", "Offline", "X=1, Y=1"), Variance = expected_posterior_var), digits = 3)
+diagnosis <-
+diagnose_strategies(
+analysis_model = model,
+given = given,
+data_strategies = list(
+A_online =  list(N=c(1,1), within = TRUE, vars = "M",
+conditions = c("X==1 & Y==1", "X==0 & Y==0")),
+B_offline = list(N=c(1,1), within = TRUE, vars = "M",
+conditions = c("X==1 & Y==0", "X==0 & Y==1")),
+C_X1Y1 = list(N=2, within = TRUE, vars = "M",
+conditions = c("X==1 & Y==1"))),
+queries = "Y[X=1] - Y[X=0]",
+sims = 6000
+)
+write_rds(diagnosis, "saved/ch13diagnosis.rds")
+diagnosis
+with(diagnosis$diagnoses_df, plot(MSE, post_var)
+)
+abline(a=0, b = 1)
+kable(diagnosis$diagnoses_df[, c(1, 4, 5)], digits = 3)
+? text
+with(diagnosis$diagnoses_df, plot(MSE, post_var))
+abline(a=0, b = 1)
+with(diagnosis$diagnoses_df, text(MSE, post_var, strategy))
+with(diagnosis$diagnoses_df, plot(MSE, post_var))
+abline(a=0, b = 1)
+with(diagnosis$diagnoses_df, text(MSE, post_var, strategy, pos = 3))
+diagnosis <-
+diagnose_strategies(
+analysis_model = model,
+given = given,
+data_strategies = list(
+A_online =  list(N=c(1,1), within = TRUE, vars = "M",
+conditions = c("X==1 & Y==1", "X==0 & Y==0")),
+B_offline = list(N=c(1,1), within = TRUE, vars = "M",
+conditions = c("X==1 & Y==0", "X==0 & Y==1")),
+C_X1Y1 = list(N=2, within = TRUE, vars = "M",
+conditions = c("X==1 & Y==1")),
+D_random = list(N=2, within = TRUE, vars = "M")),
+queries = "Y[X=1] - Y[X=0]",
+sims = 60
+)
+diagnosis <-
+diagnose_strategies(
+analysis_model = model,
+given = given,
+data_strategies = list(
+A_online =  list(N=c(1,1), within = TRUE, vars = "M",
+conditions = c("X==1 & Y==1", "X==0 & Y==0")),
+B_offline = list(N=c(1,1), within = TRUE, vars = "M",
+conditions = c("X==1 & Y==0", "X==0 & Y==1")),
+C_X1Y1 = list(N=2, within = TRUE, vars = "M",
+conditions = c("X==1 & Y==1")),
+D_random = list(N=2, within = TRUE, vars = "M", conditions = TRUE)),
+queries = "Y[X=1] - Y[X=0]",
+sims = 60
+)
+diagnosis
+with(diagnosis$diagnoses_df, plot(MSE, post_var))
+abline(a=0, b = 1)
+with(diagnosis$diagnoses_df, text(MSE, post_var, strategy, pos = 3))
+diagnosis <-
+diagnose_strategies(
+analysis_model = model,
+given = given,
+data_strategies = list(
+A_online =  list(N=c(1,1), within = TRUE, vars = "M",
+conditions = c("X==1 & Y==1", "X==0 & Y==0")),
+B_offline = list(N=c(1,1), within = TRUE, vars = "M",
+conditions = c("X==1 & Y==0", "X==0 & Y==1")),
+C_X1Y1 = list(N=2, within = TRUE, vars = "M",
+conditions = c("X==1 & Y==1")),
+D_random = list(N=2, within = TRUE, vars = "M", conditions = TRUE)),
+queries = "Y[X=1] - Y[X=0]",
+sims = 6000
+)
+write_rds(diagnosis, "saved/ch13diagnosis.rds")
+install.packages("bookdown")
+model <- make_model("K-> X -> Y <- K")
+library(gbiqqtools)
+model <- make_model("K-> X -> Y <- K")
+library(gbiqq)
+data_strategies = list(
+N4L0 =  list(N=4, withins = FALSE, vars = list(c("X", "Y")), conditions = TRUE),
+N2L2 =  list(N=2, withins = FALSE, vars = list(c("X", "K", "Y")), conditions = TRUE),
+N3L1 =  list(N=list(1,2), withins = FALSE, vars = list(c("X", "K", "Y"), c("X", "Y")), conditions = TRUE))
+possible_data_list = lapply(data_strategies, function(ds)
+with(ds, make_possible_data(model = model, given = NULL,
+N = N, withins = withins, conditions = conditions, vars = vars)))
+library(gbiqqtools)
+model <- make_model("K-> X -> Y <- K")
+data_strategies = list(
+N4L0 =  list(N=4, withins = FALSE, vars = list(c("X", "Y")), conditions = TRUE),
+N2L2 =  list(N=2, withins = FALSE, vars = list(c("X", "K", "Y")), conditions = TRUE),
+N3L1 =  list(N=list(1,2), withins = FALSE, vars = list(c("X", "K", "Y"), c("X", "Y")), conditions = TRUE))
+possible_data_list = lapply(data_strategies, function(ds)
+with(ds, make_possible_data(model = model, given = NULL,
+N = N, withins = withins, conditions = conditions, vars = vars)))
+data_strategies
+possible_data_list = lapply(data_strategies, function(ds)
+with(ds, make_possible_data(model = model, given = NULL,
+N = N, withins = withins, conditions = conditions, vars = vars)))
+rm(list = ls())
+rm(list = ls())
+library(gbiqq)
+model <- make_model("K-> X -> Y <- K")
+data_strategies = list(
+N4L0 =  list(N=4, withins = FALSE, vars = list(c("X", "Y")), conditions = TRUE),
+N2L2 =  list(N=2, withins = FALSE, vars = list(c("X", "K", "Y")), conditions = TRUE),
+N3L1 =  list(N=list(1,2), withins = FALSE, vars = list(c("X", "K", "Y"), c("X", "Y")), conditions = TRUE))
+possible_data_list = lapply(data_strategies, function(ds)
+with(ds, make_possible_data(model = model, given = NULL,
+N = N, withins = withins, conditions = conditions, vars = vars)))
+library(gbiqqtools)
+data_strategies = list(
+N4L0 =  list(N=4, withins = FALSE, vars = list(c("X", "Y")), conditions = TRUE),
+N2L2 =  list(N=2, withins = FALSE, vars = list(c("X", "K", "Y")), conditions = TRUE),
+N3L1 =  list(N=list(1,2), withins = FALSE, vars = list(c("X", "K", "Y"), c("X", "Y")), conditions = TRUE))
+possible_data_list = lapply(data_strategies, function(ds)
+with(ds, make_possible_data(model = model, given = NULL,
+N = N, withins = withins, conditions = conditions, vars = vars)))
+lapply(possible_data_list, length)
+# Estimands database
+type_distribution <- draw_type_prob_multiple(reference_model, using = using)
+using <- "posteriors"
+param_dist <- (rstan::extract(reference_model$posterior, pars= "lambdas")$lambdas)[1:sims,]
+data_strategies = list(
+N4L0 =  list(N=4, withins = FALSE, vars = list(c("X", "Y")), conditions = TRUE),
+N2L2 =  list(N=2, withins = FALSE, vars = list(c("X", "K", "Y")), conditions = TRUE),
+N3L1 =  list(N=list(1,2), withins = FALSE, vars = list(c("X", "K", "Y"), c("X", "Y")), conditions = TRUE))
+possible_data_list = lapply(data_strategies, function(ds)
+with(ds, make_possible_data(model = model, given = NULL,
+N = N, withins = withins, conditions = conditions, vars = vars)))
+diagnosis <-
+diagnose_strategies(
+analysis_model = model,
+possible_data_list = possible_data_list,
+data_strategies = data_strategies,
+queries = "Y[X=1] - Y[X=0]",
+sims = 400
+)
+diagnosis <-
+diagnose_strategies(
+analysis_model = model,
+possible_data_list = possible_data_list,
+data_strategies = data_strategies,
+queries = "Y[X=1] - Y[X=0]",
+sims = 400
+)
+fitted_model()
+fitted_model()
+library(gbiqq)
+library(gbiqqtools)
+fitted_model()
+M <- file.path(Sys.getenv("HOME"), ".R", ifelse(.Platform$OS.type == "windows", "Makevars.win", "Makevars"))
+file.edit(M)

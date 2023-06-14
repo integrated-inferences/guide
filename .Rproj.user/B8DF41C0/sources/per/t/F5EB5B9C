@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1570017286586.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2657688613",
+    "id" : "F5EB5B9C",
+    "lastKnownWriteTime" : 1570489386,
+    "last_content_update" : 1570548265228,
+    "path" : "C:/Dropbox/github/integrated_inferences/13-caseselection.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "279,3",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

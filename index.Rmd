@@ -1,0 +1,61 @@
+--- 
+title: 'Causal Models: Guide to `CausalQueries`'
+author: "Macartan Humphreys and Alan Jacobs"
+date: "`r Sys.Date()`"
+bibliography:
+- bib.bib
+- packages.bib
+description: Model based strategies for integrating qualitative and quantitative inferences.
+documentclass: book
+fontsize: 12pt
+github-repo: rstudio/causalmodels
+header-includes:
+- \usepackage{amsmath}
+- \usepackage{color}
+- \usepackage{amssymb}
+- \usepackage{amsfonts}
+- \usepackage{dsfont}
+link-citations: yes
+site: bookdown::bookdown_site
+biblio-style: apalike
+---
+
+```{r setup, include=FALSE}
+
+ # - \usepackage{mathspec}
+
+options(
+  htmltools.dir.version = FALSE, formatR.indent = 2,
+  width = 55, digits = 4, warnPartialMatchAttr = FALSE, warnPartialMatchDollar = FALSE
+
+)
+```
+
+# Preface {-}
+
+```{r, include=FALSE}
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+
+```
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("_packages_used.R")
+```
+
+**Map**
+
+This guide is supplementary material for our book-in-progress *Integrated Inferences*.
+
+* The [first part](#cm)  of the guide provides a brief motivation of causal models.
+* The [second part](#package) describes how the package works and how to use it. 
+* The [third part](#applications)  illustrates applications of the package for defining and learning from a set of canonical causal models. 
+* The short [last part](#notation) has a notation guide.
+
+
+**Credits**
+
+The approach used in CausalQueries is a generalization of the biqq models described in "Mixing Methods: A Bayesian Approach" [@humphreys2015mixing]. The conceptual extension makes use of work on probabilistic causal models described in Pearl's *Causality* [@pearl2009causality]. The approach to generating a generic stan function that can take data from arbitrary models was developed in key contributions by [Jasper Cooper](http://jasper-cooper.com/) and [Georgiy Syunyaev](http://gsyunyaev.com/). [Lily Medina](https://lilymedina.github.io/) did magical work pulling it all together and developing approaches to characterizing confounding and defining estimands. Clara Bicalho helped figure out a nice syntax for causal statements. Julio Solis made many key contributions figuring out how to simplify the specification of priors. Merlin Heidemanns figure out the `rstantools` integration and made myriad code improvements.

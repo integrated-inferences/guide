@@ -1,0 +1,19 @@
+library(gbiqq)
+
+model <- make_model("I -> M -> D <- P; I -> D", add_priors = FALSE) %>% #Specify the DAG
+  
+  set_restrictions(c( 
+    # "(M[I=1] < M[I=0])", 
+    "(D[I=1] > D[I=0]) | (D[M=1] < D[M=0]) | (D[P=1] < D[P=0])"))  %>% #Exclude a set of negative-effect and positive-effect nodal types.
+  
+  set_confound(list(I = "(M[I=1] == 1) & (M[I=0] == 0)"))  #Allow I to have a distinct conditional distribution when M's nodal type is \theta_01. 
+  
+
+out <-  query_model(
+          model, 
+          queries = "(M[I=1] < M[I=0]) & 
+                     (D[M=M[I=0]] > D[M=M[I=1]]) & 
+                     (D[I=1, M=M[I=1]] == D[I=0, M=M[I=1]])", 
+          subsets = "I==0 & D==1")
+
+out

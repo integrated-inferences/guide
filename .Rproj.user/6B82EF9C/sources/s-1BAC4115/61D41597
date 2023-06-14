@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1575625375061.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "61D41597",
+    "lastKnownWriteTime" : 1575536807,
+    "last_content_update" : 1575536807,
+    "path" : "C:/Dropbox/github/gbiqq/R/prep_gbiqq_data.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "56,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 43,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

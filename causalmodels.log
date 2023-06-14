@@ -1,0 +1,129 @@
+
+! fmtutil: fmtutil is using the following fmtutil.cnf files (in precedence order):
+! fmtutil:   c:/users/solis/appdata/roaming/tinytex/texmf-dist/web2c/fmtutil.cnf
+! fmtutil: fmtutil is using the following fmtutil.cnf file for writing changes:
+! fmtutil:   c:/users/solis/.tinytex/texmf-config/web2c/fmtutil.cnf
+! fmtutil [INFO]: writing formats under c:/users/solis/.tinytex/texmf-var/web2c
+! fmtutil [INFO]: --- remaking xelatex with xetex
+! fmtutil: running `xetex -ini   -jobname=xelatex -progname=xelatex -etex xelatex.ini' ...
+! This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/W32TeX) (INITEX)
+!  restricted \write18 enabled.
+! entering extended mode
+
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/tex-ini-files/xe
+! latex.ini
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/latex.ltx
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/texsys.cfg)
+! ./texsys.aux found
+
+
+! \@currdir set to: ./.
+
+
+! Assuming \openin and \input 
+! have the same search path.
+
+
+! Defining UNIX/DOS style filename parser.
+
+! catcodes, registers, parameters,
+! LaTeX2e <2020-02-02> patch level 2
+! hacks, control, par, spacing, files, font encodings, lengths,
+! ====================================
+
+! Local config file fonttext.cfg used
+
+! ====================================
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/fonttext.cfg
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/fonttext.ltx
+! === Don't modify this file, use a .cfg file instead ===
+
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omlenc.def)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omsenc.def)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/ot1enc.def)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/t1enc.def)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/ts1enc.def)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/tuenc.def)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/tulmr.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/tulmss.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/tulmtt.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/t1cmr.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/ot1cmr.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/ot1cmss.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/ot1cmtt.fd)))
+
+! ====================================
+
+! Local config file fontmath.cfg used
+
+! ====================================
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/fontmath.cfg
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/fontmath.ltx
+! === Don't modify this file, use a .cfg file instead ===
+
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omlcmm.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omscmsy.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omxcmex.fd)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/ucmr.fd)))
+! ====================================
+
+! Local config file preload.cfg used
+
+! =====================================
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/preload.cfg
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/preload.ltx))
+! page nos., x-ref, environments, center, verbatim, math definitions, boxes,
+! title, sectioning, contents, floats, footnotes, index, bibliography, output,
+!  Unicode character data,
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/unicode-data/loa
+! d-unicode-data.tex 
+! load-unicode-data.tex v1.11 (2019-11-28)
+! Reading Unicode data
+! # UnicodeData-12.1.0.txt
+! # Modified 2019-04-01 05:08:00 GMT [MFK]
+! )
+! ===========================================
+! Local configuration file hyphen.cfg used
+! ===========================================
+
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/babel/hyphen.cfg
+
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/babel/xebabel.de
+! f)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/babel/switch.def
+! )
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/hyphen/hyphen.te
+! x)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/hyphen/dumyhyph.
+! tex)
+! (c:/Users/solis/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/hyphen/zerohyph.
+! tex)
+! ! I can't find file `dehypht-x-2019-04-04.tex'.
+! <to be read again> 
+!                    \relax 
+! l.172   \repeat
+               
+! (Press Enter to retry, or Control-Z to exit)
+! Please type another input file name: 
+! ! Emergency stop.
+! <to be read again> 
+!                    \relax 
+! l.172   \repeat
+               
+! No pages of output.
+! Transcript written on xelatex.log.
+! fmtutil [ERROR]: running `xetex -ini   -jobname=xelatex -progname=xelatex -etex xelatex.ini <nul' return status: 1
+! fmtutil [ERROR]: returning error due to option --strict
+! fmtutil [INFO]: log file copied to: c:/users/solis/.tinytex/texmf-var/web2c/xetex/xelatex.log
+! fmtutil [INFO]: not selected formats: 12
+! fmtutil [INFO]: failed to build: 1 (xetex/xelatex)
+! fmtutil [INFO]: total formats: 13
+! fmtutil [INFO]: exiting with status 1
+! ...rs\solis\AppData\Roaming\TinyTeX\bin\win32\runscript.tlu:907: command failed with exit code 1:
+! perl.exe c:\Users\solis\AppData\Roaming\TinyTeX\texmf-dist\scripts\texlive\fmtutil.pl  --user --byfmt xelatex
+! Running the command C:\Users\solis\AppData\Roaming\TinyTeX\bin\win32\fmtutil-user.exe
+
+! kpathsea: Running mktexfmt xelatex.fmt
+
+! The command name is C:\Users\solis\AppData\Roaming\TinyTeX\bin\win32\mktexfmt

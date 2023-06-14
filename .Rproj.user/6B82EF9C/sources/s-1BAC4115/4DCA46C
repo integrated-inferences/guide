@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1570117983779.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "4DCA46C",
+    "lastKnownWriteTime" : 7232611042762257267,
+    "last_content_update" : 1570117983779,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "context" : "package:gbiqqtools:::average_data_probabilities"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 32,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_code_browser"
+}

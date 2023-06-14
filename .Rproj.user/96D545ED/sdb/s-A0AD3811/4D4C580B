@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "\nn <- 100\n\nsim <- function() {\n  b   <- rnorm(1)\n  e1  <- rnorm(n)\n  e2  <- rnorm(n)\n  x_r <- rnorm(n)\n  x_o <- e2\n  y_obs1 <- 1*x_o+e1+e2\n  y_exp1 <- 1*x_r+e1+e2\n  y_obs2 <- b*x_o+e1+e2\n  y_exp2 <- b*x_r+e1+e2\n  b1 <- summary(lm(y_obs1~x_o))$coef[2,1]\n  b2 <- summary(lm(y_exp1~x_r))$coef[2,1]\n  b3 <- summary(lm(y_obs2~x_o))$coef[2,1]\n  b4 <- summary(lm(y_exp2~x_r))$coef[2,1]\n  c(b1-1, b2 - 1, b3 - b, b4 - b)\n}\n\nsims <- replicate(100000, sim())\nout <- cbind(means = apply(sims, 1, mean), sds =apply(sims, 1, sd))\nout",
+    "created" : 1502286630330.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "1824938073",
+    "id" : "4D4C580B",
+    "lastKnownWriteTime" : 3419473789575321445,
+    "last_content_update" : 1502288585864,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

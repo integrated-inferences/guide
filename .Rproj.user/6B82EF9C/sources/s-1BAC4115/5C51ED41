@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567946974147.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "5C51ED41",
+    "lastKnownWriteTime" : 1572008244,
+    "last_content_update" : 1573774689805,
+    "path" : "C:/Dropbox/github/integrated_inferences/14-Justifying-Models.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "35,178",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 18,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "n <- 100\n\nsim <- function() {\n  b <- rnorm(1)\n  x <- rnorm(n)\n  y <- b*x+rnorm(n)\n  bhat <- summary(lm(y~x))$coef[2,1]\n  c(bhat, b - bhat)\n}\n\nsims <- replicate(50000, sim())\ncbind(means = apply(sims, 1, mean), sds =apply(sims, 1, sd))\n",
+    "created" : 1502197419446.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "3701995203",
+    "id" : "19C6530B",
+    "lastKnownWriteTime" : 30962698416226401,
+    "last_content_update" : 1502197938425,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

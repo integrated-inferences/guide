@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1576704525098.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "D212A189",
+    "lastKnownWriteTime" : 1578147815,
+    "last_content_update" : 1578836616238,
+    "path" : "C:/Dropbox/github/causalmodels/3_models.Rmd",
+    "project_path" : "3_models.Rmd",
+    "properties" : {
+        "cursorPosition" : "1804,376",
+        "ignored_words" : "counterfactual,rds,compliers,frontdoor,ignorability,collider,covariate,Collider,missingness,dgp,Estimand,sd,unmodelled,Manski,confounder,covariance,modelled,diag,monotonicity,confounders,colliders,colliderQ,colliderQW,twopaths,somethingnothing,unconfounded,gbiqq,frankenstein,rightarrow,Probative,acyclic,complier,Reconceived,PChist,NoC,appPTinf,Evera's,illistration,vanevera\n",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 46,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

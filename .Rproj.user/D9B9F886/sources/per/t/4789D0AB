@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1560969391225.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1108400644",
+    "id" : "4789D0AB",
+    "lastKnownWriteTime" : 1560982898,
+    "last_content_update" : 1560982898253,
+    "path" : "~/Dropbox/ProcessTracing/6 Book/ii/04-causal-questions.Rmd",
+    "project_path" : "04-causal-questions.Rmd",
+    "properties" : {
+        "cursorPosition" : "233,45",
+        "scrollLine" : "220"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

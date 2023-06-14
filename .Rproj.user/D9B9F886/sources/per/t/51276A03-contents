@@ -1,0 +1,57 @@
+---
+title: "Integrated Inferences"
+author: "Macartan Humphreys and Alan Jacobs"
+header-includes:
+  - \usepackage{multirow}
+  - \usepackage{graphicx}
+  - \newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
+  - \usepackage{bbold, mathabx}
+bibliography: bib.bib
+output: 
+  beamer_presentation:
+    slide_level: 2
+---
+
+```{r, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include = FALSE}
+source("../6 Book/ii/hj_dag.R")
+```
+
+
+## Draw your own DAG: inequality and democracy
+
+* Boix: Read Ansell and Samuels, pp. 62-64
+
+* Represent Boix's argument as a DAG
+
+    * Follow rules for drawing a DAG
+    
+* Can you capture everything?
+
+    * What are acceptable simplifications?
+    
+* Consider using dagitty web tool at http://dagitty.net/dags.html
+
+* Email code to alan.jacobs@ubc.ca
+    
+
+## Draw your own DAG: inequality and democracy
+
+* Acemoglu and Robinson: Read Ansell and Samuels, pp. 64-65  
+
+* Represent Boix's argument as a DAG
+
+    * Follow rules for drawing a DAG
+    
+    * Can you capture everything?
+    
+    
+## Comparing DAGs     
+    
+* What are key differences between Boix and A/R graphs?
+
+* Are there differences in functional equations? Or in beliefs about types implied by the two?

@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1509904388496.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1695525454",
+    "id" : "8830F1D8",
+    "lastKnownWriteTime" : 1509912279,
+    "last_content_update" : 1509912279,
+    "path" : "~/Dropbox/04_RA and TA work/02 Macartan/ProcessTracing/6 Book/ii/01-intro.Rmd",
+    "project_path" : "01-intro.Rmd",
+    "properties" : {
+        "cursorPosition" : "57,0",
+        "scrollLine" : "60"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

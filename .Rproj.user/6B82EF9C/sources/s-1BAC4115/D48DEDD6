@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1578846984596.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "D48DEDD6",
+    "lastKnownWriteTime" : 1578847034,
+    "last_content_update" : 1578847034019,
+    "path" : "C:/Dropbox/github/integrated_inferences/07-PT-application.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "403,28",
+        "last_setup_crc32" : "",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 53,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

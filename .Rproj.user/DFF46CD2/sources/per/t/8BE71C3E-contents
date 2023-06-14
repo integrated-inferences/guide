@@ -1,0 +1,71 @@
+# Mixed-Method Application: Inequality and Democracy Revisited
+
+Now for some data
+
+
+
+```{r loadUDs, include = FALSE, comment = NA, echo = FALSE}
+library(knitr)
+UDs <- read.csv("Notes and other/ineq_democ_lambdascorrected.csv")
+UDs <- UDs[,c(1,3,2,4,5,7,6,8)] # Reorder to reflect PIMD ordering
+
+
+library("rstan") 
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+
+# FLAT DATA (Quantitatiate prior on D1)
+D0 <- list(
+  PIM_D1    = rep(0,8),
+  ID        <- rep(0,4),
+  M_u_prior = c(.1, .4, .25, .25)*2, #    // initial hyperparameters for the Dirichlet distribution; provided as data. Note independent priors on Y and K.
+  D_u_prior = rep(.5,20),     #    ;    // initial hyperparameters for the Dirichlet distribution; provided as data
+  pi_alpha  = c(.5, .5, .5),  #;     // initial hyperparameters for the beta distributions for three pis
+  pi_beta   = c(.5, .5, .5)  # initial hyperparameters for the beta distributions for three pis
+)
+
+F0 <- stan(file = 'Notes and other/stan_biqq_PIMD.stan', 
+             data = D0, 
+             iter = 2000, chains = 4)
+
+M0 <- extract(F0)
+A0 <- apply(M0$pr_ab_PIMD, 2, mean)
+
+```
+
+```{r}
+
+pimd_data <- read.csv("../Chapters/5 Applications/CGV_data/Processed/Inequality and Democracy Application Data.csv")
+
+library(dplyr)
+pimd_data_84 <- pimd_data %>%
+                dplyr::filter(Excluded==0)%>%
+                dplyr::select(P,I,M,D)
+ID <- as.vector(table(pimd_data$D, pimd_data$I))
+names(ID) <- c("00", "01", 10, 11)
+
+with(pimd_data[pimd_data$D==1,], table(M,I, P))
+PIM <- as.vector(with(pimd_data[pimd_data$D==1,], table(M,I, P)))
+
+D1 <- list(
+  PIM_D1    = PIM,
+  ID        = ID,
+  M_u_prior = c(.1, .4, .25, .25)*2, #    // initial hyperparameters for the Dirichlet distribution; provided as data. Note independent priors on Y and K.
+  D_u_prior = rep(.5,20),     #    ;    // initial hyperparameters for the Dirichlet distribution; provided as data
+  pi_alpha  = c(.5, .5, .5),  #;     // initial hyperparameters for the beta distributions for three pis
+  pi_beta   = c(.5, .5, .5)  # initial hyperparameters for the beta distributions for three pis
+)
+
+
+F1 <-  stan(file = 'Notes and other/stan_biqq_PIMD.stan', 
+             data = D1, 
+             iter = 2000, chains = 4)
+
+# Probability that I caused D given I=1, D=1, M=1, P=1:
+
+A1 <- extract(F1)
+
+cbind(A0, A1)  
+  
+```

@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1575579191015.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "859846210",
+    "id" : "67CAAA7",
+    "lastKnownWriteTime" : 1484150765,
+    "last_content_update" : 1484150765,
+    "path" : "C:/Dropbox/github/causalmodels/_build.sh",
+    "project_path" : "_build.sh",
+    "properties" : {
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 37,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "sh"
+}

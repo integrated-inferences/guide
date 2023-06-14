@@ -1,0 +1,388 @@
+---
+title: "Integrated Inferences"
+author: "Macartan Humphreys and Alan Jacobs"
+header-includes:
+  - \usepackage{multirow}
+  - \usepackage{graphicx}
+  - \newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
+  - \usepackage{bbold, mathabx}
+bibliography: bib.bib
+output: 
+  beamer_presentation:
+    slide_level: 2
+    incremental: true
+---
+
+```{r, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r echo=FALSE}
+knitr::knit_hooks$set(mysize = function(before, options, envir) {
+  if (before) 
+    return(options$size)
+})
+```
+
+
+```{r, include = FALSE}
+source("../6 Book/ii/hj_dag.R")
+```
+
+# An Application: How Does Inequality Affect Democratization?
+
+## How Does Inequality Affect Democratization?
+
+We start with prior knowledge---the literature
+
+Key claims
+
+* Boix: High inequality prevents democratization
+
+* Acemoglu and Robinson: Higher inequality aids democratization at the low end; prevents democratization at the high end
+
+* Ansell and Samuels: It's complicated.
+    * Rising land inequality prevents democratization
+    * Rising industrial inequality causes democratization
+
+* Haggard and Kaufman (2012)
+    * Our data source
+    * Our foil
+
+## Mapping from literature to DAG: Higher-level model
+
+
+```{r dagdemochigh, echo = FALSE, fig.width = 7, fig.height = 5, fig.align="center", out.width='.9\\textwidth'}
+
+hj_dag(x = c(1,2,2),
+       y = c(1,1,2),
+       names = c(
+         "Inequality (I)",
+         "Democratization (D)",  
+         expression(paste(theta^D))
+         ),
+       arcs = cbind( c(1,3),
+                     c(2,2)),
+       add_functions = 0, 
+       contraction = .28, 
+       padding = .2
+)
+
+
+```
+
+
+## What one could do: Boix
+
+What one *could* do:
+
+
+```{r echo=FALSE, out.width="300px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/boixfull.png")
+
+```
+
+
+## What one could do: Acemoglu-Robinson
+
+What one *could* do:
+
+```{r echo=FALSE, out.width="300px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/arfull.png")
+
+```
+
+
+## What one could do: Ansell-Samuels
+
+What one *could* do:
+
+```{r echo=FALSE, out.width="300px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/ansellsamuelsfull.png")
+
+```
+
+## What one could do: the *literature*
+
+
+```{r echo=FALSE, out.width="300px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/integratedineqdemdag.png")
+
+```
+
+
+
+## Mapping from literature to DAG: A tractable lower-level model
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 5, fig.align="center", out.width='.9\\textwidth'}
+
+hj_dag(x = c(1,1.5,3,3, 1.5, 2.2),
+       y = c(1,2,2,3, 3, 3),
+       names = c(
+         "I",
+        "Mobilization (M)",  
+         "D",  
+         expression(paste(theta[D]^{lower})),
+        expression(paste(theta[M])),
+         "Int'l pressure (P)"
+         ),
+       arcs = cbind( c(1,2, 4, 6, 5, 1),
+                     c(2,3, 3, 3, 2, 3)),
+       add_functions = 0, 
+       contraction = .2, 
+       padding = .2
+)
+
+
+```
+
+
+
+## Forming priors
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 5, fig.align="center", out.width='.6\\textwidth'}
+
+hj_dag(x = c(1,1.5,3,3, 1.5, 2.2),
+       y = c(1,2,2,3, 3, 3),
+       names = c(
+         "I",
+        "Mobilization (M)",  
+         "D",  
+         expression(paste(theta[D]^{lower})),
+        expression(paste(theta[M])),
+         "Int'l pressure (P)"
+         ),
+       arcs = cbind( c(1,2, 4, 6, 5, 1),
+                     c(2,3, 3, 3, 2, 3)),
+       add_functions = 0, 
+       contraction = .2, 
+       padding = .2
+)
+
+
+```
+
+* We form priors in two ways
+
+    * Qualitative restrictions only: monotonic effects
+
+    * Quantitative weights: taking fuller account of Ansell and Samuels, allow negative effect of $I$ on $M$ but assign a low probability
+
+## Types  $_{ab}^{cd}\theta_{ef}^{gh}$ 
+
+Given three ancestor variables for $Y$, we write   $_{ab}^{cd}\theta_{ef}^{gh}$ to indicate what happens under all eventualities.
+
+* The left block of cases refer to $P=0$
+* Horizontal shifts (within blocks) represent changes of $I$ from 0 to 1. 
+* Vertical shifts represent changes from $M=0$ to $M=1$
+
+So e.g. $_{00}^{00}\theta_{00}^{01}$  means democratization only if $P=1, I=1, D=1$.
+
+## Restrictions
+
+* No neg direct effect of  mobilization on democratization ($M$ on $D$)
+      * This rules out e.g. $_{00}^{11}\theta_{01}^{00}$  
+
+* No pos direct effect of  inequality on democratization ($I$ on $D$)
+      * This rules out e.g. $_{00}^{11}\theta_{00}^{01}$  
+
+* No neg direct effect of  pressure on democratization ($P$ on $D$)
+      * This rules out e.g. $_{00}^{01}\theta_{00}^{00}$  
+
+* Also: No neg direct effect of inequality on mobilization ($I$ on $M$)
+
+
+
+## Restrictions
+
+* These restrictions reduce the set of types from 1024 (!!) ($2^8 \times 2^2$) to 60 ($20\times 3$)
+
+* These are brave qualitative restrictions
+
+
+## Restrictions: Excluded types
+
+
+```{r echo=FALSE, out.width="50%", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/ID_exclude.png")
+
+```
+
+
+
+## Restrictions
+
+
+```{r echo=FALSE, out.width="90%", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/ID_admissible_types.png")
+
+```
+
+## Model
+
+```{r, mysize=TRUE, size='\\tiny', eval = FALSE, echo = TRUE}
+# Specification of a model of inequality and democratization
+
+pi_P = .5
+pi_I = .5
+M <- biqq_model(
+     var_names =  c("Pressure", "Inequality", "Mobilization", "Democracy"), 
+
+     var_functions =
+      list(f_P = function(U,V) U[1] < pi_P,
+           f_I = function(U,V) U[2] < pi_I,
+           f_M = function(U,V) (U[3]==1)*(1-V[2]) + (U[3]==2)*V[2]+ (U[3]==4),
+           f_D = function(U, V) { f = function(j) {mean(j == V[1:3])==1}
+                                      UDs[U[[4]],][apply(perms, 1, f)]} ), 
+      P  =  function() {
+             c(UP = runif(1), 
+               UI = runif(1), 
+               UM = (1:4 %*% rmultinom(1, 1, prob = c(0, .5, .25, .25)))[[1]],
+               UD = sample(20,1))}
+               )
+
+```
+
+This model relies on the matrix of admissible types as separate file, `UDs`.
+
+
+## Empirical strategies
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 5, fig.align="center", out.width='.6\\textwidth'}
+
+hj_dag(x = c(1,1.5,3,3, 1.5, 2.2),
+       y = c(1,2,2,3, 3, 3),
+       names = c(
+         "I",
+        "Mobilization (M)",  
+         "D",  
+         expression(paste(theta[D]^{lower})),
+        expression(paste(theta[M])),
+         "Int'l pressure (P)"
+         ),
+       arcs = cbind( c(1,2, 4, 6, 5, 1),
+                     c(2,3, 3, 3, 2, 3)),
+       add_functions = 0, 
+       contraction = .2, 
+       padding = .2
+)
+
+
+```
+
+* Observe $X,Y$ (i.e. $I$, $D$)
+
+* Observe $M$
+
+* Observe $P$
+
+
+## Results: I=0, D=1 (qual. priors)
+
+
+```{r echo=FALSE, out.width="320px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/i0d1results.png")
+
+```
+
+Did *no inequality* cause denocratization?
+
+* $M$ (mediator): only moderately informative.
+
+    * A negative effect of inequality can only run via direct path
+    
+    * $M$ informative only as a moderator, not as a mediator.
+
+* $P$ (moderator): highly informative.
+
+    * If there was pressure but still no democracy, inequality may have had countervailing effects.
+    
+    <!-- * Presence of pressure leaves less room for inequality to cause democratization -->
+
+## Results: I=1, D=1 (qual. restrictions)
+
+
+```{r echo=FALSE, out.width="320px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/i1d1results.png")
+
+```
+
+Did *inequality* cause denocratization?
+
+* $M$ Now highly informative in its role as a *mediator*.
+
+    * A positive effect of inequality has to run through mobilization
+    
+* $P$ (moderator): Highly informative, *unless you already know that there was no mobilization*
+
+    * Pressure again acts as substitute for inequality so if $P$, then $I$ less likely to be the cuase
+    * If no $M$ then you know enough without $P$
+
+
+
+## Results: Qual vs. Quant priors: $I=1, D=0$
+
+* Qualitative restrictions (monotonicity)
+```{r echo=FALSE, out.width="290px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/i0d1results.png")
+
+```
+
+* Quantitative restrictions (negative effect of $I$ on $M$ permitted)
+```{r echo=FALSE, out.width="290px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/i0d1quantresults.png")
+
+```
+* Key difference is when looking for negative effect
+
+    * Now negative effect *can* run through $M$    
+  
+    * So $M$ now informative as a *mediator* as well as a moderator
+
+
+## Uncertainty-reduction for different strategies
+
+```{r echo=FALSE, out.width="320px", fig.align="center", eval = TRUE}
+
+knitr::include_graphics("figures/uncertaintyhk.png")
+
+```
+
+* Note prior variances are different because we focus on different estimands.
+* Numbers in parentheses are for quantitative priors
+
+<!-- ## Comparing to Haggard and Kaufman (2012) analysis -->
+
+<!-- * In H&K:  -->
+
+<!--     * Seeing no mobilization = not a "distributive" transition $\Rightarrow$ inequality didn't matter, *regardless* of $I$ or $D$ value -->
+
+<!--     * Main clue is mediator -->
+
+<!--     * Critique inequality literature for "cross-cutting effects" but don't model them -->
+
+<!-- * Our analysis suggests: -->
+
+<!--     * Inferences from the clues depend on the model. -->
+
+<!--     * Seeing no mobilization with low inequality *supports* inequality effect under monotonicity -->
+
+<!--     * But *undercuts* inequality effect *if* inequality can prevent mobilization -->
+
+<!--     * It's the moderator ($P$), not the mediator ($M$), that's most informative -->
+
+<!--     * $D=0$ cases *would* have been just as informative -->
+
+
