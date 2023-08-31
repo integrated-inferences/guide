@@ -48,7 +48,7 @@ source("_packages_used.R")
 
 **Map**
 
-This guide is supplementary material for our book-in-progress *Integrated Inferences*.
+This guide is supplementary material for our book. [*Integrated Inferences*](https://integrated-inferences.github.io/) [@ii2023].
 
 * The [first part](#cm)  of the guide provides a brief motivation of causal models.
 * The [second part](#package) describes how the package works and how to use it. 
@@ -58,4 +58,4 @@ This guide is supplementary material for our book-in-progress *Integrated Infere
 
 **Credits**
 
-The approach used in CausalQueries is a generalization of the biqq models described in "Mixing Methods: A Bayesian Approach" [@humphreys2015mixing]. The conceptual extension makes use of work on probabilistic causal models described in Pearl's *Causality* [@pearl2009causality]. The approach to generating a generic stan function that can take data from arbitrary models was developed in key contributions by [Jasper Cooper](http://jasper-cooper.com/) and [Georgiy Syunyaev](http://gsyunyaev.com/). [Lily Medina](https://lilymedina.github.io/) did magical work pulling it all together and developing approaches to characterizing confounding and defining estimands. Clara Bicalho helped figure out a nice syntax for causal statements. Julio Solis made many key contributions figuring out how to simplify the specification of priors. Merlin Heidemanns figure out the `rstantools` integration and made myriad code improvements.
+The approach used in `CausalQueries` is a generalization of the "biqq" models described in "Mixing Methods: A Bayesian Approach" [@humphreys2015mixing]. The conceptual extension makes use of work on probabilistic causal models described in Pearl's *Causality* [@pearl2009causality]. The approach to generating a generic stan function that can take data from arbitrary models was developed in key contributions by [Jasper Cooper](http://jasper-cooper.com/) and [Georgiy Syunyaev](http://gsyunyaev.com/). [Lily Medina](https://lilymedina.github.io/) did magical work pulling it all together and developing approaches to characterizing confounding and defining estimands. Clara Bicalho helped figure out a nice syntax for causal statements. Julio Solis made many key contributions figuring out how to simplify the specification of priors. Merlin Heidemanns figure out the `rstantools` integration and made myriad code improvements. Till Tietz revamped the package and improved every part of it.

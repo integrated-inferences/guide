@@ -3,7 +3,7 @@
 ```{r part2, include = FALSE}
 source("_packages_used.R")
 library(DeclareDesign)
-#do_diagnosis <- FALSE
+run <- FALSE
 ```
 
 # Installation {#package}
@@ -14,7 +14,7 @@ You can install the package from Rstudio via:
 install.packages("CausalQueries")
 ```
 
-The package has some dependencies, the most important of which is `rstan`. Make sure you have `rstan` installed and working properly before doing anything else. Note that at installation `CausalQueries` compiles and stores a `stan` model so if you have problems with `stan` you won't be ablt to install `CausalQueries`. 
+The package has some dependencies, the most important of which is `rstan`. Make sure you have `rstan` installed and working properly before doing anything else. Note that at installation `CausalQueries` compiles and stores a `stan` model so if you have problems with `stan` you won't be able to install `CausalQueries`. 
 
 * See the [rstan getting started guide](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) for general installation procedures
 * Check that rstan is working by running one of the simple `stan` examples (see for example `?stan`)
@@ -22,7 +22,7 @@ The package has some dependencies, the most important of which is `rstan`. Make 
 * if all is working you should be able to run a simple model of the form:
 
 ```{r, eval = FALSE}
-make_model("X->Y") %>% update_model
+make_model("X->Y") |> update_model()
 ```
 
 
@@ -86,7 +86,7 @@ Once defined, a model can be graphed (we use the `dagitty` package for this):
 
 ```{r, fig.cap="A plotted model. Curved double headed arrows indicate unobserved confounding"}
 model <- make_model("X -> Y <- W -> X; X <-> Y")
-CausalQueries:::plot_dag(model)
+plot(model)
 ```
 
 This is useful to check that you have written the structure down correctly. 
@@ -257,7 +257,7 @@ Note:
 When confounding is added to a model, a dataframe, `confounds_df` is created and added to the model, recording which variables involve confounding. This is then used for plotting:
 
 ```{r}
-make_model("A <- X -> B; A <-> X; B <-> X") %>% CausalQueries:::plot_dag()
+make_model("A <- X -> B; A <-> X; B <-> X") %>% plot()
 ```
 
 Sometimes the `confounds_df` can highlight nonobvious confounding relations:
@@ -386,8 +386,6 @@ This normalization behavior can mean that you can control parameters better if t
 make_model('X -> Y') %>% 
   make_parameters(statement = c('Y[X=1]<Y[X=0] | Y[X=1]>Y[X=0]'), parameters = c(1/2, 0))
 
-make_model('X -> Y') %>% 
-  make_parameters(statement = c('Y[X=1]<Y[X=0]', 'Y[X=1]>Y[X=0]'), parameters = c(1/2, 0))
 ```
 
 Here the .6 in the second vector arises because a two step process is requested (`statement` is of length 2) and the vector first becomes (1/6, 1/2, 1/6, 1/6) and then becomes (.2, .6, 0, .2) which is a renormalization of  (1/6, 1/2, 0, 1/6).
@@ -444,7 +442,7 @@ CausalQueries:::prep_stan_data(model, compact_data)
 Below we show the  `stan` code. This starts off with a block saying what input data is to be expected. Then there is a characterization of parameters and the transformed parameters. Then the likelihoods and priors are provided. `stan` takes it from there and generates a posterior distribution.
 
 ```{r, echo = FALSE, comment = ""}
- if(do_diagnosis) 
+ if(run) 
    update_model(make_model("X->Y"), data = data,
                 keep_fit = TRUE)$stan_objects$stan_fit %>%
    write_rds("saved/fit.rds")
@@ -585,7 +583,7 @@ model$posterior_distribution %>%
 
 ```{r, warning = FALSE, echo = FALSE}
 
-if(do_diagnosis){
+if(run){
 data  <- fabricate(N = 100, X = complete_ra(N), Y = X)
 
 model <- make_model("X->Y; X<->Y") %>% 
@@ -639,7 +637,7 @@ query_model(
 
 ```{r, echo = FALSE}
 
-if(do_diagnosis){
+if(run){
 model <- make_model("X->M->Y") %>% 
   set_restrictions(c(decreasing("X", "M"), decreasing("M", "Y"))) %>%
   update_model(data = data.frame(X = 1, M = 1, Y = 1), iter = 12000, chains = 8)

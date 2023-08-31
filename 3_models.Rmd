@@ -4,7 +4,7 @@
 
 ```{r part3, include = FALSE}
 source("_packages_used.R")
-#do_diagnosis <- FALSE
+run <- FALSE
 options(knitr.kable.NA = '')
 
 ```
@@ -66,7 +66,7 @@ We will imagine three estimands, corresponding to Pearl's "ladder of causation."
 
 
 ```{r, message = FALSE, warning = FALSE, include = FALSE}
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, data, refresh = 0), "saved/appendix_XY_model_1.rds")
   }
 updated <- read_rds("saved/appendix_XY_model_1.rds")
@@ -92,7 +92,7 @@ We see from the posterior variance on PC that we have the greatest difficulty wi
 
 
 ```{r, echo = FALSE} 
-if(do_diagnosis){
+if(run){
 ATE_dist <- query_distribution(
                    model = updated, 
                    using = "posteriors",
@@ -112,9 +112,14 @@ PC_dist  <- read_rds("saved/appendix_PC_dist.rds")
 ```
 
 ```{r PChist, echo = FALSE, fig.cap = "ATE is identified, PC is not identified but has informative bounds"}
-par(mfrow = c(1,2))
-hist(ATE_dist, xlim = c(-1,1), main = "Posterior on ATE", xlab = "ATE")  
-hist(PC_dist, xlim = c(0,1), main = "Posterior on PC", xlab = "Probability X=1 caused Y=1")  
+list('Posterior on ATE' = data.frame(p = as.vector(ATE_dist)),
+     'Posterior on PC' = data.frame(p = as.vector(PC_dist))) |>
+  bind_rows(.id = "Q") |>
+  ggplot(aes(p)) + geom_histogram() + facet_grid(~Q) + xlim(c(0,1)) + theme_bw()
+
+# par(mfrow = c(1,2))
+# hist(ATE_dist, xlim = c(-1,1), main = "Posterior on ATE", xlab = "ATE")  
+# hist(PC_dist, xlim = c(0,1), main = "Posterior on PC", xlab = "Probability X=1 caused Y=1")  
 ```
 
 
@@ -129,7 +134,7 @@ An $X$ causes $Y$ model with confounding can be written:
 
 ```{r ap_with_conf}
 model <- make_model("X -> Y; X <-> Y") 
-CausalQueries:::plot_dag(model)
+plot(model)
 ```
 
 
@@ -160,7 +165,7 @@ data100 <- data5000[sample(5000, 100), ]
 
 
 ```{r, message = FALSE, warning = FALSE, include = FALSE}
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, data5000, refresh = 0, iter = 6000), "saved/appendix_XY_model_5000.rds")
     write_rds(update_model(model, data100, refresh = 0, iter = 6000), "saved/appendix_XY_model_100.rds")
 
@@ -170,7 +175,7 @@ updated_100  <- read_rds("saved/appendix_XY_model_100.rds")
 ```
 
 ```{r, echo = FALSE, fig.cap= "Modest gains from additional data when ATE is not identified"}
-if(do_diagnosis){
+if(run){
 prior_ate      <- query_distribution(updated_5000, "c(Y[X=1] - Y[X=0])", using = "priors")
 post_ate_5000  <- query_distribution(updated_5000, "c(Y[X=1] - Y[X=0])", using = "posteriors")
 post_ate_100   <- query_distribution(updated_100, "c(Y[X=1] - Y[X=0])", using = "posteriors")
@@ -200,9 +205,9 @@ We will assume that it is know that $X$ does not have a negative effet on $X$. I
 
 ```{r modeledconfounding}
 
-model <- make_model("C -> X -> Y <- C") %>%
+model <- make_model("C -> X -> Y <- C") |>
   
-  set_restrictions("(X[C=1] < X[C=0])") %>%
+  set_restrictions("(X[C=1] < X[C=0])") |>
 
   set_parameters(
            statement = c("(Y[X=1] < Y[X=0]) | (Y[C=1] < Y[C=0])"), 
@@ -215,9 +220,9 @@ The ATE estimand in this case is given by:
 query_model(
     model, 
     queries = list(ATE = "c(Y[X=1] - Y[X=0])"), 
-    using = "parameters") %>%
+    using = "parameters") |>
   
-  kable
+  kable()
 
 ```
 
@@ -226,8 +231,8 @@ A regression based approach won't fare very well here without data on $C$. It wo
 ```{r}
 data <- make_data(model, n = 1000)
 
-estimatr::lm_robust(Y~X, data = data) %>%
-  tidy %>% 
+estimatr::lm_robust(Y~X, data = data) |>
+  tidy() |> 
   kable(digits = 2)
 
 ```
@@ -251,7 +256,7 @@ confound <-
 
 
 ```{r, message = FALSE, warning = FALSE, include = FALSE}
-if(do_diagnosis){
+if(run){
   
   data_sparse <- select(data, X, Y)
   
@@ -272,12 +277,12 @@ write_rds(data.frame(ate = ate, confound = confound), "saved/appendix_modelled_c
 df <- read_rds("saved/appendix_modelled_confound_confound.rds")
 
 df <- cbind(
-  df %>% select(starts_with("ate")) %>%
+  df |> select(starts_with("ate")) |>
     pivot_longer(cols=ate.1:ate.12000, 
                  names_to = "ID", values_to = "ate"),
-  df %>% select(starts_with("confound")) %>%
+  df |> select(starts_with("confound")) |>
     pivot_longer(cols=confound.1:confound.12000, 
-                 names_to = "ID1", values_to = "confound")) %>%
+                 names_to = "ID1", values_to = "confound")) |>
   select(ate, confound)
 
 plot(df$confound, df$ate, ylab = "ATE", xlab = "Confound", cex = .2)
@@ -291,10 +296,9 @@ The strong negative correlation shows that when we update we contemplate possibi
 We define a simple mediation model and illustrate learning about  whether $X=1$ caused $Y=1$ from observations of $M$.
 
 ```{r appsimplemed}
-model <- make_model("X -> M -> Y") %>%
-         set_confound(confound = list(X = "M[X=1]==1")) %>%
-         set_parameters(node = "X",  parameters = c(.2, .8, .8, .2)) %>% 
-         set_parameters(node = "M", parameters = c(.2, 0, .8, 0)) %>%
+model <- make_model("X -> M -> Y; X <-> M") |>
+         set_parameters(node = "M", given = "X.0", parameters = c(.2, 0, .8, 0)) |>
+         set_parameters(node = "M", given = "X.1", parameters = c(.2, .8, 0, 0)) |>
          set_parameters(node = "Y", parameters = c(.2, 0, .8, 0))
 
 ```
@@ -303,7 +307,7 @@ model <- make_model("X -> M -> Y; X <-> M")
 ```
 
 ```{r}
-CausalQueries:::plot_dag(model)
+plot(model)
 ```
 Data and estimation:
 
@@ -316,12 +320,12 @@ updated <- update_model(model, data)
 ```
 
 ```{r, message = FALSE, warning = FALSE, include = FALSE}
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, data, refresh = 0), "saved/appendix_XMY_simple.rds")
   }
 updated <- read_rds("saved/appendix_XMY_simple.rds")
 
-if(do_diagnosis){
+if(run){
    result <- query_model(
     updated, 
     queries = list(COE = "c(Y[X=1] > Y[X=0])"), 
@@ -355,7 +359,7 @@ We define a simple  model with a moderator and illustrate how updating about COE
 
 ```{r appsimpmod}
 model <- make_model("X -> Y; Z -> Y") 
-CausalQueries:::plot_dag(model)
+plot(model)
 
 ```
 
@@ -373,7 +377,7 @@ posterior <- update_model(model, data)
 ```
 
 ```{r, message = FALSE, warning = FALSE, include = FALSE}
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, data), "saved/appendix_mod_simple.rds")
   }
 updated <- read_rds("saved/appendix_mod_simple.rds")
@@ -390,7 +394,7 @@ result <- query_model(
 ```
 
 ```{r, echo = FALSE}
-kable(result)
+kable(result, digits = 2)
 ```
 
 
@@ -411,9 +415,9 @@ We illustrate with a simple example in which data is drawn from a process in whi
 model <- make_model("X -> Y <- C; Y <-> C")
 
 data <- 
-  model %>%
+  model |>
   set_restrictions("(Y[X=1, C=1] > Y[X=0, C=1]) & 
-                    (Y[X=1, C=0] < Y[X=0, C=0])", keep = TRUE) %>%
+                    (Y[X=1, C=0] < Y[X=0, C=0])", keep = TRUE) |>
   make_data(n= 200)
 
 ```
@@ -425,20 +429,20 @@ These restrictions, coupled with flat priors, produce the following  priors (i) 
 query_model(model, 
             query = list(ATE = "Y[X=1] - Y[X=0]", 
                          PC  = "Y[X=1] > Y[X=0]"),
-            given = list("All", "X==1 & Y==1")) %>% 
-kable
+            given = list("All", "X==1 & Y==1")) |> 
+kable()
 
 ```
 
 We now compare inferences on the PC (for a case where we have no data on $C$) using one model that has been updated using data on $C$ and one that has not:   
 
 ```{r, eval = FALSE}
-update_model(model, select(data, X, Y)) %>%
+update_model(model, select(data, X, Y)) |>
   
   query_model(query = "Y[X=1]>Y[X=0]", given = "X==1 & Y==1",
               using = "posteriors") 
 
-update_model(model, data) %>%
+update_model(model, data) |>
 
     query_model(query = "Y[X=1]>Y[X=0]", given = "X==1 & Y==1", 
               using = "posteriors") 
@@ -447,14 +451,14 @@ update_model(model, data) %>%
 
    
 ```{r appsimpmod3, echo = FALSE}
-if(do_diagnosis){
-app_PC_C <-  update_model(model, data) %>%
+if(run){
+app_PC_C <-  update_model(model, data) |>
   query_model(query = list(`X caused Y` = "Y[X=1]>Y[X=0]"), given = "X==1 & Y==1",
               using = "posteriors") 
 
 write_rds(app_PC_C, "saved/app_PC_C.rds")
 
-app_PC_NoC <-  update_model(model, select(data, X, Y)) %>%
+app_PC_NoC <-  update_model(model, select(data, X, Y)) |>
   query_model(query = list(`X caused Y` = "Y[X=1]>Y[X=0]"), given = "X==1 & Y==1",
               using = "posteriors")
 
@@ -486,7 +490,7 @@ We model a simple version of the Billy and Suzy stone throwing game as a causal 
 ```{r appbillysuzy1}
 
 
-model <- make_model("Suzy -> Billy -> Smash <- Suzy") %>%
+model <- make_model("Suzy -> Billy -> Smash <- Suzy") |>
          set_restrictions(c(
            
            # If Suzy throws the bottle breaks
@@ -497,7 +501,7 @@ model <- make_model("Suzy -> Billy -> Smash <- Suzy") %>%
            
            # Suzy's throw doesn't *encourage* Billy to throw
            "Billy[Suzy=1]>Billy[Suzy=0]"))
-CausalQueries:::plot_dag(model)
+plot(model)
 ```
 
 Here "Suzy" means Suzy throws, "Billy": means Billy throws---which he might not do if Suzy throws---and "Smash" means the bottle gets smashed.
@@ -553,17 +557,17 @@ An illustration:
 
 
 ```{r appdiagnosis}
-model <- make_model("A -> S -> Y <- B") %>%
+model <- make_model("A -> S -> Y <- B") |>
   set_restrictions(c("(S[A=1]< S[A=0])", 
                    "(Y[S=1]<Y[S=0])",
                    "(Y[S = 0, B = 0]== 1)"))
 
-CausalQueries:::plot_dag(model)
+plot(model)
 
 query_model(model, 
        queries = list(A="(Y[A=1] > Y[A =0]) & A==1", B="(Y[B=1] > Y[B =0]) & B==1"),
        given = list("Y==1",  "Y==1 & S==1"), using = "priors", 
-       expand_grid = TRUE) %>% kable
+       expand_grid = TRUE) |> kable()
 
 ```
 
@@ -580,7 +584,7 @@ In *Integrated Inferences* we explore an inequality-democratization model where 
 
 
 ```{r apppt1}
-model <- make_model("I -> M -> D <- I; P -> D") %>% 
+model <- make_model("I -> M -> D <- I; P -> D") |> 
   set_restrictions(c( 
     "(M[I=1] < M[I=0])", 
     "(D[I=1] > D[I=0]) | (D[M=1] < D[M=0]) | (D[P=1] < D[P=0])")) 
@@ -600,7 +604,7 @@ query_model(model,
                        "I==0 & D==1 & M == 0 & P==0",
                        "I==0 & D==1 & M == 1 & P==0",
                        "I==0 & D==1 & M == 0 & P==1",
-                       "I==0 & D==1 & M == 1 & P==1")) %>% kable
+                       "I==0 & D==1 & M == 1 & P==1")) |> kable()
 ```
 
 We see in this example that learning about a rival cause---the moderator  $P$ (international pressure)---induces larger changes in beliefs than learning about the mediator, $M$ (mobilization). The two clues substitute for each other marginally.
@@ -615,7 +619,7 @@ query_model(model,
                        "I==1 & D==1 & M==0", 
                        "I==1 & D==1 & M==1", 
                        "I==1 & D==1 & P==0", 
-                       "I==1 & D==1 & P==1")) %>% kable
+                       "I==1 & D==1 & P==1")) |> kable()
 ```
 
 Note that inferences are taken here based on the model made by `make_model`, without any updating of the model using data. In this sense the approach simply makes the model used for process tracing explicit, but it does not justify. It is possible however to first update a model using data from many cases and then use the updated model to draw inferences about a single case.
@@ -630,10 +634,10 @@ To wit:
 
 ```{r appdsepar}
 
-model <- make_model("X -> Y -> S <- W") %>% 
+model <- make_model("X -> Y -> S <- W") |> 
   set_restrictions(complements("Y", "W", "S"), keep = TRUE)
 
-CausalQueries:::plot_dag(model)
+plot(model)
 
 ```
 
@@ -646,14 +650,14 @@ query_model(model,
                       "X==1 & S==1",
                       "X==1 & S==1 & W==1", 
                       "X==1 & Y==1",
-                      "X==1 & W==1 & S==1 & Y==1")) %>% kable
+                      "X==1 & W==1 & S==1 & Y==1")) |> kable()
 
 ```
 
 
 
 ```{r, echo = FALSE}
-if(do_diagnosis){
+if(run){
 q <- query_model(model,
             query = "Y[X=1] > Y[X=0]",
             using = "parameters",
@@ -696,11 +700,11 @@ For the illustration we first make use of a function that generates data from a 
 ```{r}
 van_evera_data <- function(y_types, k_types)
   
-  make_model("X -> Y <- K") %>%
+  make_model("X -> Y <- K") |>
   
-  set_restrictions(labels = list(Y = y_types), keep = TRUE) %>%
+  set_restrictions(labels = list(Y = y_types), keep = TRUE) |>
   
-  set_parameters(param_type = "define", node = "K", parameters = c(1 - k_types, k_types)) %>%
+  set_parameters(param_type = "define", node = "K", parameters = c(1 - k_types, k_types)) |>
   
   make_data(n = 1000)
 ```
@@ -710,9 +714,9 @@ We then use a function that draws inferences, given different values of a clue $
 ```{r}
 van_evera_inference <- function(data)
   
-  make_model("X -> Y <- K") %>%
+  make_model("X -> Y <- K") |>
   
-  update_model(data = data) %>%  
+  update_model(data = data) |>  
   
   query_model(query = "Y[X=1] > Y[X=0]", 
               given = c(TRUE, "K==0", "K==1"),
@@ -724,36 +728,36 @@ We can now generate posterior beliefs, given $K$, for different types of tests w
 Results:
 
 ```{r, eval = FALSE}
-doubly_decisive <- van_evera_data("0001", .5) %>% van_evera_inference
+doubly_decisive <- van_evera_data("0001", .5) |> van_evera_inference()
 
-hoop            <- van_evera_data(c("0001", "0101"), .9) %>% van_evera_inference
+hoop            <- van_evera_data(c("0001", "0101"), .9) |> van_evera_inference()
 
-smoking_gun     <- van_evera_data(c("0001", "0011"), .1) %>% van_evera_inference
+smoking_gun     <- van_evera_data(c("0001", "0011"), .1) |> van_evera_inference()
 
-straw_in_wind   <- van_evera_data(c("0001", "0101", "0011"), .5) %>% van_evera_inference
+straw_in_wind   <- van_evera_data(c("0001", "0101", "0011"), .5) |> van_evera_inference()
 ```
 
 
 
 ```{r, echo = FALSE}
-if(do_diagnosis){
-doubly_decisive <- van_evera_data("0001", .5) %>% van_evera_inference
+if(run){
+doubly_decisive <- van_evera_data("0001", .5) |> van_evera_inference()
 
-hoop            <- van_evera_data(c("0001", "0101"), .9) %>% van_evera_inference
+hoop            <- van_evera_data(c("0001", "0101"), .9) |> van_evera_inference()
 
-smoking_gun     <- van_evera_data(c("0001", "0011"), .1) %>% van_evera_inference
+smoking_gun     <- van_evera_data(c("0001", "0011"), .1) |> van_evera_inference()
 
-straw_in_wind   <- van_evera_data(c("0001", "0101", "0011"), .5) %>% van_evera_inference
+straw_in_wind   <- van_evera_data(c("0001", "0101", "0011"), .5) |> van_evera_inference()
 
 write_rds(list(doubly_decisive, hoop, smoking_gun, straw_in_wind), "saved/app_vanevera.rds")
 }
 
 tests <- read_rds("saved/app_vanevera.rds")
 
-tests[[1]] %>% kable(caption= "Doubly decisive test")
-tests[[2]] %>%  kable(caption= "Hoop test")
-tests[[3]] %>% kable(caption= "Smoking gun test")
-tests[[4]] %>% kable(caption= "Straw in the wind test")
+tests[[1]] |> kable(caption= "Doubly decisive test")
+tests[[2]] |>  kable(caption= "Hoop test")
+tests[[3]] |> kable(caption= "Smoking gun test")
+tests[[4]] |> kable(caption= "Straw in the wind test")
 
 ```
 
@@ -769,7 +773,7 @@ Which clue is most informative for the proposition that $X$ caused $Y$ in a case
 In all case we will conclude that $X$ did not cause $Y$ if we see a 0 along the chain (since a 1 can not cause a 0). But what do we conclude if we see a 1?
 
 ```{r appcluesonchain}
-model <- make_model("X -> M1 -> M2 -> M3 -> Y") %>%
+model <- make_model("X -> M1 -> M2 -> M3 -> Y") |>
   set_restrictions(labels = list(M1 = "10", M2 = "10", M3 = "10", Y = "10"))
 ```
 
@@ -780,7 +784,7 @@ query_model(model,
             query = "Y[X=1] > Y[X=0]", 
             given = c("X==1 & Y==1", "X==1 & Y==1 & M1==1", "X==1 & Y==1 & M2==1", 
                       "X==1 & Y==1 & M3==1", "X==1 & Y==1 & M1==1 & M2==1 & M3==1"),
-            using= "parameters") %>% kable
+            using= "parameters") |> kable()
 ```
 
 A couple of features are worth noting. First without any data our beliefs that $X$ caused $Y$ are quite low. This is due to the fact that even though the ATE at each step is reasonably large, the ATE over the whole chain is small, only $(1/3)^4)$ (incidentally, a beautiful number: 0.01234568).
@@ -800,7 +804,7 @@ To illustrate the backdoor criterion we want to show that estimates of the effec
 
 ```{r appbackdoor, eval = TRUE}
 
-model <- make_model("C -> X -> Y <- C")  %>%
+model <- make_model("C -> X -> Y <- C")  |>
          set_restrictions("(Y[C=1]<Y[C=0])")
 
 
@@ -814,10 +818,10 @@ df_open_door_small   <- df_open_door_large[sample(N, 200), ]
 ```
 
 ```{r, message = FALSE, echo = FALSE}
-if(do_diagnosis){
+if(run){
 
-  model <- make_model("C -> X -> Y <- C")  %>%
-         set_parameters(type = "prior_mean")  %>%
+  model <- make_model("C -> X -> Y <- C")  |>
+         set_parameters(type = "prior_mean")  |>
          set_restrictions("(Y[C=1]<Y[C=0])")
 
 # parameters <- model$parameters
@@ -875,7 +879,7 @@ We start with a model that builds in the instrumental variables  exclusion restr
 ```{r appinstruments}
 model <- make_model("Z -> X -> Y; X <-> Y")  
 
-CausalQueries:::plot_dag(model)
+plot(model)
 ```
 
 ```{r, echo = FALSE}
@@ -890,7 +894,7 @@ data <- make_data(model, n = 5000, parameters = pars)
 ```
 
 ```{r appinstruments4, message = FALSE, warning = FALSE, include = FALSE}
-if(do_diagnosis){
+if(run){
   updated <- update_model(model, data)
   write_rds(updated, "saved/appendix_IV_simple.rds")
   }
@@ -916,13 +920,12 @@ We calculate the average causal effect (a) for all (b) for the compliers and (c)
 We see here that the effects are strongest for the "compliers"---units for whom $X$ responds positively to $Z$; in addition they are stronger for the treated than for the untreated. Moreover we see that the posterior variance on the complier average effect is low.  If our model also imposed a monotonicity assumption then it would be lower still.
 
 ```{r}
-model <- make_model("Z -> X -> Y")  %>%
-         set_restrictions(decreasing("Z", "X")) %>%
-         set_confound(confound = list(X = "Y[X=1]==1")) 
+model <- make_model("Z -> X -> Y; X <-> Y")  |>
+         set_restrictions(decreasing("Z", "X")) 
 ```
 
 ```{r appinstruments8, include = FALSE}
-if(do_diagnosis){
+if(run){
   updated <- update_model(model, data)
   write_rds(updated, "saved/appendix_IV_simple2.rds")
   }
@@ -949,7 +952,7 @@ A less well known approach to identification uses information on the causal path
 
 frontdoor <- make_model("X -> M -> Y; X <-> Y") 
 
-CausalQueries:::plot_dag(frontdoor)
+plot(frontdoor)
 
 ```
 
@@ -959,7 +962,7 @@ Below we plot posterior distributions given observations on 2000 units, with and
 
 ```{r appfrontdoor2, echo = FALSE}
 
-if(do_diagnosis) {
+if(run) {
   data <- make_data(frontdoor, n = 2000)
   
   updated_1 <- update_model(frontdoor, mutate(data, M = NA))
@@ -991,10 +994,11 @@ To tackle the problem we will include sample selection into our model:
 
 ```{r appsimpleselc}
 
-model <- make_model("R -> S") %>%
-  set_parameters(node = c("R", "S"), parameters = list(c(2/3,1/3), c(1/3, 0, 1/3, 1/3)))
+model <- make_model("R -> S") |>
+  set_parameters(node = "R", parameters = c(2/3,1/3)) |>
+  set_parameters(node = "S", parameters = c(1/3, 0, 1/3, 1/3))
 
-data <- make_data(model, n = 1000) %>%
+data <- make_data(model, n = 1000) |>
         mutate(R = ifelse(S==0, NA, R ))
 
 ```
@@ -1002,7 +1006,7 @@ data <- make_data(model, n = 1000) %>%
 From this data and model, the priors and posteriors for population and sample quantities are:
 
 ```{r, echo = FALSE}
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, data, refresh = 0), "saved/appendix_simple_selection1.rds")
   }
 
@@ -1019,10 +1023,10 @@ Importantly we would not do so well if our data did not indicate that we had mis
 
 
 ```{r appsimpleselc4, echo = FALSE}
-data <- make_data(model, n = 10000) %>%
+data <- make_data(model, n = 10000) |>
         filter(S==1)
 
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, data, refresh = 0), "saved/appendix_simple_selection2.rds")
   }
 
@@ -1049,7 +1053,7 @@ selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S")
 
 ```{r, echo = FALSE}
 selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S")
-CausalQueries:::plot_dag(selection)
+plot(selection)
 ```
 
 To keep the parameter and type space small we also impose a set of restrictions: $S$ is non decreasing in $W_1$, $X$ is not decreasing in either $W1$ or $W2$, $Y$ is not decreasing $Z$ or $X$ and $X$ affects $Y$ only if $Z=1$. $W_2=1$ if and only if both $W_1=1$ and $Z=1$. These all reduce the problem to one with 18 nodal types and 288 causal types. 
@@ -1060,21 +1064,19 @@ Given these priors we will assume a true (unknown) data generating process with 
 
 ```{r appsimpleselcconf3, echo = FALSE} 
 
-if(do_diagnosis) {
+if(run) {
   
-selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S") %>%
+selection <- make_model("X <- W1 -> W2 -> X -> Y <- Z -> W2; W1 -> S") |>
     set_restrictions(c(
                      "(S[W1=1] < S[W1=0])",
                      "(X[W2=1] < X[W2=0])",
                      "(X[W1=1] < X[W1=0])",
                      "(Y[Z=1]  < Y[Z=0])",
-                     "(Y[X=1]  < Y[X=0])")) %>%
-    set_restrictions(labels = list(W2 = c("0001", "1111")), keep = TRUE) %>%
-    set_parameters(statement = "(S[W1=1] > S[W1=0])",
-                   node = "S", parameters = .14) %>%
-    set_parameters(statement = "(Y[X=1] != Y[X=0])",
-                   node = "Y", parameters = 0) %>%
-    set_parameters(label = "0001", node = "X", parameters = .85)
+                     "(Y[X=1]  < Y[X=0])")) |>
+  set_restrictions(labels = list(W2 = c("0001", "1111")), keep = TRUE) |>
+    set_parameters(statement = "(S[W1=1] > S[W1=0])", parameters = .14) |>
+    set_parameters(statement = "(Y[X=1] != Y[X=0])", parameters = 0) |>
+    set_parameters(node = "X", nodal_type = "0001", parameters = .85)
 
 selection$parameters_df
 df  <- make_data(selection, n = 30000, using = "parameters")
@@ -1162,15 +1164,17 @@ Pearl describes a model similar to the following as a case for which controlling
 
 ```{r applearncoll}
 
-model <- make_model("X -> Y <- U1 -> W <- U2 -> X") %>%
+model <- make_model("X -> Y <- U1 -> W <- U2 -> X") |>
   
-  set_restrictions(labels = list(Y = c("0001", "1111"), W = "0001"), keep = TRUE) %>%
-  set_restrictions("(X[U2=1]<X[U2=0])") %>%
-  set_parameters(node = c("U1", "Y"), parameters = list(c(1/4, 3/4), c(2/3, 1/3)))
+  set_restrictions(labels = list(Y = c("0001", "1111"), W = "0001"), keep = TRUE) |>
+  set_restrictions("(X[U2=1]<X[U2=0])") |>
+  set_parameters(node = "U1",  parameters = c(1/4, 3/4)) |>
+  set_parameters(node = "Y", parameters = c(2/3, 1/3))
 
-CausalQueries:::plot_dag(model)
+plot(model)
 
 ```
+
 
 ```{r applearncoll2}
 data <- make_data(model, 
@@ -1192,8 +1196,8 @@ The effect of $X$ on $Y$ is .5 but average effects as well as the probability of
                 "W==1",
                 "X==1 & Y==1",
                 "X==1 & Y==1 & W==0",
-                "X==1 & Y==1 & W==1")) %>% 
-    kable
+                "X==1 & Y==1 & W==1")) |> 
+    kable()
 ```
 
 
@@ -1212,7 +1216,7 @@ stargazer::stargazer(M1, M2, M3, type = "html", header = FALSE)
 How does the Bayesian model do, with and without data on $W$?
 
 ```{r, echo = FALSE}
-if(do_diagnosis){
+if(run){
   
   updated_no_W <- update_model(model, select(data, X,Y))
   
@@ -1295,7 +1299,7 @@ The model:
 model <- 
   make_model("X -> M -> Y; M <-> X; X <-> Y") 
 
-CausalQueries:::plot_dag(model)
+plot(model)
 ```
 
 Parameters: We imagine a true model with a treatment effect of .25 but positive confounding ($X=1$ more likely in cases in which $Y=1$, regardless of $X$. 
@@ -1304,7 +1308,7 @@ Parameters: We imagine a true model with a treatment effect of .25 but positive 
 model <- 
   make_model("X -> M -> Y;  X <-> Y") 
 
-model <- model %>%  
+model <- model |>  
   set_parameters(
        node = c("X", "M", "Y"),
        parameters = c(0.75, 0.25,
@@ -1312,7 +1316,7 @@ model <- model %>%
          .25, 0, .5, .25,
          .25, 0, .5, .25))
 
-query_model(model, list(ATE = "Y[X=1] - Y[X=0]"), using = "parameters")  %>% kable()
+query_model(model, list(ATE = "Y[X=1] - Y[X=0]"), using = "parameters")  |> kable()
 
 ```
 
@@ -1323,9 +1327,9 @@ n <- 20000
 
 full_data <-  make_data(model, n, using = "parameters")
 
-XY_data <- full_data %>% select(X, Y)
+XY_data <- full_data |> select(X, Y)
 
-some_data  <- full_data %>%  mutate(M = ifelse((1:n) %in% sample(1:n, 100), M, NA))
+some_data  <- full_data |>  mutate(M = ifelse((1:n) %in% sample(1:n, 100), M, NA))
 
 ```
 
@@ -1333,7 +1337,7 @@ some_data  <- full_data %>%  mutate(M = ifelse((1:n) %in% sample(1:n, 100), M, N
 Naive analysis:
 
 ```{r}
-summary(lm(Y~X, data = full_data))$coef %>% 
+summary(lm(Y~X, data = full_data))$coef |> 
   kable(digits = 2)
 ```
 
@@ -1345,7 +1349,7 @@ With full data on $X, M$ and $Y$ we get a tight estimate on the ATE, though our 
 
 ```{r appmm6, include = FALSE}
 
-if(do_diagnosis){
+if(run){
 # X, Y data only
 updated_XY       <- update_model(model, XY_data, iter = 6000)
 write_rds(updated_XY, "saved/17_mixing1XY.rds")
@@ -1387,13 +1391,13 @@ plot_posterior <- function(model, main = "", prior = FALSE) {
     
   if(prior) {
     model <- set_prior_distribution(model)
-    lambdas <- model$prior_distribution %>% data.frame
+    lambdas <- model$prior_distribution |> data.frame()
     }
     
-  if(!prior) lambdas <- model$posterior_distribution %>% data.frame
+  if(!prior) lambdas <- model$posterior_distribution |> data.frame()
 
   lambdas      <- 
-    lambdas  %>%
+    lambdas  |>
     mutate(ATE = M.01*(Y.01_X.0 - Y.10_X.1) + M.10*(Y.10_X.1 - Y.01_X.0),
            confound = X.1 - X.0)
 
@@ -1421,15 +1425,16 @@ Here is another example of mixing methods where a little within-case data goes a
 
 
 ```{r apppaths}
-model <- make_model("X -> M1 -> Y <- M2 <- X") %>%
+model <- make_model("X -> M1 -> Y <- M2 <- X") |>
   set_restrictions(c(decreasing("X", "M1"), 
                      decreasing("M1", "Y"),
                      decreasing("X", "M2"), 
-                     decreasing("M2", "Y"))) %>%
-  set_parameters(node = c("M1", "M2"), parameters = list(c(0,1,0), c(.5, 0,.5)), normalize=FALSE)  %>%
+                     decreasing("M2", "Y"))) |>
+  set_parameters(node = "M1", parameters = c(0,1,0), normalize=FALSE)  |>
+  set_parameters(node = "M2", parameters = c(.5, 0,.5), normalize=FALSE)  |>
   set_parameters(statement = "(Y[M1=1] == Y[M1=0])", parameters = 0)  
 
-CausalQueries:::plot_dag(model)
+plot(model)
 ```
 
 We imagine that in truth $X$ always causes $Y$ and it does so via $M1$, though this is not known *ex ante*:
@@ -1445,7 +1450,7 @@ Q1 <- query_model(model,
 
 ```{r apppaths3, echo = FALSE}
 
-Q1 %>% arrange(Using) %>% select(-Given) %>% kable(caption = "Priors and parameters")
+Q1 |> arrange(Using) |> select(-Given) |> kable(caption = "Priors and parameters")
 
 ```
 
@@ -1454,15 +1459,15 @@ Now suppose we have access to large $X$, $Y$, data.
 ```{r apppath4, echo = FALSE}
 
 # Updating
-if(do_diagnosis){
+if(run){
 
 n <- 1000
 
 full_data <-  make_data(model, n, using = "parameters")
 
-XY_data  <- full_data %>% select(X, Y)
+XY_data  <- full_data |> select(X, Y)
 
-some_data  <- full_data %>%  mutate(
+some_data  <- full_data |>  mutate(
   M1 = ifelse((1:n) %in% sample(1:n, 20), M1, NA),
   M2 = ifelse(is.na(M1), NA, M2))
 
@@ -1486,7 +1491,7 @@ query_model(updated_XY,
                  via_M1 = "(M1[X=1]>M1[X=0]) & (Y[M1=1]>Y[M1=0])", 
                  via_M2 = "(M2[X=1]>M2[X=0]) & (Y[M2=1]>Y[M2=0])"), 
   using = c("posteriors"),
-  expand_grid = TRUE) %>% kable(caption = "Inferences with 1000 observations; data on X, Y, only")
+  expand_grid = TRUE) |> kable(caption = "Inferences with 1000 observations; data on X, Y, only")
 ```
 
 We infer that that $X$ certainly causes $Y$. But we are unsure about channels. 
@@ -1499,7 +1504,7 @@ query_model(updated_mixed,
                  via_M1 = "(M1[X=1]>M1[X=0]) & (Y[M1=1]>Y[M1=0])", 
                  via_M2 = "(M2[X=1]>M2[X=0]) & (Y[M2=1]>Y[M2=0])"), 
   using = c("posteriors"),
-  expand_grid = TRUE)  %>% kable(caption = "Inferences with 1000 observations for X, Y,  20 observations for M1, M2")
+  expand_grid = TRUE)  |> kable(caption = "Inferences with 1000 observations for X, Y,  20 observations for M1, M2")
 
 ```
 
@@ -1527,7 +1532,7 @@ Here is the data:
 
 ```{r appnana}
 
-data <- make_model("X -> M -> Y") %>% 
+data <- make_model("X -> M -> Y") |> 
   
         make_data(n = 2000, 
                   parameters = c(.5, .5, .2, 0, .8, 0, 0, 0, .8, .2))
@@ -1560,9 +1565,9 @@ model_2 <-
 
 ```{r, echo = FALSE, fig.cap= "Two models. The model on the right might be justified if $X$ is known to be randomized."}
 par(mfrow = 1:2)
-CausalQueries:::plot_dag(model_1)
+plot(model_1)
 # title(main = list("X not known to be randomized", cex = .5))
-CausalQueries:::plot_dag(model_2)
+plot(model_2)
 # title("X  known to be randomized")
 # text(0, -1.3, "X  known to be randomized")
 ```
@@ -1585,7 +1590,7 @@ query_model(model_1,
 
 ```{r, echo = FALSE}
 
-if(do_diagnosis){
+if(run){
 
 model_1 <- update_model(model_1, data, iter = 6000)
 
@@ -1612,10 +1617,10 @@ write_rds(q2, "saved/App_somethingnothing2.rds")
 q1 <- read_rds("saved/App_somethingnothing1.rds")
 q2 <- read_rds("saved/App_somethingnothing2.rds")
 
-q1 %>% arrange(Using) %>% kable( 
+q1 |> arrange(Using) |> kable( 
       caption = "Can observation of large N data render mediator $M$ informative for case level inference? Observational data.")
 
-kable(q2 %>% arrange(Using), 
+kable(q2 |> arrange(Using), 
       caption = "Can observation of large N data render mediator $M$ informative for case level inference? X randomized.")
 ```
 
@@ -1638,13 +1643,13 @@ We illustrate with a simple model in which a confounder has a different distribu
 
 ```{r extval}
 
-model <- make_model("Case -> W  -> X -> Y <- W") %>%
-  set_restrictions("W[Case = 1] < W[Case = 0]") %>%
-  set_parameters(node = "X", statement = "X[W=1]>X[W=0]", parameters = 1/2)%>%
-  set_parameters(node = "Y", statement = complements("W", "X", "Y"), parameters = .17) %>%
-  set_parameters(node = "Y", statement = decreasing("X", "Y"), parameters = 0) 
+model <- make_model("Case -> W  -> X -> Y <- W") |>
+  set_restrictions("W[Case = 1] < W[Case = 0]") |>
+  set_parameters(statement = "X[W=1]>X[W=0]", parameters = 1/2)|>
+  set_parameters(statement = complements("W", "X", "Y"), parameters = .17) |>
+  set_parameters(statement = decreasing("X", "Y"), parameters = 0) 
 
-CausalQueries:::plot_dag(model)
+plot(model)
 
 
 ```
@@ -1658,7 +1663,7 @@ query_model(model,
                            ATE = "Y[X=1] - Y[X=0]", 
                            CATE = "Y[X=1, W=1] - Y[X=0, W=1]"),
             given = c("Case==0", "Case==1"),
-            using = c("priors", "parameters"), expand_grid = TRUE) %>% kable
+            using = c("priors", "parameters"), expand_grid = TRUE) |> kable()
 
 ```
 
@@ -1688,7 +1693,7 @@ query_model(transport,
 
 
 ```{r, echo = FALSE}
-if(do_diagnosis){
+if(run){
 
   data <- make_data(model, n = 10000, 
                   vars = list(c("Case", "W"), c("X", "Y")), 
@@ -1718,7 +1723,7 @@ Had we attempted to make the extrapolation without data on $W$ in country 1 we w
 
 
 ```{r, echo = FALSE}
-if(do_diagnosis){
+if(run){
 
   data2 <- make_data(model, n = 10000, 
                   vars = list(c("Case"), c("W", "X", "Y")), 
@@ -1749,11 +1754,11 @@ An interesting weakness of experimental studies is that, by dealing so effective
 A causal model can encompass both experimental and observational data and let you answer this kind of question. To illustrate, imagine that node $R$ indicates whether a unit was assigned to be randomly assigned to treatment assignment ($X=Z$ if $R=1$) or took on its observational value ($X=O$ if $R=0$). We assume the exclusion restriction that entering the experimental sample is not related to $Y$ other than through assignment of $X$. 
 
 ```{r appcombexpob, message = FALSE, warning = FALSE}
-model <- make_model("R -> X -> Y; O -> X <- Z; O <-> Y") %>%
+model <- make_model("R -> X -> Y; O -> X <- Z; O <-> Y") |>
   
 	set_restrictions("(X[R=1, Z=0]!=0) | (X[R=1, Z=1]!=1) | (X[R=0, O=0]!=0) | (X[R=0, O=1]!=1)")
 
-CausalQueries:::plot_dag(model)
+plot(model)
 ```
 
 ```{r, echo = FALSE, include = FALSE}
@@ -1768,9 +1773,9 @@ We imagine parameter values in which there is a true .2 effect of $X$ on $Y$. Ho
 
 ```{r}
 
-model <- model %>%
-	set_parameters(node = "Y", confound = "O==0", parameters = c(.8, .2,  0,  0)) %>%
-	set_parameters(node = "Y", confound = "O==1", parameters = c( 0,  0, .6, .4))
+model <- model |>
+	set_parameters(node = "Y", given = "O.0", parameters = c(.8, .2,  0,  0)) |>
+	set_parameters(node = "Y", given = "O.1", parameters = c( 0,  0, .6, .4))
 
 ```
 
@@ -1827,7 +1832,7 @@ posterior <- update_model(model, data)
 
 
 ```{r, message = FALSE, warning = FALSE, include = FALSE}
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, data), "saved/appendix_exp_obs.rds")
   }
 updated <- read_rds("saved/appendix_exp_obs.rds")
@@ -1855,7 +1860,7 @@ updated_no_O <- update_model(model, dplyr::filter(data, R==1))
 
 
 ```{r, message = FALSE, warning = FALSE, include = FALSE}
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, dplyr::filter(data, R==1)), "saved/appendix_exp_obs_2.rds")
   }
 updated_no_O <- read_rds("saved/appendix_exp_obs_2.rds")
@@ -1892,15 +1897,15 @@ kable(result2)
 Consider a situation in which we believe the same model holds in multiple sites but in which learning about the model requires combining data about different parts of the model from multiple studies. 
 
 ```{r jigsaw, eval = TRUE}
-model <- make_model("X -> Y <- Z -> K") %>%
+model <- 
+  make_model("X -> Y <- Z -> K") |>
+  set_parameters(
+    statement = "(Y[X=1, Z = 1] > Y[X=0, Z = 1])", parameters = .24) |>
+  set_parameters(
+    statement = "(K[Z = 1] > K[Z = 0])", parameters = .85)
 
-          set_parameters(
-            statement = list("(Y[X=1, Z = 1] > Y[X=0, Z = 1])",  
-                             "(K[Z = 1] > K[Z = 0])"),
-            node = c("Y","K"), 
-            parameters = c(.24,.85))
 
-CausalQueries:::plot_dag(model)
+plot(model)
 
 ```
 
@@ -1912,7 +1917,7 @@ We imagine we have access to three types of data;
 
 ```{r}
 
-df <- make_data(model, 300, using = "parameters") %>%
+df <- make_data(model, 300, using = "parameters") |>
   
       mutate(study = rep(1:3, each = 100),
              K = ifelse(study == 1, NA, K),
@@ -1924,7 +1929,7 @@ df <- make_data(model, 300, using = "parameters") %>%
 ```
 
 ```{r, echo = FALSE}
-if(do_diagnosis){
+if(run){
 
 updated1 <- update_model(model, filter(df, study == 1))
 updated2 <- update_model(model, filter(df, study == 2))

@@ -4,9 +4,9 @@ bookdown::gitbook:
         position: static
       toc:
         before: |
-          <li><a href="./">Model based causal inference: A guide to gbiqq</a></li>
+          <li><a href="./">Model based causal inference: A guide to CausalQueries</a></li>
         after: |
-          <li><a href="https://github.com/macartan/gbiqq/" target="blank">Uses gbiqq</a></li>
+          <li><a href="https://integrated-inferences.github.io/" target="blank">Uses CausalQueries</a></li>
         collapse: section
       sharing:
         all: false

@@ -3,7 +3,7 @@
 ```{r part1, include = FALSE}
 source("_packages_used.R")
 library(DeclareDesign)
-#do_diagnosis <- FALSE
+run <- FALSE
 ```
 
 # What and why {#cm}
@@ -96,7 +96,7 @@ query_model(model, using  = "posteriors", query = "Y[X=1] - Y[X=0]")
 ```{r, echo = FALSE}
 model <- make_model("X -> Y") 
 
-if(do_diagnosis){
+if(run){
   write_rds(update_model(model, data, refresh = 0), "saved/XY.rds")
   }
 model <- read_rds("saved/XY.rds")

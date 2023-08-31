@@ -6,11 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 8 Process tracing | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.17 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 8 Process tracing | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
-  
   
   <meta property="og:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
   <meta name="github-repo" content="rstudio/causalmodels" />
@@ -24,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2020-06-10" />
+<meta name="date" content="2023-08-31" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,7 +32,8 @@
   
 <link rel="prev" href="explanation.html"/>
 <link rel="next" href="identification.html"/>
-<script src="libs/jquery/jquery.min.js"></script>
+<script src="libs/jquery/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
@@ -49,29 +49,33 @@
 
 
 
-
+<link href="libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections/anchor-sections.js"></script>
 
 
 <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -80,15 +84,15 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code span.at { color: #7d9029; } /* Attribute */
 code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
+code span.bu { color: #008000; } /* BuiltIn */
 code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
 code span.ch { color: #4070a0; } /* Char */
 code span.cn { color: #880000; } /* Constant */
@@ -101,7 +105,7 @@ code span.er { color: #ff0000; font-weight: bold; } /* Error */
 code span.ex { } /* Extension */
 code span.fl { color: #40a070; } /* Float */
 code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
+code span.im { color: #008000; font-weight: bold; } /* Import */
 code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 code span.kw { color: #007020; font-weight: bold; } /* Keyword */
 code span.op { color: #666666; } /* Operator */
@@ -115,7 +119,34 @@ code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
-<link rel="stylesheet" href="headers\style.css" type="text/css" />
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="headers/style.css" type="text/css" />
 </head>
 
 <body>
@@ -128,12 +159,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><a href="./">Model based causal inference: A guide to gbiqq</a></li>
+<li><a href="./">Model based causal inference: A guide to CausalQueries</a></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
 <li class="part"><span><b>I Causal Models</b></span></li>
-<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a><ul>
+<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a>
+<ul>
 <li class="chapter" data-level="1.1" data-path="cm.html"><a href="cm.html#two-approaches-to-inference"><i class="fa fa-check"></i><b>1.1</b> Two approaches to inference</a></li>
 <li class="chapter" data-level="1.2" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-difference-in-means"><i class="fa fa-check"></i><b>1.2</b> Recovering the ATE with Difference in Means</a></li>
 <li class="chapter" data-level="1.3" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-a-causal-model"><i class="fa fa-check"></i><b>1.3</b> Recovering the ATE with a Causal Model</a></li>
@@ -141,9 +173,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="part"><span><b>II The Package</b></span></li>
 <li class="chapter" data-level="2" data-path="package.html"><a href="package.html"><i class="fa fa-check"></i><b>2</b> Installation</a></li>
-<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a><ul>
+<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a>
+<ul>
 <li class="chapter" data-level="3.1" data-path="defining-models.html"><a href="defining-models.html#getting-going"><i class="fa fa-check"></i><b>3.1</b> Getting going</a></li>
-<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a><ul>
+<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a>
+<ul>
 <li class="chapter" data-level="3.2.1" data-path="defining-models.html"><a href="defining-models.html#nodal-types"><i class="fa fa-check"></i><b>3.2.1</b> Nodal types</a></li>
 <li class="chapter" data-level="3.2.2" data-path="defining-models.html"><a href="defining-models.html#causal-types"><i class="fa fa-check"></i><b>3.2.2</b> Causal types</a></li>
 <li class="chapter" data-level="3.2.3" data-path="defining-models.html"><a href="defining-models.html#parameters-dataframe"><i class="fa fa-check"></i><b>3.2.3</b> Parameters dataframe</a></li>
@@ -151,22 +185,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="3.3" data-path="defining-models.html"><a href="defining-models.html#restrictions"><i class="fa fa-check"></i><b>3.3</b> Setting restrictions</a></li>
 <li class="chapter" data-level="3.4" data-path="defining-models.html"><a href="defining-models.html#confounding"><i class="fa fa-check"></i><b>3.4</b> Allowing confounding</a></li>
-<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a><ul>
+<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a>
+<ul>
 <li class="chapter" data-level="3.5.1" data-path="defining-models.html"><a href="defining-models.html#custom-priors"><i class="fa fa-check"></i><b>3.5.1</b> Custom priors</a></li>
 <li class="chapter" data-level="3.5.2" data-path="defining-models.html"><a href="defining-models.html#prior-warnings"><i class="fa fa-check"></i><b>3.5.2</b> Prior warnings</a></li>
 </ul></li>
 <li class="chapter" data-level="3.6" data-path="defining-models.html"><a href="defining-models.html#parameters"><i class="fa fa-check"></i><b>3.6</b> Setting Parameters</a></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a><ul>
+<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a>
+<ul>
 <li class="chapter" data-level="4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#data-for-stan"><i class="fa fa-check"></i><b>4.1</b> Data for <code>stan</code></a></li>
 <li class="chapter" data-level="4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#stan-code"><i class="fa fa-check"></i><b>4.2</b> <code>stan</code> code</a></li>
 <li class="chapter" data-level="4.3" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a></li>
-<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a><ul>
+<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a>
+<ul>
 <li class="chapter" data-level="4.4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#arbitrary-parameters"><i class="fa fa-check"></i><b>4.4.1</b> Arbitrary parameters</a></li>
 <li class="chapter" data-level="4.4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#non-binary-data"><i class="fa fa-check"></i><b>4.4.2</b> Non binary data</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a><ul>
+<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a>
+<ul>
 <li class="chapter" data-level="5.1" data-path="querying-models.html"><a href="querying-models.html#case-level-queries"><i class="fa fa-check"></i><b>5.1</b> Case level queries</a></li>
 <li class="chapter" data-level="5.2" data-path="querying-models.html"><a href="querying-models.html#posterior-queries"><i class="fa fa-check"></i><b>5.2</b> Posterior queries</a></li>
 <li class="chapter" data-level="5.3" data-path="querying-models.html"><a href="querying-models.html#query-distribution"><i class="fa fa-check"></i><b>5.3</b> Query distribution</a></li>
@@ -174,25 +212,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.5" data-path="querying-models.html"><a href="querying-models.html#complex-queries"><i class="fa fa-check"></i><b>5.5</b> Complex queries</a></li>
 </ul></li>
 <li class="part"><span><b>III Applications</b></span></li>
-<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a><ul>
+<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a>
+<ul>
 <li class="chapter" data-level="6.1" data-path="applications.html"><a href="applications.html#the-ladder-of-causation-in-an-x-rightarrow-y-model"><i class="fa fa-check"></i><b>6.1</b> The ladder of causation in an <span class="math inline">\(X \rightarrow Y\)</span> model</a></li>
 <li class="chapter" data-level="6.2" data-path="applications.html"><a href="applications.html#x-causes-y-with-unmodelled-confounding"><i class="fa fa-check"></i><b>6.2</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with unmodelled confounding</a></li>
 <li class="chapter" data-level="6.3" data-path="applications.html"><a href="applications.html#x-causes-y-with-confounding-modeled"><i class="fa fa-check"></i><b>6.3</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with confounding modeled</a></li>
 <li class="chapter" data-level="6.4" data-path="applications.html"><a href="applications.html#simple-mediation-model"><i class="fa fa-check"></i><b>6.4</b> Simple mediation model</a></li>
 <li class="chapter" data-level="6.5" data-path="applications.html"><a href="applications.html#simple-moderator-model"><i class="fa fa-check"></i><b>6.5</b> Simple moderator model</a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a><ul>
+<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a>
+<ul>
 <li class="chapter" data-level="7.1" data-path="explanation.html"><a href="explanation.html#tightening-bounds-on-causes-of-effects-using-an-unobserved-covariate"><i class="fa fa-check"></i><b>7.1</b> Tightening bounds on causes of effects using an unobserved covariate</a></li>
 <li class="chapter" data-level="7.2" data-path="explanation.html"><a href="explanation.html#Billy"><i class="fa fa-check"></i><b>7.2</b> Actual Causation: Billy and Suzy’s moderator and mediation model</a></li>
 <li class="chapter" data-level="7.3" data-path="explanation.html"><a href="explanation.html#diagnosis-inferring-a-cause-from-symptoms"><i class="fa fa-check"></i><b>7.3</b> Diagnosis: Inferring a cause from symptoms</a></li>
 </ul></li>
-<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a><ul>
+<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a>
+<ul>
 <li class="chapter" data-level="8.1" data-path="process-tracing.html"><a href="process-tracing.html#what-to-infer-from-what"><i class="fa fa-check"></i><b>8.1</b> What to infer from what</a></li>
 <li class="chapter" data-level="8.2" data-path="process-tracing.html"><a href="process-tracing.html#probative-value-and-d-separation"><i class="fa fa-check"></i><b>8.2</b> Probative value and <span class="math inline">\(d\)</span>-separation</a></li>
 <li class="chapter" data-level="8.3" data-path="process-tracing.html"><a href="process-tracing.html#foundations-for-van-everas-tests"><i class="fa fa-check"></i><b>8.3</b> Foundations for Van Evera’s tests</a></li>
 <li class="chapter" data-level="8.4" data-path="process-tracing.html"><a href="process-tracing.html#clue-selection-clues-at-the-center-of-chains-can-be-more-informative"><i class="fa fa-check"></i><b>8.4</b> Clue selection: clues at the center of chains can be more informative</a></li>
 </ul></li>
-<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a><ul>
+<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a>
+<ul>
 <li class="chapter" data-level="9.1" data-path="identification.html"><a href="identification.html#illustration-of-the-backdoor-criterion"><i class="fa fa-check"></i><b>9.1</b> Illustration of the backdoor criterion</a></li>
 <li class="chapter" data-level="9.2" data-path="identification.html"><a href="identification.html#identification-instruments"><i class="fa fa-check"></i><b>9.2</b> Identification: Instruments</a></li>
 <li class="chapter" data-level="9.3" data-path="identification.html"><a href="identification.html#identification-through-the-frontdoor"><i class="fa fa-check"></i><b>9.3</b> Identification through the frontdoor</a></li>
@@ -200,26 +242,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="9.5" data-path="identification.html"><a href="identification.html#addressing-both-sample-selection-bias-and-confounding"><i class="fa fa-check"></i><b>9.5</b> Addressing both sample selection bias and confounding</a></li>
 <li class="chapter" data-level="9.6" data-path="identification.html"><a href="identification.html#learning-from-a-collider"><i class="fa fa-check"></i><b>9.6</b> Learning from a collider!</a></li>
 </ul></li>
-<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a><ul>
+<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a>
+<ul>
 <li class="chapter" data-level="10.1" data-path="mixing-methods.html"><a href="mixing-methods.html#using-within-case-data-to-help-with-identification"><i class="fa fa-check"></i><b>10.1</b> Using within case data to help with identification</a></li>
 <li class="chapter" data-level="10.2" data-path="mixing-methods.html"><a href="mixing-methods.html#distinguishing-paths"><i class="fa fa-check"></i><b>10.2</b> Distinguishing paths</a></li>
 <li class="chapter" data-level="10.3" data-path="mixing-methods.html"><a href="mixing-methods.html#nothing-from-nothing"><i class="fa fa-check"></i><b>10.3</b> Nothing from nothing</a></li>
 </ul></li>
-<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a><ul>
+<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a>
+<ul>
 <li class="chapter" data-level="11.1" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#transportation-of-findings-across-contexts"><i class="fa fa-check"></i><b>11.1</b> Transportation of findings across contexts</a></li>
 <li class="chapter" data-level="11.2" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#combining-observational-and-experimental-data"><i class="fa fa-check"></i><b>11.2</b> Combining observational and experimental data</a></li>
 <li class="chapter" data-level="11.3" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#a-jigsaw-puzzle-learning-across-populations"><i class="fa fa-check"></i><b>11.3</b> A jigsaw puzzle: Learning across populations</a></li>
 </ul></li>
 <li class="part"><span><b>IV Notation</b></span></li>
-<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a><ul>
-<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a><ul>
+<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a>
+<ul>
 <li class="chapter" data-level="12.1.1" data-path="notation.html"><a href="notation.html#parents"><i class="fa fa-check"></i><b>12.1.1</b> Parents, children, and all that</a></li>
 </ul></li>
 <li class="chapter" data-level="12.2" data-path="notation.html"><a href="notation.html#syntax"><i class="fa fa-check"></i><b>12.2</b> Causal syntax</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
-<li><a href="https://github.com/macartan/gbiqq/" target="blank">Uses gbiqq</a></li>
+<li><a href="https://integrated-inferences.github.io/" target="blank">Uses CausalQueries</a></li>
 
 </ul>
 
@@ -238,35 +284,43 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="process-tracing" class="section level1">
-<h1><span class="header-section-number">Chapter 8</span> Process tracing</h1>
-<div id="what-to-infer-from-what" class="section level2">
-<h2><span class="header-section-number">8.1</span> What to infer from what</h2>
+<div id="process-tracing" class="section level1 hasAnchor" number="8">
+<h1><span class="header-section-number">Chapter 8</span> Process tracing<a href="process-tracing.html#process-tracing" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="what-to-infer-from-what" class="section level2 hasAnchor" number="8.1">
+<h2><span class="header-section-number">8.1</span> What to infer from what<a href="process-tracing.html#what-to-infer-from-what" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The simplest application of the <code>CausalQueries</code> package is to figure out what inferences to make about a case upon observing within-case data, given a model. One might observe many pieces of evidence and have to figure out how to update from these jointly.</p>
 <p>In <em>Integrated Inferences</em> we explore an inequality-democratization model where for a case with low inequality and democratization (say) one is interested in whether the democratization was due to the low inequality. In the simple model, inequality can give rise to popular mobilization which in turn forces democratization; or alternatively, inequality could prevent democratization by generating a threat from elites. In addition other forces, such as international pressure, could give rise to democratization. The question is: how do we update on our beliefs that low inequality caused democratization when we observe mobilization or international pressure?</p>
-<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb87-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;I -&gt; M -&gt; D &lt;- I; P -&gt; D&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb87-2" title="2"><span class="st">  </span><span class="kw">set_restrictions</span>(<span class="kw">c</span>( </a>
-<a class="sourceLine" id="cb87-3" title="3">    <span class="st">&quot;(M[I=1] &lt; M[I=0])&quot;</span>, </a>
-<a class="sourceLine" id="cb87-4" title="4">    <span class="st">&quot;(D[I=1] &gt; D[I=0]) | (D[M=1] &lt; D[M=0]) | (D[P=1] &lt; D[P=0])&quot;</span>)) </a></code></pre></div>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="process-tracing.html#cb88-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;I -&gt; M -&gt; D &lt;- I; P -&gt; D&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb88-2"><a href="process-tracing.html#cb88-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="fu">c</span>( </span>
+<span id="cb88-3"><a href="process-tracing.html#cb88-3" tabindex="-1"></a>    <span class="st">&quot;(M[I=1] &lt; M[I=0])&quot;</span>, </span>
+<span id="cb88-4"><a href="process-tracing.html#cb88-4" tabindex="-1"></a>    <span class="st">&quot;(D[I=1] &gt; D[I=0]) | (D[M=1] &lt; D[M=0]) | (D[P=1] &lt; D[P=0])&quot;</span>)) </span></code></pre></div>
 <p>We can read inferences directly from <code>query_model</code>:</p>
-<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb88-1" title="1"><span class="kw">query_model</span>(model, </a>
-<a class="sourceLine" id="cb88-2" title="2">            <span class="dt">query =</span> <span class="kw">list</span>(<span class="st">`</span><span class="dt">I = 0 caused D = 1</span><span class="st">`</span> =<span class="st"> &quot;D[I=1] != D[I=0]&quot;</span>), </a>
-<a class="sourceLine" id="cb88-3" title="3">            <span class="dt">using =</span> <span class="st">&quot;parameters&quot;</span>, </a>
-<a class="sourceLine" id="cb88-4" title="4">            <span class="dt">given =</span> <span class="kw">c</span>(<span class="st">&quot;I==0 &amp; D==1&quot;</span>, </a>
-<a class="sourceLine" id="cb88-5" title="5">                       <span class="st">&quot;I==0 &amp; D==1 &amp; M==0&quot;</span>, </a>
-<a class="sourceLine" id="cb88-6" title="6">                       <span class="st">&quot;I==0 &amp; D==1 &amp; M==1&quot;</span>, </a>
-<a class="sourceLine" id="cb88-7" title="7">                       <span class="st">&quot;I==0 &amp; D==1 &amp; P==0&quot;</span>, </a>
-<a class="sourceLine" id="cb88-8" title="8">                       <span class="st">&quot;I==0 &amp; D==1 &amp; P==1&quot;</span>, </a>
-<a class="sourceLine" id="cb88-9" title="9">                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 0 &amp; P==0&quot;</span>,</a>
-<a class="sourceLine" id="cb88-10" title="10">                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 1 &amp; P==0&quot;</span>,</a>
-<a class="sourceLine" id="cb88-11" title="11">                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 0 &amp; P==1&quot;</span>,</a>
-<a class="sourceLine" id="cb88-12" title="12">                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 1 &amp; P==1&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>kable</a></code></pre></div>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="process-tracing.html#cb89-1" tabindex="-1"></a><span class="fu">query_model</span>(model, </span>
+<span id="cb89-2"><a href="process-tracing.html#cb89-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="fu">list</span>(<span class="st">`</span><span class="at">I = 0 caused D = 1</span><span class="st">`</span> <span class="ot">=</span> <span class="st">&quot;D[I=1] != D[I=0]&quot;</span>), </span>
+<span id="cb89-3"><a href="process-tracing.html#cb89-3" tabindex="-1"></a>            <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>, </span>
+<span id="cb89-4"><a href="process-tracing.html#cb89-4" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;I==0 &amp; D==1&quot;</span>, </span>
+<span id="cb89-5"><a href="process-tracing.html#cb89-5" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M==0&quot;</span>, </span>
+<span id="cb89-6"><a href="process-tracing.html#cb89-6" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M==1&quot;</span>, </span>
+<span id="cb89-7"><a href="process-tracing.html#cb89-7" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; P==0&quot;</span>, </span>
+<span id="cb89-8"><a href="process-tracing.html#cb89-8" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; P==1&quot;</span>, </span>
+<span id="cb89-9"><a href="process-tracing.html#cb89-9" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 0 &amp; P==0&quot;</span>,</span>
+<span id="cb89-10"><a href="process-tracing.html#cb89-10" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 1 &amp; P==0&quot;</span>,</span>
+<span id="cb89-11"><a href="process-tracing.html#cb89-11" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 0 &amp; P==1&quot;</span>,</span>
+<span id="cb89-12"><a href="process-tracing.html#cb89-12" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 1 &amp; P==1&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
 <table>
+<colgroup>
+<col width="24%" />
+<col width="35%" />
+<col width="13%" />
+<col width="17%" />
+<col width="8%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 </tr>
 </thead>
@@ -275,66 +329,83 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1</td>
 <td align="left">parameters</td>
-<td align="right">0.438</td>
+<td align="left">FALSE</td>
+<td align="right">0.4384</td>
 </tr>
 <tr class="even">
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M==0</td>
 <td align="left">parameters</td>
-<td align="right">0.475</td>
+<td align="left">FALSE</td>
+<td align="right">0.4750</td>
 </tr>
 <tr class="odd">
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M==1</td>
 <td align="left">parameters</td>
-<td align="right">0.394</td>
+<td align="left">FALSE</td>
+<td align="right">0.3939</td>
 </tr>
 <tr class="even">
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; P==0</td>
 <td align="left">parameters</td>
-<td align="right">0.615</td>
+<td align="left">FALSE</td>
+<td align="right">0.6154</td>
 </tr>
 <tr class="odd">
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; P==1</td>
 <td align="left">parameters</td>
-<td align="right">0.340</td>
+<td align="left">FALSE</td>
+<td align="right">0.3404</td>
 </tr>
 <tr class="even">
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M == 0 &amp; P==0</td>
 <td align="left">parameters</td>
-<td align="right">0.667</td>
+<td align="left">FALSE</td>
+<td align="right">0.6667</td>
 </tr>
 <tr class="odd">
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M == 1 &amp; P==0</td>
 <td align="left">parameters</td>
-<td align="right">0.571</td>
+<td align="left">FALSE</td>
+<td align="right">0.5714</td>
 </tr>
 <tr class="even">
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M == 0 &amp; P==1</td>
 <td align="left">parameters</td>
-<td align="right">0.393</td>
+<td align="left">FALSE</td>
+<td align="right">0.3929</td>
 </tr>
 <tr class="odd">
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M == 1 &amp; P==1</td>
 <td align="left">parameters</td>
-<td align="right">0.263</td>
+<td align="left">FALSE</td>
+<td align="right">0.2632</td>
 </tr>
 </tbody>
 </table>
 <p>We see in this example that learning about a rival cause—the moderator <span class="math inline">\(P\)</span> (international pressure)—induces larger changes in beliefs than learning about the mediator, <span class="math inline">\(M\)</span> (mobilization). The two clues substitute for each other marginally.</p>
 <p>The importance of different clues depends however on what one wants to explain. In the next analysis, we see that if we want to know if inequality explained democratization, learning that <span class="math inline">\(M=0\)</span> has a large impact on beliefs.</p>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="27%" />
+<col width="27%" />
+<col width="15%" />
+<col width="20%" />
+<col width="10%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 </tr>
 </thead>
@@ -343,62 +414,68 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1</td>
 <td align="left">parameters</td>
-<td align="right">0.128</td>
+<td align="left">FALSE</td>
+<td align="right">0.1277</td>
 </tr>
 <tr class="even">
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1 &amp; M==0</td>
 <td align="left">parameters</td>
-<td align="right">0.000</td>
+<td align="left">FALSE</td>
+<td align="right">0.0000</td>
 </tr>
 <tr class="odd">
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1 &amp; M==1</td>
 <td align="left">parameters</td>
-<td align="right">0.150</td>
+<td align="left">FALSE</td>
+<td align="right">0.1500</td>
 </tr>
 <tr class="even">
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1 &amp; P==0</td>
 <td align="left">parameters</td>
-<td align="right">0.231</td>
+<td align="left">FALSE</td>
+<td align="right">0.2308</td>
 </tr>
 <tr class="odd">
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1 &amp; P==1</td>
 <td align="left">parameters</td>
-<td align="right">0.088</td>
+<td align="left">FALSE</td>
+<td align="right">0.0882</td>
 </tr>
 </tbody>
 </table>
 <p>Note that inferences are taken here based on the model made by <code>make_model</code>, without any updating of the model using data. In this sense the approach simply makes the model used for process tracing explicit, but it does not justify. It is possible however to first update a model using data from many cases and then use the updated model to draw inferences about a single case.</p>
 </div>
-<div id="probative-value-and-d-separation" class="section level2">
-<h2><span class="header-section-number">8.2</span> Probative value and <span class="math inline">\(d\)</span>-separation</h2>
+<div id="probative-value-and-d-separation" class="section level2 hasAnchor" number="8.2">
+<h2><span class="header-section-number">8.2</span> Probative value and <span class="math inline">\(d\)</span>-separation<a href="process-tracing.html#probative-value-and-d-separation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Observation of a node (a “clue”) is potentially informative for a query when it is <em>not</em> <span class="math inline">\(d\)</span>-separated<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> from query-relevant nodes (See <em>Integrated Inferences</em>, Ch 6).</p>
 <p>An implication of this is that the observation of some nodes may render other nodes more or less informative. From the graph alone you can sometimes tell when additional data will be uninformative for a query.</p>
 <p>To wit:</p>
-<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y -&gt; S &lt;- W&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb89-2" title="2"><span class="st">  </span><span class="kw">set_restrictions</span>(<span class="kw">complements</span>(<span class="st">&quot;Y&quot;</span>, <span class="st">&quot;W&quot;</span>, <span class="st">&quot;S&quot;</span>), <span class="dt">keep =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb89-3" title="3"></a>
-<a class="sourceLine" id="cb89-4" title="4"><span class="kw">plot</span>(model)</a></code></pre></div>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="process-tracing.html#cb90-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y -&gt; S &lt;- W&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb90-2"><a href="process-tracing.html#cb90-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="fu">complements</span>(<span class="st">&quot;Y&quot;</span>, <span class="st">&quot;W&quot;</span>, <span class="st">&quot;S&quot;</span>), <span class="at">keep =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb90-3"><a href="process-tracing.html#cb90-3" tabindex="-1"></a></span>
+<span id="cb90-4"><a href="process-tracing.html#cb90-4" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/appdsepar-1.png" width="672" /></p>
-<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb90-1" title="1"><span class="kw">query_model</span>(model,</a>
-<a class="sourceLine" id="cb90-2" title="2">            <span class="dt">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>,</a>
-<a class="sourceLine" id="cb90-3" title="3">            <span class="dt">using =</span> <span class="st">&quot;parameters&quot;</span>,</a>
-<a class="sourceLine" id="cb90-4" title="4">            <span class="dt">given =</span> <span class="kw">c</span>(<span class="st">&quot;X==1&quot;</span>,</a>
-<a class="sourceLine" id="cb90-5" title="5">                      <span class="st">&quot;X==1 &amp; W==1&quot;</span>,</a>
-<a class="sourceLine" id="cb90-6" title="6">                      <span class="st">&quot;X==1 &amp; S==1&quot;</span>,</a>
-<a class="sourceLine" id="cb90-7" title="7">                      <span class="st">&quot;X==1 &amp; S==1 &amp; W==1&quot;</span>, </a>
-<a class="sourceLine" id="cb90-8" title="8">                      <span class="st">&quot;X==1 &amp; Y==1&quot;</span>,</a>
-<a class="sourceLine" id="cb90-9" title="9">                      <span class="st">&quot;X==1 &amp; W==1 &amp; S==1 &amp; Y==1&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>kable</a></code></pre></div>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="process-tracing.html#cb91-1" tabindex="-1"></a><span class="fu">query_model</span>(model,</span>
+<span id="cb91-2"><a href="process-tracing.html#cb91-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>,</span>
+<span id="cb91-3"><a href="process-tracing.html#cb91-3" tabindex="-1"></a>            <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>,</span>
+<span id="cb91-4"><a href="process-tracing.html#cb91-4" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;X==1&quot;</span>,</span>
+<span id="cb91-5"><a href="process-tracing.html#cb91-5" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; W==1&quot;</span>,</span>
+<span id="cb91-6"><a href="process-tracing.html#cb91-6" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; S==1&quot;</span>,</span>
+<span id="cb91-7"><a href="process-tracing.html#cb91-7" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; S==1 &amp; W==1&quot;</span>, </span>
+<span id="cb91-8"><a href="process-tracing.html#cb91-8" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; Y==1&quot;</span>,</span>
+<span id="cb91-9"><a href="process-tracing.html#cb91-9" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; W==1 &amp; S==1 &amp; Y==1&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
 <table>
-<caption><span id="tab:unnamed-chunk-87">Table 8.1: </span>Whether a clue is informative or not depends on what else has been observed: in particular whether the clue is <span class="math inline">\(d\)</span>-separated from the query.</caption>
+<caption><span id="tab:unnamed-chunk-88">Table 8.1: </span>Whether a clue is informative or not depends on what else has been observed: in particular whether the clue is <span class="math inline">\(d\)</span>-separated from the query.</caption>
 <thead>
 <tr class="header">
 <th align="right">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 </tr>
 </thead>
@@ -407,36 +484,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="right">1</td>
 <td align="left">X==1</td>
 <td align="left">parameters</td>
+<td align="left">FALSE</td>
 <td align="right">0.25</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="left">X==1 &amp; W==1</td>
 <td align="left">parameters</td>
+<td align="left">FALSE</td>
 <td align="right">0.25</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="left">X==1 &amp; S==1</td>
 <td align="left">parameters</td>
+<td align="left">FALSE</td>
 <td align="right">0.25</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="left">X==1 &amp; S==1 &amp; W==1</td>
 <td align="left">parameters</td>
+<td align="left">FALSE</td>
 <td align="right">0.40</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">parameters</td>
+<td align="left">FALSE</td>
 <td align="right">0.50</td>
 </tr>
 <tr class="even">
 <td align="right">6</td>
 <td align="left">X==1 &amp; W==1 &amp; S==1 &amp; Y==1</td>
 <td align="left">parameters</td>
+<td align="left">FALSE</td>
 <td align="right">0.50</td>
 </tr>
 </tbody>
@@ -444,51 +527,64 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In this example <span class="math inline">\(W\)</span> is not informative for the <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span> query (a query about <span class="math inline">\(\theta^Y\)</span>, a parent of <span class="math inline">\(Y\)</span>), when <span class="math inline">\(Y\)</span> and <span class="math inline">\(S\)</span> are unobserved (Row 1 = Row 3). It becomes informative, however, when <span class="math inline">\(S\)</span>, a symptom of <span class="math inline">\(Y\)</span>, is observed (Row 3 <span class="math inline">\(\neq\)</span> Row 4). But when <span class="math inline">\(Y\)</span> is observed neither <span class="math inline">\(S\)</span> nor <span class="math inline">\(W\)</span> are informative (Row 5 = Row 6).</p>
 <p>The reason is that <span class="math inline">\(W\)</span> is <span class="math inline">\(d\)</span>-separated from <span class="math inline">\(\theta^Y\)</span> when <span class="math inline">\(Y\)</span> and <span class="math inline">\(S\)</span> are unobserved. But <span class="math inline">\(S\)</span> is a “collider” for <span class="math inline">\(Y\)</span> and <span class="math inline">\(W\)</span> and so <span class="math inline">\(W\)</span> <em>becomes</em> informative about <span class="math inline">\(Y\)</span> once <span class="math inline">\(S\)</span> is observed, and hence of <span class="math inline">\(\theta^Y\)</span> (so long as <span class="math inline">\(Y\)</span> is unobserved). When <span class="math inline">\(Y\)</span> is observed however now <span class="math inline">\(S\)</span> and <span class="math inline">\(W\)</span> become <span class="math inline">\(d\)</span>-separated from <span class="math inline">\(\theta^Y\)</span> and neither is informative.</p>
 </div>
-<div id="foundations-for-van-everas-tests" class="section level2">
-<h2><span class="header-section-number">8.3</span> Foundations for Van Evera’s tests</h2>
-<p>Students of process tracing often refer to a set of classical “qualitative tests” that are used to link within-case evidence to inferences around specific (often case-level) hypotheses. The four classical tests as described by <span class="citation">Collier (<a href="#ref-collier2011understanding" role="doc-biblioref">2011</a>)</span> and drawing on <span class="citation">Van Evera (<a href="#ref-Van-Evera:1997" role="doc-biblioref">1997</a>)</span> are “smoking gun” tests, “hoop” tests, “doubly decisive” tests, and “straw-in-the-wind” tests. A hoop test is one which, if failed, bodes especially badly for a claim; a smoking gun test is one that bodes well for a hypothesis if passed; a doubly decisive test is strongly conclusive no matter what is found, and a straw-in-the-wind test is suggestive, though not conclusive, either way.</p>
-<p>In some treatments (such as <span class="citation">Humphreys and Jacobs (<a href="#ref-humphreys2015mixing" role="doc-biblioref">2015</a>)</span>) formalization involves specifying a prior that a hypothesis is true and an independent set of beliefs about the probability of seeing some data if the hypothesis is true and if it is false. Then updating proceeds using Bayes’ rule.</p>
+<div id="foundations-for-van-everas-tests" class="section level2 hasAnchor" number="8.3">
+<h2><span class="header-section-number">8.3</span> Foundations for Van Evera’s tests<a href="process-tracing.html#foundations-for-van-everas-tests" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Students of process tracing often refer to a set of classical “qualitative tests” that are used to link within-case evidence to inferences around specific (often case-level) hypotheses. The four classical tests as described by <span class="citation">Collier (<a href="#ref-collier2011understanding">2011</a>)</span> and drawing on <span class="citation">Van Evera (<a href="#ref-Van-Evera:1997">1997</a>)</span> are “smoking gun” tests, “hoop” tests, “doubly decisive” tests, and “straw-in-the-wind” tests. A hoop test is one which, if failed, bodes especially badly for a claim; a smoking gun test is one that bodes well for a hypothesis if passed; a doubly decisive test is strongly conclusive no matter what is found, and a straw-in-the-wind test is suggestive, though not conclusive, either way.</p>
+<p>In some treatments (such as <span class="citation">Humphreys and Jacobs (<a href="#ref-humphreys2015mixing">2015</a>)</span>) formalization involves specifying a prior that a hypothesis is true and an independent set of beliefs about the probability of seeing some data if the hypothesis is true and if it is false. Then updating proceeds using Bayes’ rule.</p>
 <p>This simple approach suffers from two related weaknesses however: first, there is no good reason to expect these probabilities to be independent; second, there is nothing in the set-up to indicate how beliefs around the probative value of clues can be established or justified.</p>
 <p>Both of these problems are easily resolved if the problem is articulated using fully specified causal models.</p>
 <p>Many different causal models might justify Van Evera’s tests. We illustrate using one in which the requisite background knowledge to justify the tests can be derived from a factorial experiment and in which one treatment serves as a clue for the effect of another.</p>
-<p>For the illistration we first make use of a function that generates data from a model with a constrained set of types for <span class="math inline">\(Y\)</span> and a given prior distribution over clue <span class="math inline">\(K\)</span>.</p>
-<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" title="1">van_evera_data &lt;-<span class="st"> </span><span class="cf">function</span>(y_types, k_types)</a>
-<a class="sourceLine" id="cb91-2" title="2">  </a>
-<a class="sourceLine" id="cb91-3" title="3">  <span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- K&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb91-4" title="4"><span class="st">  </span></a>
-<a class="sourceLine" id="cb91-5" title="5"><span class="st">  </span><span class="kw">set_restrictions</span>(<span class="dt">labels =</span> <span class="kw">list</span>(<span class="dt">Y =</span> y_types), <span class="dt">keep =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb91-6" title="6"><span class="st">  </span></a>
-<a class="sourceLine" id="cb91-7" title="7"><span class="st">  </span><span class="kw">set_parameters</span>(<span class="dt">param_type =</span> <span class="st">&quot;define&quot;</span>, <span class="dt">node =</span> <span class="st">&quot;K&quot;</span>, <span class="dt">parameters =</span> <span class="kw">c</span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>k_types, k_types)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb91-8" title="8"><span class="st">  </span></a>
-<a class="sourceLine" id="cb91-9" title="9"><span class="st">  </span><span class="kw">make_data</span>(<span class="dt">n =</span> <span class="dv">1000</span>)</a></code></pre></div>
+<p>For the illustration we first make use of a function that generates data from a model with a constrained set of types for <span class="math inline">\(Y\)</span> and a given prior distribution over clue <span class="math inline">\(K\)</span>.</p>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="process-tracing.html#cb92-1" tabindex="-1"></a>van_evera_data <span class="ot">&lt;-</span> <span class="cf">function</span>(y_types, k_types)</span>
+<span id="cb92-2"><a href="process-tracing.html#cb92-2" tabindex="-1"></a>  </span>
+<span id="cb92-3"><a href="process-tracing.html#cb92-3" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- K&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb92-4"><a href="process-tracing.html#cb92-4" tabindex="-1"></a>  </span>
+<span id="cb92-5"><a href="process-tracing.html#cb92-5" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="at">labels =</span> <span class="fu">list</span>(<span class="at">Y =</span> y_types), <span class="at">keep =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb92-6"><a href="process-tracing.html#cb92-6" tabindex="-1"></a>  </span>
+<span id="cb92-7"><a href="process-tracing.html#cb92-7" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">param_type =</span> <span class="st">&quot;define&quot;</span>, <span class="at">node =</span> <span class="st">&quot;K&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">1</span> <span class="sc">-</span> k_types, k_types)) <span class="sc">|&gt;</span></span>
+<span id="cb92-8"><a href="process-tracing.html#cb92-8" tabindex="-1"></a>  </span>
+<span id="cb92-9"><a href="process-tracing.html#cb92-9" tabindex="-1"></a>  <span class="fu">make_data</span>(<span class="at">n =</span> <span class="dv">1000</span>)</span></code></pre></div>
 <p>We then use a function that draws inferences, given different values of a clue <span class="math inline">\(K\)</span>, from a model that has been updated using available data. Note that the model that is updated has no constraints on <span class="math inline">\(Y\)</span>, has flat beliefs over the distribution of <span class="math inline">\(K\)</span>, and imposes no assumption that <span class="math inline">\(K\)</span> is informative for how <span class="math inline">\(Y\)</span> reacts to <span class="math inline">\(X\)</span>.</p>
-<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb92-1" title="1">van_evera_inference &lt;-<span class="st"> </span><span class="cf">function</span>(data)</a>
-<a class="sourceLine" id="cb92-2" title="2">  </a>
-<a class="sourceLine" id="cb92-3" title="3">  <span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- K&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb92-4" title="4"><span class="st">  </span></a>
-<a class="sourceLine" id="cb92-5" title="5"><span class="st">  </span><span class="kw">update_model</span>(<span class="dt">data =</span> data) <span class="op">%&gt;%</span><span class="st">  </span></a>
-<a class="sourceLine" id="cb92-6" title="6"><span class="st">  </span></a>
-<a class="sourceLine" id="cb92-7" title="7"><span class="st">  </span><span class="kw">query_model</span>(<span class="dt">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, </a>
-<a class="sourceLine" id="cb92-8" title="8">              <span class="dt">given =</span> <span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="st">&quot;K==0&quot;</span>, <span class="st">&quot;K==1&quot;</span>),</a>
-<a class="sourceLine" id="cb92-9" title="9">              <span class="dt">using =</span> <span class="st">&quot;posteriors&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="process-tracing.html#cb93-1" tabindex="-1"></a>van_evera_inference <span class="ot">&lt;-</span> <span class="cf">function</span>(data)</span>
+<span id="cb93-2"><a href="process-tracing.html#cb93-2" tabindex="-1"></a>  </span>
+<span id="cb93-3"><a href="process-tracing.html#cb93-3" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- K&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb93-4"><a href="process-tracing.html#cb93-4" tabindex="-1"></a>  </span>
+<span id="cb93-5"><a href="process-tracing.html#cb93-5" tabindex="-1"></a>  <span class="fu">update_model</span>(<span class="at">data =</span> data) <span class="sc">|&gt;</span>  </span>
+<span id="cb93-6"><a href="process-tracing.html#cb93-6" tabindex="-1"></a>  </span>
+<span id="cb93-7"><a href="process-tracing.html#cb93-7" tabindex="-1"></a>  <span class="fu">query_model</span>(<span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, </span>
+<span id="cb93-8"><a href="process-tracing.html#cb93-8" tabindex="-1"></a>              <span class="at">given =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="st">&quot;K==0&quot;</span>, <span class="st">&quot;K==1&quot;</span>),</span>
+<span id="cb93-9"><a href="process-tracing.html#cb93-9" tabindex="-1"></a>              <span class="at">using =</span> <span class="st">&quot;posteriors&quot;</span>)</span></code></pre></div>
 <p>We can now generate posterior beliefs, given <span class="math inline">\(K\)</span>, for different types of tests where the tests are now justified by different types of data, coupled with a common prior causal model.</p>
 <p>Results:</p>
-<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb93-1" title="1">doubly_decisive &lt;-<span class="st"> </span><span class="kw">van_evera_data</span>(<span class="st">&quot;0001&quot;</span>, <span class="fl">.5</span>) <span class="op">%&gt;%</span><span class="st"> </span>van_evera_inference</a>
-<a class="sourceLine" id="cb93-2" title="2"></a>
-<a class="sourceLine" id="cb93-3" title="3">hoop            &lt;-<span class="st"> </span><span class="kw">van_evera_data</span>(<span class="kw">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0101&quot;</span>), <span class="fl">.9</span>) <span class="op">%&gt;%</span><span class="st"> </span>van_evera_inference</a>
-<a class="sourceLine" id="cb93-4" title="4"></a>
-<a class="sourceLine" id="cb93-5" title="5">smoking_gun     &lt;-<span class="st"> </span><span class="kw">van_evera_data</span>(<span class="kw">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0011&quot;</span>), <span class="fl">.1</span>) <span class="op">%&gt;%</span><span class="st"> </span>van_evera_inference</a>
-<a class="sourceLine" id="cb93-6" title="6"></a>
-<a class="sourceLine" id="cb93-7" title="7">straw_in_wind   &lt;-<span class="st"> </span><span class="kw">van_evera_data</span>(<span class="kw">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0101&quot;</span>, <span class="st">&quot;0011&quot;</span>), <span class="fl">.5</span>) <span class="op">%&gt;%</span><span class="st"> </span>van_evera_inference</a></code></pre></div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="process-tracing.html#cb94-1" tabindex="-1"></a>doubly_decisive <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="st">&quot;0001&quot;</span>, .<span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
+<span id="cb94-2"><a href="process-tracing.html#cb94-2" tabindex="-1"></a></span>
+<span id="cb94-3"><a href="process-tracing.html#cb94-3" tabindex="-1"></a>hoop            <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0101&quot;</span>), .<span class="dv">9</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
+<span id="cb94-4"><a href="process-tracing.html#cb94-4" tabindex="-1"></a></span>
+<span id="cb94-5"><a href="process-tracing.html#cb94-5" tabindex="-1"></a>smoking_gun     <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0011&quot;</span>), .<span class="dv">1</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
+<span id="cb94-6"><a href="process-tracing.html#cb94-6" tabindex="-1"></a></span>
+<span id="cb94-7"><a href="process-tracing.html#cb94-7" tabindex="-1"></a>straw_in_wind   <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0101&quot;</span>, <span class="st">&quot;0011&quot;</span>), .<span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span></code></pre></div>
 <table>
-<caption><span id="tab:unnamed-chunk-91">Table 8.2: </span>Doubly decisive test</caption>
+<caption><span id="tab:unnamed-chunk-92">Table 8.2: </span>Doubly decisive test</caption>
+<colgroup>
+<col width="8%" />
+<col width="8%" />
+<col width="15%" />
+<col width="20%" />
+<col width="10%" />
+<col width="10%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
+<th align="right">conf.low</th>
+<th align="right">conf.high</th>
 </tr>
 </thead>
 <tbody>
@@ -496,34 +592,56 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">Q 1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
-<td align="right">0.489</td>
-<td align="right">0.016</td>
+<td align="left">FALSE</td>
+<td align="right">0.5091</td>
+<td align="right">0.0155</td>
+<td align="right">0.4793</td>
+<td align="right">0.5390</td>
 </tr>
 <tr class="even">
 <td align="left">Q 1</td>
 <td align="left">K==0</td>
 <td align="left">posteriors</td>
-<td align="right">0.009</td>
-<td align="right">0.005</td>
+<td align="left">FALSE</td>
+<td align="right">0.0094</td>
+<td align="right">0.0052</td>
+<td align="right">0.0023</td>
+<td align="right">0.0222</td>
 </tr>
 <tr class="odd">
 <td align="left">Q 1</td>
 <td align="left">K==1</td>
 <td align="left">posteriors</td>
-<td align="right">0.976</td>
-<td align="right">0.008</td>
+<td align="left">FALSE</td>
+<td align="right">0.9763</td>
+<td align="right">0.0074</td>
+<td align="right">0.9591</td>
+<td align="right">0.9886</td>
 </tr>
 </tbody>
 </table>
 <table>
-<caption><span id="tab:unnamed-chunk-91">Table 8.2: </span>Hoop test</caption>
+<caption><span id="tab:unnamed-chunk-92">Table 8.2: </span>Hoop test</caption>
+<colgroup>
+<col width="8%" />
+<col width="8%" />
+<col width="15%" />
+<col width="20%" />
+<col width="10%" />
+<col width="10%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
+<th align="right">conf.low</th>
+<th align="right">conf.high</th>
 </tr>
 </thead>
 <tbody>
@@ -531,34 +649,56 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">Q 1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
-<td align="right">0.451</td>
-<td align="right">0.022</td>
+<td align="left">FALSE</td>
+<td align="right">0.4605</td>
+<td align="right">0.0224</td>
+<td align="right">0.4174</td>
+<td align="right">0.5033</td>
 </tr>
 <tr class="even">
 <td align="left">Q 1</td>
 <td align="left">K==0</td>
 <td align="left">posteriors</td>
-<td align="right">0.044</td>
-<td align="right">0.028</td>
+<td align="left">FALSE</td>
+<td align="right">0.0367</td>
+<td align="right">0.0231</td>
+<td align="right">0.0069</td>
+<td align="right">0.0933</td>
 </tr>
 <tr class="odd">
 <td align="left">Q 1</td>
 <td align="left">K==1</td>
 <td align="left">posteriors</td>
-<td align="right">0.494</td>
-<td align="right">0.023</td>
+<td align="left">FALSE</td>
+<td align="right">0.5122</td>
+<td align="right">0.0243</td>
+<td align="right">0.4646</td>
+<td align="right">0.5594</td>
 </tr>
 </tbody>
 </table>
 <table>
-<caption><span id="tab:unnamed-chunk-91">Table 8.2: </span>Smoking gun test</caption>
+<caption><span id="tab:unnamed-chunk-92">Table 8.2: </span>Smoking gun test</caption>
+<colgroup>
+<col width="8%" />
+<col width="8%" />
+<col width="15%" />
+<col width="20%" />
+<col width="10%" />
+<col width="10%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
+<th align="right">conf.low</th>
+<th align="right">conf.high</th>
 </tr>
 </thead>
 <tbody>
@@ -566,34 +706,56 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">Q 1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
-<td align="right">0.536</td>
-<td align="right">0.022</td>
+<td align="left">FALSE</td>
+<td align="right">0.5240</td>
+<td align="right">0.0226</td>
+<td align="right">0.4799</td>
+<td align="right">0.5692</td>
 </tr>
 <tr class="even">
 <td align="left">Q 1</td>
 <td align="left">K==0</td>
 <td align="left">posteriors</td>
-<td align="right">0.493</td>
-<td align="right">0.024</td>
+<td align="left">FALSE</td>
+<td align="right">0.4801</td>
+<td align="right">0.0243</td>
+<td align="right">0.4323</td>
+<td align="right">0.5283</td>
 </tr>
 <tr class="odd">
 <td align="left">Q 1</td>
 <td align="left">K==1</td>
 <td align="left">posteriors</td>
-<td align="right">0.900</td>
-<td align="right">0.037</td>
+<td align="left">FALSE</td>
+<td align="right">0.8991</td>
+<td align="right">0.0371</td>
+<td align="right">0.8132</td>
+<td align="right">0.9566</td>
 </tr>
 </tbody>
 </table>
 <table>
-<caption><span id="tab:unnamed-chunk-91">Table 8.2: </span>Straw in the wind test</caption>
+<caption><span id="tab:unnamed-chunk-92">Table 8.2: </span>Straw in the wind test</caption>
+<colgroup>
+<col width="8%" />
+<col width="8%" />
+<col width="15%" />
+<col width="20%" />
+<col width="10%" />
+<col width="10%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
+<th align="right">conf.low</th>
+<th align="right">conf.high</th>
 </tr>
 </thead>
 <tbody>
@@ -601,46 +763,63 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">Q 1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
-<td align="right">0.469</td>
-<td align="right">0.022</td>
+<td align="left">FALSE</td>
+<td align="right">0.4919</td>
+<td align="right">0.0216</td>
+<td align="right">0.4492</td>
+<td align="right">0.5340</td>
 </tr>
 <tr class="even">
 <td align="left">Q 1</td>
 <td align="left">K==0</td>
 <td align="left">posteriors</td>
-<td align="right">0.301</td>
-<td align="right">0.029</td>
+<td align="left">FALSE</td>
+<td align="right">0.3075</td>
+<td align="right">0.0285</td>
+<td align="right">0.2544</td>
+<td align="right">0.3649</td>
 </tr>
 <tr class="odd">
 <td align="left">Q 1</td>
 <td align="left">K==1</td>
 <td align="left">posteriors</td>
-<td align="right">0.637</td>
-<td align="right">0.030</td>
+<td align="left">FALSE</td>
+<td align="right">0.6828</td>
+<td align="right">0.0301</td>
+<td align="right">0.6224</td>
+<td align="right">0.7404</td>
 </tr>
 </tbody>
 </table>
-<p>We see that these tests all behave as expected. Importantly, however, the approach to thinking about the tests is quite different to that described in <span class="citation">Collier (<a href="#ref-collier2011understanding" role="doc-biblioref">2011</a>)</span> or <span class="citation">Humphreys and Jacobs (<a href="#ref-humphreys2015mixing" role="doc-biblioref">2015</a>)</span>. Rather than having a belief about the probative value of a clue, and a prior over a hypothesis, inferences are drawn directly from a causal model that relates a clue to possible causal effects. Critically, with this approach, the inferences made from observing clues can be justified by reference to a more fundamental, agnostic model, that has been updated in light of data. The updated model yields both a prior over the proposition, belief about probative values, and guidance for what conclusions to draw given knowledge of <span class="math inline">\(K\)</span>.</p>
+<p>We see that these tests all behave as expected. Importantly, however, the approach to thinking about the tests is quite different to that described in <span class="citation">Collier (<a href="#ref-collier2011understanding">2011</a>)</span> or <span class="citation">Humphreys and Jacobs (<a href="#ref-humphreys2015mixing">2015</a>)</span>. Rather than having a belief about the probative value of a clue, and a prior over a hypothesis, inferences are drawn directly from a causal model that relates a clue to possible causal effects. Critically, with this approach, the inferences made from observing clues can be justified by reference to a more fundamental, agnostic model, that has been updated in light of data. The updated model yields both a prior over the proposition, belief about probative values, and guidance for what conclusions to draw given knowledge of <span class="math inline">\(K\)</span>.</p>
 </div>
-<div id="clue-selection-clues-at-the-center-of-chains-can-be-more-informative" class="section level2">
-<h2><span class="header-section-number">8.4</span> Clue selection: clues at the center of chains can be more informative</h2>
+<div id="clue-selection-clues-at-the-center-of-chains-can-be-more-informative" class="section level2 hasAnchor" number="8.4">
+<h2><span class="header-section-number">8.4</span> Clue selection: clues at the center of chains can be more informative<a href="process-tracing.html#clue-selection-clues-at-the-center-of-chains-can-be-more-informative" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Model querying can also be used to assess which types of clues are more informative among a set of informative clues. Consider a chain linking <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span> via <span class="math inline">\(M_1\)</span>, <span class="math inline">\(M_2\)</span>, <span class="math inline">\(M_3\)</span>. To keep things simple let’s assume that the chain is monotonic: no node in the chain has a negative effect on the next node in the chain.</p>
 <p>Which clue is most informative for the proposition that <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span> in a case with <span class="math inline">\(X=Y=1\)</span>?</p>
 <p>In all case we will conclude that <span class="math inline">\(X\)</span> did not cause <span class="math inline">\(Y\)</span> if we see a 0 along the chain (since a 1 can not cause a 0). But what do we conclude if we see a 1?</p>
-<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; M1 -&gt; M2 -&gt; M3 -&gt; Y&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb94-2" title="2"><span class="st">  </span><span class="kw">set_restrictions</span>(<span class="dt">labels =</span> <span class="kw">list</span>(<span class="dt">M1 =</span> <span class="st">&quot;10&quot;</span>, <span class="dt">M2 =</span> <span class="st">&quot;10&quot;</span>, <span class="dt">M3 =</span> <span class="st">&quot;10&quot;</span>, <span class="dt">Y =</span> <span class="st">&quot;10&quot;</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="process-tracing.html#cb95-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M1 -&gt; M2 -&gt; M3 -&gt; Y&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb95-2"><a href="process-tracing.html#cb95-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="at">labels =</span> <span class="fu">list</span>(<span class="at">M1 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">M2 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">M3 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">Y =</span> <span class="st">&quot;10&quot;</span>))</span></code></pre></div>
 <p>In imposing monotonicity and using default parameter values we are assuming that the effect of each node on the next node is 1/3. What does this imply for our query? We get the answer using <code>query_model</code>.</p>
-<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" title="1"><span class="kw">query_model</span>(model, </a>
-<a class="sourceLine" id="cb95-2" title="2">            <span class="dt">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, </a>
-<a class="sourceLine" id="cb95-3" title="3">            <span class="dt">given =</span> <span class="kw">c</span>(<span class="st">&quot;X==1 &amp; Y==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M1==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M2==1&quot;</span>, </a>
-<a class="sourceLine" id="cb95-4" title="4">                      <span class="st">&quot;X==1 &amp; Y==1 &amp; M3==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M1==1 &amp; M2==1 &amp; M3==1&quot;</span>),</a>
-<a class="sourceLine" id="cb95-5" title="5">            <span class="dt">using=</span> <span class="st">&quot;parameters&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>kable</a></code></pre></div>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="process-tracing.html#cb96-1" tabindex="-1"></a><span class="fu">query_model</span>(model, </span>
+<span id="cb96-2"><a href="process-tracing.html#cb96-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, </span>
+<span id="cb96-3"><a href="process-tracing.html#cb96-3" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;X==1 &amp; Y==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M1==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M2==1&quot;</span>, </span>
+<span id="cb96-4"><a href="process-tracing.html#cb96-4" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; Y==1 &amp; M3==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M1==1 &amp; M2==1 &amp; M3==1&quot;</span>),</span>
+<span id="cb96-5"><a href="process-tracing.html#cb96-5" tabindex="-1"></a>            <span class="at">using=</span> <span class="st">&quot;parameters&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
 <table>
+<colgroup>
+<col width="8%" />
+<col width="48%" />
+<col width="14%" />
+<col width="18%" />
+<col width="9%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 </tr>
 </thead>
@@ -649,59 +828,64 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">Q 1</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">parameters</td>
-<td align="right">0.024</td>
+<td align="left">FALSE</td>
+<td align="right">0.0244</td>
 </tr>
 <tr class="even">
 <td align="left">Q 1</td>
 <td align="left">X==1 &amp; Y==1 &amp; M1==1</td>
 <td align="left">parameters</td>
-<td align="right">0.036</td>
+<td align="left">FALSE</td>
+<td align="right">0.0357</td>
 </tr>
 <tr class="odd">
 <td align="left">Q 1</td>
 <td align="left">X==1 &amp; Y==1 &amp; M2==1</td>
 <td align="left">parameters</td>
-<td align="right">0.040</td>
+<td align="left">FALSE</td>
+<td align="right">0.0400</td>
 </tr>
 <tr class="even">
 <td align="left">Q 1</td>
 <td align="left">X==1 &amp; Y==1 &amp; M3==1</td>
 <td align="left">parameters</td>
-<td align="right">0.036</td>
+<td align="left">FALSE</td>
+<td align="right">0.0357</td>
 </tr>
 <tr class="odd">
 <td align="left">Q 1</td>
 <td align="left">X==1 &amp; Y==1 &amp; M1==1 &amp; M2==1 &amp; M3==1</td>
 <td align="left">parameters</td>
-<td align="right">0.062</td>
+<td align="left">FALSE</td>
+<td align="right">0.0625</td>
 </tr>
 </tbody>
 </table>
 <p>A couple of features are worth noting. First without any data our beliefs that <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span> are quite low. This is due to the fact that even though the ATE at each step is reasonably large, the ATE over the whole chain is small, only <span class="math inline">\((1/3)^4)\)</span> (incidentally, a beautiful number: 0.01234568).</p>
 <p>Second we learn from which nodes we learn the most. We update most strongly from positive evidence on the middle mediator. One can also show that not only is there greater updating higher if a positive outcome is seen on the middle mediator, but the <em>expected</em> reduction in posterior variance is also greater (expected reduction in posterior variance takes account of the probability of observing different outcomes, which can also be calculated from the model given available data.)<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
-<p>Last, while we update most strongly when we observe positive evidence on all steps, even that does not produce a large posterior probability that <span class="math inline">\(X=1\)</span> caused <span class="math inline">\(Y=1\)</span>. Positive evidence on a causal chain is often not very informative. Explanations for this are in <span class="citation">Dawid, Humphreys, and Musio (<a href="#ref-dawid2019bounding" role="doc-biblioref">2019</a>)</span>.</p>
+<p>Last, while we update most strongly when we observe positive evidence on all steps, even that does not produce a large posterior probability that <span class="math inline">\(X=1\)</span> caused <span class="math inline">\(Y=1\)</span>. Positive evidence on a causal chain is often not very informative. Explanations for this are in <span class="citation">P. Dawid, Humphreys, and Musio (<a href="#ref-dawid2019bounding">2019</a>)</span>.</p>
 </div>
 </div>
-<h3>References</h3>
-<div id="refs" class="references">
-<div id="ref-collier2011understanding">
-<p>Collier, David. 2011. “Understanding Process Tracing.” <em>PS: Political Science &amp; Politics</em> 44 (04): 823–30.</p>
+<h3>References<a href="references.html#references" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-collier2011understanding" class="csl-entry">
+Collier, David. 2011. <span>“Understanding Process Tracing.”</span> <em>PS: Political Science &amp; Politics</em> 44 (04): 823–30.
 </div>
-<div id="ref-dawid2019bounding">
-<p>Dawid, Philip, Macartan Humphreys, and Monica Musio. 2019. “Bounding Causes of Effects with Mediators.” <em>arXiv Preprint arXiv:1907.00399</em>.</p>
+<div id="ref-dawid2019bounding" class="csl-entry">
+Dawid, Philip, Macartan Humphreys, and Monica Musio. 2019. <span>“Bounding Causes of Effects with Mediators.”</span> <em>arXiv Preprint arXiv:1907.00399</em>.
 </div>
-<div id="ref-humphreys2015mixing">
-<p>Humphreys, Macartan, and Alan M Jacobs. 2015. “Mixing Methods: A Bayesian Approach.” <em>American Political Science Review</em> 109 (04): 653–73.</p>
+<div id="ref-humphreys2015mixing" class="csl-entry">
+Humphreys, Macartan, and Alan M Jacobs. 2015. <span>“Mixing Methods: A Bayesian Approach.”</span> <em>American Political Science Review</em> 109 (04): 653–73.
 </div>
-<div id="ref-Van-Evera:1997">
-<p>Van Evera, Stephen. 1997. <em>Guide to Methods for Students of Political Science</em>. Ithaca, NY: Cornell University Press.</p>
+<div id="ref-Van-Evera:1997" class="csl-entry">
+Van Evera, Stephen. 1997. <em>Guide to Methods for Students of Political Science</em>. Ithaca, NY: Cornell University Press.
 </div>
 </div>
 <div class="footnotes">
 <hr />
 <ol start="1">
-<li id="fn1"><p><span class="math inline">\(d\)</span>-separation is a key idea in the study of directed acyclic graphs; for an introduction see <a href="http://www.dagitty.net/learn/dsep/index%3C-.html"><span class="math inline">\(d\)</span>-separation without tears</a>.<a href="process-tracing.html#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>These quantities can be calculated by the <code>CQtools</code> package, still in alpha, via: <code>CQtools::expected_learning(model, "Y[X=1] &gt; Y[X=0]", given = "X==1 &amp; Y==1", strategy = "M2")</code><a href="process-tracing.html#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p><span class="math inline">\(d\)</span>-separation is a key idea in the study of directed acyclic graphs; for an introduction see <a href="http://www.dagitty.net/learn/dsep/index%3C-.html"><span class="math inline">\(d\)</span>-separation without tears</a>.<a href="process-tracing.html#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>These quantities can be calculated by the <code>CQtools</code> package, still in alpha, via: <code>CQtools::expected_learning(model, "Y[X=1] &gt; Y[X=0]", given = "X==1 &amp; Y==1", strategy = "M2")</code><a href="process-tracing.html#fnref2" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
             </section>
@@ -714,7 +898,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </div>
   </div>
 <script src="libs/gitbook/js/app.min.js"></script>
-<script src="libs/gitbook/js/lunr.js"></script>
 <script src="libs/gitbook/js/clipboard.min.js"></script>
 <script src="libs/gitbook/js/plugin-search.js"></script>
 <script src="libs/gitbook/js/plugin-sharing.js"></script>
@@ -733,6 +916,7 @@ gitbook.start({
 "weibo": false,
 "instapaper": false,
 "vk": false,
+"whatsapp": false,
 "all": false,
 "google": false,
 "instapper": false
@@ -755,6 +939,10 @@ gitbook.start({
 "text": null
 },
 "download": ["causalmodels.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
 "toc": {
 "collapse": "section"
 },
@@ -771,7 +959,7 @@ gitbook.start({
     var script = document.createElement("script");
     script.type = "text/javascript";
     var src = "true";
-    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:")
       if (/^https?:/.test(src))
         src = src.replace(/^https?:/, '');

@@ -6,11 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 1 What and why | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.17 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 1 What and why | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
-  
   
   <meta property="og:description" content="Model based strategies for integrating qualitative and quantitative inferences." />
   <meta name="github-repo" content="rstudio/causalmodels" />
@@ -24,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2020-06-10" />
+<meta name="date" content="2023-08-31" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,7 +32,8 @@
   
 <link rel="prev" href="index.html"/>
 <link rel="next" href="package.html"/>
-<script src="libs/jquery/jquery.min.js"></script>
+<script src="libs/jquery/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
@@ -49,29 +49,33 @@
 
 
 
-
+<link href="libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections/anchor-sections.js"></script>
 
 
 <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -80,15 +84,15 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code span.at { color: #7d9029; } /* Attribute */
 code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
+code span.bu { color: #008000; } /* BuiltIn */
 code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
 code span.ch { color: #4070a0; } /* Char */
 code span.cn { color: #880000; } /* Constant */
@@ -101,7 +105,7 @@ code span.er { color: #ff0000; font-weight: bold; } /* Error */
 code span.ex { } /* Extension */
 code span.fl { color: #40a070; } /* Float */
 code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
+code span.im { color: #008000; font-weight: bold; } /* Import */
 code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 code span.kw { color: #007020; font-weight: bold; } /* Keyword */
 code span.op { color: #666666; } /* Operator */
@@ -115,7 +119,34 @@ code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
-<link rel="stylesheet" href="headers\style.css" type="text/css" />
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="headers/style.css" type="text/css" />
 </head>
 
 <body>
@@ -128,12 +159,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><a href="./">Model based causal inference: A guide to gbiqq</a></li>
+<li><a href="./">Model based causal inference: A guide to CausalQueries</a></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
 <li class="part"><span><b>I Causal Models</b></span></li>
-<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a><ul>
+<li class="chapter" data-level="1" data-path="cm.html"><a href="cm.html"><i class="fa fa-check"></i><b>1</b> What and why</a>
+<ul>
 <li class="chapter" data-level="1.1" data-path="cm.html"><a href="cm.html#two-approaches-to-inference"><i class="fa fa-check"></i><b>1.1</b> Two approaches to inference</a></li>
 <li class="chapter" data-level="1.2" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-difference-in-means"><i class="fa fa-check"></i><b>1.2</b> Recovering the ATE with Difference in Means</a></li>
 <li class="chapter" data-level="1.3" data-path="cm.html"><a href="cm.html#recovering-the-ate-with-a-causal-model"><i class="fa fa-check"></i><b>1.3</b> Recovering the ATE with a Causal Model</a></li>
@@ -141,9 +173,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="part"><span><b>II The Package</b></span></li>
 <li class="chapter" data-level="2" data-path="package.html"><a href="package.html"><i class="fa fa-check"></i><b>2</b> Installation</a></li>
-<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a><ul>
+<li class="chapter" data-level="3" data-path="defining-models.html"><a href="defining-models.html"><i class="fa fa-check"></i><b>3</b> Defining models</a>
+<ul>
 <li class="chapter" data-level="3.1" data-path="defining-models.html"><a href="defining-models.html#getting-going"><i class="fa fa-check"></i><b>3.1</b> Getting going</a></li>
-<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a><ul>
+<li class="chapter" data-level="3.2" data-path="defining-models.html"><a href="defining-models.html#structure"><i class="fa fa-check"></i><b>3.2</b> Causal structure</a>
+<ul>
 <li class="chapter" data-level="3.2.1" data-path="defining-models.html"><a href="defining-models.html#nodal-types"><i class="fa fa-check"></i><b>3.2.1</b> Nodal types</a></li>
 <li class="chapter" data-level="3.2.2" data-path="defining-models.html"><a href="defining-models.html#causal-types"><i class="fa fa-check"></i><b>3.2.2</b> Causal types</a></li>
 <li class="chapter" data-level="3.2.3" data-path="defining-models.html"><a href="defining-models.html#parameters-dataframe"><i class="fa fa-check"></i><b>3.2.3</b> Parameters dataframe</a></li>
@@ -151,22 +185,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="3.3" data-path="defining-models.html"><a href="defining-models.html#restrictions"><i class="fa fa-check"></i><b>3.3</b> Setting restrictions</a></li>
 <li class="chapter" data-level="3.4" data-path="defining-models.html"><a href="defining-models.html#confounding"><i class="fa fa-check"></i><b>3.4</b> Allowing confounding</a></li>
-<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a><ul>
+<li class="chapter" data-level="3.5" data-path="defining-models.html"><a href="defining-models.html#priors"><i class="fa fa-check"></i><b>3.5</b> Setting Priors</a>
+<ul>
 <li class="chapter" data-level="3.5.1" data-path="defining-models.html"><a href="defining-models.html#custom-priors"><i class="fa fa-check"></i><b>3.5.1</b> Custom priors</a></li>
 <li class="chapter" data-level="3.5.2" data-path="defining-models.html"><a href="defining-models.html#prior-warnings"><i class="fa fa-check"></i><b>3.5.2</b> Prior warnings</a></li>
 </ul></li>
 <li class="chapter" data-level="3.6" data-path="defining-models.html"><a href="defining-models.html#parameters"><i class="fa fa-check"></i><b>3.6</b> Setting Parameters</a></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a><ul>
+<li class="chapter" data-level="4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html"><i class="fa fa-check"></i><b>4</b> Updating models with <code>stan</code></a>
+<ul>
 <li class="chapter" data-level="4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#data-for-stan"><i class="fa fa-check"></i><b>4.1</b> Data for <code>stan</code></a></li>
 <li class="chapter" data-level="4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#stan-code"><i class="fa fa-check"></i><b>4.2</b> <code>stan</code> code</a></li>
 <li class="chapter" data-level="4.3" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a></li>
-<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a><ul>
+<li class="chapter" data-level="4.4" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#extensions"><i class="fa fa-check"></i><b>4.4</b> Extensions</a>
+<ul>
 <li class="chapter" data-level="4.4.1" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#arbitrary-parameters"><i class="fa fa-check"></i><b>4.4.1</b> Arbitrary parameters</a></li>
 <li class="chapter" data-level="4.4.2" data-path="updating-models-with-stan.html"><a href="updating-models-with-stan.html#non-binary-data"><i class="fa fa-check"></i><b>4.4.2</b> Non binary data</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a><ul>
+<li class="chapter" data-level="5" data-path="querying-models.html"><a href="querying-models.html"><i class="fa fa-check"></i><b>5</b> Querying models</a>
+<ul>
 <li class="chapter" data-level="5.1" data-path="querying-models.html"><a href="querying-models.html#case-level-queries"><i class="fa fa-check"></i><b>5.1</b> Case level queries</a></li>
 <li class="chapter" data-level="5.2" data-path="querying-models.html"><a href="querying-models.html#posterior-queries"><i class="fa fa-check"></i><b>5.2</b> Posterior queries</a></li>
 <li class="chapter" data-level="5.3" data-path="querying-models.html"><a href="querying-models.html#query-distribution"><i class="fa fa-check"></i><b>5.3</b> Query distribution</a></li>
@@ -174,25 +212,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.5" data-path="querying-models.html"><a href="querying-models.html#complex-queries"><i class="fa fa-check"></i><b>5.5</b> Complex queries</a></li>
 </ul></li>
 <li class="part"><span><b>III Applications</b></span></li>
-<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a><ul>
+<li class="chapter" data-level="6" data-path="applications.html"><a href="applications.html"><i class="fa fa-check"></i><b>6</b> Basic Models</a>
+<ul>
 <li class="chapter" data-level="6.1" data-path="applications.html"><a href="applications.html#the-ladder-of-causation-in-an-x-rightarrow-y-model"><i class="fa fa-check"></i><b>6.1</b> The ladder of causation in an <span class="math inline">\(X \rightarrow Y\)</span> model</a></li>
 <li class="chapter" data-level="6.2" data-path="applications.html"><a href="applications.html#x-causes-y-with-unmodelled-confounding"><i class="fa fa-check"></i><b>6.2</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with unmodelled confounding</a></li>
 <li class="chapter" data-level="6.3" data-path="applications.html"><a href="applications.html#x-causes-y-with-confounding-modeled"><i class="fa fa-check"></i><b>6.3</b> <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span>, with confounding modeled</a></li>
 <li class="chapter" data-level="6.4" data-path="applications.html"><a href="applications.html#simple-mediation-model"><i class="fa fa-check"></i><b>6.4</b> Simple mediation model</a></li>
 <li class="chapter" data-level="6.5" data-path="applications.html"><a href="applications.html#simple-moderator-model"><i class="fa fa-check"></i><b>6.5</b> Simple moderator model</a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a><ul>
+<li class="chapter" data-level="7" data-path="explanation.html"><a href="explanation.html"><i class="fa fa-check"></i><b>7</b> Explanation</a>
+<ul>
 <li class="chapter" data-level="7.1" data-path="explanation.html"><a href="explanation.html#tightening-bounds-on-causes-of-effects-using-an-unobserved-covariate"><i class="fa fa-check"></i><b>7.1</b> Tightening bounds on causes of effects using an unobserved covariate</a></li>
 <li class="chapter" data-level="7.2" data-path="explanation.html"><a href="explanation.html#Billy"><i class="fa fa-check"></i><b>7.2</b> Actual Causation: Billy and Suzy’s moderator and mediation model</a></li>
 <li class="chapter" data-level="7.3" data-path="explanation.html"><a href="explanation.html#diagnosis-inferring-a-cause-from-symptoms"><i class="fa fa-check"></i><b>7.3</b> Diagnosis: Inferring a cause from symptoms</a></li>
 </ul></li>
-<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a><ul>
+<li class="chapter" data-level="8" data-path="process-tracing.html"><a href="process-tracing.html"><i class="fa fa-check"></i><b>8</b> Process tracing</a>
+<ul>
 <li class="chapter" data-level="8.1" data-path="process-tracing.html"><a href="process-tracing.html#what-to-infer-from-what"><i class="fa fa-check"></i><b>8.1</b> What to infer from what</a></li>
 <li class="chapter" data-level="8.2" data-path="process-tracing.html"><a href="process-tracing.html#probative-value-and-d-separation"><i class="fa fa-check"></i><b>8.2</b> Probative value and <span class="math inline">\(d\)</span>-separation</a></li>
 <li class="chapter" data-level="8.3" data-path="process-tracing.html"><a href="process-tracing.html#foundations-for-van-everas-tests"><i class="fa fa-check"></i><b>8.3</b> Foundations for Van Evera’s tests</a></li>
 <li class="chapter" data-level="8.4" data-path="process-tracing.html"><a href="process-tracing.html#clue-selection-clues-at-the-center-of-chains-can-be-more-informative"><i class="fa fa-check"></i><b>8.4</b> Clue selection: clues at the center of chains can be more informative</a></li>
 </ul></li>
-<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a><ul>
+<li class="chapter" data-level="9" data-path="identification.html"><a href="identification.html"><i class="fa fa-check"></i><b>9</b> Identification</a>
+<ul>
 <li class="chapter" data-level="9.1" data-path="identification.html"><a href="identification.html#illustration-of-the-backdoor-criterion"><i class="fa fa-check"></i><b>9.1</b> Illustration of the backdoor criterion</a></li>
 <li class="chapter" data-level="9.2" data-path="identification.html"><a href="identification.html#identification-instruments"><i class="fa fa-check"></i><b>9.2</b> Identification: Instruments</a></li>
 <li class="chapter" data-level="9.3" data-path="identification.html"><a href="identification.html#identification-through-the-frontdoor"><i class="fa fa-check"></i><b>9.3</b> Identification through the frontdoor</a></li>
@@ -200,26 +242,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="9.5" data-path="identification.html"><a href="identification.html#addressing-both-sample-selection-bias-and-confounding"><i class="fa fa-check"></i><b>9.5</b> Addressing both sample selection bias and confounding</a></li>
 <li class="chapter" data-level="9.6" data-path="identification.html"><a href="identification.html#learning-from-a-collider"><i class="fa fa-check"></i><b>9.6</b> Learning from a collider!</a></li>
 </ul></li>
-<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a><ul>
+<li class="chapter" data-level="10" data-path="mixing-methods.html"><a href="mixing-methods.html"><i class="fa fa-check"></i><b>10</b> Mixing methods</a>
+<ul>
 <li class="chapter" data-level="10.1" data-path="mixing-methods.html"><a href="mixing-methods.html#using-within-case-data-to-help-with-identification"><i class="fa fa-check"></i><b>10.1</b> Using within case data to help with identification</a></li>
 <li class="chapter" data-level="10.2" data-path="mixing-methods.html"><a href="mixing-methods.html#distinguishing-paths"><i class="fa fa-check"></i><b>10.2</b> Distinguishing paths</a></li>
 <li class="chapter" data-level="10.3" data-path="mixing-methods.html"><a href="mixing-methods.html#nothing-from-nothing"><i class="fa fa-check"></i><b>10.3</b> Nothing from nothing</a></li>
 </ul></li>
-<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a><ul>
+<li class="chapter" data-level="11" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html"><i class="fa fa-check"></i><b>11</b> External validity and inference aggregation</a>
+<ul>
 <li class="chapter" data-level="11.1" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#transportation-of-findings-across-contexts"><i class="fa fa-check"></i><b>11.1</b> Transportation of findings across contexts</a></li>
 <li class="chapter" data-level="11.2" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#combining-observational-and-experimental-data"><i class="fa fa-check"></i><b>11.2</b> Combining observational and experimental data</a></li>
 <li class="chapter" data-level="11.3" data-path="external-validity-and-inference-aggregation.html"><a href="external-validity-and-inference-aggregation.html#a-jigsaw-puzzle-learning-across-populations"><i class="fa fa-check"></i><b>11.3</b> A jigsaw puzzle: Learning across populations</a></li>
 </ul></li>
 <li class="part"><span><b>IV Notation</b></span></li>
-<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a><ul>
-<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a><ul>
+<li class="chapter" data-level="12" data-path="notation.html"><a href="notation.html"><i class="fa fa-check"></i><b>12</b> Notation and syntax</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="notation.html"><a href="notation.html#notation-1"><i class="fa fa-check"></i><b>12.1</b> Notation</a>
+<ul>
 <li class="chapter" data-level="12.1.1" data-path="notation.html"><a href="notation.html#parents"><i class="fa fa-check"></i><b>12.1.1</b> Parents, children, and all that</a></li>
 </ul></li>
 <li class="chapter" data-level="12.2" data-path="notation.html"><a href="notation.html#syntax"><i class="fa fa-check"></i><b>12.2</b> Causal syntax</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
-<li><a href="https://github.com/macartan/gbiqq/" target="blank">Uses gbiqq</a></li>
+<li><a href="https://integrated-inferences.github.io/" target="blank">Uses CausalQueries</a></li>
 
 </ul>
 
@@ -238,26 +284,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="cm" class="section level1">
-<h1><span class="header-section-number">Chapter 1</span> What and why</h1>
+<div id="cm" class="section level1 hasAnchor" number="1">
+<h1><span class="header-section-number">Chapter 1</span> What and why<a href="cm.html#cm" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <p>The <code>CausalQueries</code> package is designed to make it easy to <em>build</em>, <em>update</em>, and <em>query</em> causal models defined over binary variables.</p>
-<p>The causal models we use are of the form described by <span class="citation">Pearl (<a href="#ref-pearl2009causality" role="doc-biblioref">2009</a>)</span>, with Bayesian updating on the causal models similar to that described by <span class="citation">Cowell et al. (<a href="#ref-cowell1999probabilistic" role="doc-biblioref">1999</a>)</span>. Though drawing heavily on the Pearlian framework, the approach specifies parameters using potential outcomes (specifically, using principal stratificaton <span class="citation">(Frangakis and Rubin <a href="#ref-frangakis2002principal" role="doc-biblioref">2002</a>)</span>) and uses the <code>stan</code> framework <span class="citation">(Carpenter et al. <a href="#ref-carpenter2017stan" role="doc-biblioref">2017</a>)</span> to implement updating.</p>
+<p>The causal models we use are of the form described by <span class="citation">Pearl (<a href="#ref-pearl2009causality">2009</a>)</span>, with Bayesian updating on the causal models similar to that described by <span class="citation">Cowell et al. (<a href="#ref-cowell1999probabilistic">1999</a>)</span>. Though drawing heavily on the Pearlian framework, the approach specifies parameters using potential outcomes (specifically, using principal stratificaton <span class="citation">(<a href="#ref-frangakis2002principal">Frangakis and Rubin 2002</a>)</span>) and uses the <code>stan</code> framework <span class="citation">(<a href="#ref-carpenter2017stan">Carpenter et al. 2017</a>)</span> to implement updating.</p>
 <p>We will illustrate how to use these models for a number of inferential tasks that are sometimes difficult to implement:</p>
 <ul>
-<li><strong>Bayesian process tracing</strong>: How to figure out what to believe about a case-level causal claim given one or more pieces of evidence about a case <span class="citation">(Bennett and Checkel <a href="#ref-bennett2015process" role="doc-biblioref">2015</a>)</span>.</li>
-<li><strong>Mixed methods</strong>: How to combine within-case (“qualitative”) evidence with cross-case (“quantitative”) evidence to make causal claims about cases or groups <span class="citation">(Humphreys and Jacobs <a href="#ref-humphreys2015mixing" role="doc-biblioref">2015</a>)</span>.</li>
-<li><strong>Counterfactual reasoning</strong>: How to estimate the probability that an outcome is due to a cause and other counterfactual queries (effects of causes, probability of sufficiency, explanation) <span class="citation">(Tian and Pearl <a href="#ref-tian2000probabilities" role="doc-biblioref">2000</a>)</span>.</li>
-<li><strong>Inference in the absence of causal identification</strong>: What inferences can you draw when causal quantities are not identified? How can you figure out <em>whether</em> a causal quantity is identified <span class="citation">(Manski <a href="#ref-manski1995identification" role="doc-biblioref">1995</a>)</span>?</li>
-<li><strong>Extrapolation, data fusion</strong>: How to draw inferences from mixtures of observational and experimental data? How to draw out-of-sample inferences given a theory of how one place differs from another <span class="citation">(Bareinboim and Pearl <a href="#ref-bareinboim2016causal" role="doc-biblioref">2016</a>)</span>?</li>
+<li><strong>Bayesian process tracing</strong>: How to figure out what to believe about a case-level causal claim given one or more pieces of evidence about a case <span class="citation">(<a href="#ref-bennett2015process">Bennett and Checkel 2015</a>)</span>.</li>
+<li><strong>Mixed methods</strong>: How to combine within-case (“qualitative”) evidence with cross-case (“quantitative”) evidence to make causal claims about cases or groups <span class="citation">(<a href="#ref-humphreys2015mixing">Humphreys and Jacobs 2015</a>)</span>.</li>
+<li><strong>Counterfactual reasoning</strong>: How to estimate the probability that an outcome is due to a cause and other counterfactual queries (effects of causes, probability of sufficiency, explanation) <span class="citation">(<a href="#ref-tian2000probabilities">Tian and Pearl 2000</a>)</span>.</li>
+<li><strong>Inference in the absence of causal identification</strong>: What inferences can you draw when causal quantities are not identified? How can you figure out <em>whether</em> a causal quantity is identified <span class="citation">(<a href="#ref-manski1995identification">Manski 1995</a>)</span>?</li>
+<li><strong>Extrapolation, data fusion</strong>: How to draw inferences from mixtures of observational and experimental data? How to draw out-of-sample inferences given a theory of how one place differs from another <span class="citation">(<a href="#ref-bareinboim2016causal">Bareinboim and Pearl 2016</a>)</span>?</li>
 </ul>
 <p>The functions in the package allow these different kinds of questions to be answered using the same three basic steps — <code>make_model</code>, <code>update_model</code>, and <code>query_model</code> — without recourse to specific estimators for specific estimands.</p>
 <p>The approach, however, requires thinking about causal inference differently from how many in the experimental tradition are used to.</p>
-<div id="two-approaches-to-inference" class="section level2">
-<h2><span class="header-section-number">1.1</span> Two approaches to inference</h2>
+<div id="two-approaches-to-inference" class="section level2 hasAnchor" number="1.1">
+<h2><span class="header-section-number">1.1</span> Two approaches to inference<a href="cm.html#two-approaches-to-inference" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>We contrast the two approaches to causal inference using the simplest problem: the analysis of data from a two-arm experimental trial to determine the average effect of a treatment on an outcome.</p>
 <p>In the canonical experimental trial, a treatment, <span class="math inline">\(X\)</span>, is randomly assigned and outcomes, <span class="math inline">\(Y\)</span>, are measured in both treatment and control groups. The usual interest is in understanding the average effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> (which we will assume are both binary).</p>
 <p>The classic approach to answering this question is to take the difference between outcomes in treatment and control groups as an estimate of this average treatment effect. Estimates of uncertainty about this answer can also be generated using information on variation in the treatment and control groups.</p>
-<p>It is also possible, however, to answer this question—along with a rich variety of other questions—using a <em>causal models</em> approach <span class="citation">(Pearl <a href="#ref-pearl2009causality" role="doc-biblioref">2009</a>)</span>.</p>
+<p>It is also possible, however, to answer this question—along with a rich variety of other questions—using a <em>causal models</em> approach <span class="citation">(<a href="#ref-pearl2009causality">Pearl 2009</a>)</span>.</p>
 <p>For intuition for how a causal model approach works, say instead of simply taking the differences between treatment and control one were to:</p>
 <ol style="list-style-type: decimal">
 <li><p>construct a simple model in which (a) <span class="math inline">\(X\)</span> is randomly assigned, with 50% probability and (b) we specify some prior beliefs about how <span class="math inline">\(Y\)</span> responds to <span class="math inline">\(X\)</span>, which could be positively, negatively, or not at all, and possibly different for each unit</p></li>
@@ -265,20 +311,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ol>
 <p>Though very simple, this <span class="math inline">\(X \rightarrow Y\)</span> model adds a great deal of structure to the situation It is, in fact, more of a model than you need if all you want to do is estimate average treatment effects. But it is nevertheless enough of a model to let you estimate quantities—such as causal attribution—that you could not estimate without a model, even given random assignment.</p>
 </div>
-<div id="recovering-the-ate-with-difference-in-means" class="section level2">
-<h2><span class="header-section-number">1.2</span> Recovering the ATE with Difference in Means</h2>
+<div id="recovering-the-ate-with-difference-in-means" class="section level2 hasAnchor" number="1.2">
+<h2><span class="header-section-number">1.2</span> Recovering the ATE with Difference in Means<a href="cm.html#recovering-the-ate-with-difference-in-means" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>To illustrate, imagine that <em>in actuality</em> (but unknown to us) <span class="math inline">\(X\)</span> shifts <span class="math inline">\(Y\)</span> from 0 to 1 in 50% of cases while in the rest <span class="math inline">\(Y\)</span> is 0 or 1 regardless.</p>
 <p>We imagine we have access to some data in which treatment, <span class="math inline">\(X\)</span>, has been randomly assigned:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># Fabricate data using fabricatr</span></a>
-<a class="sourceLine" id="cb1-2" title="2"><span class="kw">set.seed</span>(<span class="dv">17022020</span>)</a>
-<a class="sourceLine" id="cb1-3" title="3">data  &lt;-<span class="st"> </span><span class="kw">fabricate</span>(<span class="dt">N =</span> <span class="dv">1000</span>, <span class="dt">X =</span> <span class="kw">complete_ra</span>(N), <span class="dt">Y =</span> <span class="dv">1</span><span class="op">*</span>(<span class="kw">runif</span>(N, <span class="dv">-1</span>, <span class="dv">3</span>)<span class="op">/</span><span class="dv">2</span> <span class="op">&lt;</span><span class="st"> </span>X))</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="cm.html#cb1-1" tabindex="-1"></a><span class="co"># Fabricate data using fabricatr</span></span>
+<span id="cb1-2"><a href="cm.html#cb1-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">17022020</span>)</span>
+<span id="cb1-3"><a href="cm.html#cb1-3" tabindex="-1"></a>data  <span class="ot">&lt;-</span> <span class="fu">fabricate</span>(<span class="at">N =</span> <span class="dv">1000</span>, <span class="at">X =</span> <span class="fu">complete_ra</span>(N), <span class="at">Y =</span> <span class="dv">1</span><span class="sc">*</span>(<span class="fu">runif</span>(N, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">3</span>)<span class="sc">/</span><span class="dv">2</span> <span class="sc">&lt;</span> X))</span></code></pre></div>
 <p>The classic experimental approach to causal inference is to estimate the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> using differences in means: taking the difference between the average outcome in treatment and the average outcome in control. Thanks to randomization, in expectation that difference is equal to the average of the differences in outcomes that units would exhibit if they were in treatment versus if they were in control—that is, the causal effect.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">difference_in_means</span>(Y<span class="op">~</span>X, <span class="dt">data =</span> data)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="cm.html#cb2-1" tabindex="-1"></a><span class="fu">difference_in_means</span>(Y<span class="sc">~</span>X, <span class="at">data =</span> data)</span></code></pre></div>
 <table>
 <caption><span id="tab:unnamed-chunk-5">Table 1.1: </span>Inferences on the ATE from differences in means</caption>
+<colgroup>
+<col width="4%" />
+<col width="12%" />
+<col width="14%" />
+<col width="10%" />
+<col width="25%" />
+<col width="12%" />
+<col width="12%" />
+<col width="8%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th></th>
+<th align="left"></th>
 <th align="right">Estimate</th>
 <th align="right">Std. Error</th>
 <th align="right">t value</th>
@@ -290,7 +346,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </thead>
 <tbody>
 <tr class="odd">
-<td>X</td>
+<td align="left">X</td>
 <td align="right">0.484</td>
 <td align="right">0.028</td>
 <td align="right">17.48</td>
@@ -303,25 +359,38 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </table>
 <p>This approach gets us an accurate and precise answer, and it’s simply done (here using a function from the <code>estimatr</code> package).</p>
 </div>
-<div id="recovering-the-ate-with-a-causal-model" class="section level2">
-<h2><span class="header-section-number">1.3</span> Recovering the ATE with a Causal Model</h2>
+<div id="recovering-the-ate-with-a-causal-model" class="section level2 hasAnchor" number="1.3">
+<h2><span class="header-section-number">1.3</span> Recovering the ATE with a Causal Model<a href="cm.html#recovering-the-ate-with-a-causal-model" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The model-based approach takes a few more lines of code and is implemented in <code>CausalQueries</code> as follows.</p>
 <p>First we define a model, like this:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">model &lt;-<span class="st"> </span><span class="kw">make_model</span>(<span class="st">&quot;X -&gt; Y&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="cm.html#cb3-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y&quot;</span>)</span></code></pre></div>
 <p>Implicit in the definition of the model is a set of parameters and priors over these parameters. We discuss these in much more detail later, but for now we will just say that priors are uniform over possible causal relations.</p>
 <p>Second, we update the model, like this:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">model &lt;-<span class="st"> </span><span class="kw">update_model</span>(model, data) </a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="cm.html#cb4-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, data) </span></code></pre></div>
 <p>Third, we query the model like this:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">query_model</span>(model, <span class="dt">using  =</span> <span class="st">&quot;posteriors&quot;</span>, <span class="dt">query =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>) </a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="cm.html#cb5-1" tabindex="-1"></a><span class="fu">query_model</span>(model, <span class="at">using  =</span> <span class="st">&quot;posteriors&quot;</span>, <span class="at">query =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>) </span></code></pre></div>
 <table>
 <caption><span id="tab:unnamed-chunk-9">Table 1.2: </span>Inferences on the ATE from updated model</caption>
+<colgroup>
+<col width="8%" />
+<col width="8%" />
+<col width="15%" />
+<col width="20%" />
+<col width="10%" />
+<col width="10%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
+<th align="right">conf.low</th>
+<th align="right">conf.high</th>
 </tr>
 </thead>
 <tbody>
@@ -329,31 +398,47 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">Q 1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
-<td align="right">0.48</td>
-<td align="right">0.028</td>
+<td align="left">FALSE</td>
+<td align="right">0.4802</td>
+<td align="right">0.0283</td>
+<td align="right">0.4242</td>
+<td align="right">0.5335</td>
 </tr>
 </tbody>
 </table>
 <p>We see that the answers we get from the differences-in-means approach and the causal-model approach are about the same, as one would hope.</p>
 </div>
-<div id="going-further" class="section level2">
-<h2><span class="header-section-number">1.4</span> Going further</h2>
+<div id="going-further" class="section level2 hasAnchor" number="1.4">
+<h2><span class="header-section-number">1.4</span> Going further<a href="cm.html#going-further" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>In principle, however, the causal models approach can let you do more. The third section of this guide is full of examples, but for a simple one consider the following: say, instead of wanting to know the average effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> you wanted to know, “What is the probability that <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span> in a case in which <span class="math inline">\(X=Y=1\)</span>?”</p>
 <p>This is a harder question. Differences-in-means is an estimation strategy tied to a particular estimand, and it does not provide a good answer to this question. However, with a causal model in hand, <em>we can ask whatever causal question we like</em>, and get an answer plus estimates of uncertainty around the answer.</p>
 <p>Here is the answer we get:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">query_model</span>(model, </a>
-<a class="sourceLine" id="cb6-2" title="2">            <span class="dt">using =</span> <span class="st">&quot;posteriors&quot;</span>, </a>
-<a class="sourceLine" id="cb6-3" title="3">            <span class="dt">query =</span> <span class="st">&quot;Y[X=0] == 0&quot;</span>,</a>
-<a class="sourceLine" id="cb6-4" title="4">            <span class="dt">given =</span> <span class="st">&quot;X==1 &amp; Y==1&quot;</span>)  </a></code></pre></div>
-<table>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="cm.html#cb6-1" tabindex="-1"></a><span class="fu">query_model</span>(model, </span>
+<span id="cb6-2"><a href="cm.html#cb6-2" tabindex="-1"></a>            <span class="at">using =</span> <span class="st">&quot;posteriors&quot;</span>, </span>
+<span id="cb6-3"><a href="cm.html#cb6-3" tabindex="-1"></a>            <span class="at">query =</span> <span class="st">&quot;Y[X=0] == 0&quot;</span>,</span>
+<span id="cb6-4"><a href="cm.html#cb6-4" tabindex="-1"></a>            <span class="at">given =</span> <span class="st">&quot;X==1 &amp; Y==1&quot;</span>)  </span></code></pre></div>
+<table style="width:100%;">
 <caption><span id="tab:unnamed-chunk-11">Table 1.3: </span>Causes of effects estimand</caption>
+<colgroup>
+<col width="7%" />
+<col width="15%" />
+<col width="14%" />
+<col width="18%" />
+<col width="9%" />
+<col width="9%" />
+<col width="11%" />
+<col width="13%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Query</th>
 <th align="left">Given</th>
 <th align="left">Using</th>
+<th align="left">Case.estimand</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
+<th align="right">conf.low</th>
+<th align="right">conf.high</th>
 </tr>
 </thead>
 <tbody>
@@ -361,8 +446,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">Q 1</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">posteriors</td>
-<td align="right">0.798</td>
-<td align="right">0.095</td>
+<td align="left">FALSE</td>
+<td align="right">0.7936</td>
+<td align="right">0.0941</td>
+<td align="right">0.6296</td>
+<td align="right">0.9663</td>
 </tr>
 </tbody>
 </table>
@@ -375,34 +463,34 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<h3>References</h3>
-<div id="refs" class="references">
-<div id="ref-bareinboim2016causal">
-<p>Bareinboim, Elias, and Judea Pearl. 2016. “Causal Inference and the Data-Fusion Problem.” <em>Proceedings of the National Academy of Sciences</em> 113 (27): 7345–52.</p>
+<h3>References<a href="references.html#references" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-bareinboim2016causal" class="csl-entry">
+Bareinboim, Elias, and Judea Pearl. 2016. <span>“Causal Inference and the Data-Fusion Problem.”</span> <em>Proceedings of the National Academy of Sciences</em> 113 (27): 7345–52.
 </div>
-<div id="ref-bennett2015process">
-<p>Bennett, Andrew, and Jeffrey T Checkel. 2015. <em>Process Tracing</em>. Cambridge University Press.</p>
+<div id="ref-bennett2015process" class="csl-entry">
+Bennett, Andrew, and Jeffrey T Checkel. 2015. <em>Process Tracing</em>. Cambridge University Press.
 </div>
-<div id="ref-carpenter2017stan">
-<p>Carpenter, Bob, Andrew Gelman, Matthew D Hoffman, Daniel Lee, Ben Goodrich, Michael Betancourt, Marcus Brubaker, Jiqiang Guo, Peter Li, and Allen Riddell. 2017. “Stan: A Probabilistic Programming Language.” <em>Journal of Statistical Software</em> 76 (1).</p>
+<div id="ref-carpenter2017stan" class="csl-entry">
+Carpenter, Bob, Andrew Gelman, Matthew D Hoffman, Daniel Lee, Ben Goodrich, Michael Betancourt, Marcus Brubaker, Jiqiang Guo, Peter Li, and Allen Riddell. 2017. <span>“Stan: A Probabilistic Programming Language.”</span> <em>Journal of Statistical Software</em> 76 (1).
 </div>
-<div id="ref-cowell1999probabilistic">
-<p>Cowell, Robert G, Philip Dawid, Steffen L Lauritzen, and David J Spiegelhalter. 1999. <em>Probabilistic Networks and Expert Systems</em>. Springer.</p>
+<div id="ref-cowell1999probabilistic" class="csl-entry">
+Cowell, Robert G, Philip Dawid, Steffen L Lauritzen, and David J Spiegelhalter. 1999. <em>Probabilistic Networks and Expert Systems</em>. Springer.
 </div>
-<div id="ref-frangakis2002principal">
-<p>Frangakis, Constantine E, and Donald B Rubin. 2002. “Principal Stratification in Causal Inference.” <em>Biometrics</em> 58 (1): 21–29.</p>
+<div id="ref-frangakis2002principal" class="csl-entry">
+Frangakis, Constantine E, and Donald B Rubin. 2002. <span>“Principal Stratification in Causal Inference.”</span> <em>Biometrics</em> 58 (1): 21–29.
 </div>
-<div id="ref-humphreys2015mixing">
-<p>Humphreys, Macartan, and Alan M Jacobs. 2015. “Mixing Methods: A Bayesian Approach.” <em>American Political Science Review</em> 109 (04): 653–73.</p>
+<div id="ref-humphreys2015mixing" class="csl-entry">
+Humphreys, Macartan, and Alan M Jacobs. 2015. <span>“Mixing Methods: A Bayesian Approach.”</span> <em>American Political Science Review</em> 109 (04): 653–73.
 </div>
-<div id="ref-manski1995identification">
-<p>Manski, Charles F. 1995. <em>Identification Problems in the Social Sciences</em>. Harvard University Press.</p>
+<div id="ref-manski1995identification" class="csl-entry">
+Manski, Charles F. 1995. <em>Identification Problems in the Social Sciences</em>. Harvard University Press.
 </div>
-<div id="ref-pearl2009causality">
-<p>Pearl, Judea. 2009. <em>Causality</em>. Cambridge university press.</p>
+<div id="ref-pearl2009causality" class="csl-entry">
+Pearl, Judea. 2009. <em>Causality</em>. Cambridge university press.
 </div>
-<div id="ref-tian2000probabilities">
-<p>Tian, Jin, and Judea Pearl. 2000. “Probabilities of Causation: Bounds and Identification.” <em>Annals of Mathematics and Artificial Intelligence</em> 28 (1-4): 287–313.</p>
+<div id="ref-tian2000probabilities" class="csl-entry">
+Tian, Jin, and Judea Pearl. 2000. <span>“Probabilities of Causation: Bounds and Identification.”</span> <em>Annals of Mathematics and Artificial Intelligence</em> 28 (1-4): 287–313.
 </div>
 </div>
             </section>
@@ -415,7 +503,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </div>
   </div>
 <script src="libs/gitbook/js/app.min.js"></script>
-<script src="libs/gitbook/js/lunr.js"></script>
 <script src="libs/gitbook/js/clipboard.min.js"></script>
 <script src="libs/gitbook/js/plugin-search.js"></script>
 <script src="libs/gitbook/js/plugin-sharing.js"></script>
@@ -434,6 +521,7 @@ gitbook.start({
 "weibo": false,
 "instapaper": false,
 "vk": false,
+"whatsapp": false,
 "all": false,
 "google": false,
 "instapper": false
@@ -456,6 +544,10 @@ gitbook.start({
 "text": null
 },
 "download": ["causalmodels.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
 "toc": {
 "collapse": "section"
 },
@@ -472,7 +564,7 @@ gitbook.start({
     var script = document.createElement("script");
     script.type = "text/javascript";
     var src = "true";
-    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:")
       if (/^https?:/.test(src))
         src = src.replace(/^https?:/, '');
