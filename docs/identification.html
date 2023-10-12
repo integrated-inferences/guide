@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 9 Identification | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 9 Identification | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2023-08-31" />
+<meta name="date" content="2023-10-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -290,16 +290,16 @@ div.csl-indent {
 <h2><span class="header-section-number">9.1</span> Illustration of the backdoor criterion<a href="identification.html#illustration-of-the-backdoor-criterion" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Perhaps the most common approach to identifying causal effects in observational research is to condition on possible confounders. The “backdoor” criterion for identifying an effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> involves finding a set of nodes to condition on that collectively block all “backdoor paths” between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. The intuition is that if these paths are blocked, then any systematic correlation between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> reflects the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>.</p>
 <p>To illustrate the backdoor criterion we want to show that estimates of the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> are identified if we have data on a node that blocks a backdoor path—<span class="math inline">\(C\)</span>—but not otherwise. With <code>CausalQueries</code> models however, rather than conditioning on <span class="math inline">\(C\)</span> we simply include data on <span class="math inline">\(C\)</span> in our model and update as usual.</p>
-<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="identification.html#cb97-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;C -&gt; X -&gt; Y &lt;- C&quot;</span>)  <span class="sc">|&gt;</span></span>
-<span id="cb97-2"><a href="identification.html#cb97-2" tabindex="-1"></a>         <span class="fu">set_restrictions</span>(<span class="st">&quot;(Y[C=1]&lt;Y[C=0])&quot;</span>)</span>
-<span id="cb97-3"><a href="identification.html#cb97-3" tabindex="-1"></a></span>
-<span id="cb97-4"><a href="identification.html#cb97-4" tabindex="-1"></a></span>
-<span id="cb97-5"><a href="identification.html#cb97-5" tabindex="-1"></a><span class="co"># Four types of data: Large, small, door open, door closed</span></span>
-<span id="cb97-6"><a href="identification.html#cb97-6" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
-<span id="cb97-7"><a href="identification.html#cb97-7" tabindex="-1"></a>df_closed_door_large <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="at">n =</span> N)</span>
-<span id="cb97-8"><a href="identification.html#cb97-8" tabindex="-1"></a>df_open_door_large   <span class="ot">&lt;-</span> <span class="fu">mutate</span>(df_closed_door_large, <span class="at">C =</span> <span class="cn">NA</span>)</span>
-<span id="cb97-9"><a href="identification.html#cb97-9" tabindex="-1"></a>df_closed_door_small <span class="ot">&lt;-</span> df_closed_door_large[<span class="fu">sample</span>(N, <span class="dv">200</span>), ]</span>
-<span id="cb97-10"><a href="identification.html#cb97-10" tabindex="-1"></a>df_open_door_small   <span class="ot">&lt;-</span> df_open_door_large[<span class="fu">sample</span>(N, <span class="dv">200</span>), ]</span></code></pre></div>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="identification.html#cb99-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;C -&gt; X -&gt; Y &lt;- C&quot;</span>)  <span class="sc">|&gt;</span></span>
+<span id="cb99-2"><a href="identification.html#cb99-2" tabindex="-1"></a>         <span class="fu">set_restrictions</span>(<span class="st">&quot;(Y[C=1]&lt;Y[C=0])&quot;</span>)</span>
+<span id="cb99-3"><a href="identification.html#cb99-3" tabindex="-1"></a></span>
+<span id="cb99-4"><a href="identification.html#cb99-4" tabindex="-1"></a></span>
+<span id="cb99-5"><a href="identification.html#cb99-5" tabindex="-1"></a><span class="co"># Four types of data: Large, small, door open, door closed</span></span>
+<span id="cb99-6"><a href="identification.html#cb99-6" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb99-7"><a href="identification.html#cb99-7" tabindex="-1"></a>df_closed_door_large <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="at">n =</span> N)</span>
+<span id="cb99-8"><a href="identification.html#cb99-8" tabindex="-1"></a>df_open_door_large   <span class="ot">&lt;-</span> <span class="fu">mutate</span>(df_closed_door_large, <span class="at">C =</span> <span class="cn">NA</span>)</span>
+<span id="cb99-9"><a href="identification.html#cb99-9" tabindex="-1"></a>df_closed_door_small <span class="ot">&lt;-</span> df_closed_door_large[<span class="fu">sample</span>(N, <span class="dv">200</span>), ]</span>
+<span id="cb99-10"><a href="identification.html#cb99-10" tabindex="-1"></a>df_open_door_small   <span class="ot">&lt;-</span> df_open_door_large[<span class="fu">sample</span>(N, <span class="dv">200</span>), ]</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/unnamed-chunk-94-1.png" width="672" /></p>
 <p>We see that with small <span class="math inline">\(n\)</span> (200 units), closing the backdoor (by including data on <span class="math inline">\(C\)</span>) produces a tighter distribution on the ATE. With large <span class="math inline">\(N\)</span> (10,000 units) the distribution around the estimand collapses when the backdoor is closed but not when it is open.</p>
 </div>
@@ -307,148 +307,160 @@ div.csl-indent {
 <h2><span class="header-section-number">9.2</span> Identification: Instruments<a href="identification.html#identification-instruments" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>We illustrate how you can learn about whether <span class="math inline">\(X=1\)</span> caused <span class="math inline">\(Y=1\)</span> by taking advantage of an “instrument,” <span class="math inline">\(Z\)</span>.</p>
 <p>We start with a model that builds in the instrumental variables exclusion restriction (no unobserved confounding between <span class="math inline">\(Z\)</span> and <span class="math inline">\(Y\)</span>, no paths between <span class="math inline">\(Z\)</span> and <span class="math inline">\(Y\)</span> except through <span class="math inline">\(X\)</span>) but does not include a monotonicity restriction (no negative effect of <span class="math inline">\(Z\)</span> on <span class="math inline">\(X\)</span>).</p>
-<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="identification.html#cb98-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;Z -&gt; X -&gt; Y; X &lt;-&gt; Y&quot;</span>)  </span>
-<span id="cb98-2"><a href="identification.html#cb98-2" tabindex="-1"></a></span>
-<span id="cb98-3"><a href="identification.html#cb98-3" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="identification.html#cb100-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;Z -&gt; X -&gt; Y; X &lt;-&gt; Y&quot;</span>)  </span>
+<span id="cb100-2"><a href="identification.html#cb100-2" tabindex="-1"></a></span>
+<span id="cb100-3"><a href="identification.html#cb100-3" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/appinstruments-1.png" width="672" /></p>
-<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="identification.html#cb99-1" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">query_model</span>(</span>
-<span id="cb99-2"><a href="identification.html#cb99-2" tabindex="-1"></a>    updated, </span>
-<span id="cb99-3"><a href="identification.html#cb99-3" tabindex="-1"></a>    <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">ATE =</span> <span class="st">&quot;c(Y[X=1] - Y[X=0])&quot;</span>), </span>
-<span id="cb99-4"><a href="identification.html#cb99-4" tabindex="-1"></a>    <span class="at">given =</span> <span class="fu">list</span>(<span class="cn">TRUE</span>, <span class="st">&quot;X[Z=1] &gt; X[Z=0]&quot;</span>,  <span class="st">&quot;X==0&quot;</span>,  <span class="st">&quot;X==1&quot;</span>),</span>
-<span id="cb99-5"><a href="identification.html#cb99-5" tabindex="-1"></a>    <span class="at">using =</span> <span class="st">&quot;posteriors&quot;</span>)</span></code></pre></div>
-<table>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="identification.html#cb101-1" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">query_model</span>(</span>
+<span id="cb101-2"><a href="identification.html#cb101-2" tabindex="-1"></a>    updated, </span>
+<span id="cb101-3"><a href="identification.html#cb101-3" tabindex="-1"></a>    <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">ATE =</span> <span class="st">&quot;c(Y[X=1] - Y[X=0])&quot;</span>), </span>
+<span id="cb101-4"><a href="identification.html#cb101-4" tabindex="-1"></a>    <span class="at">given =</span> <span class="fu">list</span>(<span class="cn">TRUE</span>, <span class="st">&quot;X[Z=1] &gt; X[Z=0]&quot;</span>,  <span class="st">&quot;X==0&quot;</span>,  <span class="st">&quot;X==1&quot;</span>),</span>
+<span id="cb101-5"><a href="identification.html#cb101-5" tabindex="-1"></a>    <span class="at">using =</span> <span class="st">&quot;posteriors&quot;</span>)</span></code></pre></div>
+<table style="width:100%;">
 <colgroup>
-<col width="7%" />
-<col width="20%" />
-<col width="13%" />
-<col width="17%" />
 <col width="8%" />
-<col width="8%" />
+<col width="6%" />
+<col width="16%" />
 <col width="11%" />
-<col width="12%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4784</td>
-<td align="right">0.1073</td>
-<td align="right">0.2604</td>
-<td align="right">0.6316</td>
+<td align="right">0.4788</td>
+<td align="right">0.1056</td>
+<td align="right">0.2612</td>
+<td align="right">0.6311</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">X[Z=1] &gt; X[Z=0]</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5813</td>
-<td align="right">0.0504</td>
-<td align="right">0.4765</td>
-<td align="right">0.6736</td>
+<td align="right">0.5927</td>
+<td align="right">0.0492</td>
+<td align="right">0.4943</td>
+<td align="right">0.6866</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">X==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4851</td>
-<td align="right">0.1309</td>
-<td align="right">0.2155</td>
-<td align="right">0.6646</td>
+<td align="right">0.4701</td>
+<td align="right">0.1356</td>
+<td align="right">0.1901</td>
+<td align="right">0.6557</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">X==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4716</td>
-<td align="right">0.1344</td>
-<td align="right">0.1980</td>
-<td align="right">0.6545</td>
+<td align="right">0.4877</td>
+<td align="right">0.1281</td>
+<td align="right">0.2201</td>
+<td align="right">0.6638</td>
 </tr>
 </tbody>
 </table>
 <p>We calculate the average causal effect (a) for all (b) for the compliers and (c) conditional on values of <span class="math inline">\(M\)</span>.</p>
 <p>We see here that the effects are strongest for the “compliers”—units for whom <span class="math inline">\(X\)</span> responds positively to <span class="math inline">\(Z\)</span>; in addition they are stronger for the treated than for the untreated. Moreover we see that the posterior variance on the complier average effect is low. If our model also imposed a monotonicity assumption then it would be lower still.</p>
-<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="identification.html#cb100-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;Z -&gt; X -&gt; Y; X &lt;-&gt; Y&quot;</span>)  <span class="sc">|&gt;</span></span>
-<span id="cb100-2"><a href="identification.html#cb100-2" tabindex="-1"></a>         <span class="fu">set_restrictions</span>(<span class="fu">decreasing</span>(<span class="st">&quot;Z&quot;</span>, <span class="st">&quot;X&quot;</span>)) </span></code></pre></div>
-<table>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="identification.html#cb102-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;Z -&gt; X -&gt; Y; X &lt;-&gt; Y&quot;</span>)  <span class="sc">|&gt;</span></span>
+<span id="cb102-2"><a href="identification.html#cb102-2" tabindex="-1"></a>         <span class="fu">set_restrictions</span>(<span class="fu">decreasing</span>(<span class="st">&quot;Z&quot;</span>, <span class="st">&quot;X&quot;</span>)) </span></code></pre></div>
+<table style="width:100%;">
 <colgroup>
-<col width="7%" />
-<col width="20%" />
-<col width="13%" />
-<col width="17%" />
 <col width="8%" />
-<col width="8%" />
+<col width="6%" />
+<col width="16%" />
 <col width="11%" />
-<col width="12%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6055</td>
-<td align="right">0.0113</td>
-<td align="right">0.5838</td>
-<td align="right">0.628</td>
+<td align="right">0.4233</td>
+<td align="right">0.1047</td>
+<td align="right">0.2236</td>
+<td align="right">0.6196</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">X[Z=1] &gt; X[Z=0]</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6055</td>
-<td align="right">0.0113</td>
-<td align="right">0.5838</td>
-<td align="right">0.628</td>
+<td align="right">0.6103</td>
+<td align="right">0.0291</td>
+<td align="right">0.5539</td>
+<td align="right">0.6682</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">X==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6055</td>
-<td align="right">0.0113</td>
-<td align="right">0.5838</td>
-<td align="right">0.628</td>
+<td align="right">0.4169</td>
+<td align="right">0.1497</td>
+<td align="right">0.1556</td>
+<td align="right">0.6737</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">X==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6055</td>
-<td align="right">0.0113</td>
-<td align="right">0.5838</td>
-<td align="right">0.628</td>
+<td align="right">0.4300</td>
+<td align="right">0.1451</td>
+<td align="right">0.1777</td>
+<td align="right">0.6779</td>
 </tr>
 </tbody>
 </table>
@@ -456,9 +468,9 @@ div.csl-indent {
 <div id="identification-through-the-frontdoor" class="section level2 hasAnchor" number="9.3">
 <h2><span class="header-section-number">9.3</span> Identification through the frontdoor<a href="identification.html#identification-through-the-frontdoor" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>A less well known approach to identification uses information on the causal path from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span>. Consider the following model:</p>
-<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="identification.html#cb101-1" tabindex="-1"></a>frontdoor <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y; X &lt;-&gt; Y&quot;</span>) </span>
-<span id="cb101-2"><a href="identification.html#cb101-2" tabindex="-1"></a></span>
-<span id="cb101-3"><a href="identification.html#cb101-3" tabindex="-1"></a><span class="fu">plot</span>(frontdoor)</span></code></pre></div>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="identification.html#cb103-1" tabindex="-1"></a>frontdoor <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y; X &lt;-&gt; Y&quot;</span>) </span>
+<span id="cb103-2"><a href="identification.html#cb103-2" tabindex="-1"></a></span>
+<span id="cb103-3"><a href="identification.html#cb103-3" tabindex="-1"></a><span class="fu">plot</span>(frontdoor)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/appfrontdoor-1.png" width="672" /></p>
 <p>Although in both the instrumental variables (IV) setup and the frontdoor setup we are trying to deal with confounding between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, the two differ in that in the IV set up we make use of a variable that is prior to <span class="math inline">\(X\)</span> whereas in the frontdoor model we make use of a variable between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. In both cases we need other exclusion restrictions: here we see that there is no unobserved confounding between <span class="math inline">\(X\)</span> and <span class="math inline">\(M\)</span> or between <span class="math inline">\(M\)</span> and <span class="math inline">\(Y\)</span>. Importantly too there is no direct path from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span>, only the path that runs through <span class="math inline">\(M\)</span>.</p>
 <p>Below we plot posterior distributions given observations on 2000 units, with and without data on <span class="math inline">\(M\)</span>:</p>
@@ -470,39 +482,42 @@ div.csl-indent {
 <p>Say we are interested in assessing the share of Republicans in a population but Republicans are (possible) systematically likely to be absent from our sample. What inferences can we make given our sample?</p>
 <p>We will assume that we know when we have missing data, though of course we do not know the value of the missing data.</p>
 <p>To tackle the problem we will include sample selection into our model:</p>
-<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="identification.html#cb102-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;R -&gt; S&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb102-2"><a href="identification.html#cb102-2" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;R&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>,<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb102-3"><a href="identification.html#cb102-3" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;S&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>))</span>
-<span id="cb102-4"><a href="identification.html#cb102-4" tabindex="-1"></a></span>
-<span id="cb102-5"><a href="identification.html#cb102-5" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="at">n =</span> <span class="dv">1000</span>) <span class="sc">|&gt;</span></span>
-<span id="cb102-6"><a href="identification.html#cb102-6" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">R =</span> <span class="fu">ifelse</span>(S<span class="sc">==</span><span class="dv">0</span>, <span class="cn">NA</span>, R ))</span></code></pre></div>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="identification.html#cb104-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;R -&gt; S&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb104-2"><a href="identification.html#cb104-2" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;R&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>,<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb104-3"><a href="identification.html#cb104-3" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;S&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>))</span>
+<span id="cb104-4"><a href="identification.html#cb104-4" tabindex="-1"></a></span>
+<span id="cb104-5"><a href="identification.html#cb104-5" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="at">n =</span> <span class="dv">1000</span>) <span class="sc">|&gt;</span></span>
+<span id="cb104-6"><a href="identification.html#cb104-6" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">R =</span> <span class="fu">ifelse</span>(S<span class="sc">==</span><span class="dv">0</span>, <span class="cn">NA</span>, R ))</span></code></pre></div>
 <p>From this data and model, the priors and posteriors for population and sample quantities are:</p>
 <table>
 <colgroup>
-<col width="8%" />
-<col width="8%" />
-<col width="15%" />
-<col width="20%" />
-<col width="10%" />
-<col width="10%" />
+<col width="9%" />
+<col width="6%" />
+<col width="6%" />
 <col width="12%" />
-<col width="14%" />
+<col width="12%" />
+<col width="8%" />
+<col width="8%" />
+<col width="16%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
@@ -512,7 +527,8 @@ div.csl-indent {
 <td align="right">0.3333</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">-</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
@@ -522,17 +538,19 @@ div.csl-indent {
 <td align="right">0.9741</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5043</td>
-<td align="right">0.1391</td>
-<td align="right">0.2553</td>
-<td align="right">0.7352</td>
+<td align="right">0.5093</td>
+<td align="right">0.1465</td>
+<td align="right">0.2635</td>
+<td align="right">0.7523</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">S==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
@@ -542,7 +560,8 @@ div.csl-indent {
 <td align="right">0.5000</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">S==1</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
@@ -552,14 +571,15 @@ div.csl-indent {
 <td align="right">0.9820</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">S==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4941</td>
-<td align="right">0.0234</td>
-<td align="right">0.4478</td>
-<td align="right">0.5398</td>
+<td align="right">0.5097</td>
+<td align="right">0.0245</td>
+<td align="right">0.4610</td>
+<td align="right">0.5577</td>
 </tr>
 </tbody>
 </table>
@@ -567,30 +587,33 @@ div.csl-indent {
 <p>Importantly we would not do so well if our data did not indicate that we had missingness.</p>
 <table>
 <colgroup>
-<col width="8%" />
-<col width="8%" />
-<col width="15%" />
-<col width="20%" />
-<col width="10%" />
-<col width="10%" />
+<col width="9%" />
+<col width="6%" />
+<col width="6%" />
 <col width="12%" />
-<col width="14%" />
+<col width="12%" />
+<col width="8%" />
+<col width="8%" />
+<col width="16%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
@@ -600,17 +623,19 @@ div.csl-indent {
 <td align="right">0.3333</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5096</td>
-<td align="right">0.0074</td>
-<td align="right">0.4954</td>
-<td align="right">0.5246</td>
+<td align="right">0.5056</td>
+<td align="right">0.0076</td>
+<td align="right">0.4912</td>
+<td align="right">0.5205</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">S==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
@@ -620,14 +645,15 @@ div.csl-indent {
 <td align="right">0.5000</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">R==1</td>
 <td align="left">S==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5096</td>
-<td align="right">0.0074</td>
-<td align="right">0.4955</td>
-<td align="right">0.5245</td>
+<td align="right">0.5056</td>
+<td align="right">0.0076</td>
+<td align="right">0.4912</td>
+<td align="right">0.5206</td>
 </tr>
 </tbody>
 </table>
@@ -637,39 +663,42 @@ div.csl-indent {
 <h2><span class="header-section-number">9.5</span> Addressing both sample selection bias and confounding<a href="identification.html#addressing-both-sample-selection-bias-and-confounding" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Consider the following model from <span class="citation">Bareinboim and Pearl (<a href="#ref-bareinboim2016causal">2016</a>)</span> (their Figure 4C). The key feature is that data is only seen for units with <span class="math inline">\(S=1\)</span> (<span class="math inline">\(S\)</span> for sampling).</p>
 <p>In this model the relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> is confounded. Two strategies work to address confounding: controlling for either <span class="math inline">\(Z\)</span> or for <span class="math inline">\(W1\)</span> <em>and</em> <span class="math inline">\(W2\)</span> works. But only the first strategy addresses the sample selection problem properly. The reason is that <span class="math inline">\(Z\)</span> is independent of <span class="math inline">\(S\)</span> and so variation in <span class="math inline">\(Z\)</span> is not affected by selection on <span class="math inline">\(S\)</span>.</p>
-<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="identification.html#cb103-1" tabindex="-1"></a>selection <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X &lt;- W1 -&gt; W2 -&gt; X -&gt; Y &lt;- Z -&gt; W2; W1 -&gt; S&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="identification.html#cb105-1" tabindex="-1"></a>selection <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X &lt;- W1 -&gt; W2 -&gt; X -&gt; Y &lt;- Z -&gt; W2; W1 -&gt; S&quot;</span>)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/unnamed-chunk-100-1.png" width="672" /></p>
 <p>To keep the parameter and type space small we also impose a set of restrictions: <span class="math inline">\(S\)</span> is non decreasing in <span class="math inline">\(W_1\)</span>, <span class="math inline">\(X\)</span> is not decreasing in either <span class="math inline">\(W1\)</span> or <span class="math inline">\(W2\)</span>, <span class="math inline">\(Y\)</span> is not decreasing <span class="math inline">\(Z\)</span> or <span class="math inline">\(X\)</span> and <span class="math inline">\(X\)</span> affects <span class="math inline">\(Y\)</span> only if <span class="math inline">\(Z=1\)</span>. <span class="math inline">\(W_2=1\)</span> if and only if both <span class="math inline">\(W_1=1\)</span> and <span class="math inline">\(Z=1\)</span>. These all reduce the problem to one with 18 nodal types and 288 causal types.</p>
 <p>Worth noting that in this model although selection is related to patterns of confounding, it is not related to causal effects: the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> is not different from units that are or are not selected.</p>
 <p>Given these priors we will assume a true (unknown) data generating process with no effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>, in which <span class="math inline">\(W_1\)</span> arises with a <span class="math inline">\(1/3\)</span> probability but has a strong positive effect on selection into the sample when it does arise.</p>
 <p>The estimand values given the true parameters and priors for this model are as shown below.</p>
-<table style="width:100%;">
+<table>
 <caption><span id="tab:appsimpleselcconf5">Table 9.1: </span>Estimand values</caption>
 <colgroup>
 <col width="8%" />
-<col width="8%" />
-<col width="15%" />
-<col width="20%" />
-<col width="8%" />
-<col width="10%" />
-<col width="13%" />
+<col width="16%" />
+<col width="6%" />
+<col width="11%" />
+<col width="11%" />
+<col width="6%" />
+<col width="7%" />
 <col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] - Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
@@ -679,14 +708,15 @@ div.csl-indent {
 <td align="right">0.0000</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] - Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
-<td align="right">0.336</td>
-<td align="right">0.1541</td>
-<td align="right">0.0839</td>
-<td align="right">0.6725</td>
+<td align="right">0.333</td>
+<td align="right">0.1514</td>
+<td align="right">0.0811</td>
+<td align="right">0.6563</td>
 </tr>
 </tbody>
 </table>
@@ -739,13 +769,13 @@ Y
 X
 </td>
 <td>
-0.081<sup>***</sup>
+0.083<sup>***</sup>
 </td>
 <td>
-0.080<sup>***</sup>
+0.063<sup>***</sup>
 </td>
 <td>
--0.006
+-0.0005
 </td>
 </tr>
 <tr>
@@ -755,7 +785,7 @@ X
 (0.008)
 </td>
 <td>
-(0.016)
+(0.015)
 </td>
 <td>
 (0.008)
@@ -778,7 +808,7 @@ X:W1_norm
 <td>
 </td>
 <td>
-0.161<sup>***</sup>
+0.149<sup>***</sup>
 </td>
 <td>
 </td>
@@ -789,7 +819,7 @@ X:W1_norm
 <td>
 </td>
 <td>
-(0.031)
+(0.030)
 </td>
 <td>
 </td>
@@ -811,7 +841,7 @@ X:W2_norm
 <td>
 </td>
 <td>
-0.098<sup>***</sup>
+0.142<sup>***</sup>
 </td>
 <td>
 </td>
@@ -822,7 +852,7 @@ X:W2_norm
 <td>
 </td>
 <td>
-(0.033)
+(0.032)
 </td>
 <td>
 </td>
@@ -846,7 +876,7 @@ X:Z_norm
 <td>
 </td>
 <td>
--0.047<sup>***</sup>
+-0.005
 </td>
 </tr>
 <tr>
@@ -879,13 +909,13 @@ X:Z_norm
 Observations
 </td>
 <td>
-14,947
+15,031
 </td>
 <td>
-14,947
+15,031
 </td>
 <td>
-14,947
+15,031
 </td>
 </tr>
 <tr>
@@ -896,10 +926,10 @@ R<sup>2</sup>
 0.007
 </td>
 <td>
-0.021
+0.017
 </td>
 <td>
-0.117
+0.104
 </td>
 </tr>
 <tr>
@@ -910,10 +940,10 @@ Adjusted R<sup>2</sup>
 0.007
 </td>
 <td>
-0.020
+0.017
 </td>
 <td>
-0.117
+0.104
 </td>
 </tr>
 <tr>
@@ -921,13 +951,13 @@ Adjusted R<sup>2</sup>
 Residual Std. Error
 </td>
 <td>
-0.498 (df = 14945)
+0.498 (df = 15029)
 </td>
 <td>
-0.495 (df = 14941)
+0.496 (df = 15025)
 </td>
 <td>
-0.470 (df = 14943)
+0.473 (df = 15027)
 </td>
 </tr>
 <tr>
@@ -935,13 +965,13 @@ Residual Std. Error
 F Statistic
 </td>
 <td>
-99.020<sup>***</sup> (df = 1; 14945)
+103.800<sup>***</sup> (df = 1; 15029)
 </td>
 <td>
-62.770<sup>***</sup> (df = 5; 14941)
+52.770<sup>***</sup> (df = 5; 15025)
 </td>
 <td>
-661.200<sup>***</sup> (df = 3; 14943)
+582.300<sup>***</sup> (df = 3; 15027)
 </td>
 </tr>
 <tr>
@@ -970,18 +1000,18 @@ F Statistic
 <tbody>
 <tr class="odd">
 <td align="left">X,Y</td>
-<td align="right">0.0714</td>
-<td align="right">0.0144</td>
+<td align="right">0.0726</td>
+<td align="right">0.0143</td>
 </tr>
 <tr class="even">
 <td align="left">X,Y, W1, W2</td>
-<td align="right">0.0127</td>
-<td align="right">0.0061</td>
+<td align="right">0.0156</td>
+<td align="right">0.0065</td>
 </tr>
 <tr class="odd">
 <td align="left">X, Y, Z</td>
-<td align="right">0.0133</td>
-<td align="right">0.0054</td>
+<td align="right">0.0120</td>
+<td align="right">0.0051</td>
 </tr>
 </tbody>
 </table>
@@ -991,71 +1021,116 @@ F Statistic
 <h2><span class="header-section-number">9.6</span> Learning from a collider!<a href="identification.html#learning-from-a-collider" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Conditioning on a collider can be a bad idea as it can introduce a correlation between variables that might not have existed otherwise <span class="citation">(<a href="#ref-elwert2014endogenous">Elwert and Winship 2014</a>)</span>. But that doesn’t mean colliders should be ignored in analysis altogether. For a Bayesian, knowledge of the value of a collider can still be informative.</p>
 <p>Pearl describes a model similar to the following as a case for which controlling for covariate <span class="math inline">\(W\)</span> induces bias in the estimation of the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>, which could otherwise be estimated without bias using simple differences in means.</p>
-<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="identification.html#cb104-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- U1 -&gt; W &lt;- U2 -&gt; X&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb104-2"><a href="identification.html#cb104-2" tabindex="-1"></a>  </span>
-<span id="cb104-3"><a href="identification.html#cb104-3" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="at">labels =</span> <span class="fu">list</span>(<span class="at">Y =</span> <span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;1111&quot;</span>), <span class="at">W =</span> <span class="st">&quot;0001&quot;</span>), <span class="at">keep =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb104-4"><a href="identification.html#cb104-4" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="st">&quot;(X[U2=1]&lt;X[U2=0])&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb104-5"><a href="identification.html#cb104-5" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;U1&quot;</span>,  <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb104-6"><a href="identification.html#cb104-6" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>))</span>
-<span id="cb104-7"><a href="identification.html#cb104-7" tabindex="-1"></a></span>
-<span id="cb104-8"><a href="identification.html#cb104-8" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="identification.html#cb106-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- U1 -&gt; W &lt;- U2 -&gt; X&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb106-2"><a href="identification.html#cb106-2" tabindex="-1"></a>  </span>
+<span id="cb106-3"><a href="identification.html#cb106-3" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="at">labels =</span> <span class="fu">list</span>(<span class="at">Y =</span> <span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;1111&quot;</span>), <span class="at">W =</span> <span class="st">&quot;0001&quot;</span>), <span class="at">keep =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb106-4"><a href="identification.html#cb106-4" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="st">&quot;(X[U2=1]&lt;X[U2=0])&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb106-5"><a href="identification.html#cb106-5" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;U1&quot;</span>,  <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb106-6"><a href="identification.html#cb106-6" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>))</span></code></pre></div>
+<pre><code>## Warning in make_par_values(model, alter = &quot;param_value&quot;, x = parameters, : A specified condition matches multiple parameters. In these cases it is unclear which parameter value should be assigned to which parameter. Assignment thus defaults to the order in which parameters appear in &#39;parameters_df&#39;.
+##               
+##  We advise checking that parameter assignment was carried out as you intended.
+
+## Warning in make_par_values(model, alter = &quot;param_value&quot;, x = parameters, : A specified condition matches multiple parameters. In these cases it is unclear which parameter value should be assigned to which parameter. Assignment thus defaults to the order in which parameters appear in &#39;parameters_df&#39;.
+##               
+##  We advise checking that parameter assignment was carried out as you intended.</code></pre>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="identification.html#cb108-1" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/applearncoll-1.png" width="672" /></p>
-<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="identification.html#cb105-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, </span>
-<span id="cb105-2"><a href="identification.html#cb105-2" tabindex="-1"></a>                  <span class="at">n =</span> <span class="dv">25000</span>, </span>
-<span id="cb105-3"><a href="identification.html#cb105-3" tabindex="-1"></a>                  <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;W&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), </span>
-<span id="cb105-4"><a href="identification.html#cb105-4" tabindex="-1"></a>                  <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="identification.html#cb109-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, </span>
+<span id="cb109-2"><a href="identification.html#cb109-2" tabindex="-1"></a>                  <span class="at">n =</span> <span class="dv">25000</span>, </span>
+<span id="cb109-3"><a href="identification.html#cb109-3" tabindex="-1"></a>                  <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;W&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), </span>
+<span id="cb109-4"><a href="identification.html#cb109-4" tabindex="-1"></a>                  <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>)</span></code></pre></div>
 <p>The effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> is .5 but average effects as well as the probability of causation, are different for units with <span class="math inline">\(W=0\)</span> and <span class="math inline">\(W=1\)</span> (this, even though <span class="math inline">\(W\)</span> does not affect <span class="math inline">\(Y\)</span>):</p>
 <table>
+<colgroup>
+<col width="8%" />
+<col width="10%" />
+<col width="19%" />
+<col width="11%" />
+<col width="11%" />
+<col width="7%" />
+<col width="3%" />
+<col width="14%" />
+<col width="16%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.5000</td>
+<td align="right"></td>
+<td align="right">0.5000</td>
+<td align="right">0.5000</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">W==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.4000</td>
+<td align="right"></td>
+<td align="right">0.4000</td>
+<td align="right">0.4000</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">W==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.6667</td>
+<td align="right"></td>
+<td align="right">0.6667</td>
+<td align="right">0.6667</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.6000</td>
+<td align="right"></td>
+<td align="right">0.6000</td>
+<td align="right">0.6000</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1 &amp; W==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.5000</td>
+<td align="right"></td>
+<td align="right">0.5000</td>
+<td align="right">0.5000</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1 &amp; W==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.6667</td>
+<td align="right"></td>
+<td align="right">0.6667</td>
 <td align="right">0.6667</td>
 </tr>
 </tbody>
@@ -1365,179 +1440,195 @@ F Statistic
 </table>
 <p>How does the Bayesian model do, with and without data on <span class="math inline">\(W\)</span>?</p>
 <p>Without <span class="math inline">\(W\)</span> we have:</p>
-<table>
+<table style="width:100%;">
 <caption><span id="tab:applearncoll6">Table 9.2: </span>Collider excluded from model</caption>
 <colgroup>
-<col width="11%" />
-<col width="21%" />
-<col width="12%" />
-<col width="16%" />
-<col width="8%" />
-<col width="8%" />
+<col width="7%" />
+<col width="9%" />
+<col width="18%" />
 <col width="10%" />
-<col width="11%" />
+<col width="10%" />
+<col width="6%" />
+<col width="6%" />
+<col width="13%" />
+<col width="15%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4904</td>
+<td align="right">0.5078</td>
 <td align="right">0.0054</td>
-<td align="right">0.4797</td>
-<td align="right">0.5010</td>
+<td align="right">0.4972</td>
+<td align="right">0.5188</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">W==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.3608</td>
-<td align="right">0.1086</td>
-<td align="right">0.0795</td>
-<td align="right">0.4878</td>
+<td align="right">0.3727</td>
+<td align="right">0.1200</td>
+<td align="right">0.0473</td>
+<td align="right">0.5058</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">W==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6620</td>
-<td align="right">0.0042</td>
-<td align="right">0.6535</td>
-<td align="right">0.6704</td>
+<td align="right">0.6743</td>
+<td align="right">0.0043</td>
+<td align="right">0.6661</td>
+<td align="right">0.6828</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5920</td>
+<td align="right">0.6093</td>
 <td align="right">0.0054</td>
-<td align="right">0.5813</td>
-<td align="right">0.6024</td>
+<td align="right">0.5990</td>
+<td align="right">0.6198</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1 &amp; W==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4181</td>
-<td align="right">0.1603</td>
-<td align="right">0.0364</td>
-<td align="right">0.5907</td>
+<td align="right">0.4314</td>
+<td align="right">0.1723</td>
+<td align="right">0.0246</td>
+<td align="right">0.6090</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1 &amp; W==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6620</td>
-<td align="right">0.0042</td>
-<td align="right">0.6535</td>
-<td align="right">0.6704</td>
+<td align="right">0.6743</td>
+<td align="right">0.0043</td>
+<td align="right">0.6661</td>
+<td align="right">0.6828</td>
 </tr>
 </tbody>
 </table>
 <p>Thus we estimate the treatment effect well. What’s more we can estimate the probability of causation when <span class="math inline">\(W=1\)</span> accurately, even though we have not observed <span class="math inline">\(W\)</span>. The reason is that if <span class="math inline">\(W=1\)</span> then, given the model restrictions, we know that both <span class="math inline">\(U_1=1\)</span> and <span class="math inline">\(U_2=1\)</span> which is enough. We are not sure however what to infer when <span class="math inline">\(W=0\)</span> since this could be due to either <span class="math inline">\(U_1=0\)</span> or <span class="math inline">\(U_2=0\)</span>.</p>
 <p>When we incorporate data on <span class="math inline">\(W\)</span> our posteriors are:</p>
-<table>
+<table style="width:100%;">
 <caption><span id="tab:applearncoll8">Table 9.3: </span>Collider included in model</caption>
 <colgroup>
-<col width="11%" />
-<col width="21%" />
-<col width="12%" />
-<col width="16%" />
-<col width="8%" />
-<col width="8%" />
+<col width="7%" />
+<col width="9%" />
+<col width="18%" />
 <col width="10%" />
-<col width="11%" />
+<col width="10%" />
+<col width="6%" />
+<col width="6%" />
+<col width="13%" />
+<col width="15%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4905</td>
+<td align="right">0.5075</td>
 <td align="right">0.0054</td>
-<td align="right">0.4795</td>
-<td align="right">0.5012</td>
+<td align="right">0.4969</td>
+<td align="right">0.5181</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">W==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.3878</td>
-<td align="right">0.0067</td>
-<td align="right">0.3741</td>
-<td align="right">0.4007</td>
+<td align="right">0.4067</td>
+<td align="right">0.0066</td>
+<td align="right">0.3940</td>
+<td align="right">0.4198</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">W==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6621</td>
+<td align="right">0.6741</td>
 <td align="right">0.0042</td>
-<td align="right">0.6540</td>
-<td align="right">0.6706</td>
+<td align="right">0.6661</td>
+<td align="right">0.6823</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5921</td>
+<td align="right">0.6090</td>
 <td align="right">0.0053</td>
-<td align="right">0.5817</td>
-<td align="right">0.6029</td>
+<td align="right">0.5986</td>
+<td align="right">0.6193</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1 &amp; W==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4874</td>
-<td align="right">0.0079</td>
-<td align="right">0.4712</td>
-<td align="right">0.5027</td>
+<td align="right">0.5066</td>
+<td align="right">0.0078</td>
+<td align="right">0.4912</td>
+<td align="right">0.5216</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Y(1)-Y(0)</td>
 <td align="left">X==1 &amp; Y==1 &amp; W==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6621</td>
+<td align="right">0.6741</td>
 <td align="right">0.0042</td>
-<td align="right">0.6540</td>
-<td align="right">0.6706</td>
+<td align="right">0.6661</td>
+<td align="right">0.6823</td>
 </tr>
 </tbody>
 </table>

@@ -112,8 +112,8 @@ PC_dist  <- read_rds("saved/appendix_PC_dist.rds")
 ```
 
 ```{r PChist, echo = FALSE, fig.cap = "ATE is identified, PC is not identified but has informative bounds"}
-list('Posterior on ATE' = data.frame(p = as.vector(ATE_dist)),
-     'Posterior on PC' = data.frame(p = as.vector(PC_dist))) |>
+list('Posterior on ATE' = data.frame(p = ATE_dist[[1]]),
+     'Posterior on PC' = data.frame(p = PC_dist[[1]])) |>
   bind_rows(.id = "Q") |>
   ggplot(aes(p)) + geom_histogram() + facet_grid(~Q) + xlim(c(0,1)) + theme_bw()
 
@@ -184,9 +184,9 @@ write_rds(list(prior_ate, post_ate_5000, post_ate_100), "saved/appendix_XY_model
 }
 
 x <- read_rds("saved/appendix_XY_model_diagnosis.rds")
-prior_ate      <- x[[1]]
-post_ate_5000  <- x[[2]]
-post_ate_100   <- x[[3]]
+prior_ate      <- x[[1]][[1]]
+post_ate_5000  <- x[[2]][[1]]
+post_ate_100   <- x[[3]][[1]]
 
 par(mfrow= c(1,3))
     hist(prior_ate, xlim = c(-1,1), main = "Prior", xlab = "ATE")
@@ -264,11 +264,14 @@ if(run){
   
   write_rds(updated, "saved/appendix_modelled_confound_sparse.rds")
 
-ate <- query_distribution(updated, "c(Y[X=1] - Y[X=0])", using = "posteriors")
 
-confound <- query_distribution(updated, "c(Y[C=1] - Y[C=0])", using = "posteriors")
+  query_distribution(updated, 
+                     list(ate = "c(Y[X=1] - Y[X=0])",
+                          confound = "c(Y[C=1] - Y[C=0])"),
+                     using = "posteriors") |>
 
-write_rds(data.frame(ate = ate, confound = confound), "saved/appendix_modelled_confound_confound.rds")
+
+write_rds("saved/appendix_modelled_confound_confound.rds")
 }
 
 ```
@@ -276,14 +279,6 @@ write_rds(data.frame(ate = ate, confound = confound), "saved/appendix_modelled_c
 ```{r, echo = FALSE}
 df <- read_rds("saved/appendix_modelled_confound_confound.rds")
 
-df <- cbind(
-  df |> select(starts_with("ate")) |>
-    pivot_longer(cols=ate.1:ate.12000, 
-                 names_to = "ID", values_to = "ate"),
-  df |> select(starts_with("confound")) |>
-    pivot_longer(cols=confound.1:confound.12000, 
-                 names_to = "ID1", values_to = "confound")) |>
-  select(ate, confound)
 
 plot(df$confound, df$ate, ylab = "ATE", xlab = "Confound", cex = .2)
 ```
@@ -295,7 +290,7 @@ The strong negative correlation shows that when we update we contemplate possibi
 
 We define a simple mediation model and illustrate learning about  whether $X=1$ caused $Y=1$ from observations of $M$.
 
-```{r appsimplemed}
+```{r appsimplemed, warning = FALSE}
 model <- make_model("X -> M -> Y; X <-> M") |>
          set_parameters(node = "M", given = "X.0", parameters = c(.2, 0, .8, 0)) |>
          set_parameters(node = "M", given = "X.1", parameters = c(.2, .8, 0, 0)) |>
@@ -347,7 +342,7 @@ result <- query_model(
 ```
 
 ```{r, echo = FALSE}
-kable(result)
+kable(result, digits = 2)
 ```
 
 Note that observation of $M=0$ results in a near 0 posterior that $X$ caused $Y$, while observation of $M=1$ has only a modest positive effect. The mediator thus provides what qualitative scholars call a "hoop" test for the proposition that $X$ caused $Y$.
@@ -855,13 +850,13 @@ back <- read_rds("saved/appendix_backdoor.rds")
 v <- query_model(model, "Y[X=1] - Y[X=0]", using = "parameters")$mean
 
 par(mfrow = c(2,2))
-hist(back$dist4, xlim = c(-1, 1)*.4, main = "Small n, backdoor open", xlab = "ATE")
+hist(back$dist4[[1]], xlim = c(-1, 1)*.4, main = "Small n, backdoor open", xlab = "ATE")
 abline(v = v, col = "red")
-hist(back$dist3, xlim = c(-1, 1)*.4, main = "Small n, backdoor blocked", xlab = "ATE")
+hist(back$dist3[[1]], xlim = c(-1, 1)*.4, main = "Small n, backdoor blocked", xlab = "ATE")
 abline(v = v, col = "red")
-hist(back$dist2, xlim = c(-1, 1)*.4, main = "Large n, backdoor open", xlab = "ATE")
+hist(back$dist2[[1]], xlim = c(-1, 1)*.4, main = "Large n, backdoor open", xlab = "ATE")
 abline(v = v, col = "red")
-hist(back$dist1, xlim = c(-1, 1)*.4, main = "Large n, backdoor blocked", xlab = "ATE")
+hist(back$dist1[[1]], xlim = c(-1, 1)*.4, main = "Large n, backdoor blocked", xlab = "ATE")
 abline(v = v, col = "red")
 
 
@@ -977,8 +972,8 @@ if(run) {
 
 frontdoor <- read_rds("saved/appendix_frontdoor.rds")
 par(mfrow = c(1,2))
-hist(frontdoor$Q1, xlim = c(-.3, .3), main= "Inferences given X,Y, data only", xlab = "ATE")
-hist(frontdoor$Q2, xlim = c(-.3, .3), main = "Inferences given X,Y, and M data", xlab = "ATE")
+hist(frontdoor$Q1[[1]], xlim = c(-.3, .3), main= "Inferences given X,Y, data only", xlab = "ATE")
+hist(frontdoor$Q2[[1]], xlim = c(-.3, .3), main = "Inferences given X,Y, and M data", xlab = "ATE")
 ```
 
 The spike on the right confirms that we have identification.
@@ -992,7 +987,7 @@ We will assume that we know when we have missing data, though of course we do no
 
 To tackle the problem we will include sample selection into our model:
 
-```{r appsimpleselc}
+```{r appsimpleselc, warning = FALSE}
 
 model <- make_model("R -> S") |>
   set_parameters(node = "R", parameters = c(2/3,1/3)) |>
@@ -1450,7 +1445,7 @@ Q1 <- query_model(model,
 
 ```{r apppaths3, echo = FALSE}
 
-Q1 |> arrange(Using) |> select(-Given) |> kable(caption = "Priors and parameters")
+Q1 |> arrange(using) |> select(-given) |> kable(caption = "Priors and parameters")
 
 ```
 
@@ -1617,10 +1612,11 @@ write_rds(q2, "saved/App_somethingnothing2.rds")
 q1 <- read_rds("saved/App_somethingnothing1.rds")
 q2 <- read_rds("saved/App_somethingnothing2.rds")
 
-q1 |> arrange(Using) |> kable( 
+q1 |> arrange(using) |> 
+  kable( 
       caption = "Can observation of large N data render mediator $M$ informative for case level inference? Observational data.")
 
-kable(q2 |> arrange(Using), 
+kable(q2 |> arrange(using), 
       caption = "Can observation of large N data render mediator $M$ informative for case level inference? X randomized.")
 ```
 
@@ -1982,7 +1978,8 @@ In no case is  $K$ informative. In study 1 data on $K$ is not available, in stud
 Table \@ref(tab:frank4) shows the inferences when the data are combined with joint updating across all parameters.
 
 ```{r frank4, echo = FALSE}
-kable(frank[[4]][,-c(1,3)], caption = "Clue is informative after combining studies linking $K$ to $Z$ and $Z$ to $Y$")
+kable(frank[[4]][,-c(1,3)], 
+      caption = "Clue is informative after combining studies linking $K$ to $Z$ and $Z$ to $Y$")
 ```
 
 Here fuller understanding of the model lets researchers use information on $K$ to update on values for $Z$ and in turn update on the likely effects of $X$ on $Y$. Rows 3-6 highlight that the updating works through inferences on $Z$ and there if $Z$ is known, as in Study 2, there are no additional gains from knowledge of $K$. 

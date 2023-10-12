@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 1 What and why | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 1 What and why | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2023-08-31" />
+<meta name="date" content="2023-10-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -373,29 +373,32 @@ div.csl-indent {
 <caption><span id="tab:unnamed-chunk-9">Table 1.2: </span>Inferences on the ATE from updated model</caption>
 <colgroup>
 <col width="8%" />
-<col width="8%" />
 <col width="15%" />
-<col width="20%" />
-<col width="10%" />
-<col width="10%" />
-<col width="12%" />
+<col width="6%" />
+<col width="11%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
 <col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1]- Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
@@ -417,33 +420,36 @@ div.csl-indent {
 <span id="cb6-2"><a href="cm.html#cb6-2" tabindex="-1"></a>            <span class="at">using =</span> <span class="st">&quot;posteriors&quot;</span>, </span>
 <span id="cb6-3"><a href="cm.html#cb6-3" tabindex="-1"></a>            <span class="at">query =</span> <span class="st">&quot;Y[X=0] == 0&quot;</span>,</span>
 <span id="cb6-4"><a href="cm.html#cb6-4" tabindex="-1"></a>            <span class="at">given =</span> <span class="st">&quot;X==1 &amp; Y==1&quot;</span>)  </span></code></pre></div>
-<table style="width:100%;">
+<table>
 <caption><span id="tab:unnamed-chunk-11">Table 1.3: </span>Causes of effects estimand</caption>
 <colgroup>
-<col width="7%" />
-<col width="15%" />
-<col width="14%" />
-<col width="18%" />
-<col width="9%" />
-<col width="9%" />
+<col width="8%" />
+<col width="12%" />
+<col width="12%" />
 <col width="11%" />
-<col width="13%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=0] == 0</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>

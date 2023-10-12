@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 11 External validity and inference aggregation | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 11 External validity and inference aggregation | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2023-08-31" />
+<meta name="date" content="2023-10-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -290,46 +290,49 @@ div.csl-indent {
 <h2><span class="header-section-number">11.1</span> Transportation of findings across contexts<a href="external-validity-and-inference-aggregation.html#transportation-of-findings-across-contexts" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Say we study the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> in case 0 (a country, for instance) and want to make inferences to case 1 (another country). Our problem however is that effects are heterogeneous and features that differ across units may be related both to treatment assignment, outcomes, and selection into the sample. This is the problem studied by <span class="citation">Pearl and Bareinboim (<a href="#ref-pearl2014external">2014</a>)</span>. In particular <span class="citation">Pearl and Bareinboim (<a href="#ref-pearl2014external">2014</a>)</span> show for which nodes data is needed in order to “licence” external claims, given a model.</p>
 <p>We illustrate with a simple model in which a confounder has a different distribution in a study site and a target site.</p>
-<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="external-validity-and-inference-aggregation.html#cb117-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;Case -&gt; W  -&gt; X -&gt; Y &lt;- W&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb117-2"><a href="external-validity-and-inference-aggregation.html#cb117-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="st">&quot;W[Case = 1] &lt; W[Case = 0]&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb117-3"><a href="external-validity-and-inference-aggregation.html#cb117-3" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">statement =</span> <span class="st">&quot;X[W=1]&gt;X[W=0]&quot;</span>, <span class="at">parameters =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>)<span class="sc">|&gt;</span></span>
-<span id="cb117-4"><a href="external-validity-and-inference-aggregation.html#cb117-4" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">statement =</span> <span class="fu">complements</span>(<span class="st">&quot;W&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="at">parameters =</span> .<span class="dv">17</span>) <span class="sc">|&gt;</span></span>
-<span id="cb117-5"><a href="external-validity-and-inference-aggregation.html#cb117-5" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">statement =</span> <span class="fu">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="at">parameters =</span> <span class="dv">0</span>) </span>
-<span id="cb117-6"><a href="external-validity-and-inference-aggregation.html#cb117-6" tabindex="-1"></a></span>
-<span id="cb117-7"><a href="external-validity-and-inference-aggregation.html#cb117-7" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="external-validity-and-inference-aggregation.html#cb123-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;Case -&gt; W  -&gt; X -&gt; Y &lt;- W&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb123-2"><a href="external-validity-and-inference-aggregation.html#cb123-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="st">&quot;W[Case = 1] &lt; W[Case = 0]&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb123-3"><a href="external-validity-and-inference-aggregation.html#cb123-3" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">statement =</span> <span class="st">&quot;X[W=1]&gt;X[W=0]&quot;</span>, <span class="at">parameters =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>)<span class="sc">|&gt;</span></span>
+<span id="cb123-4"><a href="external-validity-and-inference-aggregation.html#cb123-4" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">statement =</span> <span class="fu">complements</span>(<span class="st">&quot;W&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="at">parameters =</span> .<span class="dv">17</span>) <span class="sc">|&gt;</span></span>
+<span id="cb123-5"><a href="external-validity-and-inference-aggregation.html#cb123-5" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">statement =</span> <span class="fu">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="at">parameters =</span> <span class="dv">0</span>) </span>
+<span id="cb123-6"><a href="external-validity-and-inference-aggregation.html#cb123-6" tabindex="-1"></a></span>
+<span id="cb123-7"><a href="external-validity-and-inference-aggregation.html#cb123-7" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/extval-1.png" width="672" /></p>
 <p>We start by checking some basic quantities in the priors and the posteriors, we will then see how we do with data.</p>
-<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="external-validity-and-inference-aggregation.html#cb118-1" tabindex="-1"></a><span class="fu">query_model</span>(model,</span>
-<span id="cb118-2"><a href="external-validity-and-inference-aggregation.html#cb118-2" tabindex="-1"></a>            <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">Incidence =</span> <span class="st">&quot;W==1&quot;</span>, </span>
-<span id="cb118-3"><a href="external-validity-and-inference-aggregation.html#cb118-3" tabindex="-1"></a>                           <span class="at">ATE =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>, </span>
-<span id="cb118-4"><a href="external-validity-and-inference-aggregation.html#cb118-4" tabindex="-1"></a>                           <span class="at">CATE =</span> <span class="st">&quot;Y[X=1, W=1] - Y[X=0, W=1]&quot;</span>),</span>
-<span id="cb118-5"><a href="external-validity-and-inference-aggregation.html#cb118-5" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;Case==0&quot;</span>, <span class="st">&quot;Case==1&quot;</span>),</span>
-<span id="cb118-6"><a href="external-validity-and-inference-aggregation.html#cb118-6" tabindex="-1"></a>            <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;priors&quot;</span>, <span class="st">&quot;parameters&quot;</span>), <span class="at">expand_grid =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
-<table style="width:100%;">
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="external-validity-and-inference-aggregation.html#cb124-1" tabindex="-1"></a><span class="fu">query_model</span>(model,</span>
+<span id="cb124-2"><a href="external-validity-and-inference-aggregation.html#cb124-2" tabindex="-1"></a>            <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">Incidence =</span> <span class="st">&quot;W==1&quot;</span>, </span>
+<span id="cb124-3"><a href="external-validity-and-inference-aggregation.html#cb124-3" tabindex="-1"></a>                           <span class="at">ATE =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>, </span>
+<span id="cb124-4"><a href="external-validity-and-inference-aggregation.html#cb124-4" tabindex="-1"></a>                           <span class="at">CATE =</span> <span class="st">&quot;Y[X=1, W=1] - Y[X=0, W=1]&quot;</span>),</span>
+<span id="cb124-5"><a href="external-validity-and-inference-aggregation.html#cb124-5" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;Case==0&quot;</span>, <span class="st">&quot;Case==1&quot;</span>),</span>
+<span id="cb124-6"><a href="external-validity-and-inference-aggregation.html#cb124-6" tabindex="-1"></a>            <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;priors&quot;</span>, <span class="st">&quot;parameters&quot;</span>), <span class="at">expand_grid =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
+<table>
 <colgroup>
-<col width="12%" />
+<col width="8%" />
 <col width="10%" />
-<col width="14%" />
-<col width="18%" />
-<col width="10%" />
-<col width="9%" />
+<col width="8%" />
 <col width="11%" />
-<col width="12%" />
+<col width="11%" />
+<col width="8%" />
+<col width="7%" />
+<col width="15%" />
+<col width="17%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==0</td>
 <td align="left">priors</td>
@@ -340,6 +343,7 @@ div.csl-indent {
 <td align="right">0.8435</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==0</td>
 <td align="left">parameters</td>
@@ -350,6 +354,7 @@ div.csl-indent {
 <td align="right">0.3333</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==1</td>
 <td align="left">priors</td>
@@ -360,6 +365,7 @@ div.csl-indent {
 <td align="right">0.9868</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==1</td>
 <td align="left">parameters</td>
@@ -370,6 +376,7 @@ div.csl-indent {
 <td align="right">0.6667</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==0</td>
 <td align="left">priors</td>
@@ -380,6 +387,7 @@ div.csl-indent {
 <td align="right">0.2771</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==0</td>
 <td align="left">parameters</td>
@@ -390,6 +398,7 @@ div.csl-indent {
 <td align="right">0.3333</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==1</td>
 <td align="left">priors</td>
@@ -400,6 +409,7 @@ div.csl-indent {
 <td align="right">0.2639</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==1</td>
 <td align="left">parameters</td>
@@ -410,6 +420,7 @@ div.csl-indent {
 <td align="right">0.5727</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==0</td>
 <td align="left">priors</td>
@@ -420,6 +431,7 @@ div.csl-indent {
 <td align="right">0.3329</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==0</td>
 <td align="left">parameters</td>
@@ -430,6 +442,7 @@ div.csl-indent {
 <td align="right">0.8121</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==1</td>
 <td align="left">priors</td>
@@ -440,6 +453,7 @@ div.csl-indent {
 <td align="right">0.3329</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==1</td>
 <td align="left">parameters</td>
@@ -454,55 +468,59 @@ div.csl-indent {
 <p>We see that the incidence of <span class="math inline">\(W\)</span> as well as the ATE of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> is larger in case 1 than in case 0 (in parameters, though not in priors). However the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> conditional on <span class="math inline">\(W\)</span> is the same in both places.</p>
 <p>We now update the model <em>using data on <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> only from one case</em> (case 1) and data on <em>W</em> from both and check inferences on the other.</p>
 <p>The function <code>make_data</code> lets us generate data like this by specifying a multistage data strategy:</p>
-<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="external-validity-and-inference-aggregation.html#cb119-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="at">n =</span> <span class="dv">1000</span>, </span>
-<span id="cb119-2"><a href="external-validity-and-inference-aggregation.html#cb119-2" tabindex="-1"></a>                  <span class="at">vars =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">&quot;Case&quot;</span>, <span class="st">&quot;W&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>)), </span>
-<span id="cb119-3"><a href="external-validity-and-inference-aggregation.html#cb119-3" tabindex="-1"></a>                  <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>),</span>
-<span id="cb119-4"><a href="external-validity-and-inference-aggregation.html#cb119-4" tabindex="-1"></a>                  <span class="at">subsets =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="st">&quot;Case ==1&quot;</span>))</span>
-<span id="cb119-5"><a href="external-validity-and-inference-aggregation.html#cb119-5" tabindex="-1"></a></span>
-<span id="cb119-6"><a href="external-validity-and-inference-aggregation.html#cb119-6" tabindex="-1"></a>transport <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, data)</span>
-<span id="cb119-7"><a href="external-validity-and-inference-aggregation.html#cb119-7" tabindex="-1"></a></span>
-<span id="cb119-8"><a href="external-validity-and-inference-aggregation.html#cb119-8" tabindex="-1"></a><span class="fu">query_model</span>(transport,</span>
-<span id="cb119-9"><a href="external-validity-and-inference-aggregation.html#cb119-9" tabindex="-1"></a>            <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">Incidence =</span> <span class="st">&quot;W==1&quot;</span>, </span>
-<span id="cb119-10"><a href="external-validity-and-inference-aggregation.html#cb119-10" tabindex="-1"></a>                           <span class="at">ATE =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>, </span>
-<span id="cb119-11"><a href="external-validity-and-inference-aggregation.html#cb119-11" tabindex="-1"></a>                           <span class="at">CATE =</span> <span class="st">&quot;Y[X=1, W=1] - Y[X=0, W=1]&quot;</span>),</span>
-<span id="cb119-12"><a href="external-validity-and-inference-aggregation.html#cb119-12" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;Case==0&quot;</span>, <span class="st">&quot;Case==1&quot;</span>),</span>
-<span id="cb119-13"><a href="external-validity-and-inference-aggregation.html#cb119-13" tabindex="-1"></a>            <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;posteriors&quot;</span>, <span class="st">&quot;parameters&quot;</span>), <span class="at">expand_grid =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<table style="width:100%;">
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="external-validity-and-inference-aggregation.html#cb125-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="at">n =</span> <span class="dv">1000</span>, </span>
+<span id="cb125-2"><a href="external-validity-and-inference-aggregation.html#cb125-2" tabindex="-1"></a>                  <span class="at">vars =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">&quot;Case&quot;</span>, <span class="st">&quot;W&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>)), </span>
+<span id="cb125-3"><a href="external-validity-and-inference-aggregation.html#cb125-3" tabindex="-1"></a>                  <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>),</span>
+<span id="cb125-4"><a href="external-validity-and-inference-aggregation.html#cb125-4" tabindex="-1"></a>                  <span class="at">subsets =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="st">&quot;Case ==1&quot;</span>))</span>
+<span id="cb125-5"><a href="external-validity-and-inference-aggregation.html#cb125-5" tabindex="-1"></a></span>
+<span id="cb125-6"><a href="external-validity-and-inference-aggregation.html#cb125-6" tabindex="-1"></a>transport <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, data)</span>
+<span id="cb125-7"><a href="external-validity-and-inference-aggregation.html#cb125-7" tabindex="-1"></a></span>
+<span id="cb125-8"><a href="external-validity-and-inference-aggregation.html#cb125-8" tabindex="-1"></a><span class="fu">query_model</span>(transport,</span>
+<span id="cb125-9"><a href="external-validity-and-inference-aggregation.html#cb125-9" tabindex="-1"></a>            <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">Incidence =</span> <span class="st">&quot;W==1&quot;</span>, </span>
+<span id="cb125-10"><a href="external-validity-and-inference-aggregation.html#cb125-10" tabindex="-1"></a>                           <span class="at">ATE =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>, </span>
+<span id="cb125-11"><a href="external-validity-and-inference-aggregation.html#cb125-11" tabindex="-1"></a>                           <span class="at">CATE =</span> <span class="st">&quot;Y[X=1, W=1] - Y[X=0, W=1]&quot;</span>),</span>
+<span id="cb125-12"><a href="external-validity-and-inference-aggregation.html#cb125-12" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;Case==0&quot;</span>, <span class="st">&quot;Case==1&quot;</span>),</span>
+<span id="cb125-13"><a href="external-validity-and-inference-aggregation.html#cb125-13" tabindex="-1"></a>            <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;posteriors&quot;</span>, <span class="st">&quot;parameters&quot;</span>), <span class="at">expand_grid =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<table>
 <caption><span id="tab:unnamed-chunk-111">Table 11.1: </span>Extrapolation when two sites differ on <span class="math inline">\(W\)</span> and <span class="math inline">\(W\)</span> is observable in both sites</caption>
 <colgroup>
-<col width="13%" />
+<col width="8%" />
 <col width="10%" />
-<col width="14%" />
-<col width="18%" />
-<col width="9%" />
-<col width="9%" />
+<col width="8%" />
 <col width="11%" />
-<col width="13%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="15%" />
+<col width="17%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.3318</td>
-<td align="right">0.0066</td>
-<td align="right">0.3188</td>
-<td align="right">0.3448</td>
+<td align="right">0.3533</td>
+<td align="right">0.0067</td>
+<td align="right">0.3403</td>
+<td align="right">0.3665</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==0</td>
 <td align="left">parameters</td>
@@ -513,16 +531,18 @@ div.csl-indent {
 <td align="right">0.3333</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6769</td>
-<td align="right">0.0069</td>
-<td align="right">0.6632</td>
-<td align="right">0.6902</td>
+<td align="right">0.6747</td>
+<td align="right">0.0067</td>
+<td align="right">0.6614</td>
+<td align="right">0.6876</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==1</td>
 <td align="left">parameters</td>
@@ -533,16 +553,18 @@ div.csl-indent {
 <td align="right">0.6667</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.3427</td>
-<td align="right">0.0115</td>
-<td align="right">0.3199</td>
-<td align="right">0.3649</td>
+<td align="right">0.3574</td>
+<td align="right">0.0114</td>
+<td align="right">0.3352</td>
+<td align="right">0.3795</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==0</td>
 <td align="left">parameters</td>
@@ -553,16 +575,18 @@ div.csl-indent {
 <td align="right">0.3333</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5772</td>
-<td align="right">0.0091</td>
-<td align="right">0.5591</td>
-<td align="right">0.5943</td>
+<td align="right">0.5851</td>
+<td align="right">0.0090</td>
+<td align="right">0.5674</td>
+<td align="right">0.6026</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==1</td>
 <td align="left">parameters</td>
@@ -573,16 +597,18 @@ div.csl-indent {
 <td align="right">0.5727</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.7967</td>
-<td align="right">0.0089</td>
-<td align="right">0.7784</td>
-<td align="right">0.8140</td>
+<td align="right">0.8156</td>
+<td align="right">0.0084</td>
+<td align="right">0.7988</td>
+<td align="right">0.8317</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==0</td>
 <td align="left">parameters</td>
@@ -593,16 +619,18 @@ div.csl-indent {
 <td align="right">0.8121</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.7967</td>
-<td align="right">0.0089</td>
-<td align="right">0.7784</td>
-<td align="right">0.8140</td>
+<td align="right">0.8156</td>
+<td align="right">0.0084</td>
+<td align="right">0.7988</td>
+<td align="right">0.8317</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==1</td>
 <td align="left">parameters</td>
@@ -616,62 +644,68 @@ div.csl-indent {
 </table>
 <p>We do well in recovering the (different) effects both in the location we study and the one in which we do not. In essence querying the model for the out of sample case requests a type of post stratification. We get the right answer, though as always this depends on the model being correct.</p>
 <p>Had we attempted to make the extrapolation without data on <span class="math inline">\(W\)</span> in country 1 we would get it wrong. In that case however we would also report greater posterior variance. The posterior variance here captures the fact that we know things could be different in country 1, but we don’t know in what way they are different. Note that we get the CATE right since in the model this is assumed to be the same across cases.</p>
-<table style="width:100%;">
+<table>
 <caption><span id="tab:unnamed-chunk-112">Table 11.2: </span>Extrapolation when two sites differ on <span class="math inline">\(W\)</span> and <span class="math inline">\(W\)</span> is not observable in target country.</caption>
 <colgroup>
-<col width="13%" />
+<col width="8%" />
 <col width="10%" />
-<col width="14%" />
-<col width="18%" />
-<col width="9%" />
-<col width="9%" />
+<col width="8%" />
 <col width="11%" />
-<col width="13%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="15%" />
+<col width="17%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.3318</td>
+<td align="right">0.3412</td>
+<td align="right">0.0066</td>
+<td align="right">0.3284</td>
+<td align="right">0.3543</td>
+</tr>
+<tr class="even">
+<td align="left">model_1</td>
+<td align="left">Incidence</td>
+<td align="left">Case==0</td>
+<td align="left">parameters</td>
+<td align="left">FALSE</td>
+<td align="right">0.3333</td>
+<td align="right"></td>
+<td align="right">0.3333</td>
+<td align="right">0.3333</td>
+</tr>
+<tr class="odd">
+<td align="left">model_1</td>
+<td align="left">Incidence</td>
+<td align="left">Case==1</td>
+<td align="left">posteriors</td>
+<td align="left">FALSE</td>
+<td align="right">0.6673</td>
 <td align="right">0.0067</td>
-<td align="right">0.3191</td>
-<td align="right">0.3450</td>
+<td align="right">0.6543</td>
+<td align="right">0.6805</td>
 </tr>
 <tr class="even">
-<td align="left">Incidence</td>
-<td align="left">Case==0</td>
-<td align="left">parameters</td>
-<td align="left">FALSE</td>
-<td align="right">0.3333</td>
-<td align="right"></td>
-<td align="right">0.3333</td>
-<td align="right">0.3333</td>
-</tr>
-<tr class="odd">
-<td align="left">Incidence</td>
-<td align="left">Case==1</td>
-<td align="left">posteriors</td>
-<td align="left">FALSE</td>
-<td align="right">0.6685</td>
-<td align="right">0.0065</td>
-<td align="right">0.6556</td>
-<td align="right">0.6810</td>
-</tr>
-<tr class="even">
+<td align="left">model_1</td>
 <td align="left">Incidence</td>
 <td align="left">Case==1</td>
 <td align="left">parameters</td>
@@ -682,16 +716,18 @@ div.csl-indent {
 <td align="right">0.6667</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.3400</td>
+<td align="right">0.3203</td>
 <td align="right">0.0113</td>
-<td align="right">0.3178</td>
-<td align="right">0.3615</td>
+<td align="right">0.2980</td>
+<td align="right">0.3425</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==0</td>
 <td align="left">parameters</td>
@@ -702,36 +738,40 @@ div.csl-indent {
 <td align="right">0.3333</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">Case==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5800</td>
+<td align="right">0.5598</td>
+<td align="right">0.0091</td>
+<td align="right">0.5427</td>
+<td align="right">0.5780</td>
+</tr>
+<tr class="even">
+<td align="left">model_1</td>
+<td align="left">ATE</td>
+<td align="left">Case==1</td>
+<td align="left">parameters</td>
+<td align="left">FALSE</td>
+<td align="right">0.5727</td>
+<td align="right"></td>
+<td align="right">0.5727</td>
+<td align="right">0.5727</td>
+</tr>
+<tr class="odd">
+<td align="left">model_1</td>
+<td align="left">CATE</td>
+<td align="left">Case==0</td>
+<td align="left">posteriors</td>
+<td align="left">FALSE</td>
+<td align="right">0.8042</td>
 <td align="right">0.0089</td>
-<td align="right">0.5618</td>
-<td align="right">0.5972</td>
+<td align="right">0.7864</td>
+<td align="right">0.8214</td>
 </tr>
 <tr class="even">
-<td align="left">ATE</td>
-<td align="left">Case==1</td>
-<td align="left">parameters</td>
-<td align="left">FALSE</td>
-<td align="right">0.5727</td>
-<td align="right"></td>
-<td align="right">0.5727</td>
-<td align="right">0.5727</td>
-</tr>
-<tr class="odd">
-<td align="left">CATE</td>
-<td align="left">Case==0</td>
-<td align="left">posteriors</td>
-<td align="left">FALSE</td>
-<td align="right">0.8163</td>
-<td align="right">0.0086</td>
-<td align="right">0.7990</td>
-<td align="right">0.8325</td>
-</tr>
-<tr class="even">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==0</td>
 <td align="left">parameters</td>
@@ -742,16 +782,18 @@ div.csl-indent {
 <td align="right">0.8121</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.8163</td>
-<td align="right">0.0086</td>
-<td align="right">0.7990</td>
-<td align="right">0.8325</td>
+<td align="right">0.8042</td>
+<td align="right">0.0089</td>
+<td align="right">0.7864</td>
+<td align="right">0.8214</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">CATE</td>
 <td align="left">Case==1</td>
 <td align="left">parameters</td>
@@ -768,50 +810,97 @@ div.csl-indent {
 <h2><span class="header-section-number">11.2</span> Combining observational and experimental data<a href="external-validity-and-inference-aggregation.html#combining-observational-and-experimental-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>An interesting weakness of experimental studies is that, by dealing so effectively with self selection into treatment, they limit our ability to learn about self selection. Often however we want to know what causal effects would be specifically for people that would take up a treatment in non experimental settings. This kind of problem is studied for example by <span class="citation">Knox et al. (<a href="#ref-knox2019design">2019</a>)</span>.</p>
 <p>A causal model can encompass both experimental and observational data and let you answer this kind of question. To illustrate, imagine that node <span class="math inline">\(R\)</span> indicates whether a unit was assigned to be randomly assigned to treatment assignment (<span class="math inline">\(X=Z\)</span> if <span class="math inline">\(R=1\)</span>) or took on its observational value (<span class="math inline">\(X=O\)</span> if <span class="math inline">\(R=0\)</span>). We assume the exclusion restriction that entering the experimental sample is not related to <span class="math inline">\(Y\)</span> other than through assignment of <span class="math inline">\(X\)</span>.</p>
-<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="external-validity-and-inference-aggregation.html#cb120-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;R -&gt; X -&gt; Y; O -&gt; X &lt;- Z; O &lt;-&gt; Y&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb120-2"><a href="external-validity-and-inference-aggregation.html#cb120-2" tabindex="-1"></a>  </span>
-<span id="cb120-3"><a href="external-validity-and-inference-aggregation.html#cb120-3" tabindex="-1"></a>    <span class="fu">set_restrictions</span>(<span class="st">&quot;(X[R=1, Z=0]!=0) | (X[R=1, Z=1]!=1) | (X[R=0, O=0]!=0) | (X[R=0, O=1]!=1)&quot;</span>)</span>
-<span id="cb120-4"><a href="external-validity-and-inference-aggregation.html#cb120-4" tabindex="-1"></a></span>
-<span id="cb120-5"><a href="external-validity-and-inference-aggregation.html#cb120-5" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb126-1"><a href="external-validity-and-inference-aggregation.html#cb126-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;R -&gt; X -&gt; Y; O -&gt; X &lt;- Z; O &lt;-&gt; Y&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb126-2"><a href="external-validity-and-inference-aggregation.html#cb126-2" tabindex="-1"></a>  </span>
+<span id="cb126-3"><a href="external-validity-and-inference-aggregation.html#cb126-3" tabindex="-1"></a>    <span class="fu">set_restrictions</span>(<span class="st">&quot;(X[R=1, Z=0]!=0) | (X[R=1, Z=1]!=1) | (X[R=0, O=0]!=0) | (X[R=0, O=1]!=1)&quot;</span>)</span>
+<span id="cb126-4"><a href="external-validity-and-inference-aggregation.html#cb126-4" tabindex="-1"></a></span>
+<span id="cb126-5"><a href="external-validity-and-inference-aggregation.html#cb126-5" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/appcombexpob-1.png" width="672" /></p>
 <p>The parameter matrix has just one type for <span class="math inline">\(X\)</span> since <span class="math inline">\(X\)</span> really operates here as a kind of switch, inheriting the value of <span class="math inline">\(Z\)</span> or <span class="math inline">\(O\)</span> depending on <span class="math inline">\(R\)</span>. Parameters allow for complete confounding between <span class="math inline">\(O\)</span> and <span class="math inline">\(Y\)</span> but <span class="math inline">\(Z\)</span> and <span class="math inline">\(Y\)</span> are unconfounded.</p>
 <p>We imagine parameter values in which there is a true .2 effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>. However the effect is positive (.6) for cases in which <span class="math inline">\(X=1\)</span> under observational assignment but negative (-.2) for cases in which <span class="math inline">\(X=0\)</span> under observational assignment.</p>
-<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="external-validity-and-inference-aggregation.html#cb121-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> model <span class="sc">|&gt;</span></span>
-<span id="cb121-2"><a href="external-validity-and-inference-aggregation.html#cb121-2" tabindex="-1"></a>    <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="at">given =</span> <span class="st">&quot;O.0&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(.<span class="dv">8</span>, .<span class="dv">2</span>,  <span class="dv">0</span>,  <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb121-3"><a href="external-validity-and-inference-aggregation.html#cb121-3" tabindex="-1"></a>    <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="at">given =</span> <span class="st">&quot;O.1&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">0</span>, .<span class="dv">6</span>, .<span class="dv">4</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="external-validity-and-inference-aggregation.html#cb127-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> model <span class="sc">|&gt;</span></span>
+<span id="cb127-2"><a href="external-validity-and-inference-aggregation.html#cb127-2" tabindex="-1"></a>    <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="at">given =</span> <span class="st">&quot;O.0&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(.<span class="dv">8</span>, .<span class="dv">2</span>,  <span class="dv">0</span>,  <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb127-3"><a href="external-validity-and-inference-aggregation.html#cb127-3" tabindex="-1"></a>    <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;Y&quot;</span>, <span class="at">given =</span> <span class="st">&quot;O.1&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">0</span>, .<span class="dv">6</span>, .<span class="dv">4</span>))</span></code></pre></div>
+<pre><code>## Warning in make_par_values(model, alter = &quot;param_value&quot;, x = parameters, : A specified condition matches multiple parameters. In these cases it is unclear which parameter value should be assigned to which parameter. Assignment thus defaults to the order in which parameters appear in &#39;parameters_df&#39;.
+##               
+##  We advise checking that parameter assignment was carried out as you intended.</code></pre>
+<pre><code>## Warning in make_par_values(model, alter =
+## &quot;param_value&quot;, x = parameters, : You are altering
+## parameters on confounded nodes. Alterations will be
+## applied across all &#39;param_sets&#39;. If this is not the
+## alteration behavior you intended, try specifying the
+## &#39;param_set&#39; option to more clearly indicate parameters
+## whose values you wish to alter.</code></pre>
+<pre><code>## Warning in make_par_values(model, alter = &quot;param_value&quot;, x = parameters, : A specified condition matches multiple parameters. In these cases it is unclear which parameter value should be assigned to which parameter. Assignment thus defaults to the order in which parameters appear in &#39;parameters_df&#39;.
+##               
+##  We advise checking that parameter assignment was carried out as you intended.</code></pre>
+<pre><code>## Warning in make_par_values(model, alter =
+## &quot;param_value&quot;, x = parameters, : You are altering
+## parameters on confounded nodes. Alterations will be
+## applied across all &#39;param_sets&#39;. If this is not the
+## alteration behavior you intended, try specifying the
+## &#39;param_set&#39; option to more clearly indicate parameters
+## whose values you wish to alter.</code></pre>
 <p>To parse this expression: we allow different parameter values for the four possible nodal types for <span class="math inline">\(Y\)</span> when <span class="math inline">\(O=0\)</span> and when <span class="math inline">\(O=1\)</span>. When <span class="math inline">\(O=0\)</span> we have <span class="math inline">\((\lambda_{00} = .8, \lambda_{10} = .2, \lambda_{01} = 0, \lambda_{11} = 0)\)</span> which implies a negative treatment effect and many <span class="math inline">\(Y=0\)</span> observations. When <span class="math inline">\(O=1\)</span> we have <span class="math inline">\((\lambda_{00} = 0, \lambda_{10} = 0, \lambda_{01} = .6, \lambda_{11} = .4)\)</span> which implies a positive treatment effect and many <span class="math inline">\(Y=1\)</span> observations.</p>
 <p>The estimands:</p>
 <table>
 <caption><span id="tab:unnamed-chunk-115">Table 11.3: </span>estimands</caption>
+<colgroup>
+<col width="10%" />
+<col width="7%" />
+<col width="7%" />
+<col width="13%" />
+<col width="13%" />
+<col width="6%" />
+<col width="3%" />
+<col width="17%" />
+<col width="20%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.2</td>
+<td align="right"></td>
+<td align="right">0.2</td>
+<td align="right">0.2</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.2</td>
+<td align="right"></td>
+<td align="right">0.2</td>
+<td align="right">0.2</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.2</td>
+<td align="right"></td>
+<td align="right">0.2</td>
 <td align="right">0.2</td>
 </tr>
 </tbody>
@@ -821,28 +910,31 @@ div.csl-indent {
 <caption><span id="tab:appcombexpobs2">Table 11.4: </span>priors</caption>
 <colgroup>
 <col width="9%" />
-<col width="9%" />
-<col width="10%" />
-<col width="21%" />
-<col width="9%" />
-<col width="10%" />
+<col width="7%" />
+<col width="7%" />
+<col width="8%" />
 <col width="13%" />
-<col width="15%" />
+<col width="7%" />
+<col width="8%" />
+<col width="17%" />
+<col width="19%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">-</td>
 <td align="left">priors</td>
@@ -853,6 +945,7 @@ div.csl-indent {
 <td align="right">0.5266</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==0</td>
 <td align="left">priors</td>
@@ -863,6 +956,7 @@ div.csl-indent {
 <td align="right">0.5266</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==1</td>
 <td align="left">priors</td>
@@ -875,9 +969,9 @@ div.csl-indent {
 </tbody>
 </table>
 <p>Data:</p>
-<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="external-validity-and-inference-aggregation.html#cb122-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="at">n =</span> <span class="dv">800</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="external-validity-and-inference-aggregation.html#cb132-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="at">n =</span> <span class="dv">800</span>)</span></code></pre></div>
 <p>The true effect is .2 but naive analysis on the observational data would yield a strongly upwardly biased estimate.</p>
-<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="external-validity-and-inference-aggregation.html#cb123-1" tabindex="-1"></a>estimatr<span class="sc">::</span><span class="fu">difference_in_means</span>(Y<span class="sc">~</span>X, <span class="at">data =</span> <span class="fu">filter</span>(data, R<span class="sc">==</span><span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="external-validity-and-inference-aggregation.html#cb133-1" tabindex="-1"></a>estimatr<span class="sc">::</span><span class="fu">difference_in_means</span>(Y<span class="sc">~</span>X, <span class="at">data =</span> <span class="fu">filter</span>(data, R<span class="sc">==</span><span class="dv">0</span>))</span></code></pre></div>
 <table>
 <caption><span id="tab:unnamed-chunk-118">Table 11.5: </span>Inferences on the ATE from differences in means</caption>
 <colgroup>
@@ -916,189 +1010,205 @@ div.csl-indent {
 </tbody>
 </table>
 <p>The <code>CausalQueries</code> estimates are:</p>
-<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="external-validity-and-inference-aggregation.html#cb124-1" tabindex="-1"></a>posterior <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, data)</span></code></pre></div>
+<div class="sourceCode" id="cb134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb134-1"><a href="external-validity-and-inference-aggregation.html#cb134-1" tabindex="-1"></a>posterior <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, data)</span></code></pre></div>
 <table>
 <colgroup>
+<col width="9%" />
+<col width="6%" />
+<col width="6%" />
+<col width="12%" />
+<col width="12%" />
 <col width="8%" />
 <col width="8%" />
 <col width="16%" />
-<col width="20%" />
-<col width="8%" />
-<col width="8%" />
-<col width="13%" />
-<col width="14%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.176</td>
-<td align="right">0.031</td>
-<td align="right">0.1142</td>
-<td align="right">0.2367</td>
+<td align="right">0.2062</td>
+<td align="right">0.0299</td>
+<td align="right">0.148</td>
+<td align="right">0.265</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.176</td>
-<td align="right">0.031</td>
-<td align="right">0.1142</td>
-<td align="right">0.2367</td>
+<td align="right">0.2062</td>
+<td align="right">0.0299</td>
+<td align="right">0.148</td>
+<td align="right">0.265</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.176</td>
-<td align="right">0.031</td>
-<td align="right">0.1142</td>
-<td align="right">0.2367</td>
+<td align="right">0.2062</td>
+<td align="right">0.0299</td>
+<td align="right">0.148</td>
+<td align="right">0.265</td>
 </tr>
 </tbody>
 </table>
 <p>Much better.</p>
 <p>This model used both the experimental and the observational data. It is interesting to ask whether the observational data improved the estimates from the experimental data or did everything depend on the experimental data?</p>
 <p>To see, lets do updating using experimental data only:</p>
-<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="external-validity-and-inference-aggregation.html#cb125-1" tabindex="-1"></a>updated_no_O <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, dplyr<span class="sc">::</span><span class="fu">filter</span>(data, R<span class="sc">==</span><span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="external-validity-and-inference-aggregation.html#cb135-1" tabindex="-1"></a>updated_no_O <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, dplyr<span class="sc">::</span><span class="fu">filter</span>(data, R<span class="sc">==</span><span class="dv">1</span>))</span></code></pre></div>
 <table>
 <colgroup>
-<col width="8%" />
-<col width="8%" />
-<col width="15%" />
-<col width="20%" />
-<col width="10%" />
-<col width="10%" />
+<col width="9%" />
+<col width="6%" />
+<col width="6%" />
 <col width="12%" />
-<col width="14%" />
+<col width="12%" />
+<col width="8%" />
+<col width="8%" />
+<col width="16%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.1535</td>
-<td align="right">0.0414</td>
-<td align="right">0.0698</td>
-<td align="right">0.2325</td>
+<td align="right">0.1977</td>
+<td align="right">0.0359</td>
+<td align="right">0.126</td>
+<td align="right">0.2676</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.1535</td>
-<td align="right">0.0414</td>
-<td align="right">0.0698</td>
-<td align="right">0.2325</td>
+<td align="right">0.1977</td>
+<td align="right">0.0359</td>
+<td align="right">0.126</td>
+<td align="right">0.2676</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.1535</td>
-<td align="right">0.0414</td>
-<td align="right">0.0698</td>
-<td align="right">0.2325</td>
+<td align="right">0.1977</td>
+<td align="right">0.0359</td>
+<td align="right">0.126</td>
+<td align="right">0.2676</td>
 </tr>
 </tbody>
 </table>
 <p>In this case we get a tightening of posterior variance and a more accurate result when we use the observational data but the gains are relatively small. They would be smaller still if we had more data, in which case inferences from the experimental data would be more accurate still.</p>
 <p>In both cases the estimates for the average effect in the randomized and the observationally assigned group are the same. This is how it should be since these are, afterall, randomly assigned into these groups.</p>
 <p>Heterogeneity in this model lies between those that are in treatment and those that are in control <em>in the observational</em> sample. We learn nothing about this heterogeneity from the experimental data alone but we learn a lot from the mixed model, picking up the strong self selection into treatment in the observational group:</p>
-<table style="width:100%;">
+<table>
 <colgroup>
+<col width="8%" />
+<col width="6%" />
+<col width="12%" />
+<col width="11%" />
+<col width="11%" />
+<col width="8%" />
 <col width="7%" />
 <col width="15%" />
-<col width="14%" />
-<col width="18%" />
-<col width="10%" />
-<col width="9%" />
-<col width="11%" />
-<col width="12%" />
+<col width="17%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==1 &amp; X==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.1760</td>
-<td align="right">0.0310</td>
-<td align="right">0.1142</td>
-<td align="right">0.2367</td>
+<td align="right">0.2062</td>
+<td align="right">0.0299</td>
+<td align="right">0.1480</td>
+<td align="right">0.2650</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==1 &amp; X==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.1760</td>
-<td align="right">0.0310</td>
-<td align="right">0.1142</td>
-<td align="right">0.2367</td>
+<td align="right">0.2062</td>
+<td align="right">0.0299</td>
+<td align="right">0.1480</td>
+<td align="right">0.2650</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==0 &amp; X==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">-0.2148</td>
-<td align="right">0.0271</td>
-<td align="right">-0.2664</td>
-<td align="right">-0.1622</td>
+<td align="right">-0.1606</td>
+<td align="right">0.0258</td>
+<td align="right">-0.2114</td>
+<td align="right">-0.1096</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">R==0 &amp; X==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6079</td>
-<td align="right">0.0497</td>
-<td align="right">0.5074</td>
-<td align="right">0.7049</td>
+<td align="right">0.5486</td>
+<td align="right">0.0462</td>
+<td align="right">0.4568</td>
+<td align="right">0.6371</td>
 </tr>
 </tbody>
 </table>
@@ -1106,15 +1216,15 @@ div.csl-indent {
 <div id="a-jigsaw-puzzle-learning-across-populations" class="section level2 hasAnchor" number="11.3">
 <h2><span class="header-section-number">11.3</span> A jigsaw puzzle: Learning across populations<a href="external-validity-and-inference-aggregation.html#a-jigsaw-puzzle-learning-across-populations" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Consider a situation in which we believe the same model holds in multiple sites but in which learning about the model requires combining data about different parts of the model from multiple studies.</p>
-<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb126-1"><a href="external-validity-and-inference-aggregation.html#cb126-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> </span>
-<span id="cb126-2"><a href="external-validity-and-inference-aggregation.html#cb126-2" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- Z -&gt; K&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb126-3"><a href="external-validity-and-inference-aggregation.html#cb126-3" tabindex="-1"></a>  <span class="fu">set_parameters</span>(</span>
-<span id="cb126-4"><a href="external-validity-and-inference-aggregation.html#cb126-4" tabindex="-1"></a>    <span class="at">statement =</span> <span class="st">&quot;(Y[X=1, Z = 1] &gt; Y[X=0, Z = 1])&quot;</span>, <span class="at">parameters =</span> .<span class="dv">24</span>) <span class="sc">|&gt;</span></span>
-<span id="cb126-5"><a href="external-validity-and-inference-aggregation.html#cb126-5" tabindex="-1"></a>  <span class="fu">set_parameters</span>(</span>
-<span id="cb126-6"><a href="external-validity-and-inference-aggregation.html#cb126-6" tabindex="-1"></a>    <span class="at">statement =</span> <span class="st">&quot;(K[Z = 1] &gt; K[Z = 0])&quot;</span>, <span class="at">parameters =</span> .<span class="dv">85</span>)</span>
-<span id="cb126-7"><a href="external-validity-and-inference-aggregation.html#cb126-7" tabindex="-1"></a></span>
-<span id="cb126-8"><a href="external-validity-and-inference-aggregation.html#cb126-8" tabindex="-1"></a></span>
-<span id="cb126-9"><a href="external-validity-and-inference-aggregation.html#cb126-9" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="external-validity-and-inference-aggregation.html#cb136-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> </span>
+<span id="cb136-2"><a href="external-validity-and-inference-aggregation.html#cb136-2" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- Z -&gt; K&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb136-3"><a href="external-validity-and-inference-aggregation.html#cb136-3" tabindex="-1"></a>  <span class="fu">set_parameters</span>(</span>
+<span id="cb136-4"><a href="external-validity-and-inference-aggregation.html#cb136-4" tabindex="-1"></a>    <span class="at">statement =</span> <span class="st">&quot;(Y[X=1, Z = 1] &gt; Y[X=0, Z = 1])&quot;</span>, <span class="at">parameters =</span> .<span class="dv">24</span>) <span class="sc">|&gt;</span></span>
+<span id="cb136-5"><a href="external-validity-and-inference-aggregation.html#cb136-5" tabindex="-1"></a>  <span class="fu">set_parameters</span>(</span>
+<span id="cb136-6"><a href="external-validity-and-inference-aggregation.html#cb136-6" tabindex="-1"></a>    <span class="at">statement =</span> <span class="st">&quot;(K[Z = 1] &gt; K[Z = 0])&quot;</span>, <span class="at">parameters =</span> .<span class="dv">85</span>)</span>
+<span id="cb136-7"><a href="external-validity-and-inference-aggregation.html#cb136-7" tabindex="-1"></a></span>
+<span id="cb136-8"><a href="external-validity-and-inference-aggregation.html#cb136-8" tabindex="-1"></a></span>
+<span id="cb136-9"><a href="external-validity-and-inference-aggregation.html#cb136-9" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/jigsaw-1.png" width="672" /></p>
 <p>We imagine we have access to three types of data;</p>
 <ol style="list-style-type: decimal">
@@ -1122,202 +1232,222 @@ div.csl-indent {
 <li>Study 2 is an RCT looking at the relation between <span class="math inline">\(Z\)</span> and <span class="math inline">\(K\)</span>. <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are not observed.</li>
 <li>Study 3 is an experiment looking at the effects of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span>, ancillary data on context, <span class="math inline">\(K\)</span> is collected but <span class="math inline">\(Z\)</span> is not observed</li>
 </ol>
-<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="external-validity-and-inference-aggregation.html#cb127-1" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="dv">300</span>, <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb127-2"><a href="external-validity-and-inference-aggregation.html#cb127-2" tabindex="-1"></a>  </span>
-<span id="cb127-3"><a href="external-validity-and-inference-aggregation.html#cb127-3" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">study =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">each =</span> <span class="dv">100</span>),</span>
-<span id="cb127-4"><a href="external-validity-and-inference-aggregation.html#cb127-4" tabindex="-1"></a>             <span class="at">K =</span> <span class="fu">ifelse</span>(study <span class="sc">==</span> <span class="dv">1</span>, <span class="cn">NA</span>, K),</span>
-<span id="cb127-5"><a href="external-validity-and-inference-aggregation.html#cb127-5" tabindex="-1"></a>             <span class="at">X =</span> <span class="fu">ifelse</span>(study <span class="sc">==</span> <span class="dv">2</span>, <span class="cn">NA</span>, X),</span>
-<span id="cb127-6"><a href="external-validity-and-inference-aggregation.html#cb127-6" tabindex="-1"></a>             <span class="at">Y =</span> <span class="fu">ifelse</span>(study <span class="sc">==</span> <span class="dv">2</span>, <span class="cn">NA</span>, Y),</span>
-<span id="cb127-7"><a href="external-validity-and-inference-aggregation.html#cb127-7" tabindex="-1"></a>             <span class="at">Z =</span> <span class="fu">ifelse</span>(study <span class="sc">==</span> <span class="dv">3</span>, <span class="cn">NA</span>, Z)</span>
-<span id="cb127-8"><a href="external-validity-and-inference-aggregation.html#cb127-8" tabindex="-1"></a>             )</span></code></pre></div>
+<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="external-validity-and-inference-aggregation.html#cb137-1" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">make_data</span>(model, <span class="dv">300</span>, <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb137-2"><a href="external-validity-and-inference-aggregation.html#cb137-2" tabindex="-1"></a>  </span>
+<span id="cb137-3"><a href="external-validity-and-inference-aggregation.html#cb137-3" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">study =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">each =</span> <span class="dv">100</span>),</span>
+<span id="cb137-4"><a href="external-validity-and-inference-aggregation.html#cb137-4" tabindex="-1"></a>             <span class="at">K =</span> <span class="fu">ifelse</span>(study <span class="sc">==</span> <span class="dv">1</span>, <span class="cn">NA</span>, K),</span>
+<span id="cb137-5"><a href="external-validity-and-inference-aggregation.html#cb137-5" tabindex="-1"></a>             <span class="at">X =</span> <span class="fu">ifelse</span>(study <span class="sc">==</span> <span class="dv">2</span>, <span class="cn">NA</span>, X),</span>
+<span id="cb137-6"><a href="external-validity-and-inference-aggregation.html#cb137-6" tabindex="-1"></a>             <span class="at">Y =</span> <span class="fu">ifelse</span>(study <span class="sc">==</span> <span class="dv">2</span>, <span class="cn">NA</span>, Y),</span>
+<span id="cb137-7"><a href="external-validity-and-inference-aggregation.html#cb137-7" tabindex="-1"></a>             <span class="at">Z =</span> <span class="fu">ifelse</span>(study <span class="sc">==</span> <span class="dv">3</span>, <span class="cn">NA</span>, Z)</span>
+<span id="cb137-8"><a href="external-validity-and-inference-aggregation.html#cb137-8" tabindex="-1"></a>             )</span></code></pre></div>
 <p>Tables <a href="external-validity-and-inference-aggregation.html#tab:frank1">11.6</a> - <a href="external-validity-and-inference-aggregation.html#tab:frank3">11.8</a> show conditional inferences for the probability that <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span> in <span class="math inline">\(X=Y=1\)</span> cases conditional on <span class="math inline">\(K\)</span> for each study, analyzed individually</p>
 <table>
 <caption><span id="tab:frank1">Table 11.6: </span>Clue is uninformative in Study 1</caption>
 <colgroup>
-<col width="34%" />
-<col width="19%" />
-<col width="9%" />
-<col width="9%" />
-<col width="12%" />
-<col width="13%" />
+<col width="15%" />
+<col width="14%" />
+<col width="14%" />
+<col width="8%" />
+<col width="8%" />
+<col width="17%" />
+<col width="20%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Given</th>
-<th align="left">Case.estimand</th>
+<th align="left">query</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 1</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4963</td>
-<td align="right">0.1588</td>
-<td align="right">0.1999</td>
-<td align="right">0.8024</td>
+<td align="right">0.4993</td>
+<td align="right">0.1611</td>
+<td align="right">0.1977</td>
+<td align="right">0.8055</td>
 </tr>
 <tr class="even">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 0</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4972</td>
-<td align="right">0.1544</td>
-<td align="right">0.2082</td>
-<td align="right">0.7914</td>
+<td align="right">0.4995</td>
+<td align="right">0.1595</td>
+<td align="right">0.2019</td>
+<td align="right">0.8074</td>
 </tr>
 </tbody>
 </table>
 <table>
 <caption><span id="tab:frank2">Table 11.7: </span>Clue is also uninformative in Study 2 (factorial)</caption>
 <colgroup>
-<col width="34%" />
-<col width="19%" />
-<col width="9%" />
-<col width="9%" />
-<col width="12%" />
-<col width="13%" />
+<col width="15%" />
+<col width="14%" />
+<col width="14%" />
+<col width="8%" />
+<col width="8%" />
+<col width="17%" />
+<col width="20%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Given</th>
-<th align="left">Case.estimand</th>
+<th align="left">query</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 1</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5698</td>
-<td align="right">0.1295</td>
-<td align="right">0.3047</td>
-<td align="right">0.8135</td>
+<td align="right">0.5952</td>
+<td align="right">0.1241</td>
+<td align="right">0.3408</td>
+<td align="right">0.8221</td>
 </tr>
 <tr class="even">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 0</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5681</td>
-<td align="right">0.1292</td>
-<td align="right">0.3046</td>
-<td align="right">0.8108</td>
+<td align="right">0.5935</td>
+<td align="right">0.1258</td>
+<td align="right">0.3386</td>
+<td align="right">0.8278</td>
 </tr>
 </tbody>
 </table>
 <table>
 <caption><span id="tab:frank3">Table 11.8: </span>Clue is also uninformative in Study 3 (experiment studying <span class="math inline">\(K\)</span>)</caption>
 <colgroup>
-<col width="34%" />
-<col width="19%" />
-<col width="9%" />
-<col width="9%" />
-<col width="12%" />
-<col width="13%" />
+<col width="15%" />
+<col width="14%" />
+<col width="14%" />
+<col width="8%" />
+<col width="8%" />
+<col width="17%" />
+<col width="20%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Given</th>
-<th align="left">Case.estimand</th>
+<th align="left">query</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 1</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4984</td>
-<td align="right">0.1611</td>
-<td align="right">0.1975</td>
-<td align="right">0.8062</td>
+<td align="right">0.5013</td>
+<td align="right">0.1604</td>
+<td align="right">0.1939</td>
+<td align="right">0.8038</td>
 </tr>
 <tr class="even">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 0</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5000</td>
-<td align="right">0.1624</td>
-<td align="right">0.1840</td>
-<td align="right">0.8100</td>
+<td align="right">0.4986</td>
+<td align="right">0.1616</td>
+<td align="right">0.1903</td>
+<td align="right">0.8029</td>
 </tr>
 </tbody>
 </table>
 <p>In no case is <span class="math inline">\(K\)</span> informative. In study 1 data on <span class="math inline">\(K\)</span> is not available, in study 2 it is available but researchers do not know, quantitatively, how it relates to <span class="math inline">\(Z\)</span>. In the third study the <span class="math inline">\(Z,K\)</span> relationship is well understood but the joint relation between <span class="math inline">\(Z,X\)</span>, and <span class="math inline">\(Y\)</span> is not understood.</p>
 <p>Table <a href="external-validity-and-inference-aggregation.html#tab:frank4">11.9</a> shows the inferences when the data are combined with joint updating across all parameters.</p>
-<table style="width:100%;">
+<table>
 <caption><span id="tab:frank4">Table 11.9: </span>Clue is informative after combining studies linking <span class="math inline">\(K\)</span> to <span class="math inline">\(Z\)</span> and <span class="math inline">\(Z\)</span> to <span class="math inline">\(Y\)</span></caption>
 <colgroup>
-<col width="41%" />
+<col width="15%" />
+<col width="14%" />
+<col width="14%" />
+<col width="8%" />
+<col width="8%" />
 <col width="17%" />
-<col width="8%" />
-<col width="8%" />
-<col width="11%" />
-<col width="12%" />
+<col width="20%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Given</th>
-<th align="left">Case.estimand</th>
+<th align="left">query</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 1</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.8395</td>
-<td align="right">0.0587</td>
-<td align="right">0.7105</td>
-<td align="right">0.9390</td>
+<td align="right">0.8695</td>
+<td align="right">0.0546</td>
+<td align="right">0.7415</td>
+<td align="right">0.9531</td>
 </tr>
 <tr class="even">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 0</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4627</td>
-<td align="right">0.0759</td>
-<td align="right">0.3098</td>
-<td align="right">0.6044</td>
+<td align="right">0.5014</td>
+<td align="right">0.0687</td>
+<td align="right">0.3684</td>
+<td align="right">0.6402</td>
 </tr>
 <tr class="odd">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 1 &amp; Z == 1</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.8864</td>
-<td align="right">0.0560</td>
-<td align="right">0.7511</td>
-<td align="right">0.9695</td>
+<td align="right">0.8947</td>
+<td align="right">0.0547</td>
+<td align="right">0.7637</td>
+<td align="right">0.9726</td>
 </tr>
 <tr class="even">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 0 &amp; Z == 1</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.8864</td>
-<td align="right">0.0560</td>
-<td align="right">0.7511</td>
-<td align="right">0.9695</td>
+<td align="right">0.8947</td>
+<td align="right">0.0547</td>
+<td align="right">0.7637</td>
+<td align="right">0.9726</td>
 </tr>
 <tr class="odd">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 1 &amp; Z == 0</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4535</td>
-<td align="right">0.0774</td>
-<td align="right">0.2985</td>
-<td align="right">0.5991</td>
+<td align="right">0.4928</td>
+<td align="right">0.0699</td>
+<td align="right">0.3561</td>
+<td align="right">0.6335</td>
 </tr>
 <tr class="even">
-<td align="left">X == 1 &amp; Y == 1 &amp; K == 0 &amp; Z == 0</td>
+<td align="left">Y[X=0] == 0</td>
+<td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4535</td>
-<td align="right">0.0774</td>
-<td align="right">0.2985</td>
-<td align="right">0.5991</td>
+<td align="right">0.4928</td>
+<td align="right">0.0699</td>
+<td align="right">0.3561</td>
+<td align="right">0.6335</td>
 </tr>
 </tbody>
 </table>

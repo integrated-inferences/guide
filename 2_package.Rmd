@@ -609,8 +609,10 @@ We see that beliefs about the size of the overall effect are related to beliefs 
 
 ```{r}
 make_model("X -> Y") %>% 
-  query_distribution(increasing("X", "Y"), using = "priors") %>%
- hist(main = "Prior on Y increasing in X")  
+  query_distribution(list(increasing = increasing("X", "Y")), 
+                     using = "priors") %>%
+  ggplot(aes(increasing)) + geom_histogram()  + 
+  xlab("Prior on Y increasing in X")  
 ```
 
 ## Token and general causation

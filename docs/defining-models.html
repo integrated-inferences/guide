@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 3 Defining models | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 3 Defining models | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2023-08-31" />
+<meta name="date" content="2023-10-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -999,7 +999,7 @@ Y.11      0      0      0      0      1      1
 <p>Here the priors have not been specified and so they default to 1, which corresponds to uniform priors.</p>
 <p>Alternatively you could set jeffreys priors like this:</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="defining-models.html#cb30-1" tabindex="-1"></a><span class="fu">make_model</span>(<span class="st">&quot;X-&gt;Y&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">set_priors</span>(<span class="at">distribution =</span> <span class="st">&quot;jeffreys&quot;</span>) <span class="sc">%&gt;%</span> get_priors</span></code></pre></div>
-<pre><code>no specific parameters to alter values for specified. Altering all parameters.</code></pre>
+<pre><code>No specific parameters to alter values for specified. Altering all parameters.</code></pre>
 <pre><code> X.0  X.1 Y.00 Y.10 Y.01 Y.11 
  0.5  0.5  0.5  0.5  0.5  0.5 </code></pre>
 <div id="custom-priors" class="section level3 hasAnchor" number="3.5.1">
@@ -1030,21 +1030,40 @@ Y.11      0      0      0      0      1      1
 <span id="cb37-3"><a href="defining-models.html#cb37-3" tabindex="-1"></a>  <span class="fu">query_model</span>(<span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>, <span class="at">n_draws =</span> <span class="dv">10000</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb37-4"><a href="defining-models.html#cb37-4" tabindex="-1"></a>  kable</span></code></pre></div>
 <table>
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="6%" />
+<col width="11%" />
+<col width="11%" />
+<col width="7%" />
+<col width="3%" />
+<col width="15%" />
+<col width="17%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] - Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.3333</td>
+<td align="right">NA</td>
+<td align="right">0.3333</td>
 <td align="right">0.3333</td>
 </tr>
 </tbody>
@@ -1055,21 +1074,40 @@ Y.11      0      0      0      0      1      1
 <span id="cb38-2"><a href="defining-models.html#cb38-2" tabindex="-1"></a>  <span class="fu">query_model</span>(<span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, <span class="at">n_draws =</span> <span class="dv">10000</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb38-3"><a href="defining-models.html#cb38-3" tabindex="-1"></a>  kable</span></code></pre></div>
 <table>
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="6%" />
+<col width="12%" />
+<col width="12%" />
+<col width="5%" />
+<col width="3%" />
+<col width="15%" />
+<col width="17%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.25</td>
+<td align="right">NA</td>
+<td align="right">0.25</td>
 <td align="right">0.25</td>
 </tr>
 </tbody>
@@ -1078,21 +1116,40 @@ Y.11      0      0      0      0      1      1
 <span id="cb39-2"><a href="defining-models.html#cb39-2" tabindex="-1"></a>  <span class="fu">query_model</span>(<span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, <span class="at">n_draws =</span> <span class="dv">10000</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb39-3"><a href="defining-models.html#cb39-3" tabindex="-1"></a>  kable</span></code></pre></div>
 <table>
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="6%" />
+<col width="12%" />
+<col width="12%" />
+<col width="6%" />
+<col width="3%" />
+<col width="15%" />
+<col width="17%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.125</td>
+<td align="right">NA</td>
+<td align="right">0.125</td>
 <td align="right">0.125</td>
 </tr>
 </tbody>

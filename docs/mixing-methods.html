@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 10 Mixing methods | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 10 Mixing methods | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2023-08-31" />
+<meta name="date" content="2023-10-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -294,55 +294,74 @@ div.csl-indent {
 <p>But we <em>also</em> do well even with quite partial data on <span class="math inline">\(M\)</span>, e.g. if we have data for 100 out of 20,000 cases.</p>
 <p>Thus a little within-case data helps us make sense of the <span class="math inline">\(X,Y\)</span> data we have.</p>
 <p>The model:</p>
-<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="mixing-methods.html#cb106-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> </span>
-<span id="cb106-2"><a href="mixing-methods.html#cb106-2" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y; M &lt;-&gt; X; X &lt;-&gt; Y&quot;</span>) </span>
-<span id="cb106-3"><a href="mixing-methods.html#cb106-3" tabindex="-1"></a></span>
-<span id="cb106-4"><a href="mixing-methods.html#cb106-4" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="mixing-methods.html#cb110-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> </span>
+<span id="cb110-2"><a href="mixing-methods.html#cb110-2" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y; M &lt;-&gt; X; X &lt;-&gt; Y&quot;</span>) </span>
+<span id="cb110-3"><a href="mixing-methods.html#cb110-3" tabindex="-1"></a></span>
+<span id="cb110-4"><a href="mixing-methods.html#cb110-4" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/appmm2-1.png" width="672" /></p>
 <p>Parameters: We imagine a true model with a treatment effect of .25 but positive confounding (<span class="math inline">\(X=1\)</span> more likely in cases in which <span class="math inline">\(Y=1\)</span>, regardless of <span class="math inline">\(X\)</span>.</p>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="mixing-methods.html#cb107-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> </span>
-<span id="cb107-2"><a href="mixing-methods.html#cb107-2" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y;  X &lt;-&gt; Y&quot;</span>) </span>
-<span id="cb107-3"><a href="mixing-methods.html#cb107-3" tabindex="-1"></a></span>
-<span id="cb107-4"><a href="mixing-methods.html#cb107-4" tabindex="-1"></a>model <span class="ot">&lt;-</span> model <span class="sc">|&gt;</span>  </span>
-<span id="cb107-5"><a href="mixing-methods.html#cb107-5" tabindex="-1"></a>  <span class="fu">set_parameters</span>(</span>
-<span id="cb107-6"><a href="mixing-methods.html#cb107-6" tabindex="-1"></a>       <span class="at">node =</span> <span class="fu">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;M&quot;</span>, <span class="st">&quot;Y&quot;</span>),</span>
-<span id="cb107-7"><a href="mixing-methods.html#cb107-7" tabindex="-1"></a>       <span class="at">parameters =</span> <span class="fu">c</span>(<span class="fl">0.75</span>, <span class="fl">0.25</span>,</span>
-<span id="cb107-8"><a href="mixing-methods.html#cb107-8" tabindex="-1"></a>         .<span class="dv">25</span>, <span class="dv">0</span>, .<span class="dv">5</span>, .<span class="dv">25</span>,</span>
-<span id="cb107-9"><a href="mixing-methods.html#cb107-9" tabindex="-1"></a>         .<span class="dv">25</span>, <span class="dv">0</span>, .<span class="dv">5</span>, .<span class="dv">25</span>,</span>
-<span id="cb107-10"><a href="mixing-methods.html#cb107-10" tabindex="-1"></a>         .<span class="dv">25</span>, <span class="dv">0</span>, .<span class="dv">5</span>, .<span class="dv">25</span>))</span>
-<span id="cb107-11"><a href="mixing-methods.html#cb107-11" tabindex="-1"></a></span>
-<span id="cb107-12"><a href="mixing-methods.html#cb107-12" tabindex="-1"></a><span class="fu">query_model</span>(model, <span class="fu">list</span>(<span class="at">ATE =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>), <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>)  <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="mixing-methods.html#cb111-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> </span>
+<span id="cb111-2"><a href="mixing-methods.html#cb111-2" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y;  X &lt;-&gt; Y&quot;</span>) </span>
+<span id="cb111-3"><a href="mixing-methods.html#cb111-3" tabindex="-1"></a></span>
+<span id="cb111-4"><a href="mixing-methods.html#cb111-4" tabindex="-1"></a>model <span class="ot">&lt;-</span> model <span class="sc">|&gt;</span>  </span>
+<span id="cb111-5"><a href="mixing-methods.html#cb111-5" tabindex="-1"></a>  <span class="fu">set_parameters</span>(</span>
+<span id="cb111-6"><a href="mixing-methods.html#cb111-6" tabindex="-1"></a>       <span class="at">node =</span> <span class="fu">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;M&quot;</span>, <span class="st">&quot;Y&quot;</span>),</span>
+<span id="cb111-7"><a href="mixing-methods.html#cb111-7" tabindex="-1"></a>       <span class="at">parameters =</span> <span class="fu">c</span>(<span class="fl">0.75</span>, <span class="fl">0.25</span>,</span>
+<span id="cb111-8"><a href="mixing-methods.html#cb111-8" tabindex="-1"></a>         .<span class="dv">25</span>, <span class="dv">0</span>, .<span class="dv">5</span>, .<span class="dv">25</span>,</span>
+<span id="cb111-9"><a href="mixing-methods.html#cb111-9" tabindex="-1"></a>         .<span class="dv">25</span>, <span class="dv">0</span>, .<span class="dv">5</span>, .<span class="dv">25</span>,</span>
+<span id="cb111-10"><a href="mixing-methods.html#cb111-10" tabindex="-1"></a>         .<span class="dv">25</span>, <span class="dv">0</span>, .<span class="dv">5</span>, .<span class="dv">25</span>))</span>
+<span id="cb111-11"><a href="mixing-methods.html#cb111-11" tabindex="-1"></a></span>
+<span id="cb111-12"><a href="mixing-methods.html#cb111-12" tabindex="-1"></a><span class="fu">query_model</span>(model, <span class="fu">list</span>(<span class="at">ATE =</span> <span class="st">&quot;Y[X=1] - Y[X=0]&quot;</span>), <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>)  <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
 <table>
+<colgroup>
+<col width="10%" />
+<col width="7%" />
+<col width="7%" />
+<col width="13%" />
+<col width="13%" />
+<col width="6%" />
+<col width="3%" />
+<col width="17%" />
+<col width="20%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ATE</td>
 <td align="left">-</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.25</td>
+<td align="right"></td>
+<td align="right">0.25</td>
+<td align="right">0.25</td>
 </tr>
 </tbody>
 </table>
 <p>We use the model to simulate different types of data we might have access to thus:</p>
-<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="mixing-methods.html#cb108-1" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20000</span></span>
-<span id="cb108-2"><a href="mixing-methods.html#cb108-2" tabindex="-1"></a></span>
-<span id="cb108-3"><a href="mixing-methods.html#cb108-3" tabindex="-1"></a>full_data <span class="ot">&lt;-</span>  <span class="fu">make_data</span>(model, n, <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>)</span>
-<span id="cb108-4"><a href="mixing-methods.html#cb108-4" tabindex="-1"></a></span>
-<span id="cb108-5"><a href="mixing-methods.html#cb108-5" tabindex="-1"></a>XY_data <span class="ot">&lt;-</span> full_data <span class="sc">|&gt;</span> <span class="fu">select</span>(X, Y)</span>
-<span id="cb108-6"><a href="mixing-methods.html#cb108-6" tabindex="-1"></a></span>
-<span id="cb108-7"><a href="mixing-methods.html#cb108-7" tabindex="-1"></a>some_data  <span class="ot">&lt;-</span> full_data <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(<span class="at">M =</span> <span class="fu">ifelse</span>((<span class="dv">1</span><span class="sc">:</span>n) <span class="sc">%in%</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="dv">100</span>), M, <span class="cn">NA</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="mixing-methods.html#cb112-1" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20000</span></span>
+<span id="cb112-2"><a href="mixing-methods.html#cb112-2" tabindex="-1"></a></span>
+<span id="cb112-3"><a href="mixing-methods.html#cb112-3" tabindex="-1"></a>full_data <span class="ot">&lt;-</span>  <span class="fu">make_data</span>(model, n, <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>)</span>
+<span id="cb112-4"><a href="mixing-methods.html#cb112-4" tabindex="-1"></a></span>
+<span id="cb112-5"><a href="mixing-methods.html#cb112-5" tabindex="-1"></a>XY_data <span class="ot">&lt;-</span> full_data <span class="sc">|&gt;</span> <span class="fu">select</span>(X, Y)</span>
+<span id="cb112-6"><a href="mixing-methods.html#cb112-6" tabindex="-1"></a></span>
+<span id="cb112-7"><a href="mixing-methods.html#cb112-7" tabindex="-1"></a>some_data  <span class="ot">&lt;-</span> full_data <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(<span class="at">M =</span> <span class="fu">ifelse</span>((<span class="dv">1</span><span class="sc">:</span>n) <span class="sc">%in%</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="dv">100</span>), M, <span class="cn">NA</span>))</span></code></pre></div>
 <p>Naive analysis:</p>
-<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="mixing-methods.html#cb109-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(Y<span class="sc">~</span>X, <span class="at">data =</span> full_data))<span class="sc">$</span>coef <span class="sc">|&gt;</span> </span>
-<span id="cb109-2"><a href="mixing-methods.html#cb109-2" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="mixing-methods.html#cb113-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(Y<span class="sc">~</span>X, <span class="at">data =</span> full_data))<span class="sc">$</span>coef <span class="sc">|&gt;</span> </span>
+<span id="cb113-2"><a href="mixing-methods.html#cb113-2" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -373,14 +392,14 @@ div.csl-indent {
 <p>Note that the estimated ATE is too high – over twice what it should be.</p>
 <p>In contrast as seen in the next graph the <code>CausalQueries</code> estimate using <span class="math inline">\(X,Y\)</span> data only is low – close to our prior at 0 and estimated with wide posterior variance.</p>
 <p>With full data on <span class="math inline">\(X, M\)</span> and <span class="math inline">\(Y\)</span> we get a tight estimate on the ATE, though our estimate of the nature of confounding is not identified—though it has much tighter bounds than before. With partial data on <span class="math inline">\(M\)</span> (100 cases out of 20000) we do nearly as well. A small amount of data is enough to narrow bounds on confounding and improve our estimates of the ATE considerably.</p>
-<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="mixing-methods.html#cb110-1" tabindex="-1"></a><span class="co"># X, Y data only</span></span>
-<span id="cb110-2"><a href="mixing-methods.html#cb110-2" tabindex="-1"></a>updated_XY      <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, XY_data)</span>
-<span id="cb110-3"><a href="mixing-methods.html#cb110-3" tabindex="-1"></a></span>
-<span id="cb110-4"><a href="mixing-methods.html#cb110-4" tabindex="-1"></a><span class="co"># Full Data</span></span>
-<span id="cb110-5"><a href="mixing-methods.html#cb110-5" tabindex="-1"></a>updated_full    <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, full_data)</span>
-<span id="cb110-6"><a href="mixing-methods.html#cb110-6" tabindex="-1"></a></span>
-<span id="cb110-7"><a href="mixing-methods.html#cb110-7" tabindex="-1"></a><span class="co"># Partial Data</span></span>
-<span id="cb110-8"><a href="mixing-methods.html#cb110-8" tabindex="-1"></a>updated_partial <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, some_data)</span></code></pre></div>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="mixing-methods.html#cb114-1" tabindex="-1"></a><span class="co"># X, Y data only</span></span>
+<span id="cb114-2"><a href="mixing-methods.html#cb114-2" tabindex="-1"></a>updated_XY      <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, XY_data)</span>
+<span id="cb114-3"><a href="mixing-methods.html#cb114-3" tabindex="-1"></a></span>
+<span id="cb114-4"><a href="mixing-methods.html#cb114-4" tabindex="-1"></a><span class="co"># Full Data</span></span>
+<span id="cb114-5"><a href="mixing-methods.html#cb114-5" tabindex="-1"></a>updated_full    <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, full_data)</span>
+<span id="cb114-6"><a href="mixing-methods.html#cb114-6" tabindex="-1"></a></span>
+<span id="cb114-7"><a href="mixing-methods.html#cb114-7" tabindex="-1"></a><span class="co"># Partial Data</span></span>
+<span id="cb114-8"><a href="mixing-methods.html#cb114-8" tabindex="-1"></a>updated_partial <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model, some_data)</span></code></pre></div>
 <div class="figure"><span style="display:block;" id="fig:ch17mmfig"></span>
 <img src="causalmodels_files/figure-html/ch17mmfig-1.png" alt="Red lines denote estimand values, black lines show posterior means. Full data allows narrowing of posterior variance on confounding and tight esimates of treatment effects. But even limited data on $M$ gets us quite far (bottom right panel)." width="672" />
 <p class="caption">
@@ -391,48 +410,57 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <div id="distinguishing-paths" class="section level2 hasAnchor" number="10.2">
 <h2><span class="header-section-number">10.2</span> Distinguishing paths<a href="mixing-methods.html#distinguishing-paths" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Here is another example of mixing methods where a little within-case data goes a long way. We imagine that available data makes us very confident that <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span> but we want to know about channels. In such cases, with high confidence about overall effects, and <em>absent unobserved confounding</em>, a little data on mediators might be highly informative.</p>
-<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="mixing-methods.html#cb111-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M1 -&gt; Y &lt;- M2 &lt;- X&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb111-2"><a href="mixing-methods.html#cb111-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="fu">c</span>(<span class="fu">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;M1&quot;</span>), </span>
-<span id="cb111-3"><a href="mixing-methods.html#cb111-3" tabindex="-1"></a>                     <span class="fu">decreasing</span>(<span class="st">&quot;M1&quot;</span>, <span class="st">&quot;Y&quot;</span>),</span>
-<span id="cb111-4"><a href="mixing-methods.html#cb111-4" tabindex="-1"></a>                     <span class="fu">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;M2&quot;</span>), </span>
-<span id="cb111-5"><a href="mixing-methods.html#cb111-5" tabindex="-1"></a>                     <span class="fu">decreasing</span>(<span class="st">&quot;M2&quot;</span>, <span class="st">&quot;Y&quot;</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb111-6"><a href="mixing-methods.html#cb111-6" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;M1&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>), <span class="at">normalize=</span><span class="cn">FALSE</span>)  <span class="sc">|&gt;</span></span>
-<span id="cb111-7"><a href="mixing-methods.html#cb111-7" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;M2&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(.<span class="dv">5</span>, <span class="dv">0</span>,.<span class="dv">5</span>), <span class="at">normalize=</span><span class="cn">FALSE</span>)  <span class="sc">|&gt;</span></span>
-<span id="cb111-8"><a href="mixing-methods.html#cb111-8" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">statement =</span> <span class="st">&quot;(Y[M1=1] == Y[M1=0])&quot;</span>, <span class="at">parameters =</span> <span class="dv">0</span>)  </span>
-<span id="cb111-9"><a href="mixing-methods.html#cb111-9" tabindex="-1"></a></span>
-<span id="cb111-10"><a href="mixing-methods.html#cb111-10" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="mixing-methods.html#cb115-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M1 -&gt; Y &lt;- M2 &lt;- X&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb115-2"><a href="mixing-methods.html#cb115-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="fu">c</span>(<span class="fu">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;M1&quot;</span>), </span>
+<span id="cb115-3"><a href="mixing-methods.html#cb115-3" tabindex="-1"></a>                     <span class="fu">decreasing</span>(<span class="st">&quot;M1&quot;</span>, <span class="st">&quot;Y&quot;</span>),</span>
+<span id="cb115-4"><a href="mixing-methods.html#cb115-4" tabindex="-1"></a>                     <span class="fu">decreasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;M2&quot;</span>), </span>
+<span id="cb115-5"><a href="mixing-methods.html#cb115-5" tabindex="-1"></a>                     <span class="fu">decreasing</span>(<span class="st">&quot;M2&quot;</span>, <span class="st">&quot;Y&quot;</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb115-6"><a href="mixing-methods.html#cb115-6" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;M1&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>), <span class="at">normalize=</span><span class="cn">FALSE</span>)  <span class="sc">|&gt;</span></span>
+<span id="cb115-7"><a href="mixing-methods.html#cb115-7" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">node =</span> <span class="st">&quot;M2&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(.<span class="dv">5</span>, <span class="dv">0</span>,.<span class="dv">5</span>), <span class="at">normalize=</span><span class="cn">FALSE</span>)  <span class="sc">|&gt;</span></span>
+<span id="cb115-8"><a href="mixing-methods.html#cb115-8" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">statement =</span> <span class="st">&quot;(Y[M1=1] == Y[M1=0])&quot;</span>, <span class="at">parameters =</span> <span class="dv">0</span>)  </span></code></pre></div>
+<pre><code>## Warning in make_par_values(model, alter = &quot;param_value&quot;, x = parameters, : A specified condition matches multiple parameters. In these cases it is unclear which parameter value should be assigned to which parameter. Assignment thus defaults to the order in which parameters appear in &#39;parameters_df&#39;.
+##               
+##  We advise checking that parameter assignment was carried out as you intended.
+
+## Warning in make_par_values(model, alter = &quot;param_value&quot;, x = parameters, : A specified condition matches multiple parameters. In these cases it is unclear which parameter value should be assigned to which parameter. Assignment thus defaults to the order in which parameters appear in &#39;parameters_df&#39;.
+##               
+##  We advise checking that parameter assignment was carried out as you intended.</code></pre>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="mixing-methods.html#cb117-1" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/apppaths-1.png" width="672" /></p>
 <p>We imagine that in truth <span class="math inline">\(X\)</span> always causes <span class="math inline">\(Y\)</span> and it does so via <span class="math inline">\(M1\)</span>, though this is not known <em>ex ante</em>:</p>
-<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="mixing-methods.html#cb112-1" tabindex="-1"></a>Q1 <span class="ot">&lt;-</span> <span class="fu">query_model</span>(model, </span>
-<span id="cb112-2"><a href="mixing-methods.html#cb112-2" tabindex="-1"></a>  <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">ate =</span> <span class="fu">te</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), </span>
-<span id="cb112-3"><a href="mixing-methods.html#cb112-3" tabindex="-1"></a>                 <span class="at">via_M1 =</span> <span class="st">&quot;(M1[X=1]&gt;M1[X=0]) &amp; (Y[M1=1]&gt;Y[M1=0])&quot;</span>, </span>
-<span id="cb112-4"><a href="mixing-methods.html#cb112-4" tabindex="-1"></a>                 <span class="at">via_M2 =</span> <span class="st">&quot;(M2[X=1]&gt;M2[X=0]) &amp; (Y[M2=1]&gt;Y[M2=0])&quot;</span>), </span>
-<span id="cb112-5"><a href="mixing-methods.html#cb112-5" tabindex="-1"></a>  <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;parameters&quot;</span>, <span class="st">&quot;priors&quot;</span>),</span>
-<span id="cb112-6"><a href="mixing-methods.html#cb112-6" tabindex="-1"></a>  <span class="at">expand_grid =</span> <span class="cn">TRUE</span>) </span></code></pre></div>
-<table>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="mixing-methods.html#cb118-1" tabindex="-1"></a>Q1 <span class="ot">&lt;-</span> <span class="fu">query_model</span>(model, </span>
+<span id="cb118-2"><a href="mixing-methods.html#cb118-2" tabindex="-1"></a>  <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">ate =</span> <span class="fu">te</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), </span>
+<span id="cb118-3"><a href="mixing-methods.html#cb118-3" tabindex="-1"></a>                 <span class="at">via_M1 =</span> <span class="st">&quot;(M1[X=1]&gt;M1[X=0]) &amp; (Y[M1=1]&gt;Y[M1=0])&quot;</span>, </span>
+<span id="cb118-4"><a href="mixing-methods.html#cb118-4" tabindex="-1"></a>                 <span class="at">via_M2 =</span> <span class="st">&quot;(M2[X=1]&gt;M2[X=0]) &amp; (Y[M2=1]&gt;Y[M2=0])&quot;</span>), </span>
+<span id="cb118-5"><a href="mixing-methods.html#cb118-5" tabindex="-1"></a>  <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;parameters&quot;</span>, <span class="st">&quot;priors&quot;</span>),</span>
+<span id="cb118-6"><a href="mixing-methods.html#cb118-6" tabindex="-1"></a>  <span class="at">expand_grid =</span> <span class="cn">TRUE</span>) </span></code></pre></div>
+<table style="width:100%;">
 <caption><span id="tab:apppaths3">Table 10.1: </span>Priors and parameters</caption>
 <colgroup>
-<col width="10%" />
-<col width="16%" />
-<col width="21%" />
-<col width="10%" />
-<col width="10%" />
+<col width="9%" />
+<col width="8%" />
 <col width="13%" />
-<col width="15%" />
+<col width="13%" />
+<col width="8%" />
+<col width="8%" />
+<col width="17%" />
+<col width="19%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ate</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
@@ -442,6 +470,7 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <td align="right">1.0000</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">via_M1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
@@ -451,6 +480,7 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <td align="right">1.0000</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">via_M2</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
@@ -460,6 +490,7 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <td align="right">0.0000</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">ate</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
@@ -469,6 +500,7 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <td align="right">0.5470</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">via_M1</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
@@ -478,6 +510,7 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <td align="right">0.3807</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">via_M2</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
@@ -494,120 +527,130 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <colgroup>
 <col width="9%" />
 <col width="8%" />
-<col width="15%" />
-<col width="19%" />
-<col width="9%" />
-<col width="9%" />
+<col width="6%" />
 <col width="12%" />
-<col width="14%" />
+<col width="12%" />
+<col width="8%" />
+<col width="8%" />
+<col width="16%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ate</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.9880</td>
-<td align="right">0.0049</td>
-<td align="right">0.9767</td>
-<td align="right">0.9955</td>
+<td align="right">0.9882</td>
+<td align="right">0.0048</td>
+<td align="right">0.9769</td>
+<td align="right">0.9956</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">via_M1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4905</td>
-<td align="right">0.2214</td>
-<td align="right">0.0518</td>
-<td align="right">0.9242</td>
+<td align="right">0.5002</td>
+<td align="right">0.2295</td>
+<td align="right">0.0507</td>
+<td align="right">0.9489</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">via_M2</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4980</td>
-<td align="right">0.2213</td>
-<td align="right">0.0654</td>
-<td align="right">0.9362</td>
+<td align="right">0.4880</td>
+<td align="right">0.2295</td>
+<td align="right">0.0375</td>
+<td align="right">0.9354</td>
 </tr>
 </tbody>
 </table>
 <p>We infer that that <span class="math inline">\(X\)</span> certainly causes <span class="math inline">\(Y\)</span>. But we are unsure about channels.</p>
 <p>However, this changes dramatically with data on <span class="math inline">\(M_1\)</span> and <span class="math inline">\(M_2\)</span>. Here we assume data on only 20 cases.</p>
-<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="mixing-methods.html#cb113-1" tabindex="-1"></a><span class="fu">query_model</span>(updated_mixed, </span>
-<span id="cb113-2"><a href="mixing-methods.html#cb113-2" tabindex="-1"></a>  <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">ate =</span> <span class="fu">te</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), </span>
-<span id="cb113-3"><a href="mixing-methods.html#cb113-3" tabindex="-1"></a>                 <span class="at">via_M1 =</span> <span class="st">&quot;(M1[X=1]&gt;M1[X=0]) &amp; (Y[M1=1]&gt;Y[M1=0])&quot;</span>, </span>
-<span id="cb113-4"><a href="mixing-methods.html#cb113-4" tabindex="-1"></a>                 <span class="at">via_M2 =</span> <span class="st">&quot;(M2[X=1]&gt;M2[X=0]) &amp; (Y[M2=1]&gt;Y[M2=0])&quot;</span>), </span>
-<span id="cb113-5"><a href="mixing-methods.html#cb113-5" tabindex="-1"></a>  <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;posteriors&quot;</span>),</span>
-<span id="cb113-6"><a href="mixing-methods.html#cb113-6" tabindex="-1"></a>  <span class="at">expand_grid =</span> <span class="cn">TRUE</span>)  <span class="sc">|&gt;</span> <span class="fu">kable</span>(<span class="at">caption =</span> <span class="st">&quot;Inferences with 1000 observations for X, Y,  20 observations for M1, M2&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="mixing-methods.html#cb119-1" tabindex="-1"></a><span class="fu">query_model</span>(updated_mixed, </span>
+<span id="cb119-2"><a href="mixing-methods.html#cb119-2" tabindex="-1"></a>  <span class="at">queries =</span> <span class="fu">list</span>(<span class="at">ate =</span> <span class="fu">te</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), </span>
+<span id="cb119-3"><a href="mixing-methods.html#cb119-3" tabindex="-1"></a>                 <span class="at">via_M1 =</span> <span class="st">&quot;(M1[X=1]&gt;M1[X=0]) &amp; (Y[M1=1]&gt;Y[M1=0])&quot;</span>, </span>
+<span id="cb119-4"><a href="mixing-methods.html#cb119-4" tabindex="-1"></a>                 <span class="at">via_M2 =</span> <span class="st">&quot;(M2[X=1]&gt;M2[X=0]) &amp; (Y[M2=1]&gt;Y[M2=0])&quot;</span>), </span>
+<span id="cb119-5"><a href="mixing-methods.html#cb119-5" tabindex="-1"></a>  <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;posteriors&quot;</span>),</span>
+<span id="cb119-6"><a href="mixing-methods.html#cb119-6" tabindex="-1"></a>  <span class="at">expand_grid =</span> <span class="cn">TRUE</span>)  <span class="sc">|&gt;</span> <span class="fu">kable</span>(<span class="at">caption =</span> <span class="st">&quot;Inferences with 1000 observations for X, Y,  20 observations for M1, M2&quot;</span>)</span></code></pre></div>
 <table>
 <caption><span id="tab:apppaths6">Table 10.3: </span>Inferences with 1000 observations for X, Y, 20 observations for M1, M2</caption>
 <colgroup>
 <col width="9%" />
 <col width="8%" />
-<col width="15%" />
-<col width="19%" />
-<col width="9%" />
-<col width="9%" />
+<col width="6%" />
 <col width="12%" />
-<col width="14%" />
+<col width="12%" />
+<col width="8%" />
+<col width="8%" />
+<col width="16%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">ate</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
 <td align="right">0.9862</td>
-<td align="right">0.0050</td>
-<td align="right">0.9750</td>
-<td align="right">0.9941</td>
+<td align="right">0.0052</td>
+<td align="right">0.9742</td>
+<td align="right">0.9943</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">via_M1</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.9850</td>
-<td align="right">0.0057</td>
-<td align="right">0.9717</td>
-<td align="right">0.9937</td>
+<td align="right">0.9823</td>
+<td align="right">0.0080</td>
+<td align="right">0.9631</td>
+<td align="right">0.9933</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">via_M2</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.0012</td>
-<td align="right">0.0019</td>
-<td align="right">0.0000</td>
-<td align="right">0.0060</td>
+<td align="right">0.0039</td>
+<td align="right">0.0047</td>
+<td align="right">0.0001</td>
+<td align="right">0.0169</td>
 </tr>
 </tbody>
 </table>
@@ -629,10 +672,10 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <li>there is no confounding</li>
 </ul>
 <p>Here is the data:</p>
-<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="mixing-methods.html#cb114-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y&quot;</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb114-2"><a href="mixing-methods.html#cb114-2" tabindex="-1"></a>  </span>
-<span id="cb114-3"><a href="mixing-methods.html#cb114-3" tabindex="-1"></a>        <span class="fu">make_data</span>(<span class="at">n =</span> <span class="dv">2000</span>, </span>
-<span id="cb114-4"><a href="mixing-methods.html#cb114-4" tabindex="-1"></a>                  <span class="at">parameters =</span> <span class="fu">c</span>(.<span class="dv">5</span>, .<span class="dv">5</span>, .<span class="dv">2</span>, <span class="dv">0</span>, .<span class="dv">8</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, .<span class="dv">8</span>, .<span class="dv">2</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="mixing-methods.html#cb120-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb120-2"><a href="mixing-methods.html#cb120-2" tabindex="-1"></a>  </span>
+<span id="cb120-3"><a href="mixing-methods.html#cb120-3" tabindex="-1"></a>        <span class="fu">make_data</span>(<span class="at">n =</span> <span class="dv">2000</span>, </span>
+<span id="cb120-4"><a href="mixing-methods.html#cb120-4" tabindex="-1"></a>                  <span class="at">parameters =</span> <span class="fu">c</span>(.<span class="dv">5</span>, .<span class="dv">5</span>, .<span class="dv">2</span>, <span class="dv">0</span>, .<span class="dv">8</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, .<span class="dv">8</span>, .<span class="dv">2</span>))</span></code></pre></div>
 <table>
 <caption><span id="tab:unnamed-chunk-107">Table 10.4: </span>Data contains strong correlations.</caption>
 <thead>
@@ -670,11 +713,11 @@ Figure 10.1: Red lines denote estimand values, black lines show posterior means.
 <li><p>In <code>model_2</code> we assume that <span class="math inline">\(X\)</span> is known to be randomized. There are now only 64 free parameters.</p></li>
 </ul>
 <p>Here are the models:</p>
-<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="mixing-methods.html#cb115-1" tabindex="-1"></a>model_1 <span class="ot">&lt;-</span> </span>
-<span id="cb115-2"><a href="mixing-methods.html#cb115-2" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y &lt;- X; X &lt;-&gt; M; M &lt;-&gt;Y; X &lt;-&gt; Y&quot;</span>) </span>
-<span id="cb115-3"><a href="mixing-methods.html#cb115-3" tabindex="-1"></a></span>
-<span id="cb115-4"><a href="mixing-methods.html#cb115-4" tabindex="-1"></a>model_2 <span class="ot">&lt;-</span> </span>
-<span id="cb115-5"><a href="mixing-methods.html#cb115-5" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y &lt;- X; M &lt;-&gt;Y&quot;</span>) </span></code></pre></div>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="mixing-methods.html#cb121-1" tabindex="-1"></a>model_1 <span class="ot">&lt;-</span> </span>
+<span id="cb121-2"><a href="mixing-methods.html#cb121-2" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y &lt;- X; X &lt;-&gt; M; M &lt;-&gt;Y; X &lt;-&gt; Y&quot;</span>) </span>
+<span id="cb121-3"><a href="mixing-methods.html#cb121-3" tabindex="-1"></a></span>
+<span id="cb121-4"><a href="mixing-methods.html#cb121-4" tabindex="-1"></a>model_2 <span class="ot">&lt;-</span> </span>
+<span id="cb121-5"><a href="mixing-methods.html#cb121-5" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M -&gt; Y &lt;- X; M &lt;-&gt;Y&quot;</span>) </span></code></pre></div>
 <div class="figure"><span style="display:block;" id="fig:unnamed-chunk-108-1"></span>
 <img src="causalmodels_files/figure-html/unnamed-chunk-108-1.png" alt="Two models. The model on the right might be justified if $X$ is known to be randomized." width="672" />
 <p class="caption">
@@ -688,184 +731,200 @@ Figure 10.3: Two models. The model on the right might be justified if <span clas
 </p>
 </div>
 <p>After updating we query the models to see how inferences depend on <span class="math inline">\(M\)</span> like this:</p>
-<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="mixing-methods.html#cb116-1" tabindex="-1"></a>model_1 <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model_1, data, <span class="at">iter =</span> <span class="dv">6000</span>)</span>
-<span id="cb116-2"><a href="mixing-methods.html#cb116-2" tabindex="-1"></a></span>
-<span id="cb116-3"><a href="mixing-methods.html#cb116-3" tabindex="-1"></a><span class="fu">query_model</span>(model_1, </span>
-<span id="cb116-4"><a href="mixing-methods.html#cb116-4" tabindex="-1"></a>            <span class="at">queries =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>,</span>
-<span id="cb116-5"><a href="mixing-methods.html#cb116-5" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;X==1 &amp; Y==1&quot;</span>, <span class="st">&quot;X==1 &amp; M==1 &amp; Y==1&quot;</span>),</span>
-<span id="cb116-6"><a href="mixing-methods.html#cb116-6" tabindex="-1"></a>            <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;priors&quot;</span>, <span class="st">&quot;posteriors&quot;</span>), </span>
-<span id="cb116-7"><a href="mixing-methods.html#cb116-7" tabindex="-1"></a>            <span class="at">expand_grid =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<table style="width:100%;">
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="mixing-methods.html#cb122-1" tabindex="-1"></a>model_1 <span class="ot">&lt;-</span> <span class="fu">update_model</span>(model_1, data, <span class="at">iter =</span> <span class="dv">6000</span>)</span>
+<span id="cb122-2"><a href="mixing-methods.html#cb122-2" tabindex="-1"></a></span>
+<span id="cb122-3"><a href="mixing-methods.html#cb122-3" tabindex="-1"></a><span class="fu">query_model</span>(model_1, </span>
+<span id="cb122-4"><a href="mixing-methods.html#cb122-4" tabindex="-1"></a>            <span class="at">queries =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>,</span>
+<span id="cb122-5"><a href="mixing-methods.html#cb122-5" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;X==1 &amp; Y==1&quot;</span>, <span class="st">&quot;X==1 &amp; M==1 &amp; Y==1&quot;</span>),</span>
+<span id="cb122-6"><a href="mixing-methods.html#cb122-6" tabindex="-1"></a>            <span class="at">using =</span> <span class="fu">c</span>(<span class="st">&quot;priors&quot;</span>, <span class="st">&quot;posteriors&quot;</span>), </span>
+<span id="cb122-7"><a href="mixing-methods.html#cb122-7" tabindex="-1"></a>            <span class="at">expand_grid =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<table>
 <caption><span id="tab:unnamed-chunk-110">Table 10.5: </span>Can observation of large N data render mediator <span class="math inline">\(M\)</span> informative for case level inference? Observational data.</caption>
 <colgroup>
 <col width="7%" />
-<col width="22%" />
-<col width="13%" />
-<col width="16%" />
-<col width="8%" />
-<col width="8%" />
+<col width="14%" />
+<col width="17%" />
 <col width="10%" />
+<col width="10%" />
+<col width="6%" />
+<col width="6%" />
 <col width="12%" />
+<col width="14%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4994</td>
-<td align="right">0.1581</td>
-<td align="right">0.1980</td>
-<td align="right">0.7968</td>
+<td align="right">0.5004</td>
+<td align="right">0.1569</td>
+<td align="right">0.2042</td>
+<td align="right">0.8002</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; M==1 &amp; Y==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4993</td>
-<td align="right">0.1667</td>
-<td align="right">0.1815</td>
-<td align="right">0.8135</td>
+<td align="right">0.5005</td>
+<td align="right">0.1662</td>
+<td align="right">0.1871</td>
+<td align="right">0.8176</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; M==0 &amp; Y==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5005</td>
-<td align="right">0.1380</td>
-<td align="right">0.2405</td>
-<td align="right">0.7639</td>
+<td align="right">0.5001</td>
+<td align="right">0.1378</td>
+<td align="right">0.2368</td>
+<td align="right">0.7660</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
+<td align="left">X==1 &amp; Y==1</td>
+<td align="left">priors</td>
+<td align="left">FALSE</td>
+<td align="right">0.4999</td>
+<td align="right">0.1048</td>
+<td align="right">0.2941</td>
+<td align="right">0.7047</td>
+</tr>
+<tr class="odd">
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
+<td align="left">X==1 &amp; M==1 &amp; Y==1</td>
+<td align="left">priors</td>
+<td align="left">FALSE</td>
+<td align="right">0.4990</td>
+<td align="right">0.1338</td>
+<td align="right">0.2347</td>
+<td align="right">0.7522</td>
+</tr>
+<tr class="even">
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
+<td align="left">X==1 &amp; M==0 &amp; Y==1</td>
+<td align="left">priors</td>
+<td align="left">FALSE</td>
+<td align="right">0.4996</td>
+<td align="right">0.1369</td>
+<td align="right">0.2430</td>
+<td align="right">0.7670</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption><span id="tab:unnamed-chunk-110">Table 10.5: </span>Can observation of large N data render mediator <span class="math inline">\(M\)</span> informative for case level inference? X randomized.</caption>
+<colgroup>
+<col width="7%" />
+<col width="14%" />
+<col width="17%" />
+<col width="10%" />
+<col width="10%" />
+<col width="6%" />
+<col width="6%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
+<td align="left">X==1 &amp; Y==1</td>
+<td align="left">posteriors</td>
+<td align="left">FALSE</td>
+<td align="right">0.8460</td>
+<td align="right">0.0288</td>
+<td align="right">0.7926</td>
+<td align="right">0.9048</td>
+</tr>
+<tr class="even">
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
+<td align="left">X==1 &amp; M==1 &amp; Y==1</td>
+<td align="left">posteriors</td>
+<td align="left">FALSE</td>
+<td align="right">0.8642</td>
+<td align="right">0.0314</td>
+<td align="right">0.8054</td>
+<td align="right">0.9270</td>
+</tr>
+<tr class="odd">
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
+<td align="left">X==1 &amp; M==0 &amp; Y==1</td>
+<td align="left">posteriors</td>
+<td align="left">FALSE</td>
+<td align="right">0.5298</td>
+<td align="right">0.1630</td>
+<td align="right">0.2136</td>
+<td align="right">0.8296</td>
+</tr>
+<tr class="even">
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
 <td align="right">0.5016</td>
-<td align="right">0.1042</td>
-<td align="right">0.2962</td>
-<td align="right">0.7056</td>
+<td align="right">0.1056</td>
+<td align="right">0.2921</td>
+<td align="right">0.7094</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; M==1 &amp; Y==1</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5018</td>
-<td align="right">0.1361</td>
-<td align="right">0.2374</td>
-<td align="right">0.7672</td>
+<td align="right">0.5011</td>
+<td align="right">0.1339</td>
+<td align="right">0.2451</td>
+<td align="right">0.7565</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; M==0 &amp; Y==1</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5017</td>
-<td align="right">0.1346</td>
-<td align="right">0.2407</td>
-<td align="right">0.7533</td>
-</tr>
-</tbody>
-</table>
-<table style="width:100%;">
-<caption><span id="tab:unnamed-chunk-110">Table 10.5: </span>Can observation of large N data render mediator <span class="math inline">\(M\)</span> informative for case level inference? X randomized.</caption>
-<colgroup>
-<col width="7%" />
-<col width="22%" />
-<col width="13%" />
-<col width="16%" />
-<col width="8%" />
-<col width="8%" />
-<col width="10%" />
-<col width="12%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
-<th align="right">mean</th>
-<th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Q 1</td>
-<td align="left">X==1 &amp; Y==1</td>
-<td align="left">posteriors</td>
-<td align="left">FALSE</td>
-<td align="right">0.8519</td>
-<td align="right">0.0297</td>
-<td align="right">0.7959</td>
-<td align="right">0.9111</td>
-</tr>
-<tr class="even">
-<td align="left">Q 1</td>
-<td align="left">X==1 &amp; M==1 &amp; Y==1</td>
-<td align="left">posteriors</td>
-<td align="left">FALSE</td>
-<td align="right">0.8692</td>
-<td align="right">0.0320</td>
-<td align="right">0.8080</td>
-<td align="right">0.9321</td>
-</tr>
-<tr class="odd">
-<td align="left">Q 1</td>
-<td align="left">X==1 &amp; M==0 &amp; Y==1</td>
-<td align="left">posteriors</td>
-<td align="left">FALSE</td>
-<td align="right">0.5294</td>
-<td align="right">0.1618</td>
-<td align="right">0.2134</td>
-<td align="right">0.8243</td>
-</tr>
-<tr class="even">
-<td align="left">Q 1</td>
-<td align="left">X==1 &amp; Y==1</td>
-<td align="left">priors</td>
-<td align="left">FALSE</td>
-<td align="right">0.5019</td>
-<td align="right">0.1061</td>
-<td align="right">0.2953</td>
-<td align="right">0.7048</td>
-</tr>
-<tr class="odd">
-<td align="left">Q 1</td>
-<td align="left">X==1 &amp; M==1 &amp; Y==1</td>
-<td align="left">priors</td>
-<td align="left">FALSE</td>
-<td align="right">0.4996</td>
-<td align="right">0.1350</td>
-<td align="right">0.2443</td>
-<td align="right">0.7629</td>
-</tr>
-<tr class="even">
-<td align="left">Q 1</td>
-<td align="left">X==1 &amp; M==0 &amp; Y==1</td>
-<td align="left">priors</td>
-<td align="left">FALSE</td>
-<td align="right">0.5032</td>
-<td align="right">0.1366</td>
-<td align="right">0.2432</td>
-<td align="right">0.7622</td>
+<td align="right">0.5012</td>
+<td align="right">0.1371</td>
+<td align="right">0.2305</td>
+<td align="right">0.7686</td>
 </tr>
 </tbody>
 </table>

@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 5 Querying models | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 5 Querying models | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2023-08-31" />
+<meta name="date" content="2023-10-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -307,38 +307,65 @@ div.csl-indent {
 <span id="cb56-13"><a href="querying-models.html#cb56-13" tabindex="-1"></a>  <span class="fu">kable</span>(</span>
 <span id="cb56-14"><a href="querying-models.html#cb56-14" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;In a monotonic model with flat priors, knowledge</span></span>
 <span id="cb56-15"><a href="querying-models.html#cb56-15" tabindex="-1"></a><span class="st">    that $M=1$ *reduces* confidence that $X=1$ caused $Y=1$&quot;</span>)</span></code></pre></div>
-<table>
+<table style="width:100%;">
 <caption><span id="tab:unnamed-chunk-43">Table 5.1: </span>In a monotonic model with flat priors, knowledge
 that <span class="math inline">\(M=1\)</span> <em>reduces</em> confidence that <span class="math inline">\(X=1\)</span> caused <span class="math inline">\(Y=1\)</span></caption>
+<colgroup>
+<col width="7%" />
+<col width="14%" />
+<col width="18%" />
+<col width="10%" />
+<col width="10%" />
+<col width="6%" />
+<col width="2%" />
+<col width="13%" />
+<col width="15%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1]&gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.6154</td>
+<td align="right">NA</td>
+<td align="right">0.6154</td>
+<td align="right">0.6154</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1]&gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1 &amp; M==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.6000</td>
+<td align="right">NA</td>
+<td align="right">0.6000</td>
+<td align="right">0.6000</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1]&gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1 &amp; M==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.6667</td>
+<td align="right">NA</td>
+<td align="right">0.6667</td>
 <td align="right">0.6667</td>
 </tr>
 </tbody>
@@ -364,9 +391,12 @@ that <span class="math inline">\(M=1\)</span> <em>reduces</em> confidence that <
 <h2><span class="header-section-number">5.3</span> Query distribution<a href="querying-models.html#query-distribution" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><code>query_distribution</code> works similarly except that the query is over an estimand. For instance:</p>
 <div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="querying-models.html#cb58-1" tabindex="-1"></a><span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb58-2"><a href="querying-models.html#cb58-2" tabindex="-1"></a>  <span class="fu">query_distribution</span>(<span class="fu">increasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="at">using =</span> <span class="st">&quot;priors&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb58-3"><a href="querying-models.html#cb58-3" tabindex="-1"></a> <span class="fu">hist</span>(<span class="at">main =</span> <span class="st">&quot;Prior on Y increasing in X&quot;</span>)  </span></code></pre></div>
-<pre><code>## Prior distribution added to model</code></pre>
+<span id="cb58-2"><a href="querying-models.html#cb58-2" tabindex="-1"></a>  <span class="fu">query_distribution</span>(<span class="fu">list</span>(<span class="at">increasing =</span> <span class="fu">increasing</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>)), </span>
+<span id="cb58-3"><a href="querying-models.html#cb58-3" tabindex="-1"></a>                     <span class="at">using =</span> <span class="st">&quot;priors&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb58-4"><a href="querying-models.html#cb58-4" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(increasing)) <span class="sc">+</span> <span class="fu">geom_histogram</span>()  <span class="sc">+</span> </span>
+<span id="cb58-5"><a href="querying-models.html#cb58-5" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">&quot;Prior on Y increasing in X&quot;</span>)  </span></code></pre></div>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with
+## `binwidth`.</code></pre>
 <p><img src="causalmodels_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
 </div>
 <div id="token-and-general-causation" class="section level2 hasAnchor" number="5.4">
@@ -386,66 +416,72 @@ that <span class="math inline">\(M=1\)</span> <em>reduces</em> confidence that <
 <caption><span id="tab:unnamed-chunk-48">Table 5.2: </span>Posteriors equal priors for a query that conditions on data used to form the posterior</caption>
 <colgroup>
 <col width="7%" />
-<col width="22%" />
 <col width="13%" />
-<col width="16%" />
-<col width="8%" />
-<col width="8%" />
+<col width="17%" />
 <col width="10%" />
+<col width="10%" />
+<col width="6%" />
+<col width="6%" />
 <col width="12%" />
+<col width="14%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1]&gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
-<td align="right">0.2091</td>
-<td align="right">0.2042</td>
-<td align="right">0.0026</td>
-<td align="right">0.7439</td>
+<td align="right">0.2143</td>
+<td align="right">0.2080</td>
+<td align="right">0.0027</td>
+<td align="right">0.7523</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1]&gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.2226</td>
-<td align="right">0.2102</td>
+<td align="right">0.2221</td>
+<td align="right">0.2107</td>
 <td align="right">0.0027</td>
-<td align="right">0.7566</td>
+<td align="right">0.7553</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1]&gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1 &amp; M==1</td>
 <td align="left">priors</td>
 <td align="left">FALSE</td>
-<td align="right">0.2485</td>
-<td align="right">0.2174</td>
-<td align="right">0.0046</td>
-<td align="right">0.7847</td>
+<td align="right">0.2552</td>
+<td align="right">0.2209</td>
+<td align="right">0.0042</td>
+<td align="right">0.7931</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1]&gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1 &amp; M==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.2500</td>
-<td align="right">0.2197</td>
+<td align="right">0.2492</td>
+<td align="right">0.2203</td>
 <td align="right">0.0037</td>
-<td align="right">0.7823</td>
+<td align="right">0.7835</td>
 </tr>
 </tbody>
 </table>

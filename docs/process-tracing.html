@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 8 Process tracing | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 8 Process tracing | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2023-08-31" />
+<meta name="date" content="2023-10-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -290,159 +290,231 @@ div.csl-indent {
 <h2><span class="header-section-number">8.1</span> What to infer from what<a href="process-tracing.html#what-to-infer-from-what" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The simplest application of the <code>CausalQueries</code> package is to figure out what inferences to make about a case upon observing within-case data, given a model. One might observe many pieces of evidence and have to figure out how to update from these jointly.</p>
 <p>In <em>Integrated Inferences</em> we explore an inequality-democratization model where for a case with low inequality and democratization (say) one is interested in whether the democratization was due to the low inequality. In the simple model, inequality can give rise to popular mobilization which in turn forces democratization; or alternatively, inequality could prevent democratization by generating a threat from elites. In addition other forces, such as international pressure, could give rise to democratization. The question is: how do we update on our beliefs that low inequality caused democratization when we observe mobilization or international pressure?</p>
-<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="process-tracing.html#cb88-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;I -&gt; M -&gt; D &lt;- I; P -&gt; D&quot;</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb88-2"><a href="process-tracing.html#cb88-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="fu">c</span>( </span>
-<span id="cb88-3"><a href="process-tracing.html#cb88-3" tabindex="-1"></a>    <span class="st">&quot;(M[I=1] &lt; M[I=0])&quot;</span>, </span>
-<span id="cb88-4"><a href="process-tracing.html#cb88-4" tabindex="-1"></a>    <span class="st">&quot;(D[I=1] &gt; D[I=0]) | (D[M=1] &lt; D[M=0]) | (D[P=1] &lt; D[P=0])&quot;</span>)) </span></code></pre></div>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="process-tracing.html#cb90-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;I -&gt; M -&gt; D &lt;- I; P -&gt; D&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb90-2"><a href="process-tracing.html#cb90-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="fu">c</span>( </span>
+<span id="cb90-3"><a href="process-tracing.html#cb90-3" tabindex="-1"></a>    <span class="st">&quot;(M[I=1] &lt; M[I=0])&quot;</span>, </span>
+<span id="cb90-4"><a href="process-tracing.html#cb90-4" tabindex="-1"></a>    <span class="st">&quot;(D[I=1] &gt; D[I=0]) | (D[M=1] &lt; D[M=0]) | (D[P=1] &lt; D[P=0])&quot;</span>)) </span></code></pre></div>
 <p>We can read inferences directly from <code>query_model</code>:</p>
-<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="process-tracing.html#cb89-1" tabindex="-1"></a><span class="fu">query_model</span>(model, </span>
-<span id="cb89-2"><a href="process-tracing.html#cb89-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="fu">list</span>(<span class="st">`</span><span class="at">I = 0 caused D = 1</span><span class="st">`</span> <span class="ot">=</span> <span class="st">&quot;D[I=1] != D[I=0]&quot;</span>), </span>
-<span id="cb89-3"><a href="process-tracing.html#cb89-3" tabindex="-1"></a>            <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>, </span>
-<span id="cb89-4"><a href="process-tracing.html#cb89-4" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;I==0 &amp; D==1&quot;</span>, </span>
-<span id="cb89-5"><a href="process-tracing.html#cb89-5" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M==0&quot;</span>, </span>
-<span id="cb89-6"><a href="process-tracing.html#cb89-6" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M==1&quot;</span>, </span>
-<span id="cb89-7"><a href="process-tracing.html#cb89-7" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; P==0&quot;</span>, </span>
-<span id="cb89-8"><a href="process-tracing.html#cb89-8" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; P==1&quot;</span>, </span>
-<span id="cb89-9"><a href="process-tracing.html#cb89-9" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 0 &amp; P==0&quot;</span>,</span>
-<span id="cb89-10"><a href="process-tracing.html#cb89-10" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 1 &amp; P==0&quot;</span>,</span>
-<span id="cb89-11"><a href="process-tracing.html#cb89-11" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 0 &amp; P==1&quot;</span>,</span>
-<span id="cb89-12"><a href="process-tracing.html#cb89-12" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 1 &amp; P==1&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="process-tracing.html#cb91-1" tabindex="-1"></a><span class="fu">query_model</span>(model, </span>
+<span id="cb91-2"><a href="process-tracing.html#cb91-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="fu">list</span>(<span class="st">`</span><span class="at">I = 0 caused D = 1</span><span class="st">`</span> <span class="ot">=</span> <span class="st">&quot;D[I=1] != D[I=0]&quot;</span>), </span>
+<span id="cb91-3"><a href="process-tracing.html#cb91-3" tabindex="-1"></a>            <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>, </span>
+<span id="cb91-4"><a href="process-tracing.html#cb91-4" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;I==0 &amp; D==1&quot;</span>, </span>
+<span id="cb91-5"><a href="process-tracing.html#cb91-5" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M==0&quot;</span>, </span>
+<span id="cb91-6"><a href="process-tracing.html#cb91-6" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M==1&quot;</span>, </span>
+<span id="cb91-7"><a href="process-tracing.html#cb91-7" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; P==0&quot;</span>, </span>
+<span id="cb91-8"><a href="process-tracing.html#cb91-8" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; P==1&quot;</span>, </span>
+<span id="cb91-9"><a href="process-tracing.html#cb91-9" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 0 &amp; P==0&quot;</span>,</span>
+<span id="cb91-10"><a href="process-tracing.html#cb91-10" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 1 &amp; P==0&quot;</span>,</span>
+<span id="cb91-11"><a href="process-tracing.html#cb91-11" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 0 &amp; P==1&quot;</span>,</span>
+<span id="cb91-12"><a href="process-tracing.html#cb91-12" tabindex="-1"></a>                       <span class="st">&quot;I==0 &amp; D==1 &amp; M == 1 &amp; P==1&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
 <table>
 <colgroup>
-<col width="24%" />
-<col width="35%" />
+<col width="6%" />
+<col width="16%" />
+<col width="23%" />
+<col width="9%" />
+<col width="9%" />
+<col width="5%" />
+<col width="2%" />
+<col width="11%" />
 <col width="13%" />
-<col width="17%" />
-<col width="8%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.4384</td>
+<td align="right"></td>
+<td align="right">0.4384</td>
+<td align="right">0.4384</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.4750</td>
+<td align="right"></td>
+<td align="right">0.4750</td>
+<td align="right">0.4750</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.3939</td>
+<td align="right"></td>
+<td align="right">0.3939</td>
+<td align="right">0.3939</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; P==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.6154</td>
+<td align="right"></td>
+<td align="right">0.6154</td>
+<td align="right">0.6154</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; P==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.3404</td>
+<td align="right"></td>
+<td align="right">0.3404</td>
+<td align="right">0.3404</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M == 0 &amp; P==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.6667</td>
+<td align="right"></td>
+<td align="right">0.6667</td>
+<td align="right">0.6667</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M == 1 &amp; P==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.5714</td>
+<td align="right"></td>
+<td align="right">0.5714</td>
+<td align="right">0.5714</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M == 0 &amp; P==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.3929</td>
+<td align="right"></td>
+<td align="right">0.3929</td>
+<td align="right">0.3929</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">I = 0 caused D = 1</td>
 <td align="left">I==0 &amp; D==1 &amp; M == 1 &amp; P==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.2632</td>
+<td align="right"></td>
+<td align="right">0.2632</td>
 <td align="right">0.2632</td>
 </tr>
 </tbody>
 </table>
 <p>We see in this example that learning about a rival cause—the moderator <span class="math inline">\(P\)</span> (international pressure)—induces larger changes in beliefs than learning about the mediator, <span class="math inline">\(M\)</span> (mobilization). The two clues substitute for each other marginally.</p>
 <p>The importance of different clues depends however on what one wants to explain. In the next analysis, we see that if we want to know if inequality explained democratization, learning that <span class="math inline">\(M=0\)</span> has a large impact on beliefs.</p>
-<table style="width:100%;">
+<table>
 <colgroup>
-<col width="27%" />
-<col width="27%" />
-<col width="15%" />
-<col width="20%" />
+<col width="7%" />
+<col width="17%" />
+<col width="17%" />
 <col width="10%" />
+<col width="10%" />
+<col width="6%" />
+<col width="2%" />
+<col width="12%" />
+<col width="14%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.1277</td>
+<td align="right"></td>
+<td align="right">0.1277</td>
+<td align="right">0.1277</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1 &amp; M==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.0000</td>
+<td align="right"></td>
+<td align="right">0.0000</td>
+<td align="right">0.0000</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1 &amp; M==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.1500</td>
+<td align="right"></td>
+<td align="right">0.1500</td>
+<td align="right">0.1500</td>
 </tr>
 <tr class="even">
+<td align="left">model_1</td>
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1 &amp; P==0</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.2308</td>
+<td align="right"></td>
+<td align="right">0.2308</td>
+<td align="right">0.2308</td>
 </tr>
 <tr class="odd">
+<td align="left">model_1</td>
 <td align="left">I = 1 caused D = 1</td>
 <td align="left">I==1 &amp; D==1 &amp; P==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.0882</td>
+<td align="right"></td>
+<td align="right">0.0882</td>
 <td align="right">0.0882</td>
 </tr>
 </tbody>
@@ -454,72 +526,111 @@ div.csl-indent {
 <p>Observation of a node (a “clue”) is potentially informative for a query when it is <em>not</em> <span class="math inline">\(d\)</span>-separated<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> from query-relevant nodes (See <em>Integrated Inferences</em>, Ch 6).</p>
 <p>An implication of this is that the observation of some nodes may render other nodes more or less informative. From the graph alone you can sometimes tell when additional data will be uninformative for a query.</p>
 <p>To wit:</p>
-<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="process-tracing.html#cb90-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y -&gt; S &lt;- W&quot;</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb90-2"><a href="process-tracing.html#cb90-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="fu">complements</span>(<span class="st">&quot;Y&quot;</span>, <span class="st">&quot;W&quot;</span>, <span class="st">&quot;S&quot;</span>), <span class="at">keep =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb90-3"><a href="process-tracing.html#cb90-3" tabindex="-1"></a></span>
-<span id="cb90-4"><a href="process-tracing.html#cb90-4" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="process-tracing.html#cb92-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y -&gt; S &lt;- W&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb92-2"><a href="process-tracing.html#cb92-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="fu">complements</span>(<span class="st">&quot;Y&quot;</span>, <span class="st">&quot;W&quot;</span>, <span class="st">&quot;S&quot;</span>), <span class="at">keep =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb92-3"><a href="process-tracing.html#cb92-3" tabindex="-1"></a></span>
+<span id="cb92-4"><a href="process-tracing.html#cb92-4" tabindex="-1"></a><span class="fu">plot</span>(model)</span></code></pre></div>
 <p><img src="causalmodels_files/figure-html/appdsepar-1.png" width="672" /></p>
-<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="process-tracing.html#cb91-1" tabindex="-1"></a><span class="fu">query_model</span>(model,</span>
-<span id="cb91-2"><a href="process-tracing.html#cb91-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>,</span>
-<span id="cb91-3"><a href="process-tracing.html#cb91-3" tabindex="-1"></a>            <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>,</span>
-<span id="cb91-4"><a href="process-tracing.html#cb91-4" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;X==1&quot;</span>,</span>
-<span id="cb91-5"><a href="process-tracing.html#cb91-5" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; W==1&quot;</span>,</span>
-<span id="cb91-6"><a href="process-tracing.html#cb91-6" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; S==1&quot;</span>,</span>
-<span id="cb91-7"><a href="process-tracing.html#cb91-7" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; S==1 &amp; W==1&quot;</span>, </span>
-<span id="cb91-8"><a href="process-tracing.html#cb91-8" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; Y==1&quot;</span>,</span>
-<span id="cb91-9"><a href="process-tracing.html#cb91-9" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; W==1 &amp; S==1 &amp; Y==1&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="process-tracing.html#cb93-1" tabindex="-1"></a><span class="fu">query_model</span>(model,</span>
+<span id="cb93-2"><a href="process-tracing.html#cb93-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>,</span>
+<span id="cb93-3"><a href="process-tracing.html#cb93-3" tabindex="-1"></a>            <span class="at">using =</span> <span class="st">&quot;parameters&quot;</span>,</span>
+<span id="cb93-4"><a href="process-tracing.html#cb93-4" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;X==1&quot;</span>,</span>
+<span id="cb93-5"><a href="process-tracing.html#cb93-5" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; W==1&quot;</span>,</span>
+<span id="cb93-6"><a href="process-tracing.html#cb93-6" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; S==1&quot;</span>,</span>
+<span id="cb93-7"><a href="process-tracing.html#cb93-7" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; S==1 &amp; W==1&quot;</span>, </span>
+<span id="cb93-8"><a href="process-tracing.html#cb93-8" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; Y==1&quot;</span>,</span>
+<span id="cb93-9"><a href="process-tracing.html#cb93-9" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; W==1 &amp; S==1 &amp; Y==1&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
 <table>
 <caption><span id="tab:unnamed-chunk-88">Table 8.1: </span>Whether a clue is informative or not depends on what else has been observed: in particular whether the clue is <span class="math inline">\(d\)</span>-separated from the query.</caption>
+<colgroup>
+<col width="5%" />
+<col width="14%" />
+<col width="24%" />
+<col width="10%" />
+<col width="10%" />
+<col width="4%" />
+<col width="2%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th align="right">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="right">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.25</td>
+<td align="right"></td>
+<td align="right">0.25</td>
+<td align="right">0.25</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; W==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.25</td>
+<td align="right"></td>
+<td align="right">0.25</td>
+<td align="right">0.25</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; S==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.25</td>
+<td align="right"></td>
+<td align="right">0.25</td>
+<td align="right">0.25</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; S==1 &amp; W==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.40</td>
+<td align="right"></td>
+<td align="right">0.40</td>
+<td align="right">0.40</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.50</td>
+<td align="right"></td>
+<td align="right">0.50</td>
+<td align="right">0.50</td>
 </tr>
 <tr class="even">
 <td align="right">6</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; W==1 &amp; S==1 &amp; Y==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.50</td>
+<td align="right"></td>
+<td align="right">0.50</td>
 <td align="right">0.50</td>
 </tr>
 </tbody>
@@ -535,259 +646,279 @@ div.csl-indent {
 <p>Both of these problems are easily resolved if the problem is articulated using fully specified causal models.</p>
 <p>Many different causal models might justify Van Evera’s tests. We illustrate using one in which the requisite background knowledge to justify the tests can be derived from a factorial experiment and in which one treatment serves as a clue for the effect of another.</p>
 <p>For the illustration we first make use of a function that generates data from a model with a constrained set of types for <span class="math inline">\(Y\)</span> and a given prior distribution over clue <span class="math inline">\(K\)</span>.</p>
-<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="process-tracing.html#cb92-1" tabindex="-1"></a>van_evera_data <span class="ot">&lt;-</span> <span class="cf">function</span>(y_types, k_types)</span>
-<span id="cb92-2"><a href="process-tracing.html#cb92-2" tabindex="-1"></a>  </span>
-<span id="cb92-3"><a href="process-tracing.html#cb92-3" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- K&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb92-4"><a href="process-tracing.html#cb92-4" tabindex="-1"></a>  </span>
-<span id="cb92-5"><a href="process-tracing.html#cb92-5" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="at">labels =</span> <span class="fu">list</span>(<span class="at">Y =</span> y_types), <span class="at">keep =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb92-6"><a href="process-tracing.html#cb92-6" tabindex="-1"></a>  </span>
-<span id="cb92-7"><a href="process-tracing.html#cb92-7" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">param_type =</span> <span class="st">&quot;define&quot;</span>, <span class="at">node =</span> <span class="st">&quot;K&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">1</span> <span class="sc">-</span> k_types, k_types)) <span class="sc">|&gt;</span></span>
-<span id="cb92-8"><a href="process-tracing.html#cb92-8" tabindex="-1"></a>  </span>
-<span id="cb92-9"><a href="process-tracing.html#cb92-9" tabindex="-1"></a>  <span class="fu">make_data</span>(<span class="at">n =</span> <span class="dv">1000</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="process-tracing.html#cb94-1" tabindex="-1"></a>van_evera_data <span class="ot">&lt;-</span> <span class="cf">function</span>(y_types, k_types)</span>
+<span id="cb94-2"><a href="process-tracing.html#cb94-2" tabindex="-1"></a>  </span>
+<span id="cb94-3"><a href="process-tracing.html#cb94-3" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- K&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb94-4"><a href="process-tracing.html#cb94-4" tabindex="-1"></a>  </span>
+<span id="cb94-5"><a href="process-tracing.html#cb94-5" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="at">labels =</span> <span class="fu">list</span>(<span class="at">Y =</span> y_types), <span class="at">keep =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb94-6"><a href="process-tracing.html#cb94-6" tabindex="-1"></a>  </span>
+<span id="cb94-7"><a href="process-tracing.html#cb94-7" tabindex="-1"></a>  <span class="fu">set_parameters</span>(<span class="at">param_type =</span> <span class="st">&quot;define&quot;</span>, <span class="at">node =</span> <span class="st">&quot;K&quot;</span>, <span class="at">parameters =</span> <span class="fu">c</span>(<span class="dv">1</span> <span class="sc">-</span> k_types, k_types)) <span class="sc">|&gt;</span></span>
+<span id="cb94-8"><a href="process-tracing.html#cb94-8" tabindex="-1"></a>  </span>
+<span id="cb94-9"><a href="process-tracing.html#cb94-9" tabindex="-1"></a>  <span class="fu">make_data</span>(<span class="at">n =</span> <span class="dv">1000</span>)</span></code></pre></div>
 <p>We then use a function that draws inferences, given different values of a clue <span class="math inline">\(K\)</span>, from a model that has been updated using available data. Note that the model that is updated has no constraints on <span class="math inline">\(Y\)</span>, has flat beliefs over the distribution of <span class="math inline">\(K\)</span>, and imposes no assumption that <span class="math inline">\(K\)</span> is informative for how <span class="math inline">\(Y\)</span> reacts to <span class="math inline">\(X\)</span>.</p>
-<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="process-tracing.html#cb93-1" tabindex="-1"></a>van_evera_inference <span class="ot">&lt;-</span> <span class="cf">function</span>(data)</span>
-<span id="cb93-2"><a href="process-tracing.html#cb93-2" tabindex="-1"></a>  </span>
-<span id="cb93-3"><a href="process-tracing.html#cb93-3" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- K&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb93-4"><a href="process-tracing.html#cb93-4" tabindex="-1"></a>  </span>
-<span id="cb93-5"><a href="process-tracing.html#cb93-5" tabindex="-1"></a>  <span class="fu">update_model</span>(<span class="at">data =</span> data) <span class="sc">|&gt;</span>  </span>
-<span id="cb93-6"><a href="process-tracing.html#cb93-6" tabindex="-1"></a>  </span>
-<span id="cb93-7"><a href="process-tracing.html#cb93-7" tabindex="-1"></a>  <span class="fu">query_model</span>(<span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, </span>
-<span id="cb93-8"><a href="process-tracing.html#cb93-8" tabindex="-1"></a>              <span class="at">given =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="st">&quot;K==0&quot;</span>, <span class="st">&quot;K==1&quot;</span>),</span>
-<span id="cb93-9"><a href="process-tracing.html#cb93-9" tabindex="-1"></a>              <span class="at">using =</span> <span class="st">&quot;posteriors&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="process-tracing.html#cb95-1" tabindex="-1"></a>van_evera_inference <span class="ot">&lt;-</span> <span class="cf">function</span>(data)</span>
+<span id="cb95-2"><a href="process-tracing.html#cb95-2" tabindex="-1"></a>  </span>
+<span id="cb95-3"><a href="process-tracing.html#cb95-3" tabindex="-1"></a>  <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; Y &lt;- K&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb95-4"><a href="process-tracing.html#cb95-4" tabindex="-1"></a>  </span>
+<span id="cb95-5"><a href="process-tracing.html#cb95-5" tabindex="-1"></a>  <span class="fu">update_model</span>(<span class="at">data =</span> data) <span class="sc">|&gt;</span>  </span>
+<span id="cb95-6"><a href="process-tracing.html#cb95-6" tabindex="-1"></a>  </span>
+<span id="cb95-7"><a href="process-tracing.html#cb95-7" tabindex="-1"></a>  <span class="fu">query_model</span>(<span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, </span>
+<span id="cb95-8"><a href="process-tracing.html#cb95-8" tabindex="-1"></a>              <span class="at">given =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="st">&quot;K==0&quot;</span>, <span class="st">&quot;K==1&quot;</span>),</span>
+<span id="cb95-9"><a href="process-tracing.html#cb95-9" tabindex="-1"></a>              <span class="at">using =</span> <span class="st">&quot;posteriors&quot;</span>)</span></code></pre></div>
 <p>We can now generate posterior beliefs, given <span class="math inline">\(K\)</span>, for different types of tests where the tests are now justified by different types of data, coupled with a common prior causal model.</p>
 <p>Results:</p>
-<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="process-tracing.html#cb94-1" tabindex="-1"></a>doubly_decisive <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="st">&quot;0001&quot;</span>, .<span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
-<span id="cb94-2"><a href="process-tracing.html#cb94-2" tabindex="-1"></a></span>
-<span id="cb94-3"><a href="process-tracing.html#cb94-3" tabindex="-1"></a>hoop            <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0101&quot;</span>), .<span class="dv">9</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
-<span id="cb94-4"><a href="process-tracing.html#cb94-4" tabindex="-1"></a></span>
-<span id="cb94-5"><a href="process-tracing.html#cb94-5" tabindex="-1"></a>smoking_gun     <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0011&quot;</span>), .<span class="dv">1</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
-<span id="cb94-6"><a href="process-tracing.html#cb94-6" tabindex="-1"></a></span>
-<span id="cb94-7"><a href="process-tracing.html#cb94-7" tabindex="-1"></a>straw_in_wind   <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0101&quot;</span>, <span class="st">&quot;0011&quot;</span>), .<span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span></code></pre></div>
-<table>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="process-tracing.html#cb96-1" tabindex="-1"></a>doubly_decisive <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="st">&quot;0001&quot;</span>, .<span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
+<span id="cb96-2"><a href="process-tracing.html#cb96-2" tabindex="-1"></a></span>
+<span id="cb96-3"><a href="process-tracing.html#cb96-3" tabindex="-1"></a>hoop            <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0101&quot;</span>), .<span class="dv">9</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
+<span id="cb96-4"><a href="process-tracing.html#cb96-4" tabindex="-1"></a></span>
+<span id="cb96-5"><a href="process-tracing.html#cb96-5" tabindex="-1"></a>smoking_gun     <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0011&quot;</span>), .<span class="dv">1</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span>
+<span id="cb96-6"><a href="process-tracing.html#cb96-6" tabindex="-1"></a></span>
+<span id="cb96-7"><a href="process-tracing.html#cb96-7" tabindex="-1"></a>straw_in_wind   <span class="ot">&lt;-</span> <span class="fu">van_evera_data</span>(<span class="fu">c</span>(<span class="st">&quot;0001&quot;</span>, <span class="st">&quot;0101&quot;</span>, <span class="st">&quot;0011&quot;</span>), .<span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="fu">van_evera_inference</span>()</span></code></pre></div>
+<table style="width:100%;">
 <caption><span id="tab:unnamed-chunk-92">Table 8.2: </span>Doubly decisive test</caption>
 <colgroup>
 <col width="8%" />
-<col width="8%" />
-<col width="15%" />
-<col width="20%" />
-<col width="10%" />
-<col width="10%" />
-<col width="12%" />
+<col width="16%" />
+<col width="6%" />
+<col width="11%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
 <col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5091</td>
-<td align="right">0.0155</td>
-<td align="right">0.4793</td>
-<td align="right">0.5390</td>
+<td align="right">0.4912</td>
+<td align="right">0.0159</td>
+<td align="right">0.4597</td>
+<td align="right">0.5214</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">K==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.0094</td>
-<td align="right">0.0052</td>
-<td align="right">0.0023</td>
-<td align="right">0.0222</td>
+<td align="right">0.0097</td>
+<td align="right">0.0053</td>
+<td align="right">0.0025</td>
+<td align="right">0.0229</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">K==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.9763</td>
-<td align="right">0.0074</td>
-<td align="right">0.9591</td>
-<td align="right">0.9886</td>
+<td align="right">0.9755</td>
+<td align="right">0.0079</td>
+<td align="right">0.9575</td>
+<td align="right">0.9881</td>
 </tr>
 </tbody>
 </table>
-<table>
+<table style="width:100%;">
 <caption><span id="tab:unnamed-chunk-92">Table 8.2: </span>Hoop test</caption>
 <colgroup>
 <col width="8%" />
-<col width="8%" />
-<col width="15%" />
-<col width="20%" />
-<col width="10%" />
-<col width="10%" />
-<col width="12%" />
+<col width="16%" />
+<col width="6%" />
+<col width="11%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
 <col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4605</td>
-<td align="right">0.0224</td>
-<td align="right">0.4174</td>
-<td align="right">0.5033</td>
+<td align="right">0.4455</td>
+<td align="right">0.0217</td>
+<td align="right">0.4031</td>
+<td align="right">0.4871</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">K==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.0367</td>
-<td align="right">0.0231</td>
-<td align="right">0.0069</td>
-<td align="right">0.0933</td>
+<td align="right">0.0431</td>
+<td align="right">0.0264</td>
+<td align="right">0.0091</td>
+<td align="right">0.1097</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">K==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5122</td>
-<td align="right">0.0243</td>
-<td align="right">0.4646</td>
-<td align="right">0.5594</td>
+<td align="right">0.4964</td>
+<td align="right">0.0238</td>
+<td align="right">0.4511</td>
+<td align="right">0.5423</td>
 </tr>
 </tbody>
 </table>
-<table>
+<table style="width:100%;">
 <caption><span id="tab:unnamed-chunk-92">Table 8.2: </span>Smoking gun test</caption>
 <colgroup>
 <col width="8%" />
-<col width="8%" />
-<col width="15%" />
-<col width="20%" />
-<col width="10%" />
-<col width="10%" />
-<col width="12%" />
+<col width="16%" />
+<col width="6%" />
+<col width="11%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
 <col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.5240</td>
-<td align="right">0.0226</td>
-<td align="right">0.4799</td>
-<td align="right">0.5692</td>
+<td align="right">0.5373</td>
+<td align="right">0.0214</td>
+<td align="right">0.4955</td>
+<td align="right">0.5789</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">K==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4801</td>
-<td align="right">0.0243</td>
-<td align="right">0.4323</td>
-<td align="right">0.5283</td>
+<td align="right">0.4960</td>
+<td align="right">0.0231</td>
+<td align="right">0.4518</td>
+<td align="right">0.5422</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">K==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.8991</td>
-<td align="right">0.0371</td>
-<td align="right">0.8132</td>
-<td align="right">0.9566</td>
+<td align="right">0.8967</td>
+<td align="right">0.0372</td>
+<td align="right">0.8089</td>
+<td align="right">0.9564</td>
 </tr>
 </tbody>
 </table>
-<table>
+<table style="width:100%;">
 <caption><span id="tab:unnamed-chunk-92">Table 8.2: </span>Straw in the wind test</caption>
 <colgroup>
 <col width="8%" />
-<col width="8%" />
-<col width="15%" />
-<col width="20%" />
-<col width="10%" />
-<col width="10%" />
-<col width="12%" />
+<col width="16%" />
+<col width="6%" />
+<col width="11%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
 <col width="14%" />
+<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
 <th align="right">sd</th>
-<th align="right">conf.low</th>
-<th align="right">conf.high</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">-</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.4919</td>
-<td align="right">0.0216</td>
-<td align="right">0.4492</td>
-<td align="right">0.5340</td>
+<td align="right">0.4944</td>
+<td align="right">0.0220</td>
+<td align="right">0.4520</td>
+<td align="right">0.5376</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">K==0</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.3075</td>
-<td align="right">0.0285</td>
-<td align="right">0.2544</td>
-<td align="right">0.3649</td>
+<td align="right">0.3251</td>
+<td align="right">0.0298</td>
+<td align="right">0.2671</td>
+<td align="right">0.3847</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">K==1</td>
 <td align="left">posteriors</td>
 <td align="left">FALSE</td>
-<td align="right">0.6828</td>
-<td align="right">0.0301</td>
-<td align="right">0.6224</td>
-<td align="right">0.7404</td>
+<td align="right">0.6714</td>
+<td align="right">0.0307</td>
+<td align="right">0.6101</td>
+<td align="right">0.7297</td>
 </tr>
 </tbody>
 </table>
@@ -798,65 +929,93 @@ div.csl-indent {
 <p>Model querying can also be used to assess which types of clues are more informative among a set of informative clues. Consider a chain linking <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span> via <span class="math inline">\(M_1\)</span>, <span class="math inline">\(M_2\)</span>, <span class="math inline">\(M_3\)</span>. To keep things simple let’s assume that the chain is monotonic: no node in the chain has a negative effect on the next node in the chain.</p>
 <p>Which clue is most informative for the proposition that <span class="math inline">\(X\)</span> caused <span class="math inline">\(Y\)</span> in a case with <span class="math inline">\(X=Y=1\)</span>?</p>
 <p>In all case we will conclude that <span class="math inline">\(X\)</span> did not cause <span class="math inline">\(Y\)</span> if we see a 0 along the chain (since a 1 can not cause a 0). But what do we conclude if we see a 1?</p>
-<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="process-tracing.html#cb95-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M1 -&gt; M2 -&gt; M3 -&gt; Y&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb95-2"><a href="process-tracing.html#cb95-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="at">labels =</span> <span class="fu">list</span>(<span class="at">M1 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">M2 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">M3 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">Y =</span> <span class="st">&quot;10&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="process-tracing.html#cb97-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">make_model</span>(<span class="st">&quot;X -&gt; M1 -&gt; M2 -&gt; M3 -&gt; Y&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb97-2"><a href="process-tracing.html#cb97-2" tabindex="-1"></a>  <span class="fu">set_restrictions</span>(<span class="at">labels =</span> <span class="fu">list</span>(<span class="at">M1 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">M2 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">M3 =</span> <span class="st">&quot;10&quot;</span>, <span class="at">Y =</span> <span class="st">&quot;10&quot;</span>))</span></code></pre></div>
 <p>In imposing monotonicity and using default parameter values we are assuming that the effect of each node on the next node is 1/3. What does this imply for our query? We get the answer using <code>query_model</code>.</p>
-<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="process-tracing.html#cb96-1" tabindex="-1"></a><span class="fu">query_model</span>(model, </span>
-<span id="cb96-2"><a href="process-tracing.html#cb96-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, </span>
-<span id="cb96-3"><a href="process-tracing.html#cb96-3" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;X==1 &amp; Y==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M1==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M2==1&quot;</span>, </span>
-<span id="cb96-4"><a href="process-tracing.html#cb96-4" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; Y==1 &amp; M3==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M1==1 &amp; M2==1 &amp; M3==1&quot;</span>),</span>
-<span id="cb96-5"><a href="process-tracing.html#cb96-5" tabindex="-1"></a>            <span class="at">using=</span> <span class="st">&quot;parameters&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="process-tracing.html#cb98-1" tabindex="-1"></a><span class="fu">query_model</span>(model, </span>
+<span id="cb98-2"><a href="process-tracing.html#cb98-2" tabindex="-1"></a>            <span class="at">query =</span> <span class="st">&quot;Y[X=1] &gt; Y[X=0]&quot;</span>, </span>
+<span id="cb98-3"><a href="process-tracing.html#cb98-3" tabindex="-1"></a>            <span class="at">given =</span> <span class="fu">c</span>(<span class="st">&quot;X==1 &amp; Y==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M1==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M2==1&quot;</span>, </span>
+<span id="cb98-4"><a href="process-tracing.html#cb98-4" tabindex="-1"></a>                      <span class="st">&quot;X==1 &amp; Y==1 &amp; M3==1&quot;</span>, <span class="st">&quot;X==1 &amp; Y==1 &amp; M1==1 &amp; M2==1 &amp; M3==1&quot;</span>),</span>
+<span id="cb98-5"><a href="process-tracing.html#cb98-5" tabindex="-1"></a>            <span class="at">using=</span> <span class="st">&quot;parameters&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">kable</span>()</span></code></pre></div>
 <table>
 <colgroup>
-<col width="8%" />
-<col width="48%" />
-<col width="14%" />
-<col width="18%" />
+<col width="6%" />
+<col width="13%" />
+<col width="29%" />
 <col width="9%" />
+<col width="9%" />
+<col width="5%" />
+<col width="2%" />
+<col width="11%" />
+<col width="13%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Query</th>
-<th align="left">Given</th>
-<th align="left">Using</th>
-<th align="left">Case.estimand</th>
+<th align="left">model</th>
+<th align="left">query</th>
+<th align="left">given</th>
+<th align="left">using</th>
+<th align="left">case_level</th>
 <th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">cred.low.2.5%</th>
+<th align="right">cred.high.97.5%</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.0244</td>
+<td align="right"></td>
+<td align="right">0.0244</td>
+<td align="right">0.0244</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1 &amp; M1==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.0357</td>
+<td align="right"></td>
+<td align="right">0.0357</td>
+<td align="right">0.0357</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1 &amp; M2==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.0400</td>
+<td align="right"></td>
+<td align="right">0.0400</td>
+<td align="right">0.0400</td>
 </tr>
 <tr class="even">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1 &amp; M3==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
 <td align="right">0.0357</td>
+<td align="right"></td>
+<td align="right">0.0357</td>
+<td align="right">0.0357</td>
 </tr>
 <tr class="odd">
-<td align="left">Q 1</td>
+<td align="left">model_1</td>
+<td align="left">Y[X=1] &gt; Y[X=0]</td>
 <td align="left">X==1 &amp; Y==1 &amp; M1==1 &amp; M2==1 &amp; M3==1</td>
 <td align="left">parameters</td>
 <td align="left">FALSE</td>
+<td align="right">0.0625</td>
+<td align="right"></td>
+<td align="right">0.0625</td>
 <td align="right">0.0625</td>
 </tr>
 </tbody>

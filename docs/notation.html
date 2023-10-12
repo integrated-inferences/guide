@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 12 Notation and syntax | Causal Models: Guide to CausalQueries</title>
   <meta name="description" content="Model based strategies for integrating qualitative and quantitative inferences." />
-  <meta name="generator" content="bookdown 0.34 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 12 Notation and syntax | Causal Models: Guide to CausalQueries" />
   <meta property="og:type" content="book" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Macartan Humphreys and Alan Jacobs" />
 
 
-<meta name="date" content="2023-08-31" />
+<meta name="date" content="2023-10-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -407,8 +407,8 @@ asks what is the probability that <span class="math inline">\(X\)</span> matters
 </ul>
 <p>These helpers can be used for setting restrictions, setting confounds, defining priors or parameter values, or querying models.</p>
 <p>For instance:</p>
-<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb128-1"><a href="notation.html#cb128-1" tabindex="-1"></a><span class="fu">get_query_types</span>(<span class="at">model =</span> <span class="fu">make_model</span>(<span class="st">&quot;A -&gt; B &lt;- C&quot;</span>),</span>
-<span id="cb128-2"><a href="notation.html#cb128-2" tabindex="-1"></a>         <span class="at">query =</span> <span class="fu">substitutes</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;B&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb138-1"><a href="notation.html#cb138-1" tabindex="-1"></a><span class="fu">get_query_types</span>(<span class="at">model =</span> <span class="fu">make_model</span>(<span class="st">&quot;A -&gt; B &lt;- C&quot;</span>),</span>
+<span id="cb138-2"><a href="notation.html#cb138-2" tabindex="-1"></a>         <span class="at">query =</span> <span class="fu">substitutes</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;B&quot;</span>))</span></code></pre></div>
 <pre><code>
 Causal types satisfying query&#39;s condition(s)  
 
